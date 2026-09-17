@@ -1,0 +1,561 @@
+"""Honcho client construction and ``HonchoClientConfig`` resolution.
+
+Config file resolution: $ARKOS_HOME/honcho.json -> ~/.honcho/config.json -> env vars
+(HONCHO_API_KEY, HONCHO_ENVIRONMENT). Within a file, host-block fields win over
+flat/global fields, which win over defaults.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import hashlib
+import ipaddress
+import json
+import logging
+import os
+import threading as _threading
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Callable
+from urllib.parse import urlparse
+
+from agent.secret_scope import get_secret
+from arkos_cli.profiles import _get_default_arkos_home
+from arkos_constants import get_arkos_home
+
+from plugins.memory.honcho.client_cache import (
+    _DEFAULT_HTTP_TIMEOUT, _client_cache_key, _client_slots, _client_slots_lock,
+    _honcho_json_timeout_memo, _refresh_oauth, _slot_for,
+)
+
+if TYPE_CHECKING:
+    from honcho import Honcho
+
+logger = logging.getLogger(__name__)
+
+HOST = "arkos"
+
+
+def _sanitize_url(url: str | None) -> str | None:
+    """``url``, or None (with a warning) if it carries non-printable ASCII: a stray terminal
+    escape in a pasted URL otherwise makes the SDK raise at client construction."""
+    if url is None or all(0x20 <= ord(c) < 0x7F for c in url):
+        return url
+    logger.warning("Honcho base_url contains non-printable characters and will be ignored: %r", url)
+    return None
+
+
+def profile_host_key(profile: str | None) -> str:
+    """Return the safe Honcho host key for a Arkos profile."""
+    if not profile or profile in {"default", "custom"}:
+        return HOST
+    sanitized = "".join(c if c.isalnum() or c in "_-" else "_" for c in profile).strip("_")
+    return f"{HOST}_{sanitized or 'profile'}"
+
+
+def _host_block(raw: dict, host: str) -> dict:
+    """Return host config, accepting legacy dot-form profile host keys."""
+    hosts = raw.get("hosts") or {}
+    block = hosts.get(host, {})
+    if block or not host.startswith(f"{HOST}_"):
+        return block
+    return hosts.get(f"{HOST}.{host[len(HOST) + 1:]}", {})
+
+
+def resolve_active_host() -> str:
+    """Honcho host key: ARKOS_HONCHO_HOST env, else the active profile. The config's
+    ``defaultHost`` is honored only for the default profile so named profiles stay isolated."""
+    explicit = os.environ.get("ARKOS_HONCHO_HOST", "").strip()
+    if explicit:
+        return explicit
+    try:
+        from arkos_cli.profiles import get_active_profile_name
+        profile_host = profile_host_key(get_active_profile_name())
+    except Exception:
+        profile_host = HOST
+    if profile_host == HOST:
+        try:
+            default_host = str(_read_config(resolve_config_path()).get("defaultHost", "")).strip()
+        except Exception:
+            default_host = ""
+        if default_host:
+            return default_host
+    return profile_host
+
+
+def _read_config(path: Path) -> dict:
+    """Parse a honcho.json; {} when absent (parse/OS errors propagate)."""
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def resolve_global_config_path() -> Path:
+    """Return the shared Honcho config path for the current HOME."""
+    return Path.home() / ".honcho" / "config.json"
+
+
+def resolve_config_path() -> Path:
+    """Active Honcho config path: $ARKOS_HOME/honcho.json -> default profile's honcho.json
+    (host blocks accumulate there via setup/clone) -> ~/.honcho/config.json (also the
+    first-time-setup write target when nothing exists)."""
+    local_path = get_arkos_home() / "honcho.json"
+    if local_path.exists():
+        return local_path
+    default_path = _get_default_arkos_home() / "honcho.json"
+    if default_path != local_path and default_path.exists():
+        return default_path
+    return resolve_global_config_path()
+
+
+
+_RECALL_MODES = ({"auto": "hybrid"}, {"hybrid", "context", "tools"}, "hybrid")
+_OBSERVATION_MODES = (
+    {"shared": "unified", "separate": "directional", "cross": "directional"},
+    {"unified", "directional"},
+    "directional",
+)
+_VALID_REASONING_LEVELS = ("minimal", "low", "medium", "high", "max")
+
+_OBSERVATION_PRESETS = {
+    "directional": {"user_observe_me": True, "user_observe_others": True, "ai_observe_me": True, "ai_observe_others": True},
+    "unified": {"user_observe_me": True, "user_observe_others": False, "ai_observe_me": False, "ai_observe_others": True},
+}
+
+
+def _normalize_choice(val: str, spec: tuple[dict, set, str]) -> str:
+    """Map aliases, then fall back to the default for unknown values."""
+    aliases, valid, default = spec
+    val = aliases.get(val, val)
+    return val if val in valid else default
+
+
+def _first_set(*vals, default):
+    """First non-None value, else default."""
+    return next((val for val in vals if val is not None), default)
+
+
+def _first_parsed(vals, caster: Callable[[Any], Any], default):
+    """First non-None value that ``caster`` accepts, else default."""
+    for val in (v for v in vals if v is not None):
+        try:
+            return caster(val)
+        except (ValueError, TypeError):
+            pass
+    return default
+
+
+def _positive_float(value: Any) -> float:
+    parsed = float(value)
+    if parsed <= 0:
+        raise ValueError(value)
+    return parsed
+
+
+def _resolve_optional_float(*values: Any) -> float | None:
+    """First value (blank strings included) that parses as a positive float, else None."""
+    return _first_parsed(values, _positive_float, None)
+
+
+def _parse_dialectic_depth_levels(vals, depth: int) -> list[str] | None:
+    """First list value, validated and padded/truncated to ``depth``; None if unset."""
+    for val in vals:
+        if isinstance(val, list):
+            levels = [lvl if lvl in _VALID_REASONING_LEVELS else "low" for lvl in val[:depth]]
+            return levels + ["low"] * (depth - len(levels))
+    return None
+
+
+def _resolve_observation(mode: str, observation_obj: dict | None) -> dict:
+    """Per-peer observation booleans: ``observation`` object fields override the mode preset."""
+    preset = _OBSERVATION_PRESETS.get(mode, _OBSERVATION_PRESETS["directional"])
+    if not isinstance(observation_obj, dict) or not observation_obj:
+        return dict(preset)
+    return {
+        f"{kind}_observe_{who}": (observation_obj.get(kind) or {}).get(json_key, preset[f"{kind}_observe_{who}"])
+        for kind in ("user", "ai")
+        for who, json_key in (("me", "observeMe"), ("others", "observeOthers"))
+    }
+
+
+class _HostLookup:
+    """Host-block-over-root field lookups for one honcho.json."""
+
+    def __init__(self, host_block: dict, raw: dict):
+        self.host, self.raw = host_block, raw
+
+    def pick(self, key: str, default=None):
+        """Truthy host value, else ``raw.get(key, default)``."""
+        return self.host.get(key) or self.raw.get(key, default)
+
+    def pick_set(self, key: str, default=None):
+        """Non-None host value, else ``raw.get(key, default)``."""
+        return _first_set(self.host.get(key), default=self.raw.get(key, default))
+
+    def vals(self, *keys: str) -> list:
+        """Host values then root values for the aliased ``keys`` (lookup order)."""
+        return [self.host.get(k) for k in keys] + [self.raw.get(k) for k in keys]
+
+    def flag(self, *keys: str, default: bool) -> bool:
+        """First non-None value across host-then-root for the aliased ``keys``, as bool."""
+        return bool(_first_set(*self.vals(*keys), default=default))
+
+    def parsed(self, key: str, caster: Callable[[Any], Any], default):
+        """First host-then-root value ``caster`` accepts, else default."""
+        return _first_parsed(self.vals(key), caster, default)
+
+    def present(self, key: str, default=None):
+        """Host value if the key is PRESENT there (even empty/None), else root."""
+        return self.host[key] if key in self.host else self.raw.get(key, default)
+
+    def string(self, key: str, default: str = "") -> str:
+        """String field where a host-level empty string can override root."""
+        value = self.present(key, default)
+        return default if value is None else str(value).strip()
+
+    def string_map(self, key: str) -> dict[str, str]:
+        """String-to-string map; a host-level map replaces the root map wholesale."""
+        source = self.present(key)
+        if not isinstance(source, dict):
+            return {}
+        pairs = ((str(k).strip(), str(v).strip() if v is not None else "") for k, v in source.items())
+        return {k: v for k, v in pairs if k and v}
+
+
+def _is_local_base_url(base_url: str | None) -> bool:
+    """True for loopback/RFC1918/link-local/ULA/CGNAT self-hosted Honcho URLs. Local
+    deployments can run without auth but the SDK needs a non-empty api_key, so LAN/VPN
+    URLs get the same placeholder-key treatment as localhost."""
+    if not base_url:
+        return False
+    try:
+        host = (urlparse(base_url).hostname or "").strip().lower()
+    except Exception:
+        host = ""
+    if host in {"localhost", "127.0.0.1", "::1"}:
+        return True
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    cgnat = ip.version == 4 and ipaddress.ip_address("100.64.0.0") <= ip <= ipaddress.ip_address("100.127.255.255")
+    return ip.is_loopback or ip.is_private or ip.is_link_local or cgnat
+
+
+def _env_base_url() -> str | None:
+    """HONCHO_BASE_URL / HONCHO_URL (the SDK's own var); a deployment setting, so plain os.environ."""
+    return os.environ.get("HONCHO_BASE_URL", "").strip() or os.environ.get("HONCHO_URL", "").strip() or None
+
+
+def _connection_fields(look: _HostLookup, host: str, path: Path) -> dict[str, Any]:
+    """Resolve identity/credential/transport fields (host block -> root -> env)."""
+    raw, host_block = look.raw, look.host
+    api_key = look.pick("apiKey") or get_secret("HONCHO_API_KEY")
+    if not api_key and host_block and host != HOST and _host_block(raw, HOST).get("apiKey"):
+        logger.warning("Honcho host block '%s' has no apiKey; the default '%s' host's key "
+                       "is NOT inherited (profiles are credential-isolated). Set apiKey on "
+                       "hosts.%s in %s or this profile runs unauthenticated.", host, HOST, host, path)
+    endpoint_block = raw.get("endpoint")
+    native_base_url = endpoint_block.get("baseUrl") if isinstance(endpoint_block, dict) else None
+    base_url = _sanitize_url(host_block.get("baseUrl") or host_block.get("base_url") or native_base_url
+                             or raw.get("baseUrl") or raw.get("base_url") or _env_base_url())
+    return {
+        "workspace_id": look.pick("workspace") or host,
+        "ai_peer": look.pick("aiPeer") or host,
+        "api_key": api_key,
+        "environment": look.pick("environment", "production"),
+        "base_url": base_url,
+        "timeout": _resolve_optional_float(*look.vals("timeout", "requestTimeout"), os.environ.get("HONCHO_TIMEOUT")),
+        "enabled": _first_set(*look.vals("enabled"), default=bool(api_key or base_url)),
+    }
+
+
+def _behavior_fields(look: _HostLookup, explicitly_configured: bool) -> dict[str, Any]:
+    """Resolve memory-behavior tuning fields (host block -> root -> defaults)."""
+    raw_wf = look.pick("writeFrequency") or "async"
+    write_frequency: str | int = _first_parsed([raw_wf], int, str(raw_wf))
+    depth = look.parsed("dialecticDepth", lambda v: max(1, min(int(v), 3)), 1)
+    observation_mode = _normalize_choice(
+        look.pick("observationMode") or ("unified" if explicitly_configured else "directional"), _OBSERVATION_MODES)
+    return {
+        "peer_name": look.pick("peerName"),
+        "pin_peer_name": look.flag("pinUserPeer", "pinPeerName", default=False),
+        "user_peer_aliases": look.string_map("userPeerAliases"),
+        "runtime_peer_prefix": look.string("runtimePeerPrefix"),
+        "save_messages": look.pick_set("saveMessages", True),
+        "write_frequency": write_frequency,
+        "context_tokens": look.parsed("contextTokens", int, None),
+        "dialectic_reasoning_level": look.pick("dialecticReasoningLevel") or "low",
+        "dialectic_dynamic": look.flag("dialecticDynamic", default=True),
+        "dialectic_max_chars": look.parsed("dialecticMaxChars", int, 600),
+        "dialectic_depth": depth,
+        "dialectic_depth_levels": _parse_dialectic_depth_levels(look.vals("dialecticDepthLevels"), depth),
+        "reasoning_heuristic": look.flag("reasoningHeuristic", default=True),
+        "reasoning_level_cap": look.pick("reasoningLevelCap") or "high",
+        "message_max_chars": look.parsed("messageMaxChars", int, 25000),
+        "dialectic_max_input_chars": look.parsed("dialecticMaxInputChars", int, 10000),
+        "recall_mode": _normalize_choice(look.pick("recallMode") or "hybrid", _RECALL_MODES),
+        "recall_sync": look.flag("recallSync", default=False),
+        "init_on_session_start": look.flag("initOnSessionStart", default=False),
+        "injection_frequency": look.pick("injectionFrequency", "every-turn"),
+        "context_cadence": look.parsed("contextCadence", int, 1),
+        "dialectic_cadence": look.parsed("dialecticCadence", int, 1),
+        "query_rewrite": look.flag("queryRewrite", default=False),
+        "first_turn_base_wait": look.parsed("firstTurnBaseWait", lambda v: max(0.0, float(v)), 3.0),
+        "first_turn_dialectic_wait": look.parsed("firstTurnDialecticWait", lambda v: max(0.0, float(v)), 2.0),
+        "observation_mode": observation_mode,
+        **_resolve_observation(observation_mode, look.pick("observation")),
+        "session_strategy": look.pick("sessionStrategy", "per-directory"),
+        "session_peer_prefix": look.pick_set("sessionPeerPrefix", False),
+    }
+
+
+@dataclass
+class HonchoClientConfig:
+    """Configuration for Honcho client, resolved for a specific host."""
+
+    host: str = HOST
+    workspace_id: str = "arkos"
+    api_key: str | None = None
+    environment: str = "production"
+    base_url: str | None = None
+    timeout: float | None = None
+    peer_name: str | None = None
+    ai_peer: str = "arkos"
+    pin_peer_name: bool = False
+    user_peer_aliases: dict[str, str] = field(default_factory=dict)
+    runtime_peer_prefix: str = ""
+    enabled: bool = False
+    save_messages: bool = True
+    write_frequency: str | int = "async"
+    context_tokens: int | None = None
+    dialectic_reasoning_level: str = "low"
+    dialectic_dynamic: bool = True
+    dialectic_max_chars: int = 600
+    dialectic_depth: int = 1
+    dialectic_depth_levels: list[str] | None = None
+    reasoning_heuristic: bool = True
+    reasoning_level_cap: str = "high"
+    message_max_chars: int = 25000
+    dialectic_max_input_chars: int = 10000
+    recall_mode: str = "hybrid"
+    recall_sync: bool = False
+    init_on_session_start: bool = False
+    injection_frequency: str = "every-turn"
+    context_cadence: int = 1
+    dialectic_cadence: int = 1
+    query_rewrite: bool = False
+    first_turn_base_wait: float = 3.0
+    first_turn_dialectic_wait: float = 2.0
+    observation_mode: str = "directional"
+    user_observe_me: bool = True
+    user_observe_others: bool = True
+    ai_observe_me: bool = True
+    ai_observe_others: bool = True
+    session_strategy: str = "per-directory"
+    session_peer_prefix: bool = False
+    sessions: dict[str, str] = field(default_factory=dict)
+    raw: dict[str, Any] = field(default_factory=dict)
+    explicitly_configured: bool = False
+    config_path: Path | None = None
+    arkos_home: Path | None = None
+
+    def bound_config_path(self) -> Path:
+        """Config path this was resolved from; ambient fallback for hand-built configs."""
+        return self.config_path if self.config_path is not None else resolve_config_path()
+
+    @classmethod
+    def from_env(cls, workspace_id: str = "arkos", host: str | None = None) -> HonchoClientConfig:
+        """Create config from environment variables (fallback)."""
+        resolved_host = host or resolve_active_host()
+        api_key = get_secret("HONCHO_API_KEY")
+        base_url = _sanitize_url(_env_base_url())
+        return cls(
+            host=resolved_host, workspace_id=workspace_id, api_key=api_key, base_url=base_url,
+            environment=os.environ.get("HONCHO_ENVIRONMENT", "production"),
+            timeout=_resolve_optional_float(os.environ.get("HONCHO_TIMEOUT")),
+            ai_peer=resolved_host, enabled=bool(api_key or base_url),
+            config_path=resolve_config_path(), arkos_home=get_arkos_home(),
+        )
+
+    @classmethod
+    def from_global_config(cls, host: str | None = None, config_path: Path | None = None) -> HonchoClientConfig:
+        """Config from the resolved Honcho config path, falling back to env. ``host=None``
+        derives it from the active Arkos profile."""
+        resolved_host = host or resolve_active_host()
+        path = config_path or resolve_config_path()
+        if not path.exists():
+            logger.debug("No global Honcho config at %s, falling back to env", path)
+            return cls.from_env(host=resolved_host)
+        try:
+            raw = _read_config(path)
+        except (json.JSONDecodeError, OSError) as e:
+            logger.warning("Failed to read %s: %s, falling back to env", path, e)
+            return cls.from_env(host=resolved_host)
+
+        host_block = _host_block(raw, resolved_host)
+        explicitly_configured = bool(host_block) or raw.get("enabled") is True
+        look = _HostLookup(host_block, raw)
+        return cls(
+            host=resolved_host, **_connection_fields(look, resolved_host, path), **_behavior_fields(look, explicitly_configured),
+            sessions=raw.get("sessions", {}), raw=raw, explicitly_configured=explicitly_configured,
+            config_path=path, arkos_home=get_arkos_home(),
+        )
+
+    @staticmethod
+    def _git_repo_name(cwd: str) -> str | None:
+        """Return the git repo root directory name, or None if not in a repo."""
+        import subprocess
+
+        try:
+            root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, encoding='utf-8',
+                                  errors='replace', cwd=cwd, timeout=5, stdin=subprocess.DEVNULL)
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        return Path(root.stdout.strip()).name if root.returncode == 0 else None
+
+    _HONCHO_SESSION_ID_MAX_LEN, _HONCHO_SESSION_ID_HASH_LEN = 100, 8
+
+    @classmethod
+    def _enforce_session_id_limit(cls, sanitized: str, original: str) -> str:
+        """Truncate to the limit with a ``-<sha256 prefix>`` suffix hashed over the ORIGINAL key:
+        two long keys sharing a prefix stay distinct; keys that sanitize identically still
+        collide intentionally (same logical session)."""
+        max_len, hash_len = cls._HONCHO_SESSION_ID_MAX_LEN, cls._HONCHO_SESSION_ID_HASH_LEN
+        if len(sanitized) <= max_len:
+            return sanitized
+        digest = hashlib.sha256(original.encode("utf-8")).hexdigest()[:hash_len]
+        prefix = sanitized[: max_len - hash_len - 1].rstrip("-")
+        return f"{prefix}-{digest}"
+
+    def _with_peer_prefix(self, name: str) -> str:
+        return f"{self.peer_name}-{name}" if self.session_peer_prefix and self.peer_name else name
+
+    def resolve_session_name(
+        self, cwd: str | None = None, session_title: str | None = None,
+        session_id: str | None = None, gateway_session_key: str | None = None,
+    ) -> str | None:
+        """Resolve the Honcho session name. Order: gateway session key (per-chat isolation no
+        cwd/strategy gives) -> per-session strategy's session_id (authoritative, so a generated
+        title never remaps a live conversation) -> sessions map override -> /title ->
+        per-repo (git root name) -> per-directory (basename) -> global (workspace)."""
+        import re
+
+        def _slug(text: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9_-]+', '-', text).strip('-')
+
+        cwd = cwd or os.getcwd()
+        if gateway_session_key and _slug(gateway_session_key):
+            return self._enforce_session_id_limit(_slug(gateway_session_key), gateway_session_key)
+        if self.session_strategy == "per-session" and session_id:
+            return self._with_peer_prefix(session_id)
+        manual = self.sessions.get(cwd)
+        if manual:
+            return manual
+        if session_title and _slug(session_title):
+            return self._with_peer_prefix(_slug(session_title))
+        if self.session_strategy == "per-repo":
+            return self._with_peer_prefix(self._git_repo_name(cwd) or Path(cwd).name)
+        if self.session_strategy in {"per-directory", "per-session"}:
+            return self._with_peer_prefix(Path(cwd).name)
+        return self.workspace_id
+
+
+def spawn_context_thread(target, *, name: str, daemon: bool = True, args: tuple = ()) -> "_threading.Thread":
+    """Thread that inherits the caller's contextvars: profile isolation is a ContextVar
+    (set_arkos_home_override) and a plain Thread starts EMPTY, so ambient resolution on it
+    would silently land on the default profile."""
+    import contextvars
+
+    ctx = contextvars.copy_context()
+    return _threading.Thread(target=lambda: ctx.run(target, *args), name=name, daemon=daemon)
+
+
+def get_honcho_client(config: HonchoClientConfig | None = None) -> Honcho:
+    """Get or create the Honcho client for this config's identity. Clients are cached PER
+    IDENTITY (host, workspace, provenance paths, credential fingerprint, timeout) so
+    multi-profile processes don't share a first-config-wins client. With no config the active
+    honcho.json is resolved — correct only on threads that see the profile ContextVar; pass a
+    bound config elsewhere. Each identity's client is built once under concurrent first calls..
+    """
+    key = _client_cache_key(config)
+    slot = _slot_for(key)
+    cached = slot.peek()
+    if cached is not None:
+        _refresh_oauth(config, cached, slot)
+        refreshed = slot.peek()
+        if refreshed is not None:
+            return refreshed
+
+    if config is None:
+        config = HonchoClientConfig.from_global_config()
+
+    _refresh_oauth(config)
+
+    if not config.api_key and not config.base_url:
+        raise ValueError("Honcho API key not found. Get your API key at https://app.honcho.dev, "
+                         "then run 'arkos honcho setup' or set HONCHO_API_KEY. "
+                         "For local instances, set HONCHO_BASE_URL instead.")
+
+    return slot.get(lambda: _build_client(config))
+
+
+def _build_client(config: HonchoClientConfig) -> "Honcho":
+    """Construct the SDK client (runs inside the slot factory so racing callers share one)."""
+    with contextlib.suppress(Exception):
+        from tools.lazy_deps import ensure as _lazy_ensure
+        _lazy_ensure("memory.honcho", prompt=False)
+    try:
+        from honcho import Honcho
+    except ImportError:
+        raise ImportError("honcho-ai is required for Honcho integration. Install it with: pip install honcho-ai  "
+                          "(or run `arkos honcho setup` to configure).")
+
+    base_url, timeout = config.base_url, config.timeout
+    if not base_url or timeout is None:
+        with contextlib.suppress(Exception):
+            from arkos_cli.config import load_config
+            honcho_cfg = load_config().get("honcho", {})
+            if isinstance(honcho_cfg, dict):
+                base_url = base_url or _sanitize_url(honcho_cfg.get("base_url", "").strip() or None)
+                if timeout is None:
+                    timeout = _resolve_optional_float(honcho_cfg.get("timeout"), honcho_cfg.get("request_timeout"))
+    if timeout is None:
+        timeout = _DEFAULT_HTTP_TIMEOUT
+
+    if base_url:
+        logger.info("Initializing Honcho client (base_url: %s, workspace: %s)", base_url, config.workspace_id)
+    else:
+        logger.info("Initializing Honcho client (host: %s, workspace: %s, base_url unset — SDK will resolve from environment=%s)",
+                    config.host, config.workspace_id, config.environment)
+
+    raw = config.raw or {}
+    explicit_key = _host_block(raw, config.host).get("apiKey") or raw.get("apiKey")
+    api_key = "local" if _is_local_base_url(base_url) and not explicit_key else config.api_key
+    kwargs: dict = {"workspace_id": config.workspace_id, "api_key": api_key, "environment": config.environment, "timeout": timeout}
+    if base_url:
+        import re
+        kwargs["base_url"] = re.sub(r"/v\d+/*$", "", base_url).rstrip("/")
+    return Honcho(**kwargs)
+
+
+def reset_honcho_client() -> None:
+    """Reset all cached Honcho clients (tests, OAuth re-login)."""
+    with _client_slots_lock:
+        _client_slots.clear()
+    _honcho_json_timeout_memo.clear()
+
+
+
+
+_PLUGIN_COMPAT_LAZY = {
+    'SingletonSlot': ('plugins.plugin_utils', 'SingletonSlot'),
+}
+
+
+def __getattr__(name):
+    target = _PLUGIN_COMPAT_LAZY.get(name)
+    if target is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import importlib
+    from arkos_cli.plugin_compat import warn_once
+    warn_once(__name__, name, *target)
+    return getattr(importlib.import_module(target[0]), target[1])

@@ -1,0 +1,9 @@
+name: chronos
+description: >-
+  Chronos — Portal-mediated managed cron provider for scale-to-zero hosted agents.
+  Delegates the "wake me at time T" trigger to Portal infrastructure so an idle
+  gateway can scale to zero and still fire cron jobs. The agent computes each
+  job's next-fire time and asks Portal to arm a one-shot; Portal calls the agent back
+  at fire time over an authenticated webhook. Inert unless cron.provider=chronos.
+version: 1.0.0
+author: Arkos

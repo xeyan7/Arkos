@@ -1,0 +1,34 @@
+# Secrets - never push
+.env
+.op.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python
+/venv/
+.venv/
+__pycache__/
+*.pyc*
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Arkos runtime
+/.arkos-runtime/
+*.log

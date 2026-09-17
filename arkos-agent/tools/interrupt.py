@@ -1,0 +1,113 @@
+"""Per-thread interrupt signaling for all tools: thread-scoped so interrupting one
+agent session does not kill tools in other sessions (the gateway runs many agents in one
+process). The agent passes its execution thread id to set_interrupt(); tools call
+is_interrupted(), which checks the CURRENT thread."""
+
+import logging
+import os
+import threading
+from collections.abc import Callable
+
+logger = logging.getLogger(__name__)
+
+_DEBUG_INTERRUPT = bool(os.getenv("ARKOS_DEBUG_INTERRUPT"))
+if _DEBUG_INTERRUPT:
+    logger.setLevel(logging.INFO)
+
+_interrupted_threads: set[int] = set()
+_interrupt_reasons: dict[int, str] = {}
+_yield_threads: set[int] = set()
+_lock = threading.Lock()
+
+
+def set_interrupt(active: bool, thread_id: int | None = None, *, reason: str | None = None) -> None:
+    """Set or clear the interrupt for *thread_id* (default: current thread); ``reason`` is
+    an optional user-safe cause. Clearing also drops a pending yield request."""
+    tid = thread_id if thread_id is not None else threading.current_thread().ident
+    with _lock:
+        (_interrupted_threads.add if active else _interrupted_threads.discard)(tid)
+        if active and reason:
+            _interrupt_reasons[tid] = reason
+        else:
+            _interrupt_reasons.pop(tid, None)
+        if not active:
+            _yield_threads.discard(tid)
+        _snapshot = set(_interrupted_threads) if _DEBUG_INTERRUPT else None
+    if _DEBUG_INTERRUPT:
+        logger.info(
+            "[interrupt-debug] set_interrupt(active=%s, target_tid=%s) "
+            "called_from_tid=%s current_set=%s",
+            active, tid, threading.current_thread().ident, _snapshot)
+
+
+def is_interrupted() -> bool:
+    return is_thread_interrupted(threading.current_thread().ident)
+
+
+def is_thread_interrupted(thread_id: int | None) -> bool:
+    """Whether *thread_id* has an interrupt bit set (``None`` never is). Used when
+    a wait moves onto a deadline worker (``run_bounded_sync``) so ``/stop``
+    targeting the original tool-worker tid still kills the subprocess..
+    """
+    if thread_id is None:
+        return False
+    with _lock:
+        return thread_id in _interrupted_threads
+
+
+def request_yield(thread_id: int) -> None:
+    """Ask the tool running on *thread_id* to yield: a foreground terminal command hands
+    its live process to the background registry and returns at once, so a user's mid-turn
+    message (``redirect()`` during tool execution) is delivered instead of parked behind it.
+    The command itself is never killed; that is what ``set_interrupt`` is for."""
+    with _lock:
+        _yield_threads.add(thread_id)
+
+
+def is_thread_yield_requested(thread_id: int | None) -> bool:
+    """Whether a yield is pending for *thread_id* (``None`` never is)."""
+    if thread_id is None:
+        return False
+    with _lock:
+        return thread_id in _yield_threads
+
+
+def consume_yield(thread_id: int | None) -> bool:
+    """Atomically take the pending yield for *thread_id*; True if one was pending."""
+    if thread_id is None:
+        return False
+    with _lock:
+        if thread_id in _yield_threads:
+            _yield_threads.discard(thread_id)
+            return True
+        return False
+
+
+def run_if_not_interrupted(callback: Callable[[], None]) -> bool:
+    """Run a state transition atomically with current-thread interruption.
+
+    Returns ``False`` without calling ``callback`` when the current thread is
+    already interrupted. The callback runs under the interrupt lock and must
+    not block or re-enter any interrupt API.
+    """
+    tid = threading.current_thread().ident
+    with _lock:
+        if tid in _interrupted_threads:
+            return False
+        callback()
+        return True
+
+
+def get_interrupt_reason() -> str | None:
+    """User-safe interrupt cause for the current thread, if known."""
+    with _lock:
+        return _interrupt_reasons.get(threading.current_thread().ident)
+
+
+def clear_current_thread_interrupt() -> None:
+    """Clear any interrupt bit on the CURRENT thread: gives a user-approved command a clean
+    slate right before it spawns its child, so a stale bit that landed during the blocking
+    approval-wait cannot SIGINT the just-approved run. A *genuine* interrupt arriving after
+    this call re-sets the bit and is still observed by the executor's poll loop. Call
+    directly on the executing thread."""
+    set_interrupt(False)

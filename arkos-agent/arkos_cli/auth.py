@@ -1,0 +1,2108 @@
+"""Multi-provider authentication system for Arkos.
+
+- ``ProviderConfig`` / ``PROVIDER_REGISTRY`` describe every known inference provider.
+- The auth store (``~/.arkos/auth.json``) holds per-provider state, the credential pool and
+  suppression markers; ``_auth_store_lock`` / ``_load_auth_store`` / ``_save_auth_store`` are the
+  only I/O primitives (cross-process flock, atomic 0o600 writes).
+- ``resolve_provider()`` picks the active provider via the documented priority chain.
+- ``OAUTH_PROVIDER_FLOWS`` maps each OAuth provider to its resolver/status builder; the flows live in
+  ``auth_portal``/``auth_codex``/``auth_xai``/``auth_qwen``/``auth_minimax``/``auth_spotify`` and are
+  re-imported here so ``arkos_cli.auth.<name>`` stays the public/patchable surface."""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import shutil
+import shlex
+import stat
+import threading
+import time
+import uuid
+import webbrowser  # noqa: F401  (tests patch auth_mod.webbrowser.open; same module object)
+
+from contextlib import ExitStack, contextmanager
+from dataclasses import dataclass, field
+from functools import partial
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Optional, Tuple
+from urllib.parse import urlparse
+
+from arkos_cli.config import (
+    get_arkos_home, get_config_path, read_raw_config, require_readable_config_before_write)
+from arkos_constants import OPENROUTER_BASE_URL, secure_parent_dir
+from agent.credential_persistence import sanitize_borrowed_credential_payload
+from utils import atomic_replace, atomic_yaml_write, env_float, is_truthy_value  # noqa: F401  (env_float: agent.credential_pool reads auth_mod.env_float)
+from arkos_cli.auth_zai_kimi import (  # noqa: F401  re-exported
+    KIMI_CODE_BASE_URL, ZAI_ENDPOINTS, _normalize_lmstudio_runtime_base_url, _resolve_kimi_base_url,
+    _resolve_zai_base_url, detect_zai_endpoint)
+from arkos_cli.auth_model_picker import (  # noqa: F401  re-exported
+    _prompt_model_selection, _save_model_choice)
+from arkos_cli.auth_device_flow import (  # noqa: F401  re-exported
+    _can_open_graphical_browser, _default_verify, _is_remote_session,
+    _portal_device_auth_timeout_message, _offer_existing_oauth_credentials,
+    _poll_device_token_generic, _poll_for_token, _print_device_code_instructions,
+    _print_login_success, _print_loopback_ssh_hint, _prompt_yes_no, _request_device_code,
+    _resolve_verify, _ssh_user_at_host)
+from arkos_cli.auth_oauth_grants import (  # noqa: F401  re-exported
+    SINGLE_USE_REFRESH_POOL_PROVIDERS, _oauth_heal_clean_marks, _oauth_heal_notices,
+    consume_oauth_heal_notices, heal_forked_single_use_oauth_grants,
+    strip_cloned_single_use_oauth_grants)
+from arkos_cli.auth_portal import (  # noqa: F401  re-exported
+    PORTAL_SESSION_TERMINAL, PORTAL_SESSION_UNKNOWN, PORTAL_SESSION_VALID, _ALLOWED_PORTAL_INFERENCE_HOSTS,
+    _agent_key_is_usable, _apply_portal_refreshed_tokens, _assert_portal_inference_jwt_usable,
+    _compute_portal_auth_status, _format_portal_entitlement_auth_error, _healed_portal_inference_url,
+    _login_portal, _merge_shared_portal_oauth_state, _migrate_stale_portal_url,
+    _portal_device_code_login, _portal_inference_env_override, _portal_invoke_jwt_is_usable,
+    _portal_invoke_jwt_status, _portal_env_override, _portal_shared_store_lock,
+    _portal_shared_store_path, _pool_first_oauth_status, _quarantine_portal_oauth_state,
+    _quarantine_portal_pool_entries, _read_shared_portal_state, _refresh_access_token,
+    _refresh_portal_or_quarantine, _select_portal_invoke_jwt, _sync_portal_pool_from_auth_store,
+    _token_fingerprint, _try_import_shared_portal_state, _validate_portal_inference_url_from_network,
+    _write_shared_portal_state, fetch_portal_models, get_portal_auth_status_local,
+    get_portal_session_validity, persist_portal_credentials, refresh_portal_oauth_from_state,
+    resolve_portal_runtime_credentials, step_up_portal_billing_scope)
+from arkos_cli.auth_minimax import (  # noqa: F401  re-exported
+    _MINIMAX_OAUTH_ERROR_BODY_LIMIT, _login_minimax_oauth, _minimax_oauth_login, _minimax_pkce_pair,
+    _minimax_poll_token, _minimax_post_form, _minimax_request_user_code,
+    _minimax_resolve_token_expiry_unix, _minimax_response_error_text, _minimax_save_auth_state,
+    _refresh_minimax_oauth_state, build_minimax_oauth_token_provider,
+    resolve_minimax_oauth_runtime_credentials)
+from arkos_cli.auth_xai import (  # noqa: F401  re-exported
+    _login_xai_oauth, _read_xai_oauth_tokens, _refresh_xai_oauth_tokens, _save_xai_oauth_tokens,
+    _write_through_xai_oauth_to_global_root, _xai_access_token_is_expiring,
+    _xai_oauth_device_code_login, _xai_oauth_discovery, _xai_oauth_poll_device_token,
+    _xai_oauth_request_device_code, _xai_proactive_refresh_skew_seconds,
+    _xai_validate_inference_base_url, refresh_xai_oauth_pure, resolve_xai_oauth_runtime_credentials)
+from arkos_cli.auth_codex import (  # noqa: F401  re-exported
+    _codex_access_token_is_expiring, _codex_device_code_login, _codex_http_client,
+    _codex_pool_rate_limit_status, _codex_quota_probe_cache, _codex_usage_probe_url,
+    _import_codex_cli_tokens, _is_codex_rate_limit_shaped, _login_openai_codex,
+    _probe_codex_quota_restored, _read_codex_tokens, _refresh_codex_auth_tokens, _save_codex_tokens,
+    clear_codex_pool_quota_cooldowns, refresh_codex_oauth_pure, resolve_codex_runtime_credentials)
+from arkos_cli.auth_spotify import (  # noqa: F401  re-exported
+    _refresh_spotify_oauth_state, get_spotify_auth_status, login_spotify_command,
+    resolve_spotify_runtime_credentials)
+from arkos_cli.auth_qwen import (  # noqa: F401  re-exported
+    _qwen_access_token_is_expiring, _qwen_cli_auth_path, _read_qwen_cli_tokens,
+    _refresh_qwen_cli_tokens, _save_qwen_cli_tokens, get_qwen_auth_status,
+    resolve_qwen_runtime_credentials)
+from arkos_cli.auth_constants import (  # noqa: F401  re-exported
+    _decode_jwt_claims, AUTH_STORE_VERSION, AUTH_LOCK_TIMEOUT_SECONDS, DEFAULT_PORTAL_URL,
+    DEFAULT_PORTAL_INFERENCE_URL, DEFAULT_PORTAL_CLIENT_ID, PORTAL_BILLING_MANAGE_SCOPE,
+    DEFAULT_PORTAL_SCOPE, PORTAL_DEVICE_CODE_SOURCE, PORTAL_AUTH_PATH_INVOKE_JWT,
+    ACCESS_TOKEN_REFRESH_SKEW_SECONDS, PORTAL_INVOKE_JWT_MIN_TTL_SECONDS, DEFAULT_CODEX_BASE_URL,
+    DEFAULT_XAI_OAUTH_BASE_URL, MINIMAX_OAUTH_CLIENT_ID, MINIMAX_OAUTH_SCOPE,
+    MINIMAX_OAUTH_GLOBAL_BASE, MINIMAX_OAUTH_CN_BASE, MINIMAX_OAUTH_GLOBAL_INFERENCE,
+    MINIMAX_OAUTH_CN_INFERENCE, MINIMAX_OAUTH_REFRESH_SKEW_SECONDS, DEFAULT_QWEN_BASE_URL,
+    DEFAULT_GITHUB_MODELS_BASE_URL, DEFAULT_COPILOT_ACP_BASE_URL, DEFAULT_OLLAMA_CLOUD_BASE_URL,
+    DEFAULT_ACTUAL_BASE_URL, DEFAULT_ACTUAL_LOCAL_BASE_URL, STEPFUN_STEP_PLAN_INTL_BASE_URL,
+    STEPFUN_STEP_PLAN_CN_BASE_URL, CODEX_OAUTH_CLIENT_ID, CODEX_OAUTH_TOKEN_URL,
+    CODEX_ACCESS_TOKEN_REFRESH_SKEW_SECONDS, XAI_OAUTH_CLIENT_ID, XAI_OAUTH_SCOPE,
+    XAI_ACCESS_TOKEN_REFRESH_SKEW_SECONDS, QWEN_ACCESS_TOKEN_REFRESH_SKEW_SECONDS,
+    DEFAULT_SPOTIFY_ACCOUNTS_BASE_URL, DEFAULT_SPOTIFY_API_BASE_URL, SPOTIFY_DOCS_URL,
+    DEFAULT_SPOTIFY_SCOPE, SERVICE_PROVIDER_NAMES, LMSTUDIO_NOAUTH_PLACEHOLDER,
+    ACTUAL_LOCAL_NOAUTH_PLACEHOLDER, CODEX_RATE_LIMITED_CODE, AuthError, _portal_err, httpx)
+
+logger = logging.getLogger(__name__)
+
+try:
+    import fcntl
+except Exception:
+    fcntl = None
+try:
+    import msvcrt
+except Exception:
+    msvcrt = None
+
+def is_actual_local_base_url(base_url: str) -> bool:
+    """Return True for Actual's loopback local API endpoint."""
+    try:
+        host = (urlparse(base_url or "").hostname or "").lower().rstrip(".")
+    except Exception:
+        return False
+    return host in {"localhost", "127.0.0.1", "::1", "0.0.0.0"}
+
+
+def normalize_actual_base_url(base_url: str) -> str:
+    """Return Actual's OpenAI-compatible base URL (hosted api.actual.inc or the loopback local server;
+    both expose a /v1 surface for the Responses transport)."""
+    url = str(base_url or "").strip().rstrip("/")
+    if not url:
+        return DEFAULT_ACTUAL_BASE_URL
+    try:
+        parsed = urlparse(url)
+        host = (parsed.hostname or "").lower().rstrip(".")
+        path = parsed.path.rstrip("/")
+    except Exception:
+        return url
+    if path in {"", "/"} and (host == "api.actual.inc" or is_actual_local_base_url(url)):
+        return url + "/v1"
+    return url
+
+
+
+@dataclass
+class ProviderConfig:
+    """Describes a known inference provider."""
+    id: str
+    name: str
+    auth_type: str
+    portal_base_url: str = ""
+    inference_base_url: str = ""
+    client_id: str = ""
+    scope: str = ""
+    extra: Dict[str, Any] = field(default_factory=dict)
+    api_key_env_vars: tuple = ()
+    base_url_env_var: str = ""
+
+
+def _api_key_provider(
+    id: str, name: str, inference_base_url: str, api_key_env_vars: tuple,
+    base_url_env_var: str = "", auth_type: str = "api_key") -> ProviderConfig:
+    """Compact constructor for the common env-var-keyed provider shape."""
+    return ProviderConfig(
+        id=id, name=name, auth_type=auth_type, inference_base_url=inference_base_url,
+        api_key_env_vars=api_key_env_vars, base_url_env_var=base_url_env_var)
+
+
+_REGISTRY_ROWS: Tuple[Any, ...] = (
+    ProviderConfig(
+        "portal", "Arkos Portal", "oauth_device_code", portal_base_url=DEFAULT_PORTAL_URL,
+        inference_base_url=DEFAULT_PORTAL_INFERENCE_URL, client_id=DEFAULT_PORTAL_CLIENT_ID,
+        scope=DEFAULT_PORTAL_SCOPE),
+    ProviderConfig("openai-codex", "OpenAI Codex", "oauth_external", inference_base_url=DEFAULT_CODEX_BASE_URL),
+    ("openai-api", "OpenAI API", "https://api.openai.com/v1", ("OPENAI_API_KEY",), "OPENAI_BASE_URL"),
+    ProviderConfig(
+        "xai-oauth", "xAI Grok OAuth (SuperGrok / Premium+)", "oauth_external",
+        inference_base_url=DEFAULT_XAI_OAUTH_BASE_URL),
+    ProviderConfig("qwen-oauth", "Qwen OAuth", "oauth_external", inference_base_url=DEFAULT_QWEN_BASE_URL),
+    ("lmstudio", "LM Studio", "http://127.0.0.1:1234/v1", ("LM_API_KEY",), "LM_BASE_URL"),
+    ("copilot", "GitHub Copilot", DEFAULT_GITHUB_MODELS_BASE_URL,
+     ("COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN"), "COPILOT_API_BASE_URL"),
+    ProviderConfig(
+        "copilot-acp", "GitHub Copilot ACP", "external_process",
+        inference_base_url=DEFAULT_COPILOT_ACP_BASE_URL, base_url_env_var="COPILOT_ACP_BASE_URL"),
+    ("gemini", "Google AI Studio", "https://generativelanguage.googleapis.com/v1beta",
+     ("GOOGLE_API_KEY", "GEMINI_API_KEY"), "GEMINI_BASE_URL"),
+    ("zai", "Z.AI / GLM", "https://api.z.ai/api/paas/v4",
+     ("GLM_API_KEY", "ZAI_API_KEY", "Z_AI_API_KEY"), "GLM_BASE_URL"),
+    ("kimi-coding", "Kimi / Moonshot", "https://api.moonshot.ai/v1",
+     ("KIMI_API_KEY", "KIMI_CODING_API_KEY"), "KIMI_BASE_URL"),
+    ("kimi-coding-cn", "Kimi / Moonshot (China)", "https://api.moonshot.cn/v1", ("KIMI_CN_API_KEY",)),
+    ("stepfun", "StepFun Step Plan", STEPFUN_STEP_PLAN_INTL_BASE_URL, ("STEPFUN_API_KEY",), "STEPFUN_BASE_URL"),
+    ("arcee", "Arcee AI", "https://api.arcee.ai/api/v1", ("ARCEEAI_API_KEY",), "ARCEE_BASE_URL"),
+    ("gmi", "GMI Cloud", "https://api.gmi-serving.com/v1", ("GMI_API_KEY",), "GMI_BASE_URL"),
+    ("actual", "Actual Computer", DEFAULT_ACTUAL_BASE_URL, ("ACTUAL_API_KEY",), "ACTUAL_BASE_URL"),
+    ("minimax", "MiniMax", "https://api.minimax.io/anthropic", ("MINIMAX_API_KEY",), "MINIMAX_BASE_URL"),
+    ProviderConfig(
+        "minimax-oauth", "MiniMax (OAuth \u00b7 minimax.io)", "oauth_minimax",
+        portal_base_url=MINIMAX_OAUTH_GLOBAL_BASE, inference_base_url=MINIMAX_OAUTH_GLOBAL_INFERENCE,
+        client_id=MINIMAX_OAUTH_CLIENT_ID, scope=MINIMAX_OAUTH_SCOPE,
+        extra={"region": "global", "cn_portal_base_url": MINIMAX_OAUTH_CN_BASE,
+               "cn_inference_base_url": MINIMAX_OAUTH_CN_INFERENCE}),
+    ("anthropic", "Anthropic", "https://api.anthropic.com",
+     ("ANTHROPIC_API_KEY", "ANTHROPIC_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN"), "ANTHROPIC_BASE_URL"),
+    ("alibaba", "Qwen Cloud", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+     ("DASHSCOPE_API_KEY",), "DASHSCOPE_BASE_URL"),
+    ("alibaba-coding-plan", "Alibaba Cloud (Coding Plan)", "https://coding-intl.dashscope.aliyuncs.com/v1",
+     ("ALIBABA_CODING_PLAN_API_KEY", "DASHSCOPE_API_KEY"), "ALIBABA_CODING_PLAN_BASE_URL"),
+    ("minimax-cn", "MiniMax (China)", "https://api.minimaxi.com/anthropic", ("MINIMAX_CN_API_KEY",),
+     "MINIMAX_CN_BASE_URL"),
+    ("deepseek", "DeepSeek", "https://api.deepseek.com/v1", ("DEEPSEEK_API_KEY",), "DEEPSEEK_BASE_URL"),
+    ("xai", "xAI", "https://api.x.ai/v1", ("XAI_API_KEY",), "XAI_BASE_URL"),
+    ("nvidia", "NVIDIA NIM", "https://integrate.api.nvidia.com/v1", ("NVIDIA_API_KEY",), "NVIDIA_BASE_URL"),
+    ("ai-gateway", "Vercel AI Gateway", "https://ai-gateway.vercel.sh/v1", ("AI_GATEWAY_API_KEY",),
+     "AI_GATEWAY_BASE_URL"),
+    ("opencode-zen", "OpenCode Zen", "https://opencode.ai/zen/v1", ("OPENCODE_ZEN_API_KEY",),
+     "OPENCODE_ZEN_BASE_URL"),
+    ("opencode-go", "OpenCode Go", "https://opencode.ai/zen/go/v1", ("OPENCODE_GO_API_KEY",),
+     "OPENCODE_GO_BASE_URL"),
+    ("opencode-free", "OpenCode Free", "https://opencode.ai/zen/v1", ()),
+    ("kilocode", "Kilo Code", "https://api.kilo.ai/api/gateway", ("KILOCODE_API_KEY",), "KILOCODE_BASE_URL"),
+    ("huggingface", "Hugging Face", "https://router.huggingface.co/v1", ("HF_TOKEN",), "HF_BASE_URL"),
+    ("xiaomi", "Xiaomi MiMo", "https://api.xiaomimimo.com/v1", ("XIAOMI_API_KEY",), "XIAOMI_BASE_URL"),
+    ("tencent-tokenhub", "Tencent TokenHub", "https://tokenhub.tencentmaas.com/v1", ("TOKENHUB_API_KEY",),
+     "TOKENHUB_BASE_URL"),
+    ("tencent-tokenplan", "Tencent TokenPlan", "https://api.lkeap.cloud.tencent.com/plan/anthropic",
+     ("TOKENPLAN_API_KEY",), "TOKENPLAN_BASE_URL"),
+    ("ollama-cloud", "Ollama Cloud", DEFAULT_OLLAMA_CLOUD_BASE_URL, ("OLLAMA_API_KEY",), "OLLAMA_BASE_URL"),
+    ("bedrock", "AWS Bedrock", "https://bedrock-runtime.us-east-1.amazonaws.com", (), "BEDROCK_BASE_URL",
+     "aws_sdk"),
+    ("vertex", "Google Vertex AI", "", (), "", "vertex"),
+    ("azure-foundry", "Azure Foundry", "", ("AZURE_FOUNDRY_API_KEY",), "AZURE_FOUNDRY_BASE_URL"))
+PROVIDER_REGISTRY: Dict[str, ProviderConfig] = {
+    p.id: p for p in (r if isinstance(r, ProviderConfig) else _api_key_provider(*r) for r in _REGISTRY_ROWS)
+}
+
+_REGISTRY_PLUGIN_SKIP = frozenset({"copilot", "kimi-coding", "kimi-coding-cn", "zai", "openrouter", "custom"})
+
+
+def _register_plugin_provider(pp: Any) -> None:
+    """Auto-register one providers/ profile (plugins/model-providers/<name>/) not declared above.
+
+    External-process (ACP) providers have no API-key env vars; registering them is what lets an
+    out-of-tree provider pass ``resolve_provider()``'s known-provider gate ("Unknown provider")."""
+    if pp.auth_type == "external_process":
+        pconfig = ProviderConfig(
+            pp.name, pp.display_name or pp.name, "external_process", inference_base_url=pp.base_url)
+    elif pp.auth_type == "api_key" and pp.env_vars and pp.name not in _REGISTRY_PLUGIN_SKIP:
+        is_url = lambda v: v.endswith("_BASE_URL") or v.endswith("_URL")  # noqa: E731
+        pconfig = _api_key_provider(
+            pp.name, pp.display_name or pp.name, pp.base_url,
+            tuple(v for v in pp.env_vars if not is_url(v)) or pp.env_vars,
+            next((v for v in pp.env_vars if is_url(v)), None) or "")
+    else:
+        return
+    PROVIDER_REGISTRY[pp.name] = pconfig
+    for alias in pp.aliases:
+        PROVIDER_REGISTRY.setdefault(alias, pconfig)
+
+
+try:
+    from providers import list_providers as _list_providers_for_registry
+    for _pp in _list_providers_for_registry():
+        if _pp.name not in PROVIDER_REGISTRY:
+            _register_plugin_provider(_pp)
+except Exception:
+    pass
+
+
+def get_anthropic_key() -> str:
+    """First usable Anthropic credential (``.env`` preferred over a stale shell export), or ``""``.
+
+    Order mirrors ``PROVIDER_REGISTRY["anthropic"].api_key_env_vars``.
+
+    Checks both the ``.env`` file and the process environment, preferring ``~/.arkos/.env`` so a deliberate
+    key rotation isn't shadowed by a stale shell export (matches the api-key resolution path).
+    """
+    from arkos_cli.config import get_env_value_prefer_dotenv
+    env_vars = PROVIDER_REGISTRY["anthropic"].api_key_env_vars
+    return next((v for v in (get_env_value_prefer_dotenv(var) or "" for var in env_vars) if v), "")
+
+
+
+_PLACEHOLDER_SECRET_VALUES = {
+    "*", "**", "***", "changeme", "your_api_key", "your_api_key_here", "your-api-key",
+    "placeholder", "example", "dummy", "null", "none"}
+
+
+def has_usable_secret(value: Any, *, min_length: int = 4) -> bool:
+    """Return True when a configured secret looks usable, not empty/placeholder."""
+    if not isinstance(value, str):
+        return False
+    cleaned = value.strip()
+    return len(cleaned) >= min_length and cleaned.lower() not in _PLACEHOLDER_SECRET_VALUES
+
+
+KNOWN_PROVIDER_KEY_PREFIXES: Dict[str, tuple] = {
+    "openrouter": ("sk-or-",),
+}
+
+
+def _usable_declared_secret(provider_id: str, value: Any, source: str) -> Optional[str]:
+    """*value* stripped when it is a usable, prefix-valid secret; None (after warning on a provable
+    prefix mismatch, so it never shadows a later credential source) otherwise. Providers without a
+    declared prefix are fail-open."""
+    val = str(value or "").strip()
+    if not has_usable_secret(val):
+        return None
+    prefixes = KNOWN_PROVIDER_KEY_PREFIXES.get(provider_id)
+    if prefixes and not any(val.startswith(p) for p in prefixes):
+        logger.warning(
+            "Ignoring %s for provider %r: value does not match the expected key "
+            "prefix (%s). Falling back to the next credential source. Fix or "
+            "remove the malformed key to silence this warning.",
+            source, provider_id, " or ".join(prefixes))
+        return None
+    return val
+
+
+def _resolve_api_key_provider_secret(provider_id: str, pconfig: ProviderConfig) -> tuple[str, str]:
+    """Resolve an API-key provider's token and indicate where it came from."""
+    if provider_id == "copilot":
+        try:
+            from arkos_cli.copilot_auth import resolve_copilot_token, get_copilot_api_token
+            token, source = resolve_copilot_token()
+            if token:
+                api_token, _base_url = get_copilot_api_token(token)
+                return api_token, source
+        except ValueError as exc:
+            logger.warning("Copilot token validation failed: %s", exc)
+        except Exception:
+            pass
+        return "", ""
+
+    from arkos_cli.config import get_env_value_prefer_dotenv
+    for env_var in pconfig.api_key_env_vars:
+        val = _usable_declared_secret(provider_id, get_env_value_prefer_dotenv(env_var), env_var)
+        if val:
+            return val, env_var
+
+    pool_source = f"credential_pool:{provider_id}"
+    try:
+        from agent.credential_pool import load_pool
+        pool = load_pool(provider_id)
+        if pool and pool.has_credentials():
+            entry = pool.peek()
+            candidates = [entry] if entry is not None else []
+            try:
+                for extra in pool.entries():
+                    if extra is not None and all(extra is not c for c in candidates):
+                        candidates.append(extra)
+            except Exception:
+                pass
+            for entry in candidates:
+                key = getattr(entry, "access_token", "") or getattr(entry, "runtime_api_key", "")
+                val = _usable_declared_secret(provider_id, key, pool_source)
+                if val:
+                    return val, pool_source
+    except Exception:
+        pass
+    return "", ""
+
+
+
+def is_rate_limited_auth_error(error: Exception) -> bool:
+    """True when an :class:`AuthError` is upstream rate-limiting / quota: transient, and
+    re-authenticating cannot fix it, so callers should say "retry later", not ``arkos auth``."""
+    return (isinstance(error, AuthError) and not error.relogin_required
+            and error.code == CODEX_RATE_LIMITED_CODE)
+
+
+_GENERIC_ENTITLEMENT_MESSAGES = {
+    "subscription_required": "No active paid subscription found. Please purchase/activate a subscription, then retry.",
+    "insufficient_credits": "Subscription credits are exhausted. Top up/renew credits, then retry."}
+_ENTITLEMENT_ERROR_CODES = frozenset(_GENERIC_ENTITLEMENT_MESSAGES) | {
+    "subscription_expired", "no_usable_credits", "account_missing", "member_spend_cap_exceeded"}
+
+
+def format_auth_error(error: Exception) -> str:
+    """Map auth failures to concise user-facing guidance."""
+    if not isinstance(error, AuthError) or is_rate_limited_auth_error(error):
+        return str(error)
+    if error.relogin_required:
+        return f"{error} Run `arkos model` to re-authenticate."
+    if error.code in _ENTITLEMENT_ERROR_CODES:
+        if error.provider == "portal":
+            return _format_portal_entitlement_auth_error(error)
+        generic = _GENERIC_ENTITLEMENT_MESSAGES.get(error.code)
+        if generic:
+            return generic
+    if error.code == "temporarily_unavailable":
+        return f"{error} Please retry in a few seconds."
+    return str(error)
+
+
+def _nonempty_str(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+
+def _auth_file_path() -> Path:
+    path = get_arkos_home() / "auth.json"
+    if (os.environ.get("PYTEST_CURRENT_TEST")
+            and _same_path(path, Path.home() / ".arkos" / "auth.json")):
+        raise RuntimeError(
+            f"Refusing to touch real user auth store during test run: {path}. "
+            "Set ARKOS_HOME to a tmp_path in your test fixture, or run "
+            "via scripts/run_tests.sh for hermetic CI-parity env.")
+    return path
+
+
+def _global_auth_file_path() -> Optional[Path]:
+    """Global-root auth.json in profile mode; None when profile and global root are the same dir.
+
+    Read-only fallback path, so no pytest seat belt here (it lives on ``_auth_file_path()``)."""
+    try:
+        from arkos_constants import get_default_arkos_root
+        global_root = get_default_arkos_root()
+    except Exception:
+        return None
+    return None if _same_path(get_arkos_home(), global_root) else global_root / "auth.json"
+
+
+def _load_global_auth_store() -> Dict[str, Any]:
+    """Load the global-root auth store (read-only fallback, mtime-memoised); ``{}`` when absent or
+    unreadable — a malformed global store must never break profile reads."""
+    global _global_auth_store_cache
+    global_path = _global_auth_file_path()
+    if global_path is None or not global_path.exists():
+        _global_auth_store_cache = None
+        return {}
+    try:
+        cache_key: Optional[Tuple[str, int]] = (
+            str(global_path.resolve(strict=False)), global_path.stat().st_mtime_ns)
+    except Exception:
+        cache_key = None
+    cached = _global_auth_store_cache
+    if cache_key is not None and cached is not None and cached[:2] == cache_key:
+        return cached[2]
+    if os.environ.get("PYTEST_CURRENT_TEST") and os.environ.get("HOME"):
+        real_root = Path(os.environ["HOME"]) / ".arkos" / "auth.json"
+        try:
+            if global_path.resolve(strict=False) == real_root.resolve(strict=False):
+                _global_auth_store_cache = None
+                return {}
+        except Exception:
+            pass
+    try:
+        store = _load_auth_store(global_path)
+    except Exception:
+        _global_auth_store_cache = None
+        return {}
+    if cache_key is not None:
+        _global_auth_store_cache = (*cache_key, store)
+    return store
+
+
+_auth_target_lock_holders: Dict[str, threading.local] = {}
+_auth_target_lock_holders_guard = threading.Lock()
+
+
+def _same_path(left: Path, right: Path) -> bool:
+    try:
+        return left.resolve(strict=False) == right.resolve(strict=False)
+    except Exception:
+        return left == right
+
+
+def _is_same_auth_store(left: Path, right: Path) -> bool:
+    """True when two auth paths name ONE store rather than two copies.
+    ``_same_path`` resolves symlinks and ``..``; ``samefile`` adds hardlinks and bind-mounts
+    (same inode under two resolved names). Used by the forked-grant heal: a shared store has
+    no "other side" to consolidate..
+    """
+    if _same_path(left, right):
+        return True
+    try:
+        return left.samefile(right)
+    except OSError:
+        return False
+
+
+def _resolved_key(path: Path) -> str:
+    """Canonical string for *path* (resolved when possible) used as a cache / lock-holder key."""
+    try:
+        return str(path.resolve(strict=False))
+    except Exception:
+        return str(path)
+
+
+def _auth_lock_holder_for(target_path: Path) -> threading.local:
+    """Return a reentrancy tracker keyed to one canonical auth-store path."""
+    with _auth_target_lock_holders_guard:
+        return _auth_target_lock_holders.setdefault(_resolved_key(target_path), threading.local())
+
+
+def _kernel_lock(lock_file: Any, acquire: bool) -> None:
+    """Non-blocking exclusive flock (fcntl) or 1-byte msvcrt lock at offset 0; ``acquire=False`` releases."""
+    if fcntl:
+        fcntl.flock(lock_file.fileno(), (fcntl.LOCK_EX | fcntl.LOCK_NB) if acquire else fcntl.LOCK_UN)
+    else:
+        lock_file.seek(0)
+        msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK if acquire else msvcrt.LK_UNLCK, 1)
+
+
+@contextmanager
+def _file_lock(
+    lock_path: Path, holder: threading.local, timeout_seconds: float, timeout_message: str):
+    """Cross-process advisory flock helper, reentrant per-thread via ``holder.depth``.
+
+    Falls back to a depth-only guard when neither ``fcntl`` nor ``msvcrt`` is available. Callers
+    supply their own ``threading.local`` so independent locks (profile store vs global root vs the
+    shared Portal store) track reentrancy separately."""
+    if getattr(holder, "depth", 0) > 0:
+        holder.depth += 1
+        try:
+            yield
+        finally:
+            holder.depth -= 1
+        return
+
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with ExitStack() as stack:
+        lock_file = None
+        if fcntl is not None or msvcrt is not None:
+            if msvcrt and (not lock_path.exists() or lock_path.stat().st_size == 0):
+                try:
+                    lock_path.write_text(" ", encoding="utf-8")
+                except (OSError, PermissionError):
+                    pass
+            lock_file = stack.enter_context(lock_path.open("r+" if msvcrt else "a+", encoding="utf-8"))
+            deadline = time.monotonic() + max(1.0, timeout_seconds)
+            while True:
+                try:
+                    _kernel_lock(lock_file, True)
+                    break
+                except (BlockingIOError, OSError, PermissionError):
+                    if time.monotonic() >= deadline:
+                        raise TimeoutError(timeout_message)
+                    time.sleep(0.05)
+
+        holder.depth = 1
+        try:
+            yield
+        finally:
+            holder.depth = 0
+            if lock_file is not None:
+                try:
+                    _kernel_lock(lock_file, False)
+                except (OSError, IOError):
+                    pass
+
+
+@contextmanager
+def _auth_store_lock(
+    timeout_seconds: float = AUTH_LOCK_TIMEOUT_SECONDS, *, target_path: Optional[Path] = None):
+    """Cross-process advisory lock for one auth.json read/write transaction.
+
+    ``target_path`` is required for profile-to-global write-throughs: each path has its own
+    reentrancy tracker and kernel lock. Lock ordering invariant: ``_auth_store_lock`` FIRST (outer),
+    ``_portal_shared_store_lock`` SECOND (inner), else deadlock against a concurrent shared import."""
+    auth_path = target_path if target_path is not None else _auth_file_path()
+    with _file_lock(
+        auth_path.with_suffix(".lock"), _auth_lock_holder_for(auth_path), timeout_seconds,
+        "Timed out waiting for auth store lock"):
+        yield
+
+
+def _empty_auth_store() -> Dict[str, Any]:
+    return {"version": AUTH_STORE_VERSION, "providers": {}}
+
+
+def _load_auth_store(auth_file: Optional[Path] = None) -> Dict[str, Any]:
+    auth_file = auth_file or _auth_file_path()
+    if not auth_file.exists():
+        return _empty_auth_store()
+    try:
+        raw = json.loads(auth_file.read_text(encoding="utf-8-sig"))
+    except OSError:
+        logger.warning(
+            "auth: could not read %s, leaving the store on disk untouched "
+            "rather than degrading to an empty one",
+            auth_file, exc_info=True)
+        raise
+    except Exception as exc:
+        corrupt_path = auth_file.with_suffix(".json.corrupt")
+        try:
+            shutil.copy2(auth_file, corrupt_path)
+            preserved = True
+        except Exception:
+            preserved = False
+            logger.debug("auth: could not preserve a copy of the corrupt store at %s", corrupt_path,
+                         exc_info=True)
+        logger.warning(
+            "auth: failed to parse %s (%s), starting with empty store. %s %s",
+            auth_file, exc,
+            "Corrupt file preserved at" if preserved else "A copy could NOT be preserved at",
+            corrupt_path)
+        return _empty_auth_store()
+
+    if isinstance(raw, dict) and (
+        isinstance(raw.get("providers"), dict) or isinstance(raw.get("credential_pool"), dict)):
+        raw.setdefault("providers", {})
+        if isinstance(raw.get("providers"), dict):
+            _migrate_stale_portal_url(raw["providers"])
+        return raw
+
+    if isinstance(raw, dict) and isinstance(raw.get("systems"), dict):
+        systems = raw["systems"]
+        portal_cred = systems.get("arkos_portal") or systems.get("portal")
+        providers = {"portal": portal_cred} if portal_cred else {}
+        return {**_empty_auth_store(), "providers": providers,
+                "active_provider": "portal" if providers else None}
+    return _empty_auth_store()
+
+
+def _write_private_file_atomic(
+    target: Path, payload: str, *, replace: Optional[Callable[[Any, Any], Any]] = None,
+    fsync_dir: bool = False) -> None:
+    """Write *payload* to *target* via a 0o600 temp file + atomic rename.
+
+    ``os.open(O_EXCL, 0o600)`` closes the TOCTOU window where ``write_text()`` + post-write
+    ``chmod`` briefly exposed tokens at process umask. The per-process random temp suffix avoids
+    collisions between concurrent writers and stale leftovers from a crashed prior write."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    secure_parent_dir(target)
+    tmp_path = target.with_name(f"{target.name}.tmp.{os.getpid()}.{uuid.uuid4().hex}")
+    try:
+        fd = os.open(str(tmp_path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, stat.S_IRUSR | stat.S_IWUSR)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        (replace or atomic_replace)(tmp_path, target)
+        if fsync_dir:
+            try:
+                dir_fd = os.open(str(target.parent), os.O_RDONLY)
+            except OSError:
+                pass
+            else:
+                try:
+                    os.fsync(dir_fd)
+                finally:
+                    os.close(dir_fd)
+    finally:
+        try:
+            if tmp_path.exists():
+                tmp_path.unlink()
+        except OSError:
+            pass
+
+
+def _save_auth_store(auth_store: Dict[str, Any], target_path: Optional[Path] = None) -> Path:
+    """Atomically persist *auth_store* (0o600, parent tightened to 0o700) to the active store, or to
+    an explicit *target_path* (e.g. the global-root write-through for rotating xAI OAuth grants)."""
+    auth_file = target_path if target_path is not None else _auth_file_path()
+    auth_store["version"] = AUTH_STORE_VERSION
+    auth_store["updated_at"] = datetime.now(timezone.utc).isoformat()
+    _write_private_file_atomic(auth_file, json.dumps(auth_store, indent=2) + "\n", fsync_dir=True)
+    try:
+        auth_file.chmod(stat.S_IRUSR | stat.S_IWUSR)
+    except OSError:
+        pass
+    return auth_file
+
+
+def _store_section(auth_store: Dict[str, Any], key: str) -> Dict[str, Any]:
+    """Return ``auth_store[key]`` as a dict, replacing a missing/non-dict value in place."""
+    section = auth_store.get(key)
+    if not isinstance(section, dict):
+        section = auth_store[key] = {}
+    return section
+
+
+def _provider_state_in(store: Dict[str, Any], provider_id: str) -> Optional[Dict[str, Any]]:
+    """Shallow copy of ``store["providers"][provider_id]`` when it is a dict, else None."""
+    providers = store.get("providers") if store else None
+    state = providers.get(provider_id) if isinstance(providers, dict) else None
+    return dict(state) if isinstance(state, dict) else None
+
+
+def _load_provider_state_with_source(
+    auth_store: Dict[str, Any], provider_id: str,
+) -> tuple[Optional[Dict[str, Any]], Optional[Path]]:
+    """Provider state plus the auth.json path it came from (profile first, then the global root).
+
+    Refresh paths that rotate single-use OAuth refresh tokens must write the updated chain back to
+    the same store they read."""
+    state = _provider_state_in(auth_store, provider_id)
+    if state is not None:
+        return state, _auth_file_path()
+    global_state = _provider_state_in(_load_global_auth_store(), provider_id)
+    return (global_state, _global_auth_file_path()) if global_state is not None else (None, None)
+
+
+def _load_provider_state(auth_store: Dict[str, Any], provider_id: str) -> Optional[Dict[str, Any]]:
+    """Provider state; in profile mode falls back to the global-root ``auth.json`` per provider (same
+    shadowing as ``read_credential_pool``), so profile workers see globally-authed providers."""
+    return _load_provider_state_with_source(auth_store, provider_id)[0]
+
+
+@contextmanager
+def _provider_state_transaction(provider_id: str):
+    """Lock the active auth store and any global fallback source, in that order.
+
+    Re-reading the source after its lock is acquired prevents stale refreshes and whole-file lost
+    updates without inverting the documented auth -> shared lock order."""
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        state, source_path = _load_provider_state_with_source(auth_store, provider_id)
+        if source_path is None or _same_path(source_path, _auth_file_path()):
+            yield auth_store, state, source_path
+            return
+        with _auth_store_lock(target_path=source_path):
+            yield auth_store, _provider_state_in(_load_auth_store(source_path), provider_id), source_path
+
+
+def _store_provider_state(
+    auth_store: Dict[str, Any], provider_id: str, state: Dict[str, Any], *, set_active: bool = True,
+) -> None:
+    _store_section(auth_store, "providers")[provider_id] = state
+    if set_active:
+        auth_store["active_provider"] = provider_id
+
+
+def _save_provider_state(auth_store: Dict[str, Any], provider_id: str, state: Dict[str, Any]) -> None:
+    """Write *state* under ``providers`` and make *provider_id* the active provider."""
+    _store_provider_state(auth_store, provider_id, state, set_active=True)
+
+
+def _save_active_provider_state(provider_id: str, state: Dict[str, Any]) -> Path:
+    """Lock, load, write *state* as the active provider, save. Returns the auth store path."""
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        _save_provider_state(auth_store, provider_id, state)
+        return _save_auth_store(auth_store)
+
+
+def _persist_provider_state_to_store(
+    provider_id: str, state: Dict[str, Any], target_path: Path, *, set_active: bool = False,
+) -> Path:
+    """Merge one provider into a specific auth store under that store's lock."""
+    with _auth_store_lock(target_path=target_path):
+        auth_store = _load_auth_store(target_path)
+        _store_provider_state(auth_store, provider_id, dict(state), set_active=set_active)
+        return _save_auth_store(auth_store, target_path=target_path)
+
+
+def _save_provider_state_to_source(
+    auth_store: Dict[str, Any], provider_id: str, state: Dict[str, Any], source_path: Optional[Path],
+) -> None:
+    """Persist provider state back to the auth store it was read from."""
+    if source_path is None or _same_path(source_path, _auth_file_path()):
+        _save_provider_state(auth_store, provider_id, state)
+        _save_auth_store(auth_store)
+    else:
+        _persist_provider_state_to_store(provider_id, state, source_path, set_active=True)
+
+
+def mark_provider_active_if_unset(provider_id: str) -> None:
+    """Set ``active_provider`` only when none is set yet: the first ``arkos auth add`` credential must
+    make its provider active (else setup reports "No inference provider configured"); later adds
+    leave the user's choice untouched."""
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        if not (auth_store.get("active_provider") or "").strip():
+            auth_store["active_provider"] = provider_id
+            _save_auth_store(auth_store)
+
+
+def is_known_auth_provider(provider_id: str) -> bool:
+    normalized = (provider_id or "").strip().lower()
+    return normalized in PROVIDER_REGISTRY or normalized in SERVICE_PROVIDER_NAMES
+
+
+def get_auth_provider_display_name(provider_id: str) -> str:
+    normalized = (provider_id or "").strip().lower()
+    if normalized in PROVIDER_REGISTRY:
+        return PROVIDER_REGISTRY[normalized].name
+    return SERVICE_PROVIDER_NAMES.get(normalized, provider_id)
+
+
+def is_runtime_provider_routable(provider_id: str) -> bool:
+    """Whether runtime resolution recognizes a provider identity (a capability check, not a credential
+    check): ``resolve_provider`` normalization plus the special runtime identities outside the registry."""
+    normalized = (provider_id or "").strip().lower()
+    if not normalized:
+        return False
+    if normalized in {"auto", "openrouter", "custom", "moa"} or normalized.startswith("custom:"):
+        return True
+    try:
+        resolve_provider(normalized)
+    except AuthError:
+        return False
+    return True
+
+
+def read_credential_pool(provider_id: Optional[str] = None) -> Dict[str, Any]:
+    """Return the persisted credential pool, or one provider slice.
+
+    In profile mode the global-root ``auth.json`` is a read-only fallback applied per provider ONLY
+    when the profile has zero entries for it (``arkos auth add`` in the profile shadows global)."""
+    pool = _load_auth_store().get("credential_pool")
+    pool = pool if isinstance(pool, dict) else {}
+    global_pool = _load_global_auth_store().get("credential_pool")
+    global_pool = global_pool if isinstance(global_pool, dict) else {}
+
+    if provider_id is None:
+        merged = dict(pool)
+        for gp_key, gp_entries in global_pool.items():
+            existing = merged.get(gp_key)
+            if not (isinstance(gp_entries, list) and gp_entries):
+                continue
+            if not (isinstance(existing, list) and existing):
+                merged[gp_key] = list(gp_entries)
+        return merged
+
+    provider_entries = pool.get(provider_id)
+    if isinstance(provider_entries, list) and provider_entries:
+        return list(provider_entries)
+    global_entries = global_pool.get(provider_id)
+    return list(global_entries) if isinstance(global_entries, list) else []
+
+
+_POOL_STATUS_FIELDS = (
+    "last_status", "last_status_at", "last_error_code", "last_error_reason", "last_error_message",
+    "last_error_reset_at")
+
+
+def _merge_disk_cooldown_state(
+    entry: Dict[str, Any], disk_entry: Optional[Dict[str, Any]], provider_id: str,
+) -> Dict[str, Any]:
+    """Keep a newer on-disk cooldown/quarantine over a stale in-memory one.
+
+    ``write_credential_pool`` persists an in-memory snapshot that may predate another process
+    marking the same credential exhausted/dead; without this merge the later rewrite resurrects a
+    rate-limited key as healthy and both processes resume hammering it."""
+    if not isinstance(disk_entry, dict):
+        return entry
+    try:
+        from agent.credential_pool import (
+            PooledCredential, STATUS_DEAD, STATUS_EXHAUSTED, _exhausted_until, _parse_absolute_timestamp,
+        )
+
+        disk_status = disk_entry.get("last_status")
+        if disk_status not in (STATUS_DEAD, STATUS_EXHAUSTED):
+            return entry
+        mem_access = entry.get("access_token") or ""
+        disk_access = disk_entry.get("access_token") or ""
+        if mem_access and disk_access and mem_access != disk_access:
+            return entry
+        disk_ts = _parse_absolute_timestamp(disk_entry.get("last_status_at")) or 0.0
+        mem_ts = _parse_absolute_timestamp(entry.get("last_status_at")) or 0.0
+        if disk_ts <= mem_ts:
+            return entry
+        if disk_status == STATUS_EXHAUSTED:
+            until = _exhausted_until(PooledCredential.from_dict(provider_id, disk_entry))
+            if until is None or until <= time.time():
+                return entry
+        return {**entry, **{f: disk_entry.get(f) for f in _POOL_STATUS_FIELDS}}
+    except Exception:  # pragma: no cover - best-effort merge
+        return entry
+
+
+def _entry_ids(entries: Iterable[Any]) -> Dict[str, Dict[str, Any]]:
+    return {e.get("id"): e for e in entries if isinstance(e, dict) and e.get("id")}
+
+
+def write_credential_pool(
+    provider_id: str, entries: List[Dict[str, Any]], *,
+    removed_ids: Optional[Iterable[str]] = None,
+    status_cleared_ids: Optional[Iterable[str]] = None,
+) -> Path:
+    """Persist one provider's credential pool under auth.json.
+
+    Final disk-boundary sanitizer for borrowed credentials (callers may pass raw dicts). Entries on
+    disk but missing from *entries* (added concurrently) are merged back unless in *removed_ids*,
+    so a rotation/exhaustion rewrite never drops a concurrent credential. Entries in
+    *status_cleared_ids* were cleared deliberately (``arkos auth reset``) and skip the
+    recency merge, which would otherwise read their cleared ``last_status_at`` (None ->
+    epoch 0) as a stale snapshot and copy a still-binding cooldown back."""
+    removed = {rid for rid in (removed_ids or ()) if rid}
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        pool = _store_section(auth_store, "credential_pool")
+        sanitized = [
+            sanitize_borrowed_credential_payload(e, provider_id) if isinstance(e, dict) else e
+            for e in entries]
+        existing_list = pool.get(provider_id)
+        existing_list = existing_list if isinstance(existing_list, list) else []
+        existing_by_id = _entry_ids(existing_list)
+        new_ids = set(_entry_ids(sanitized))
+        status_cleared = {cid for cid in (status_cleared_ids or ()) if cid}
+        merged: List[Dict[str, Any]] = [
+            _merge_disk_cooldown_state(
+                e, None if e.get("id") in status_cleared else existing_by_id.get(e.get("id")), provider_id,
+            )
+            if isinstance(e, dict) else e
+            for e in sanitized]
+        for disk_entry in existing_list:
+            disk_id = disk_entry.get("id") if isinstance(disk_entry, dict) else None
+            if disk_id and disk_id not in new_ids and disk_id not in removed:
+                merged.append(sanitize_borrowed_credential_payload(disk_entry, provider_id))
+        pool[provider_id] = merged
+        return _save_auth_store(auth_store)
+
+
+def _suppressed_source_list(suppressed: Dict[str, Any], provider_id: str) -> Optional[List[str]]:
+    """Canonical (list-form) suppressed sources for *provider_id*; a legacy mapping (keys = source
+    names) is migrated to the list form in place."""
+    raw_sources = suppressed.get(provider_id)
+    if isinstance(raw_sources, list):
+        return raw_sources
+    if isinstance(raw_sources, dict):
+        suppressed[provider_id] = [str(name) for name in raw_sources]
+        return suppressed[provider_id]
+    return None
+
+
+def suppress_credential_source(provider_id: str, source: str) -> None:
+    """Mark a credential source as suppressed so it won't be re-seeded."""
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        suppressed = _store_section(auth_store, "suppressed_sources")
+        provider_list = _suppressed_source_list(suppressed, provider_id)
+        if provider_list is None:
+            provider_list = suppressed[provider_id] = []
+        if source not in provider_list:
+            provider_list.append(source)
+        _save_auth_store(auth_store)
+
+
+def is_source_suppressed(provider_id: str, source: str) -> bool:
+    """Check if a credential source has been suppressed by the user."""
+    try:
+        return source in _load_auth_store().get("suppressed_sources", {}).get(provider_id, [])
+    except Exception:
+        return False
+
+
+def unsuppress_credential_source(provider_id: str, source: str) -> bool:
+    """Clear a suppression marker so the source will be re-seeded on the next load."""
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        suppressed = auth_store.get("suppressed_sources")
+        if not isinstance(suppressed, dict):
+            return False
+        provider_list = _suppressed_source_list(suppressed, provider_id)
+        if provider_list is None or source not in provider_list:
+            return False
+        provider_list.remove(source)
+        if not provider_list:
+            suppressed.pop(provider_id, None)
+        if not suppressed:
+            auth_store.pop("suppressed_sources", None)
+        _save_auth_store(auth_store)
+        return True
+
+
+def get_provider_auth_state(provider_id: str) -> Optional[Dict[str, Any]]:
+    """Persisted auth state for a provider (profile first, global-root fallback), or None."""
+    return _load_provider_state(_load_auth_store(), provider_id)
+
+
+def portal_token_has_billing_scope() -> bool:
+    """Return True if the currently-held Portal token carries ``billing:manage``.
+
+    Reads the persisted ``scope`` string saved at login (``_save_provider_state``
+    stores ``token_data.get("scope") or scope``). A space-delimited match. Used by
+    the lazy step-up: if False, the first billing call will 403 ``insufficient_scope``
+    anyway, but checking up front lets a surface skip a doomed round-trip.
+    """
+    try:
+        state = get_provider_auth_state("portal") or {}
+    except Exception:
+        return False
+    scope = state.get("scope")
+    if not isinstance(scope, str):
+        return False
+    return PORTAL_BILLING_MANAGE_SCOPE in scope.split()
+
+
+def get_active_provider() -> Optional[str]:
+    """Return the currently active provider ID from auth store."""
+    return _load_auth_store().get("active_provider")
+
+
+def _active_provider_is(normalized: str) -> bool:
+    active = (_load_auth_store().get("active_provider") or "").strip().lower()
+    return bool(active) and active == normalized
+
+
+def _slot_selects(slot: Any, normalized: str) -> bool:
+    return isinstance(slot, dict) and (slot.get("provider") or "").strip().lower() == normalized
+
+
+def _config_selects_provider(normalized: str) -> bool:
+    """config.yaml ``model.provider``, or a MoA advisor/aggregator slot naming the provider.
+
+    MoA presets are explicit model selections too: ``provider: anthropic`` in a MoA slot opts into
+    Anthropic credentials for that slot even when the main model is another provider; otherwise
+    Claude Code OAuth entries get pruned by ``load_pool("anthropic")`` and MoA advisors fail with
+    "no ANTHROPIC_API_KEY" while the picker says Anthropic is logged in."""
+    from arkos_cli.config import load_config
+    cfg = load_config()
+    if _slot_selects(cfg.get("model"), normalized):
+        return True
+
+    def _moa_block_matches(block: Any) -> bool:
+        return isinstance(block, dict) and (
+            any(_slot_selects(s, normalized) for s in block.get("reference_models") or [])
+            or _slot_selects(block.get("aggregator"), normalized))
+
+    moa_cfg = cfg.get("moa")
+    if not isinstance(moa_cfg, dict):
+        return False
+    presets = moa_cfg.get("presets")
+    presets = presets.values() if isinstance(presets, dict) else ()
+    return _moa_block_matches(moa_cfg) or any(_moa_block_matches(p) for p in presets)
+
+
+def _explicit_pool_entry_present(normalized: str) -> bool:
+    """Pool rows from EXPLICIT Arkos flows (manual add / device-code / PKCE) or live env keys;
+    ambient borrowed sources (gh_cli / claude_code / qwen-cli) are deliberately excluded."""
+    return any(_pool_entry_is_explicit(entry) for entry in read_credential_pool(normalized))
+
+
+_IMPLICIT_ENV_VARS = frozenset({"CLAUDE_CODE_OAUTH_TOKEN"})
+_EXPLICIT_POOL_SOURCES = frozenset({"device_code", "loopback_pkce", "arkos_pkce", "manual"})
+_VERTEX_PROVIDER_IDS = ("vertex", "google-vertex", "vertex-ai", "gcp-vertex", "vertexai")
+
+
+def _env_secret(name: str) -> bool:
+    return has_usable_secret(os.getenv(name, ""))
+
+
+def _explicit_env_credentials_present(normalized: str) -> bool:
+    """True when the user has pasted an explicit credential env var for *normalized*.
+
+    Falls back to the models.dev ``ProviderDef`` (same shape) for non-registry providers such as
+    openrouter. AWS SDK providers are checked via explicit env vars only — NOT boto3's chain, so
+    ambient EC2 IMDS / SSO profiles never auto-surface."""
+    pconfig = PROVIDER_REGISTRY.get(normalized)
+    if pconfig is None:
+        from arkos_cli.providers import get_provider
+        pconfig = get_provider(normalized)
+        if not pconfig:
+            return False
+    if pconfig.auth_type == "api_key":
+        return any(_env_secret(v) for v in pconfig.api_key_env_vars if v not in _IMPLICIT_ENV_VARS)
+    if pconfig.auth_type == "aws_sdk":
+        return _env_secret("AWS_BEARER_TOKEN_BEDROCK") or (
+            _env_secret("AWS_ACCESS_KEY_ID") and _env_secret("AWS_SECRET_ACCESS_KEY"))
+    return False
+
+
+def _pool_entry_is_explicit(entry: Any) -> bool:
+    """True for pool rows the user created via an explicit Arkos flow (or a still-live env key)."""
+    if not isinstance(entry, dict):
+        return False
+    source = str(entry.get("source") or "").strip().lower()
+    if source.startswith("env:"):
+        env_var = entry.get("source", "").split(":", 1)[1].strip()
+        return bool(env_var and _env_secret(env_var))
+    return bool(source) and (source in _EXPLICIT_POOL_SOURCES or source.startswith("manual:"))
+
+
+def _keyless_provider_has_explicit_config(normalized: str) -> bool:
+    """Vertex / Bedrock count as explicit when Arkos-scoped routing config is present.
+
+    Uses has_explicit_vertex_config(), NOT has_vertex_credentials(): the latter also counts an
+    ambient GOOGLE_APPLICATION_CREDENTIALS path (commonly set for unrelated GCP work). Only
+    Arkos-scoped signals (VERTEX_PROJECT_ID / vertex.project_id / VERTEX_CREDENTIALS_PATH) count
+    here."""
+    if normalized in _VERTEX_PROVIDER_IDS:
+        from agent.vertex_adapter import has_explicit_vertex_config
+        return bool(has_explicit_vertex_config())
+    if normalized == "bedrock":
+        from arkos_cli.config import load_config
+        bedrock_cfg = load_config().get("bedrock")
+        return isinstance(bedrock_cfg, dict) and bool(str(bedrock_cfg.get("region") or "").strip())
+    return False
+
+
+_EXPLICIT_CONFIG_CHECKS: Tuple[Tuple[Callable[[str], bool], bool], ...] = (
+    (_active_provider_is, True), (_config_selects_provider, True),
+    (_explicit_env_credentials_present, False), (_explicit_pool_entry_present, True),
+    (_keyless_provider_has_explicit_config, True))
+
+
+def is_provider_explicitly_configured(provider_id: str) -> bool:
+    """True only if the user explicitly configured this provider: auth.json ``active_provider``,
+    config.yaml ``model.provider`` / MoA slots, a pasted provider env var, a pool entry from a
+    Arkos-initiated flow, or Arkos-scoped routing config for keyless cloud-SDK providers. Ambient
+    borrowed credentials (gh CLI, qwen-cli, ~/.claude/.credentials.json) never count."""
+    normalized = (provider_id or "").strip().lower()
+    for check, best_effort in _EXPLICIT_CONFIG_CHECKS:
+        try:
+            if check(normalized):
+                return True
+        except Exception as exc:
+            if not best_effort:
+                raise
+            logger.debug("explicit-config check %s failed for %s: %s", check.__name__, provider_id, exc)
+    return False
+
+
+def clear_provider_auth(provider_id: Optional[str] = None) -> bool:
+    """Clear auth state for a provider (the active one when *provider_id* is None). Used by
+    ``arkos logout``. Returns True if something was cleared."""
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        target = provider_id or auth_store.get("active_provider")
+        if not target:
+            return False
+        cleared = False
+        for section in ("providers", "credential_pool"):
+            entries = _store_section(auth_store, section)
+            if target in entries:
+                del entries[target]
+                cleared = True
+        if auth_store.get("active_provider") == target:
+            auth_store["active_provider"] = None
+            cleared = True
+        if cleared:
+            _save_auth_store(auth_store)
+        return cleared
+
+
+def deactivate_provider() -> None:
+    """Clear active_provider without deleting credentials: used when the user switches to a non-OAuth
+    provider (OpenRouter, custom) so auto-resolution doesn't keep picking the OAuth provider."""
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        auth_store["active_provider"] = None
+        _save_auth_store(auth_store)
+
+
+
+
+def _get_config_hint_for_unknown_provider(provider_name: str) -> str:
+    """Return a helpful hint string when provider resolution fails."""
+    try:
+        from arkos_cli.config import validate_config_structure
+        issues = validate_config_structure()
+        if not issues:
+            return ""
+        lines = ["Config issue detected — run 'arkos doctor' for full diagnostics:"]
+        for ci in issues:
+            lines.append(f"  [{'ERROR' if ci.severity == 'error' else 'WARNING'}] {ci.message}")
+            if ci.hint and ci.hint.splitlines()[0]:
+                lines.append(f"    → {ci.hint.splitlines()[0]}")
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+
+def _refuse_env_adoption_if_config_corrupt() -> None:
+    """Refuse env-key/pool auto-adoption of openrouter while config.yaml is corrupt.
+
+    A corrupt config loads as ``DEFAULT_CONFIG`` (no ``model.provider``), so the env sniff would
+    silently adopt the PAID openrouter provider over whatever the broken config really names.
+    Fires ONLY on the auto path and clears itself once the file parses again."""
+    try:
+        from arkos_cli.config import get_active_config_parse_failure
+        err = get_active_config_parse_failure()
+        if not err:
+            return
+        path = get_config_path()
+    except Exception as e:
+        logger.debug("Could not probe config parse-failure state: %s", e)
+        return
+    raise AuthError(
+        f"config.yaml at {path} is corrupt ({err}) — refusing to auto-select "
+        f"an inference provider from environment keys. Fix the YAML (a backup "
+        f"was saved next to it) or run arkos setup.",
+        code="corrupt_config")
+
+
+_PROVIDER_ALIASES: Dict[str, str] = {
+    "glm": "zai", "z-ai": "zai", "z.ai": "zai", "zhipu": "zai",
+    "google": "gemini", "google-gemini": "gemini", "google-ai-studio": "gemini",
+    "x-ai": "xai", "x.ai": "xai", "grok": "xai",
+    "xai-oauth": "xai-oauth", "x-ai-oauth": "xai-oauth",
+    "grok-oauth": "xai-oauth", "xai-grok-oauth": "xai-oauth",
+    "kimi": "kimi-coding", "kimi-for-coding": "kimi-coding", "moonshot": "kimi-coding",
+    "kimi-cn": "kimi-coding-cn", "moonshot-cn": "kimi-coding-cn",
+    "step": "stepfun", "stepfun-coding-plan": "stepfun",
+    "arcee-ai": "arcee", "arceeai": "arcee",
+    "gmi-cloud": "gmi", "gmicloud": "gmi",
+    "actual-computer": "actual", "actualcomputer": "actual", "aci": "actual",
+    "minimax-china": "minimax-cn", "minimax_cn": "minimax-cn",
+    "minimax-portal": "minimax-oauth", "minimax-global": "minimax-oauth", "minimax_oauth": "minimax-oauth",
+    "alibaba_coding": "alibaba-coding-plan", "alibaba-coding": "alibaba-coding-plan",
+    "alibaba_coding_plan": "alibaba-coding-plan",
+    "claude": "anthropic", "claude-code": "anthropic",
+    "github": "copilot", "github-copilot": "copilot",
+    "github-models": "copilot", "github-model": "copilot",
+    "github-copilot-acp": "copilot-acp", "copilot-acp-agent": "copilot-acp",
+    "aigateway": "ai-gateway", "vercel": "ai-gateway", "vercel-ai-gateway": "ai-gateway",
+    "opencode": "opencode-zen", "zen": "opencode-zen",
+    "free": "opencode-free", "opencode_free": "opencode-free",
+    "qwen-portal": "qwen-oauth", "qwen-cli": "qwen-oauth", "qwen-oauth": "qwen-oauth",
+    "hf": "huggingface", "hugging-face": "huggingface", "huggingface-hub": "huggingface",
+    "mimo": "xiaomi", "xiaomi-mimo": "xiaomi",
+    "tencent": "tencent-tokenhub", "tokenhub": "tencent-tokenhub",
+    "tencent-cloud": "tencent-tokenhub", "tencentmaas": "tencent-tokenhub",
+    "tokenplan": "tencent-tokenplan", "tencent-lkeap": "tencent-tokenplan",
+    "aws": "bedrock", "aws-bedrock": "bedrock", "amazon-bedrock": "bedrock", "amazon": "bedrock",
+    "go": "opencode-go", "opencode-go-sub": "opencode-go",
+    "kilo": "kilocode", "kilo-code": "kilocode", "kilo-gateway": "kilocode",
+    "lmstudio": "lmstudio", "lm-studio": "lmstudio", "lm_studio": "lmstudio",
+    "ollama": "custom", "ollama_cloud": "ollama-cloud",
+    "vllm": "custom", "llamacpp": "custom",
+    "llama.cpp": "custom", "llama-cpp": "custom"}
+
+
+def _plugin_aliases() -> Dict[str, str]:
+    """``_PROVIDER_ALIASES`` extended with aliases declared in plugins/model-providers/<name>/."""
+    aliases = dict(_PROVIDER_ALIASES)
+    try:
+        from providers import list_providers as _lp
+        for _pp in _lp():
+            for _alias in _pp.aliases:
+                aliases.setdefault(_alias, _pp.name)
+    except Exception:
+        pass
+    return aliases
+
+
+def _scoped_key_env_reader() -> Callable[[str], str]:
+    """Scope-aware key reader for provider auto-detection.
+
+    Under multiplex a secondary profile's keys live only in its secret scope, not os.environ. Catch
+    ONLY ImportError: any other auxiliary_client failure must propagate rather than silently
+    falling back to os.getenv (a traceless fail-open)."""
+    try:
+        from agent.auxiliary_client import _scoped_key_env
+        return _scoped_key_env
+    except ImportError:
+        logger.warning(
+            "agent.auxiliary_client unavailable (%s); provider auto-detection "
+            "will read keys from the process environment only — under "
+            "multiplex, secondary profiles may report 'No LLM provider'.",
+            "import failed")
+        return lambda name: os.getenv(name) or ""
+
+
+def _openrouter_auto_detected(scoped_key_env: Callable[[str], str]) -> bool:
+    """True when an OpenRouter credential exists via env key or the credential pool (a key added via
+    `arkos auth add openrouter` has no env var; without the pool check it is invisible to
+    auto-detection and requests go out with no Authorization header)."""
+    if any(has_usable_secret(scoped_key_env(v)) for v in ("OPENAI_API_KEY", "OPENROUTER_API_KEY")):
+        return True
+    try:
+        from agent.credential_pool import load_pool as _load_pool
+        return bool(_load_pool("openrouter").has_credentials())
+    except Exception as e:
+        logger.debug("Could not check OpenRouter credential pool: %s", e)
+        return False
+
+
+def _logged_in_oauth_active_provider() -> Optional[str]:
+    """auth.json ``active_provider`` when it is a registry provider that reports logged in."""
+    try:
+        _maybe = _load_auth_store().get("active_provider")
+        if _maybe and _maybe in PROVIDER_REGISTRY and get_auth_status(_maybe).get("logged_in"):
+            return _maybe
+    except Exception as e:
+        logger.debug("Could not pre-read active auth provider: %s", e)
+    return None
+
+
+def _config_model_provider() -> Tuple[Any, Optional[str]]:
+    """``(model_cfg, provider)`` from config.yaml when ``model.provider`` names a registry provider.
+
+    The normal chat/gateway path resolves config.provider upstream in resolve_requested_provider();
+    this is the safety net for the lone direct caller (main.py resolve_provider("auto"))."""
+    try:
+        from arkos_cli.config import load_config
+        model_cfg = (load_config() or {}).get("model")
+        provider = model_cfg.get("provider") if isinstance(model_cfg, dict) else None
+        provider = provider.strip().lower() if isinstance(provider, str) else ""
+        return model_cfg, (provider if provider in PROVIDER_REGISTRY else None)
+    except Exception as e:
+        logger.debug("Could not read config.yaml model.provider for auto-resolution: %s", e)
+        return None, None
+
+
+_NO_AUTO_DETECT_PROVIDERS = frozenset({"copilot", "lmstudio"})
+
+
+def _env_key_auto_detected(
+    scoped_key_env: Callable[[str], str], oauth_active: Optional[str]) -> Optional[str]:
+    """First registry api_key provider (registry order) with a usable env key, warning when it
+    preempts a logged-in OAuth provider so a stale key in ~/.arkos/.env never switches silently."""
+    for pid, pconfig in PROVIDER_REGISTRY.items():
+        if pconfig.auth_type != "api_key" or pid in _NO_AUTO_DETECT_PROVIDERS:
+            continue
+        for env_var in pconfig.api_key_env_vars:
+            if has_usable_secret(scoped_key_env(env_var)):
+                if oauth_active and oauth_active != pid:
+                    logger.warning(
+                        "Provider resolved to %r via %s, preempting your "
+                        "logged-in OAuth provider %r. If you meant to use the "
+                        "OAuth login, unset %s or set `model.provider` "
+                        "explicitly.",
+                        pid, env_var, oauth_active, env_var)
+                return pid
+    return None
+
+
+def resolve_provider(
+    requested: Optional[str] = None,
+    *,
+    explicit_api_key: Optional[str] = None,
+    explicit_base_url: Optional[str] = None) -> str:
+    """Determine which inference provider to use.
+
+    "auto" priority (explicit intent beats a stale OAuth login): 1. CLI api_key/base_url ->
+    "openrouter"; 2. config.yaml ``model.provider``; 3. OPENAI_API_KEY / OPENROUTER_API_KEY ->
+    "openrouter"; 4. OpenRouter pool; 5. provider env keys; 6. auth.json ``active_provider``;
+    7. AWS Bedrock chain; 8. AuthError(no_provider_configured).
+
+    1. 3. 4. 5. Provider-specific API keys (GLM, Kimi, MiniMax, ...) -> that provider 7. 8. Error (no
+    provider configured).
+    """
+    normalized = (requested or "auto").strip().lower()
+    normalized = _plugin_aliases().get(normalized, normalized)
+
+    if normalized in ("openrouter", "custom") or normalized in PROVIDER_REGISTRY:
+        return normalized
+    if normalized != "auto":
+        hint = _get_config_hint_for_unknown_provider(normalized)
+        tail = (f"\n\n{hint}" if hint else " Check 'arkos model' for available providers, "
+                "or run 'arkos doctor' to diagnose config issues.")
+        raise AuthError(f"Unknown provider '{normalized}'." + tail, code="invalid_provider")
+
+    if explicit_api_key or explicit_base_url:
+        return "openrouter"
+
+    _model_cfg, cfg_provider = _config_model_provider()
+    if cfg_provider:
+        return cfg_provider
+
+    _scoped_key_env = _scoped_key_env_reader()
+    if _openrouter_auto_detected(_scoped_key_env):
+        _refuse_env_adoption_if_config_corrupt()
+        return "openrouter"
+
+    _oauth_active = _logged_in_oauth_active_provider()
+    env_pid = _env_key_auto_detected(_scoped_key_env, _oauth_active)
+    if env_pid:
+        return env_pid
+
+    if _oauth_active:
+        if isinstance(_model_cfg, dict) and _model_cfg and not _model_cfg.get("provider"):
+            logger.warning(
+                "Provider resolved to logged-in OAuth provider %r because "
+                "config.yaml `model` has no `provider` key. If you meant a "
+                "different provider, set `model.provider` explicitly.",
+                _oauth_active)
+        return _oauth_active
+
+    try:
+        from agent.bedrock_adapter import has_aws_credentials
+        if has_aws_credentials():
+            return "bedrock"
+    except ImportError:
+        pass
+    raise AuthError(
+        "No inference provider configured. Run 'arkos model' to choose a "
+        "provider and model, or set an API key (OPENROUTER_API_KEY, "
+        "OPENAI_API_KEY, etc.) in ~/.arkos/.env.",
+        code="no_provider_configured")
+
+
+
+def _utc_now_z() -> str:
+    """Current UTC time as an ISO-8601 string with a ``Z`` suffix (last_refresh format)."""
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _parse_iso_timestamp(value: Any) -> Optional[float]:
+    text = value.strip() if isinstance(value, str) else ""
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except Exception:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
+
+
+def _is_expiring(expires_at_iso: Any, skew_seconds: int) -> bool:
+    expires_epoch = _parse_iso_timestamp(expires_at_iso)
+    return expires_epoch is None or expires_epoch <= (time.time() + skew_seconds)
+
+
+def _tls_state_from_verify(verify: Any) -> Dict[str, Any]:
+    """Persistable ``tls`` block derived from an httpx ``verify`` value."""
+    return {"insecure": verify is False, "ca_bundle": verify if isinstance(verify, str) else None}
+
+
+def _last_auth_error_marker(
+    provider: str, error: "AuthError", *, reason: str, default_code: Optional[str] = None,
+) -> Dict[str, Any]:
+    """The ``last_auth_error`` record persisted when dead OAuth material is quarantined."""
+    return {
+        "provider": provider, "message": str(error), "reason": reason, "relogin_required": True,
+        "code": error.code if default_code is None else (error.code or default_code),
+        "at": datetime.now(timezone.utc).isoformat()}
+
+
+_FLAT_OAUTH_TOKEN_KEYS = ("access_token", "refresh_token", "expires_at", "expires_in", "obtained_at")
+
+
+def _quarantine_flat_oauth_state(state: Dict[str, Any], provider: str, exc: "AuthError") -> None:
+    """Strip dead tokens from a flat OAuth state after a terminal runtime refresh failure so
+    subsequent calls fail fast without a network retry (mirrors the Portal / xAI / Codex pattern)."""
+    for _k in _FLAT_OAUTH_TOKEN_KEYS:
+        state.pop(_k, None)
+    state["last_auth_error"] = _last_auth_error_marker(
+        provider, exc, reason="runtime_refresh_failure", default_code="refresh_failed")
+
+
+def _coerce_ttl_seconds(expires_in: Any) -> int:
+    try:
+        return max(0, int(expires_in))
+    except Exception:
+        return 0
+
+
+def _optional_base_url(value: Any) -> Optional[str]:
+    cleaned = value.strip().rstrip("/") if isinstance(value, str) else ""
+    return cleaned or None
+
+
+_PORTAL_ALLOWED_HOSTS: FrozenSet[str] = frozenset({
+    "localhost", "127.0.0.1"})
+
+_RESOLVE_TOKEN_CACHE_LOCK = threading.Lock()
+_RESOLVE_TOKEN_CACHE: "tuple[float, str] | None" = None
+_RESOLVE_TOKEN_CACHE_TTL_S = 5.0
+
+
+def _portal_base_url(state: Dict[str, Any]) -> str:
+    """ARKOS_PORTAL_BASE_URL / PORTAL_BASE_URL is the trusted operator override and wins
+    OUTRIGHT, bypassing the host allowlist (which exists to reject an untrusted network-provided
+    value, not one the operator configured). Otherwise the stored/default value, allowlist-gated."""
+    env_portal_override = _portal_env_override()
+    if env_portal_override:
+        return env_portal_override.rstrip("/")
+    portal_base_url = _optional_base_url(state.get("portal_base_url")) or DEFAULT_PORTAL_URL
+    portal_base_url = portal_base_url.rstrip("/")
+    host = urlparse(portal_base_url).hostname
+    if host and host not in _PORTAL_ALLOWED_HOSTS:
+        logger.warning(
+            "auth: ignoring invalid portal_base_url %r (host %r not in allowlist), using default",
+            portal_base_url, host)
+        return DEFAULT_PORTAL_URL
+    return portal_base_url
+
+
+def resolve_portal_access_token(
+    *,
+    timeout_seconds: float = 15.0,
+    insecure: Optional[bool] = None,
+    ca_bundle: Optional[str] = None,
+    refresh_skew_seconds: int = ACCESS_TOKEN_REFRESH_SKEW_SECONDS) -> str:
+    """Resolve a refresh-aware Arkos Portal access token for managed tool gateways."""
+    global _RESOLVE_TOKEN_CACHE
+    memoable = not insecure and ca_bundle is None
+    if memoable:
+        with _RESOLVE_TOKEN_CACHE_LOCK:
+            cached = _RESOLVE_TOKEN_CACHE
+        if cached is not None and (time.monotonic() - cached[0]) < _RESOLVE_TOKEN_CACHE_TTL_S:
+            return cached[1]
+
+    def _memo(token: str) -> str:
+        global _RESOLVE_TOKEN_CACHE
+        if memoable:
+            with _RESOLVE_TOKEN_CACHE_LOCK:
+                _RESOLVE_TOKEN_CACHE = (time.monotonic(), token)
+        return token
+
+    with _provider_state_transaction("portal") as (auth_store, state, state_source_path):
+        if not state:
+            raise _portal_err("Arkos is not logged into Arkos Portal.", relogin=True)
+        portal_base_url = _portal_base_url(state)
+        client_id = str(state.get("client_id") or DEFAULT_PORTAL_CLIENT_ID)
+        verify = _resolve_verify(insecure=insecure, ca_bundle=ca_bundle, auth_state=state)
+        persist = lambda: _save_provider_state_to_source(  # noqa: E731
+            auth_store, "portal", state, state_source_path)
+
+        lock_timeout = max(timeout_seconds + 5.0, AUTH_LOCK_TIMEOUT_SECONDS)
+        with _portal_shared_store_lock(timeout_seconds=lock_timeout):
+            merged_shared = _merge_shared_portal_oauth_state(state)
+            access_token = state.get("access_token")
+            refresh_token = state.get("refresh_token")
+            if not isinstance(access_token, str) or not access_token:
+                raise _portal_err("No access token found for Arkos Portal login.", relogin=True)
+
+            if not _is_expiring(state.get("expires_at"), refresh_skew_seconds):
+                if merged_shared:
+                    persist()
+                return _memo(access_token)
+
+            if not isinstance(refresh_token, str) or not refresh_token:
+                raise _portal_err("Session expired and no refresh token is available.", relogin=True)
+
+            with httpx.Client(timeout=httpx.Timeout(timeout_seconds or 15.0),
+                              headers={"Accept": "application/json"}, verify=verify) as client:
+                refreshed = _refresh_portal_or_quarantine(
+                    client=client, auth_store=auth_store, state=state, portal_base_url=portal_base_url,
+                    client_id=client_id, refresh_token=refresh_token,
+                    reason="managed_access_token_refresh_failure", persist=persist)
+
+            _apply_portal_refreshed_tokens(state, refreshed, refresh_token)
+            state["portal_base_url"] = portal_base_url
+            state["client_id"] = client_id
+            state["tls"] = _tls_state_from_verify(verify)
+            persist()
+            _write_shared_portal_state(state)
+            return _memo(state["access_token"])
+
+
+
+_PORTAL_AUTH_STATUS_CACHE_TTL = 15.0
+_portal_auth_status_cache: Optional[Tuple[float, str, Optional[float], Dict[str, Any]]] = None
+
+_global_auth_store_cache: Optional[Tuple[str, int, Dict[str, Any]]] = None
+
+
+def _auth_file_cache_key() -> Tuple[str, Optional[float]]:
+    auth_file = _auth_file_path()
+    try:
+        return _resolved_key(auth_file), auth_file.stat().st_mtime
+    except Exception:
+        return _resolved_key(auth_file), None
+
+
+def invalidate_portal_auth_status_cache() -> None:
+    """Clear the get_portal_auth_status() memo (for code paths that mutate Portal auth state without
+    touching auth.json, e.g. tests; login/logout invalidate via the mtime check automatically)."""
+    global _portal_auth_status_cache
+    _portal_auth_status_cache = None
+
+
+def get_portal_auth_status() -> Dict[str, Any]:
+    """Status snapshot for Portal auth, memoised ~15s keyed on the auth.json mtime.
+
+    Prefers the auth-store provider state (the live source of truth for refresh) and validates it by
+    resolving runtime credentials so revoked refresh sessions do not show up as a healthy login."""
+    global _portal_auth_status_cache
+    now = time.monotonic()
+    auth_file_key, mtime = _auth_file_cache_key()
+    cached = _portal_auth_status_cache
+    if (cached is not None and cached[1:3] == (auth_file_key, mtime)
+            and (now - cached[0]) < _PORTAL_AUTH_STATUS_CACHE_TTL):
+        return dict(cached[3])
+    status = _compute_portal_auth_status()
+    _portal_auth_status_cache = (now, auth_file_key, mtime, dict(status))
+    return status
+
+
+@dataclass(frozen=True)
+class OAuthProviderFlow:
+    """Per-provider OAuth plumbing, keyed by provider id in ``OAUTH_PROVIDER_FLOWS``.
+
+    Callables are named (strings) and looked up in this module at call time so
+    ``monkeypatch.setattr("arkos_cli.auth.resolve_codex_runtime_credentials", ...)`` applies."""
+    provider_id: str
+    resolve_fn: str
+    status_fn: str
+    terminal_refresh_codes: FrozenSet[str] = frozenset()
+    logout_from_config: bool = False
+
+    def resolve(self, **kwargs: Any) -> Dict[str, Any]:
+        return globals()[self.resolve_fn](**kwargs)
+
+    def status(self) -> Dict[str, Any]:
+        return globals()[self.status_fn]()
+
+    def is_terminal_refresh_error(self, exc: Exception) -> bool:
+        return (
+            isinstance(exc, AuthError) and exc.provider == self.provider_id
+            and exc.code in self.terminal_refresh_codes and bool(exc.relogin_required))
+
+
+_OAUTH_GRANT_DEAD_CODES = frozenset({"invalid_grant", "invalid_token", "refresh_token_reused"})
+
+OAUTH_PROVIDER_FLOWS: Dict[str, OAuthProviderFlow] = {
+    "portal": OAuthProviderFlow(
+        "portal", "resolve_portal_runtime_credentials", "get_portal_auth_status",
+        terminal_refresh_codes=_OAUTH_GRANT_DEAD_CODES, logout_from_config=True),
+    "openai-codex": OAuthProviderFlow(
+        "openai-codex", "resolve_codex_runtime_credentials", "get_codex_auth_status",
+        terminal_refresh_codes=_OAUTH_GRANT_DEAD_CODES | {"codex_refresh_failed", "codex_auth_missing_refresh_token"},
+        logout_from_config=True),
+    "xai-oauth": OAuthProviderFlow(
+        "xai-oauth", "resolve_xai_oauth_runtime_credentials", "get_xai_oauth_auth_status",
+        terminal_refresh_codes=frozenset({"xai_refresh_failed", "xai_auth_missing_refresh_token"}),
+        logout_from_config=True),
+    "qwen-oauth": OAuthProviderFlow(
+        "qwen-oauth", "resolve_qwen_runtime_credentials", "get_qwen_auth_status"),
+    "minimax-oauth": OAuthProviderFlow(
+        "minimax-oauth", "resolve_minimax_oauth_runtime_credentials", "get_minimax_oauth_auth_status"),
+}
+
+
+def _is_terminal_refresh_error(exc: Exception, provider: str) -> bool:
+    """True when retrying the same *provider* refresh token cannot succeed."""
+    return OAUTH_PROVIDER_FLOWS[provider].is_terminal_refresh_error(exc)
+
+
+_is_terminal_portal_refresh_error = partial(_is_terminal_refresh_error, provider="portal")
+_is_terminal_xai_oauth_refresh_error = partial(_is_terminal_refresh_error, provider="xai-oauth")
+_is_terminal_codex_oauth_refresh_error = partial(
+    _is_terminal_refresh_error, provider="openai-codex")
+
+
+def _codex_pool_rate_limited_status() -> Optional[Dict[str, Any]]:
+    rate_limit = _codex_pool_rate_limit_status()
+    if not rate_limit:
+        return None
+    return {
+        "logged_in": True, "auth_store": str(_auth_file_path()),
+        "last_refresh": rate_limit.get("last_refresh"), "auth_mode": "chatgpt",
+        "source": f"pool:{rate_limit.get('label') or 'unknown'}", "rate_limited": True,
+        "error_code": CODEX_RATE_LIMITED_CODE,
+        "error": (rate_limit.get("message")
+                  or "Codex provider quota exhausted; retry after the usage limit resets."),
+        "reset_at": rate_limit.get("reset_at")}
+
+
+def get_codex_auth_status() -> Dict[str, Any]:
+    """Status snapshot for Codex auth (pool first, then legacy provider state)."""
+    return _pool_first_oauth_status(
+        "openai-codex", is_expiring=_codex_access_token_is_expiring, auth_mode="chatgpt",
+        resolve=resolve_codex_runtime_credentials, on_pool_miss=_codex_pool_rate_limited_status)
+
+
+def get_xai_oauth_auth_status() -> Dict[str, Any]:
+    return _pool_first_oauth_status(
+        "xai-oauth", is_expiring=_xai_access_token_is_expiring, auth_mode="oauth_device_code",
+        resolve=resolve_xai_oauth_runtime_credentials)
+
+
+def _provider_env_base_url(pconfig: ProviderConfig) -> str:
+    return os.getenv(pconfig.base_url_env_var, "").strip() if pconfig.base_url_env_var else ""
+
+
+def _provider_is_keyless(provider_id: str) -> bool:
+    """ArkosOverlay keyless flag — the same source the provider catalog and GUI contract tests use."""
+    try:
+        from arkos_cli.providers import ARKOS_OVERLAYS
+        return bool(getattr(ARKOS_OVERLAYS.get(provider_id), "keyless", False))
+    except Exception:
+        return False
+
+
+def get_api_key_provider_status(provider_id: str) -> Dict[str, Any]:
+    """Status snapshot for API-key providers (z.ai, Kimi, MiniMax)."""
+    pconfig = PROVIDER_REGISTRY.get(provider_id)
+    if not pconfig or pconfig.auth_type != "api_key":
+        return {"configured": False}
+    status = {
+        "configured": True, "provider": provider_id, "name": pconfig.name, "key_source": "keyless",
+        "base_url": pconfig.inference_base_url, "logged_in": True}
+    if _provider_is_keyless(provider_id):
+        return status
+
+    api_key, key_source = _resolve_api_key_provider_secret(provider_id, pconfig)
+    env_url = _provider_env_base_url(pconfig)
+    if provider_id in {"kimi-coding", "kimi-coding-cn"}:
+        base_url = _resolve_kimi_base_url(api_key, pconfig.inference_base_url, env_url)
+    else:
+        base_url = env_url or pconfig.inference_base_url
+    actual_local_noauth = False
+    if provider_id == "actual":
+        base_url = normalize_actual_base_url(base_url)
+        actual_local_noauth = not api_key and is_actual_local_base_url(base_url)
+    configured = bool(api_key) or actual_local_noauth
+    status.update(
+        configured=configured, base_url=base_url, logged_in=configured,
+        key_source=key_source or ("local-offline" if actual_local_noauth else ""))
+    return status
+
+
+def _external_process_auth_evidence(provider_id: str) -> tuple[bool, Optional[str]]:
+    """Best-effort POSITIVE evidence ``(verified, source)`` that an external-process CLI is authed.
+
+    False means "not verifiable from here", NOT "signed out" (the Copilot CLI may use an OS keychain
+    Arkos can't read). Deliberately subprocess-free: spawning ``gh auth token`` from status
+    endpoints/pickers re-creates the cold-start stall copilot_auth.py avoids."""
+    if provider_id != "copilot-acp":
+        return False, None
+    try:
+        from arkos_cli.copilot_auth import COPILOT_ENV_VARS, validate_copilot_token
+        for env_var in COPILOT_ENV_VARS:
+            val = os.getenv(env_var, "").strip()
+            if val and validate_copilot_token(val)[0]:
+                return True, f"env: {env_var}"
+    except Exception as exc:
+        logger.debug("copilot-acp env token evidence check failed: %s", exc)
+    try:
+        cli_config = os.path.expanduser("~/.copilot/config.json")
+        if os.path.isfile(cli_config):
+            with open(cli_config, "r", encoding="utf-8", errors="ignore") as fh:
+                raw = "\n".join(
+                    line for line in fh.read().splitlines() if not line.lstrip().startswith("//"))
+            tokens = (json.loads(raw) if raw.strip() else {}).get("copilotTokens")
+            if isinstance(tokens, dict) and any(
+                isinstance(v, str) and v.strip() for v in tokens.values()):
+                return True, "~/.copilot/config.json"
+    except Exception as exc:
+        logger.debug("copilot-acp CLI config evidence check failed: %s", exc)
+    for cred_path in ("~/.config/github-copilot/hosts.json", "~/.config/github-copilot/apps.json"):
+        try:
+            expanded = os.path.expanduser(cred_path)
+            if os.path.isfile(expanded) and os.path.getsize(expanded) > 2:
+                return True, cred_path
+        except OSError:
+            continue
+    return False, None
+
+
+def _external_process_spec(
+    pconfig: ProviderConfig) -> tuple[str, List[str], str, Optional[str], tuple[str, ...]]:
+    """``(command, args, base_url, resolved_command, command_env_vars)`` for an ACP provider.
+
+    Launch details come from the provider's own profile (copilot-acp: ARKOS_COPILOT_ACP_COMMAND /
+    COPILOT_CLI_PATH / ARKOS_COPILOT_ACP_ARGS), so out-of-tree providers describe their binary."""
+    base_url = _provider_env_base_url(pconfig) or pconfig.inference_base_url
+    try:
+        from providers import get_provider_profile as _get_provider_profile
+        profile = _get_provider_profile(pconfig.id)
+    except Exception:
+        profile = None
+    command_env_vars = tuple(getattr(profile, "process_command_env_vars", ()) or ())
+    args_env_var = str(getattr(profile, "process_args_env_var", "") or "")
+    command = (next((v for v in (os.getenv(var, "").strip() for var in command_env_vars) if v), "")
+               or str(getattr(profile, "process_command", "") or ""))
+    raw_args = os.getenv(args_env_var, "").strip() if args_env_var else ""
+    args = shlex.split(raw_args) if raw_args else list(getattr(profile, "process_args", ()) or [])
+    return command, args, base_url, shutil.which(command) if command else None, command_env_vars
+
+
+def get_external_process_provider_status(provider_id: str) -> Dict[str, Any]:
+    """Status snapshot for providers that run a local subprocess.
+
+    ``configured``/``logged_in`` are structural (executable resolves or TCP endpoint set): the
+    subprocess owns real auth. ``auth_verified``/``auth_source`` carry positive evidence only."""
+    pconfig = PROVIDER_REGISTRY.get(provider_id)
+    if not pconfig or pconfig.auth_type != "external_process":
+        return {"configured": False}
+    command, args, base_url, resolved_command, _ = _external_process_spec(pconfig)
+    available = bool(resolved_command or base_url.startswith("acp+tcp://"))
+    auth_verified, auth_source = _external_process_auth_evidence(provider_id)
+    return {
+        "configured": available, "provider": provider_id, "name": pconfig.name, "command": command,
+        "args": args, "resolved_command": resolved_command, "base_url": base_url,
+        "logged_in": available, "auth_verified": auth_verified, "auth_source": auth_source}
+
+
+def _get_aws_sdk_auth_status(target: str) -> Dict[str, Any]:
+    """AWS SDK providers (Bedrock) — check via boto3 credential chain."""
+    try:
+        from agent.bedrock_adapter import has_aws_credentials
+        return {"logged_in": has_aws_credentials(), "provider": target}
+    except ImportError:
+        return {"logged_in": False, "provider": target, "error": "boto3 not installed"}
+
+
+def get_auth_status(provider_id: Optional[str] = None) -> Dict[str, Any]:
+    """Generic auth status dispatcher: bespoke builders (``OAUTH_PROVIDER_FLOWS`` plus Spotify /
+    Azure Foundry) first, then the registry ``auth_type`` so a whole provider class (e.g. every
+    external-process ACP backend) gets a real status. Builders are looked up by NAME at call time so
+    tests that patch ``arkos_cli.auth.get_*_auth_status`` still apply."""
+    target = (provider_id or get_active_provider() or "").strip().lower()
+    if not target:
+        return {"logged_in": False}
+    status_fn_name = _BESPOKE_STATUS_FUNCTIONS.get(target)
+    if status_fn_name:
+        return globals()[status_fn_name]()
+    pconfig = PROVIDER_REGISTRY.get(target)
+    if pconfig and pconfig.auth_type in _STATUS_BY_AUTH_TYPE:
+        return globals()[_STATUS_BY_AUTH_TYPE[pconfig.auth_type]](target)
+    return {"logged_in": False}
+
+
+_BESPOKE_STATUS_FUNCTIONS: Dict[str, str] = {
+    **{pid: flow.status_fn for pid, flow in OAUTH_PROVIDER_FLOWS.items()},
+    "spotify": "get_spotify_auth_status",
+    "azure-foundry": "_get_azure_foundry_auth_status"}
+_STATUS_BY_AUTH_TYPE: Dict[str, str] = {
+    "external_process": "get_external_process_provider_status",
+    "api_key": "get_api_key_provider_status",
+    "aws_sdk": "_get_aws_sdk_auth_status"}
+
+
+def _get_azure_foundry_auth_status() -> Dict[str, Any]:
+    """Structural auth status for Azure Foundry.
+
+    ``entra_id``: ``azure-identity`` importable — never invokes the Entra credential chain (keeps
+    CLI startup flat; ``arkos doctor`` runs the live probe). ``api_key`` (default): usable
+    ``AZURE_FOUNDRY_API_KEY``."""
+    info: Dict[str, Any] = {"provider": "azure-foundry"}
+    try:
+        from arkos_cli.config import load_config, get_env_value_prefer_dotenv
+        cfg = load_config()
+    except Exception:
+        cfg = {}
+    model_cfg = cfg.get("model") if isinstance(cfg, dict) else None
+    if not isinstance(model_cfg, dict):
+        model_cfg = {}
+    auth_mode = str(model_cfg.get("auth_mode") or "api_key").strip().lower() or "api_key"
+    info["auth_mode"] = auth_mode
+    info["base_url"] = str(model_cfg.get("base_url") or "").strip()
+
+    if auth_mode == "entra_id":
+        try:
+            from agent.azure_identity_adapter import (
+                EntraIdentityConfig, SCOPE_AI_AZURE_DEFAULT, has_azure_identity_installed)
+            installed = has_azure_identity_installed()
+            entra_cfg = model_cfg["entra"] if isinstance(model_cfg.get("entra"), dict) else {}
+            identity_config = EntraIdentityConfig.from_dict(entra_cfg, default_scope=SCOPE_AI_AZURE_DEFAULT)
+            info.update(
+                azure_identity_installed=installed, scope=identity_config.scope, credential_probe="not_run",
+                credential_verified=False, logged_in=bool(installed),
+                hint=(
+                    "azure-identity is installed; live credential validation "
+                    "is skipped here. Run `arkos doctor` to verify token acquisition."
+                ) if installed else (
+                    "azure-identity not installed. Install with: "
+                    "pip install azure-identity  (or rely on Arkos' "
+                    "lazy-install at first use)."))
+        except Exception as exc:
+            info["logged_in"] = False
+            info["error"] = f"azure-identity check failed: {exc}"
+        return info
+
+    try:
+        api_key = get_env_value_prefer_dotenv("AZURE_FOUNDRY_API_KEY") or ""
+    except Exception:
+        api_key = os.getenv("AZURE_FOUNDRY_API_KEY", "")
+    info["logged_in"] = has_usable_secret(api_key)
+    return info
+
+
+def _default_api_key_base_url(api_key: str, default: str, env_url: str) -> str:
+    return env_url.rstrip("/") if env_url else default
+
+
+def _copilot_runtime_base_url(api_key: str, default: str, env_url: str) -> str:
+    """Copilot's API base comes from the token-exchange response (endpoints.api, proxy-ep fallback),
+    authoritative for Enterprise / proxied accounts; falls back to the registry default."""
+    base_url = _default_api_key_base_url(api_key, default, env_url)
+    try:
+        from arkos_cli.copilot_auth import resolve_copilot_token, get_copilot_api_token
+        raw_token, _ = resolve_copilot_token()
+        if raw_token:
+            resolved = (get_copilot_api_token(raw_token)[1] or "").strip()
+            if resolved:
+                base_url = resolved
+    except Exception as exc:
+        logger.debug("Copilot base URL resolution fell back to default: %s", exc)
+    return base_url
+
+
+_API_KEY_BASE_URL_RESOLVERS: Dict[str, Callable[[str, str, str], str]] = {
+    "kimi-coding": _resolve_kimi_base_url,
+    "kimi-coding-cn": _resolve_kimi_base_url,
+    "zai": _resolve_zai_base_url,
+    "copilot": _copilot_runtime_base_url,
+    "lmstudio": lambda *a: _normalize_lmstudio_runtime_base_url(_default_api_key_base_url(*a)),
+    "actual": lambda *a: normalize_actual_base_url(_default_api_key_base_url(*a))}
+
+
+def resolve_api_key_provider_credentials(provider_id: str) -> Dict[str, Any]:
+    """Resolve API key and base URL for an API-key provider."""
+    pconfig = PROVIDER_REGISTRY.get(provider_id)
+    if not pconfig or pconfig.auth_type != "api_key":
+        raise AuthError(
+            f"Provider '{provider_id}' is not an API-key provider.",
+            provider=provider_id, code="invalid_provider")
+
+    api_key, key_source = _resolve_api_key_provider_secret(provider_id, pconfig)
+    if not api_key and provider_id == "lmstudio":
+        api_key = LMSTUDIO_NOAUTH_PLACEHOLDER
+        key_source = key_source or "default"
+
+    env_url = _provider_env_base_url(pconfig)
+    resolve_url = _API_KEY_BASE_URL_RESOLVERS.get(provider_id, _default_api_key_base_url)
+    base_url = resolve_url(api_key, pconfig.inference_base_url, env_url)
+    if not _nonempty_str(base_url):
+        base_url = pconfig.inference_base_url
+
+    if not api_key and provider_id == "actual" and is_actual_local_base_url(base_url):
+        api_key = ACTUAL_LOCAL_NOAUTH_PLACEHOLDER
+        key_source = key_source or "local-offline"
+    return {
+        "provider": provider_id, "api_key": api_key, "base_url": base_url.rstrip("/"),
+        "source": key_source or "default"}
+
+
+def resolve_external_process_provider_credentials(provider_id: str) -> Dict[str, Any]:
+    """Resolve runtime details for local subprocess-backed providers."""
+    pconfig = PROVIDER_REGISTRY.get(provider_id)
+    if not pconfig or pconfig.auth_type != "external_process":
+        raise AuthError(
+            f"Provider '{provider_id}' is not an external-process provider.",
+            provider=provider_id, code="invalid_provider")
+
+    command, args, base_url, resolved_command, command_env_vars = _external_process_spec(pconfig)
+    if not resolved_command and not base_url.startswith("acp+tcp://"):
+        _hint = " or set " + "/".join(command_env_vars) if command_env_vars else ""
+        raise AuthError(
+            f"Could not find the '{provider_id}' CLI command "
+            f"'{command or '(none configured)'}'. Install it{_hint}.",
+            provider=provider_id,
+            code="missing_external_process_cli")
+    return {
+        "provider": provider_id, "api_key": pconfig.id or provider_id,
+        "base_url": base_url.rstrip("/"), "command": resolved_command or command, "args": args,
+        "source": "process"}
+
+
+
+def _update_config_for_provider(
+    provider_id: str, inference_base_url: str, default_model: Optional[str] = None) -> Path:
+    """Update config.yaml and auth.json to reflect the active provider.
+
+    *default_model*, when given, is written as ``model.default`` in the same step so the gateway
+    (which re-reads config per message) can't pick up the new provider before model selection
+    finishes and send an OpenRouter-style ``vendor/model`` name to a direct API."""
+    with _auth_store_lock():
+        auth_store = _load_auth_store()
+        auth_store["active_provider"] = provider_id
+        _save_auth_store(auth_store)
+
+    config_path = get_config_path()
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    require_readable_config_before_write(config_path)
+    config = read_raw_config()
+    current_model = config.get("model")
+    if isinstance(current_model, dict):
+        model_cfg = dict(current_model)
+    else:
+        model_cfg = {"default": current_model.strip()} if _nonempty_str(current_model) else {}
+    model_cfg["provider"] = provider_id
+    if inference_base_url and inference_base_url.strip():
+        model_cfg["base_url"] = inference_base_url.rstrip("/")
+    else:
+        model_cfg.pop("base_url", None)
+
+    from arkos_cli.config import clear_model_endpoint_credentials
+    clear_model_endpoint_credentials(model_cfg)
+
+    if default_model:
+        cur_default = model_cfg.get("default", "")
+        if not cur_default or "/" in cur_default:
+            model_cfg["default"] = default_model
+    config["model"] = model_cfg
+    atomic_yaml_write(config_path, config, sort_keys=False)
+    return config_path
+
+
+def _get_config_provider() -> Optional[str]:
+    """Return model.provider from config.yaml, normalized, if present."""
+    try:
+        config = read_raw_config()
+    except Exception:
+        return None
+    model = config.get("model") if config else None
+    provider = model.get("provider") if isinstance(model, dict) else None
+    return (provider.strip().lower() or None) if isinstance(provider, str) else None
+
+
+def _should_reset_config_provider_on_logout(provider_id: Optional[str]) -> bool:
+    """True when logout should reset model.provider (a registry provider config.yaml selects)."""
+    normalized = (provider_id or "").strip().lower()
+    return normalized in PROVIDER_REGISTRY and _get_config_provider() == normalized
+
+
+def _logout_default_provider_from_config() -> Optional[str]:
+    """Fallback logout target when auth.json has no active provider but config.yaml still selects an
+    OAuth provider (e.g. openai-codex) — otherwise logout said "No provider is currently logged in"
+    and never reset model.provider."""
+    provider = _get_config_provider()
+    flow = OAUTH_PROVIDER_FLOWS.get(provider or "")
+    return provider if flow and flow.logout_from_config else None
+
+
+def _reset_config_provider() -> Path:
+    """Reset config.yaml provider back to auto after logout."""
+    config_path = get_config_path()
+    if not config_path.exists():
+        return config_path
+    require_readable_config_before_write(config_path)
+    config = read_raw_config()
+    if not config:
+        return config_path
+    model = config.get("model")
+    if isinstance(model, dict):
+        model["provider"] = "auto"
+        if "base_url" in model:
+            model["base_url"] = OPENROUTER_BASE_URL
+    atomic_yaml_write(config_path, config, sort_keys=False)
+    return config_path
+
+
+def login_command(args) -> None:
+    """Deprecated: use 'arkos model' or 'arkos setup' instead."""
+    print("The 'arkos login' command has been removed.\nUse 'arkos auth' to manage credentials,\n"
+          "'arkos model' to select a provider, or 'arkos setup' for full setup.")
+    raise SystemExit(0)
+
+
+def get_minimax_oauth_auth_status() -> Dict[str, Any]:
+    """Return auth status dict for MiniMax OAuth provider."""
+    state = get_provider_auth_state("minimax-oauth")
+    if not state or not state.get("access_token"):
+        return {"logged_in": False, "provider": "minimax-oauth"}
+    try:
+        token_valid = datetime.fromisoformat(state.get("expires_at", "")).timestamp() > time.time()
+    except Exception:
+        token_valid = True
+    return {
+        "logged_in": token_valid, "provider": "minimax-oauth",
+        "region": state.get("region", "global"), "expires_at": state.get("expires_at")}
+
+
+def logout_command(args) -> None:
+    """Clear auth state for a provider."""
+    provider_id = getattr(args, "provider", None)
+    if provider_id and not is_known_auth_provider(provider_id):
+        print(f"Unknown provider: {provider_id}")
+        raise SystemExit(1)
+    target = provider_id or get_active_provider() or _logout_default_provider_from_config()
+    if not target:
+        print("No provider is currently logged in.")
+        return
+    should_reset_config = _should_reset_config_provider_on_logout(target)
+    provider_name = get_auth_provider_display_name(target)
+    if not (clear_provider_auth(target) or should_reset_config):
+        print(f"No auth state found for {provider_name}.")
+        return
+    if should_reset_config:
+        _reset_config_provider()
+    print(f"Logged out of {provider_name}.")
+    if not should_reset_config:
+        print("Model provider configuration was unchanged.")
+    elif os.getenv("OPENROUTER_API_KEY"):
+        print("Arkos will use OpenRouter for inference.")
+    else:
+        print("Run `arkos model` or configure an API key to use Arkos.")
+
+
+from http.server import BaseHTTPRequestHandler  # noqa: F401,E402
+from http.server import HTTPServer  # noqa: F401,E402
+from typing import TYPE_CHECKING  # noqa: F401,E402
+import base64  # noqa: F401,E402
+import hashlib  # noqa: F401,E402
+from urllib.parse import parse_qs  # noqa: F401,E402
+import ssl  # noqa: F401,E402
+import subprocess  # noqa: F401,E402
+import sys  # noqa: F401,E402
+from urllib.parse import urlencode  # noqa: F401,E402
+
+
+_PLUGIN_COMPAT_LAZY = {
+    'CODEX_OAUTH_USER_AGENT': ('arkos_cli.auth_constants', 'CODEX_OAUTH_USER_AGENT'),
+    'CODEX_QUOTA_PROBE_MIN_INTERVAL_SECONDS': ('arkos_cli.auth_codex', 'CODEX_QUOTA_PROBE_MIN_INTERVAL_SECONDS'),
+    'DEFAULT_SPOTIFY_REDIRECT_URI': ('arkos_cli.auth_constants', 'DEFAULT_SPOTIFY_REDIRECT_URI'),
+    'DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS': ('arkos_cli.auth_constants', 'DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS'),
+    'MINIMAX_OAUTH_GRANT_TYPE': ('arkos_cli.auth_constants', 'MINIMAX_OAUTH_GRANT_TYPE'),
+    'PORTAL_INFERENCE_INVOKE_SCOPE': ('arkos_cli.auth_constants', 'PORTAL_INFERENCE_INVOKE_SCOPE'),
+    'PORTAL_SHARED_STORE_FILENAME': ('arkos_cli.auth_portal', 'PORTAL_SHARED_STORE_FILENAME'),
+    'OAUTH_OVER_SSH_DOCS_URL': ('arkos_cli.auth_constants', 'OAUTH_OVER_SSH_DOCS_URL'),
+    'QWEN_OAUTH_CLIENT_ID': ('arkos_cli.auth_constants', 'QWEN_OAUTH_CLIENT_ID'),
+    'QWEN_OAUTH_TOKEN_URL': ('arkos_cli.auth_constants', 'QWEN_OAUTH_TOKEN_URL'),
+    'SINGLE_USE_OAUTH_SINGLETON_FILES': ('arkos_cli.auth_oauth_grants', 'SINGLE_USE_OAUTH_SINGLETON_FILES'),
+    'SPOTIFY_ACCESS_TOKEN_REFRESH_SKEW_SECONDS': ('arkos_cli.auth_constants', 'SPOTIFY_ACCESS_TOKEN_REFRESH_SKEW_SECONDS'),
+    'SPOTIFY_DASHBOARD_URL': ('arkos_cli.auth_constants', 'SPOTIFY_DASHBOARD_URL'),
+    'XAI_OAUTH_DEVICE_CODE_URL': ('arkos_cli.auth_constants', 'XAI_OAUTH_DEVICE_CODE_URL'),
+    'XAI_OAUTH_DISCOVERY_URL': ('arkos_cli.auth_constants', 'XAI_OAUTH_DISCOVERY_URL'),
+    'XAI_OAUTH_ISSUER': ('arkos_cli.auth_constants', 'XAI_OAUTH_ISSUER'),
+    'refresh_portal_oauth_pure': ('arkos_cli.auth_portal', 'refresh_portal_oauth_pure'),
+}
+
+
+def __getattr__(name):
+    target = _PLUGIN_COMPAT_LAZY.get(name)
+    if target is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import importlib
+    from arkos_cli.plugin_compat import warn_once
+    warn_once(__name__, name, *target)
+    return getattr(importlib.import_module(target[0]), target[1])

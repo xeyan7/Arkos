@@ -1,0 +1,44 @@
+"""Per-attempt recovery bookkeeping (``TurnRetryState``) for the conversation turn loop.
+Dependency-free so it imports without a cycle."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass
+class TurnRetryState:
+    """One-shot recovery guards + restart signals for a single API-call attempt.
+
+    A fresh instance is created per ``api_call_count`` iteration; each guard fires at
+    most once, and ``restart_with_*`` signals tell the loop to rebuild and retry.
+    Loop-control (``retry_count``, ``max_retries``) stays as plain loop locals."""
+
+    codex_auth_retry_attempted: bool = False
+    anthropic_auth_retry_attempted: bool = False
+    portal_auth_retry_attempted: bool = False
+    portal_paid_entitlement_refresh_attempted: bool = False
+    copilot_auth_retry_attempted: bool = False
+    copilot_stale_cred_retry_attempted: bool = False
+    vertex_auth_retry_attempted: bool = False
+
+    thinking_sig_retry_attempted: bool = False
+    invalid_encrypted_content_retry_attempted: bool = False
+    native_compaction_reject_retry_attempted: bool = False
+    image_shrink_retry_attempted: bool = False
+    multimodal_tool_content_retry_attempted: bool = False
+    reasoning_mandatory_retry_attempted: bool = False
+    oauth_1m_beta_retry_attempted: bool = False
+    llama_cpp_grammar_retry_attempted: bool = False
+
+    primary_recovery_attempted: bool = False
+    has_retried_429: bool = False
+    auth_failover_attempted: bool = False
+
+    restart_with_compressed_messages: bool = False
+    restart_with_length_continuation: bool = False
+    restart_with_rebuilt_messages: bool = False
+    restart_with_redirected_messages: bool = False
+
+
+from dataclasses import fields  # noqa: F401,E402

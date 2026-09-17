@@ -1,0 +1,293 @@
+"""Provider profile base class.
+
+A ProviderProfile declares everything about an inference provider in one place:
+auth, endpoints, client quirks, request-time quirks. The transport reads this
+instead of receiving 20+ boolean flags.
+
+Provider profiles are DECLARATIVE — they describe the provider's behavior.
+They do NOT own client construction, credential rotation, or streaming.
+Those stay on AIAgent.
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+OMIT_TEMPERATURE = object()
+
+
+def _profile_user_agent() -> str:
+    """Return a ``arkos-cli/<version>`` UA string, with a stable fallback.
+
+    Used by ``ProviderProfile.fetch_models`` so the catalog probe is not
+    served the default ``Python-urllib/<ver>`` UA — some providers
+    (OpenCode Zen, etc.) sit behind a WAF that returns 403 for that.
+    """
+    try:
+        from arkos_cli import __version__ as _ver
+        return f"arkos-cli/{_ver}"
+    except Exception:
+        return "arkos-cli"
+
+
+@dataclass
+class ProviderProfile:
+    """Base provider profile — subclass or instantiate with overrides."""
+
+    name: str
+    api_mode: str = "chat_completions"
+    aliases: tuple = ()
+
+    display_name: str = ""
+    description: str = ""
+    signup_url: str = ""
+
+    env_vars: tuple = ()
+    base_url: str = ""
+    models_url: str = ""
+    auth_type: str = "api_key"
+    supports_health_check: bool = True
+
+    supports_vision: bool = False
+
+    supports_vision_tool_messages: bool = True
+
+    supports_prompt_cache_key: bool = False
+
+    process_command: str = ""
+    process_args: tuple = ()
+    process_command_env_vars: tuple = ()
+    process_args_env_var: str = ""
+
+    fallback_models: tuple = ()
+
+    hostname: str = ""
+
+    default_headers: dict[str, str] = field(default_factory=dict)
+
+    fixed_temperature: Any = None
+    default_max_tokens: int | None = None
+    default_aux_model: str = (
+        ""
+    )
+
+
+    def resolve_aux_model(self, *, vision: bool = False) -> str:
+        """Return a LIVE cheap-model id for auxiliary tasks, or "".
+
+        ``default_aux_model`` is a hardcoded id in source, so it rots: when the
+        provider retires that model every auxiliary call spends a round-trip
+        404ing before the retry net catches it. Providers that publish a
+        machine-readable recommendation should override this and query it, so
+        the cheap tier tracks the upstream catalog instead of a constant a human
+        has to remember to bump.
+
+        Contract: cheap to call (implementations must cache — this runs on
+        client-resolution paths), never raises, and returns "" when it has no
+        answer so the caller falls through to ``default_aux_model``.
+        """
+        return ""
+
+    def get_hostname(self) -> str:
+        """Return the provider's base hostname for URL-based detection.
+
+        Uses self.hostname if set explicitly, otherwise derives it from base_url.
+        e.g. 'https://api.gmi-serving.com/v1' → 'api.gmi-serving.com'
+        """
+        if self.hostname:
+            return self.hostname
+        if self.base_url:
+            from urllib.parse import urlparse
+            return urlparse(self.base_url).hostname or ""
+        return ""
+
+    def prepare_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Provider-specific message preprocessing.
+
+        Called AFTER codex field sanitization, BEFORE developer role swap.
+        Default: pass-through.
+        """
+        return messages
+
+    def build_extra_body(
+        self, *, session_id: str | None = None, **context: Any
+    ) -> dict[str, Any]:
+        """Provider-specific extra_body fields.
+
+        Merged into the API kwargs extra_body. Default: empty dict.
+        """
+        return {}
+
+    def build_api_kwargs_extras(
+        self,
+        *,
+        reasoning_config: dict | None = None,
+        **context: Any,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Provider-specific kwargs split between extra_body and top-level api_kwargs.
+
+        Returns (extra_body_additions, top_level_kwargs).
+        The transport merges extra_body_additions into extra_body, and
+        top_level_kwargs directly into api_kwargs.
+
+        This split exists because some providers put reasoning config in
+        extra_body (OpenRouter: extra_body.reasoning) while others put it
+        as top-level api_kwargs (Kimi: api_kwargs.reasoning_effort).
+
+        Default: ({}, {}).
+        """
+        return {}, {}
+
+    def default_vision_model(self) -> str | None:
+        """Return a default vision model id for this provider, or None.
+
+        Overrideable hook for providers that discover their vision default at
+        runtime (e.g. from a live catalog) rather than pinning one in code.
+        Keeps provider-specific vision discovery inside the provider's plugin
+        instead of a name-check branch in shared vision resolution.
+
+        Default: None (no provider-specific vision model — the caller falls
+        back to the user's chat model or the aggregator chain).
+        """
+        return None
+
+    def get_max_tokens(self, model: str | None) -> int | None:
+        """Return the default max_tokens cap for *model*.
+
+        Overrideable hook for providers that need per-model output caps —
+        e.g. a relay that fronts several upstream backends, each with a
+        different completion-token limit. The transport calls this when
+        the user hasn't set an explicit max_tokens.
+
+        Default: return self.default_max_tokens (the static profile field),
+        ignoring the model name. Override in a subclass to vary the cap
+        per-model.
+        """
+        return self.default_max_tokens
+
+    def supported_reasoning_efforts(
+        self, model: str | None
+    ) -> tuple[str, ...] | None:
+        """Declared reasoning-effort vocabulary for *model* on this provider.
+
+        Overrideable hook for providers whose gateway validates
+        ``reasoning.effort`` per model instead of ignoring or clamping
+        unknown levels server-side (Ramp Router derives this from its live
+        ``/v1/models`` catalog). The Responses transport consults it before
+        falling back to its built-in per-backend vocabularies; it is the
+        profile-declared analog of the OpenRouter catalog clamp on the
+        chat-completions path (``openrouter_model_reasoning_capabilities``).
+
+        Tri-state contract:
+          - ``None`` — unknown/undeclared: the transport keeps its default
+            vocabulary for the wire (this base implementation).
+          - ``()`` — the model accepts NO reasoning parameters at all; the
+            transport must omit reasoning fields entirely (some gateways
+            return HTTP 400 rather than ignoring them).
+          - non-empty tuple — clamp the requested effort onto these levels
+            (``agent.reasoning_effort.clamp_effort`` semantics: nearest
+            weaker supported level, never escalate).
+
+        Implementations are called on the per-request hot path and must not
+        block on network I/O — answer from a cache and return None while
+        cold.
+        """
+        return None
+
+    def create_client(self, **client_kwargs: Any) -> Any | None:
+        """Return a provider-specific client, or ``None`` for the standard one.
+
+        Most providers speak OpenAI-compatible HTTP and want the shared
+        ``openai.OpenAI`` client the core builds — they inherit this and return
+        ``None``. A provider whose wire protocol is not HTTP at all (the ACP
+        subprocess shims) or which needs a native SDK overrides this and
+        returns its own client object.
+
+        ``client_kwargs`` is the same mapping the core would have passed to
+        ``openai.OpenAI`` (``api_key``, ``base_url``, ``command``, ``args``,
+        timeouts, headers…). Unknown keys must be tolerated: the core adds to
+        this mapping over time, so an override should accept ``**kwargs`` and
+        pick what it needs rather than enumerate.
+
+        Returning ``None`` (the default) is always safe — the caller falls
+        through to its existing construction path.
+
+        This is the hook that lets a provider ship *outside* this tree: with it,
+        a profile registered from ``~/.arkos/plugins/model-providers/`` or a
+        pip entry point can supply its own transport without any core edit. See
+        ``plugins/model-providers/copilot-acp/`` for the in-tree example.
+        """
+        return None
+
+    def fetch_models(
+        self,
+        *,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        timeout: float = 8.0,
+    ) -> list[str] | None:
+        """Fetch the live model list from the provider's models endpoint.
+
+        Returns a list of model ID strings, or None if the fetch failed or
+        the provider does not support live model listing.
+
+        Resolution order for the endpoint URL:
+          1. base_url + "/models", but ONLY when the caller passed a base_url
+             that differs from this profile's default (a user-configured
+             model.base_url pointing at a proxy/custom endpoint). Callers
+             pass base_url unconditionally — falling back to the profile
+             default when the user configured nothing — so equality with
+             self.base_url means "not customised" and must not shadow
+             models_url.
+          2. self.models_url  (explicit override — use when the models
+             endpoint differs from the inference base URL, e.g. OpenRouter
+             exposes a public catalog at /api/v1/models while inference is
+             at /api/v1)
+          3. self.base_url + "/models"  (standard OpenAI-compat fallback)
+
+        The default implementation sends Bearer auth when api_key is given
+        and forwards self.default_headers. Override to customise auth, path,
+        response shape, or to return None for providers with no REST catalog.
+
+        Callers must always fall back to the static _PROVIDER_MODELS list
+        when this returns None.
+        """
+        caller_base = (base_url or "").strip()
+        effective_base = caller_base or self.base_url
+        custom_base = bool(caller_base) and (
+            caller_base.rstrip("/") != (self.base_url or "").rstrip("/")
+        )
+        if custom_base:
+            url = caller_base.rstrip("/") + "/models"
+        else:
+            url = (self.models_url or "").strip()
+            if not url:
+                if not effective_base:
+                    return None
+                url = effective_base.rstrip("/") + "/models"
+
+        import json
+        import urllib.request
+
+        from arkos_cli.urllib_security import open_credentialed_url
+
+        req = urllib.request.Request(url)
+        if api_key:
+            req.add_header("Authorization", f"Bearer {api_key}")
+        req.add_header("Accept", "application/json")
+        req.add_header("User-Agent", _profile_user_agent())
+        for k, v in self.default_headers.items():
+            req.add_header(k, v)
+
+        try:
+            with open_credentialed_url(req, timeout=timeout) as resp:
+                data = json.loads(resp.read().decode())
+            items = data if isinstance(data, list) else data.get("data", [])
+            return [m["id"] for m in items if isinstance(m, dict) and "id" in m]
+        except Exception as exc:
+            logger.debug("fetch_models(%s): %s", self.name, exc)
+            return None

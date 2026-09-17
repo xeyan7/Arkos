@@ -1,0 +1,476 @@
+"""Static provider/model catalog tables (data only — no network).
+
+Curated per-provider model lists, the canonical provider registry, display groups and alias
+maps. Split out of ``arkos_cli.models``.
+"""
+
+from __future__ import annotations
+
+from typing import NamedTuple
+
+
+_OPENROUTER_DESCRIPTIONS = {
+    "anthropic/claude-opus-5-fast": "2x price, higher output speed",
+    "anthropic/claude-opus-4.8-fast": "2x price, higher output speed",
+    "deepseek/deepseek-v4-pro-0813": "dated snapshot of v4-pro",
+    "deepseek/deepseek-v4-flash-0731": "dated snapshot of v4-flash",
+    "moonshotai/kimi-k3": "recommended",
+    "z-ai/glm-5.2": "default",
+    "openrouter/pareto-code": "auto-routes to cheapest coder meeting openrouter.min_coding_score",
+    "openai/gpt-6-astra-fast": "2x price, priority tier",
+    "openai/gpt-6-astra-flex": "0.5x price, flex tier",
+    "openai/gpt-6-astra-pro-fast": "2x price, priority tier",
+    "openai/gpt-6-astra-pro-flex": "0.5x price, flex tier",
+}
+OPENROUTER_MODELS: list[tuple[str, str]] = [
+    (mid, _OPENROUTER_DESCRIPTIONS.get(mid, "free" if mid.endswith(":free") else ""))
+    for mid in (
+        "anthropic/claude-fable-5.1", "anthropic/claude-fable-5", "anthropic/claude-opus-5",
+        "anthropic/claude-opus-5-fast", "anthropic/claude-opus-4.8", "anthropic/claude-opus-4.8-fast",
+        "anthropic/claude-sonnet-5", "anthropic/claude-haiku-4.5", "openai/gpt-6-astra", "openai/gpt-6-astra-fast",
+        "openai/gpt-6-astra-flex", "openai/gpt-6-astra-pro", "openai/gpt-6-astra-pro-fast", "openai/gpt-6-astra-pro-flex",
+        "openai/gpt-5.6-sol", "openai/gpt-5.6-sol-pro",
+        "openai/gpt-5.6-terra", "openai/gpt-5.6-terra-pro", "openai/gpt-5.6-luna", "openai/gpt-5.6-luna-pro",
+        "openai/gpt-5.5", "openai/gpt-5.5-pro", "openai/gpt-5.4-mini", "google/gemini-3.1-pro-preview",
+        "google/gemini-3.8-flash", "google/gemini-3.7-flash", "x-ai/grok-4.6", "deepseek/deepseek-v4-pro",
+        "deepseek/deepseek-v4-pro-0813", "deepseek/deepseek-v4-flash-0731",
+        "qwen/qwen3.8-max-0902", "qwen/qwen3.8-flash", "moonshotai/kimi-k3", "minimax/minimax-m3", "z-ai/glm-5.3",
+        "z-ai/glm-5.3-flash", "z-ai/glm-5.2", "xiaomi/mimo-v2.5-pro", "tencent/hy4-preview", "tencent/hy3",
+        "stepfun/step-3.7-flash", "nvidia/nemotron-3-super-120b-a12b", "meta/muse-spark-1.2",
+        "meta/muse-spark-1.2-contributor", "meta/muse-spark-1.3", "meta/muse-spark-1.3-contributor", "sakana/fugu-ultra",
+        "openrouter/pareto-code", "thinkingmachines/inkling:free", "thinkingmachines/inkling-small:free",
+        "minimax/minimax-m3:free", "z-ai/glm-5.2:free", "poolside/laguna-s-2.1:free", "poolside/laguna-xs-2.1:free",
+        "nvidia/nemotron-3-super-120b-a12b:free", "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "nvidia/nemotron-3.5-lightning:free",
+    )
+]
+
+_OPENROUTER_ONLY = {
+    "anthropic/claude-opus-5-fast", "anthropic/claude-opus-4.8-fast", "meta/muse-spark-1.2",
+    "meta/muse-spark-1.2-contributor", "meta/muse-spark-1.3", "meta/muse-spark-1.3-contributor", "openrouter/pareto-code",
+}
+
+
+VERCEL_AI_GATEWAY_MODELS: list[tuple[str, str]] = [("moonshotai/kimi-k2.6", "recommended")] + [
+    (mid, "") for mid in (
+        "alibaba/qwen3.6-plus", "zai/glm-5.1", "minimax/minimax-m2.7", "anthropic/claude-sonnet-4.6",
+        "anthropic/claude-opus-4.7", "anthropic/claude-opus-4.6", "anthropic/claude-haiku-4.5",
+        "openai/gpt-5.4", "openai/gpt-5.4-mini", "openai/gpt-5.3-codex", "google/gemini-3.1-pro-preview",
+        "google/gemini-3-flash", "google/gemini-3.1-flash-lite-preview", "xai/grok-4.20-reasoning",
+    )
+]
+
+
+def _codex_curated_models() -> list[str]:
+    """openai-codex curated list from codex_models.py (DEFAULT_CODEX_MODELS + forward-compat
+    synthesis) so the gateway /model picker and the CLI ``arkos model`` flow share one source."""
+    from arkos_cli.codex_models import DEFAULT_CODEX_MODELS, _finalize_codex_models
+    return _finalize_codex_models(list(DEFAULT_CODEX_MODELS))
+
+
+_XAI_STATIC_FALLBACK: list[str] = [
+    "grok-4.6", "grok-build-0.1", "grok-4.5", "grok-4.3", "grok-4.20-0309-reasoning",
+    "grok-4.20-0309-non-reasoning", "grok-4.20-multi-agent-0309",
+]
+
+_XAI_CURATED_EXTRAS: list[str] = ["grok-4.6", "grok-4.5", "grok-composer-2.5-fast"]
+
+_XAI_TOP_MODEL = "grok-4.6"
+
+
+def _xai_promote_top(ids: list[str]) -> list[str]:
+    """Pin the headline xAI model to the top of the curated list."""
+    if _XAI_TOP_MODEL in ids:
+        return [_XAI_TOP_MODEL] + [m for m in ids if m != _XAI_TOP_MODEL]
+    return ids
+
+
+def _xai_merge_curated_extras(ids: list[str]) -> list[str]:
+    """Append Arkos-curated xAI models missing from models.dev, right after the pinned headline."""
+    out = list(ids)
+    for extra in _XAI_CURATED_EXTRAS:
+        if extra not in out:
+            out.insert(1 if out and out[0] == _XAI_TOP_MODEL else len(out), extra)
+    return out
+
+
+def _xai_finalize_catalog(ids: list[str]) -> list[str]:
+    return _xai_promote_top(_xai_merge_curated_extras(ids))
+
+
+def _xai_curated_models() -> list[str]:
+    """Offline curated floor for xAI / xAI OAuth pickers: $ARKOS_HOME/models_dev_cache.json
+    (no network), else ``_XAI_STATIC_FALLBACK``. Any failure falls through to the static list."""
+    try:
+        from agent.models_dev import _load_disk_cache
+        data = _load_disk_cache()
+        xai = data.get("xai") if isinstance(data, dict) else None
+        models = xai.get("models") if isinstance(xai, dict) else None
+        if isinstance(models, dict) and models:
+            ids = [mid for mid in models if isinstance(mid, str)]
+            if ids:
+                return _xai_finalize_catalog(sorted(ids))
+    except Exception:
+        pass
+    return _xai_finalize_catalog(list(_XAI_STATIC_FALLBACK))
+
+
+_OPENAI_CHAT_MODELS = [
+    "gpt-5.4", "gpt-5.4-mini", "gpt-5-mini", "gpt-5.3-codex", "gpt-5.2-codex", "gpt-4.1", "gpt-4o", "gpt-4o-mini",
+]
+_MINIMAX_MODELS = ["MiniMax-M3", "MiniMax-M2.7", "MiniMax-M2.5", "MiniMax-M2.1", "MiniMax-M2"]
+_TENCENT_MODELS = ["hy4-preview", "hy3", "hy3-preview"]
+_ALIBABA_MODELS = [
+    "qwen3.8-max", "qwen3.7-max", "qwen3.7-plus", "qwen3.6-plus", "qwen3.6-flash", "kimi-k2.5",
+    "qwen3.5-plus", "qwen3-coder-plus", "qwen3-coder-next", "glm-5.2", "glm-5", "glm-4.7",
+    "deepseek-v4-pro", "deepseek-v4-flash-0731", "MiniMax-M2.5",
+]
+_ALIBABA_CODING_PLAN_MODELS = [
+    "qwen3.7-plus", "qwen3.6-plus", "qwen3.5-plus", "qwen3-max-2026-01-23", "qwen3-coder-plus",
+    "qwen3-coder-next", "kimi-k2.5", "glm-5", "glm-4.7", "MiniMax-M2.5",
+]
+_ALIBABA_TOKEN_PLAN_MODELS = [
+    "qwen3.8-max-0902", "qwen3.7-max", "qwen3.7-plus", "qwen3.6-plus", "qwen3.6-flash", "deepseek-v4-pro",
+    "deepseek-v4-flash", "deepseek-v3.2", "kimi-k2.7-code", "kimi-k2.6", "kimi-k2.5", "glm-5.2", "glm-5.1", "glm-5",
+]
+_XAI_MODELS = _xai_curated_models()
+
+_PROVIDER_MODELS: dict[str, list[str]] = {
+    "moa": ["default"],
+    "portal": [mid for mid, _ in OPENROUTER_MODELS if mid not in _OPENROUTER_ONLY and not mid.endswith(":free")],
+    "openai": list(_OPENAI_CHAT_MODELS),
+    "openai-api": [
+        "gpt-5.6-sol", "gpt-5.6-sol-pro", "gpt-5.6-terra", "gpt-5.6-terra-pro", "gpt-5.6-luna",
+        "gpt-5.6-luna-pro", "gpt-5.5", "gpt-5.5-pro", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano",
+        "gpt-5-mini", "gpt-5.3-codex", "gpt-4.1", "gpt-4o", "gpt-4o-mini",
+    ],
+    "openai-codex": _codex_curated_models(),
+    "xai-oauth": list(_XAI_MODELS),
+    "copilot-acp": ["copilot-acp"],
+    "copilot": _OPENAI_CHAT_MODELS + [
+        "claude-sonnet-4.6", "claude-sonnet-5", "claude-sonnet-4", "claude-sonnet-4.5", "claude-haiku-4.5",
+        "gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro",
+    ],
+    "gemini": [
+        "gemini-3.8-flash", "gemini-3.7-flash",
+        "gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-3.6-flash", "gemini-3.1-flash-lite-preview",
+    ],
+    "zai": [
+        "glm-5.3", "glm-5.3-flash", "glm-5.2", "glm-5.1", "glm-5", "glm-5v-turbo", "glm-5-turbo",
+        "glm-4.7", "glm-4.5", "glm-4.5-flash",
+    ],
+    "xai": list(_XAI_MODELS),
+    "nvidia": [
+        "nvidia/nemotron-3-ultra-550b-a55b", "nvidia/nemotron-3-super-120b-a12b",
+        "nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+        "z-ai/glm-5.3", "z-ai/glm-5.2", "moonshotai/kimi-k2.6", "minimaxai/minimax-m3",
+    ],
+    "kimi-coding": [
+        "kimi-k3", "kimi-k2.7-code", "kimi-k2.6", "kimi-k2.5", "kimi-for-coding", "kimi-for-coding-highspeed",
+        "kimi-k2-thinking", "kimi-k2-thinking-turbo", "kimi-k2-turbo-preview", "kimi-k2-0905-preview",
+    ],
+    "kimi-coding-cn": [
+        "kimi-k3", "kimi-k2.7-code", "kimi-k2.7-code-highspeed", "kimi-k2.6", "kimi-k2.5",
+        "kimi-k2-thinking", "kimi-k2-turbo-preview", "kimi-k2-0905-preview",
+    ],
+    "stepfun": ["step-3.5-flash", "step-3.5-flash-2603"],
+    "moonshot": [
+        "kimi-k3", "kimi-k2.6", "kimi-k2.5", "kimi-k2-thinking", "kimi-k2-turbo-preview", "kimi-k2-0905-preview",
+    ],
+    "minimax": list(_MINIMAX_MODELS),
+    "minimax-oauth": ["MiniMax-M3", "MiniMax-M2.7", "MiniMax-M2.7-highspeed"],
+    "minimax-cn": list(_MINIMAX_MODELS),
+    "anthropic": [
+        "claude-fable-5", "claude-sonnet-5", "claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6",
+        "claude-sonnet-4-6", "claude-opus-4-5-20251101", "claude-sonnet-4-5-20250929",
+        "claude-opus-4-20250514", "claude-sonnet-4-20250514", "claude-haiku-4-5-20251001",
+    ],
+    "deepseek": ["deepseek-v4-pro", "deepseek-v4-flash"],
+    "xiaomi": ["mimo-v2.5-pro", "mimo-v2.5", "mimo-v2-pro", "mimo-v2-omni", "mimo-v2-flash"],
+    "tencent-tokenhub": list(_TENCENT_MODELS),
+    "tencent-tokenplan": list(_TENCENT_MODELS),
+    "arcee": ["trinity-large-thinking", "trinity-large-preview", "trinity-mini"],
+    "gmi": [
+        "zai-org/GLM-5.1-FP8", "deepseek-ai/DeepSeek-V3.2", "moonshotai/Kimi-K2.5",
+        "google/gemini-3.1-flash-lite-preview", "anthropic/claude-sonnet-5",
+        "anthropic/claude-sonnet-4.6", "openai/gpt-5.4",
+    ],
+    "opencode-zen": [
+        "x-preview-f-free", "kimi-k3", "kimi-k2.5", "kimi-k2.6", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna",
+        "gpt-5.5", "gpt-5.5-pro", "gpt-5.4-pro", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.3-codex",
+        "gpt-5.3-codex-spark", "gpt-5.2", "gpt-5.2-codex", "gpt-5.1", "gpt-5.1-codex", "gpt-5.1-codex-max",
+        "gpt-5.1-codex-mini", "gpt-5", "gpt-5-codex", "gpt-5-nano", "claude-fable-5", "claude-opus-5",
+        "claude-sonnet-5", "claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6", "claude-opus-4-5",
+        "claude-sonnet-4-6", "claude-sonnet-4-5", "claude-sonnet-4", "claude-haiku-4-5", "gemini-3.8-flash",
+        "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-pro", "gemini-3-flash",
+        "grok-4.6", "grok-4.5", "grok-build-0.1", "muse-spark-1.2", "minimax-m3", "minimax-m2.7", "minimax-m2.5",
+        "glm-5.3", "glm-5.3-flash", "glm-5.2", "glm-5.1", "glm-5", "kimi-k2.7-code", "deepseek-v4-pro",
+        "deepseek-v4-flash", "deepseek-v4-flash-free", "qwen3.6-plus", "qwen3.5-plus", "big-pickle", "mimo-v2.5-free",
+        "hy3-free", "laguna-s-2.1-free", "nemotron-3-ultra-free", "nemotron-3.5-lightning-free",
+        "muse-spark-1.2-contributor-free", "muse-spark-1.3-contributor-free",
+    ],
+    "opencode-free": [
+        "deepseek-v4-flash-free", "hy3-free", "mimo-v2.5-free", "laguna-s-2.1-free",
+        "nemotron-3-ultra-free", "nemotron-3.5-lightning-free", "muse-spark-1.2-contributor-free",
+        "muse-spark-1.3-contributor-free",
+    ],
+    "opencode-go": [
+        "kimi-k3", "kimi-k2.7-code", "kimi-k2.6", "kimi-k2.5", "gpt-5.6-luna", "grok-4.5", "glm-5.3",
+        "glm-5.3-flash", "glm-5.2", "glm-5.1", "glm-5", "mimo-v2.5-pro", "mimo-v2.5", "mimo-v2-pro",
+        "mimo-v2-omni", "minimax-m3", "minimax-m2.7", "minimax-m2.5", "deepseek-v4-pro",
+        "deepseek-v4-flash", "qwen3.8-max", "qwen3.7-max", "qwen3.7-plus", "qwen3.6-plus",
+        "qwen3.5-plus", "hy3", "hy3-preview", "muse-spark-1.2-contributor", "muse-spark-1.3-contributor",
+        "ox-alpha-free",
+    ],
+    "kilocode": [
+        "anthropic/claude-opus-4.6", "anthropic/claude-sonnet-4.6", "openai/gpt-5.4",
+        "google/gemini-3-pro-preview", "google/gemini-3-flash-preview",
+    ],
+    "alibaba": list(_ALIBABA_MODELS),
+    "alibaba-cn": list(_ALIBABA_MODELS),
+    "alibaba-coding-plan": list(_ALIBABA_CODING_PLAN_MODELS),
+    "alibaba-coding-plan-cn": list(_ALIBABA_CODING_PLAN_MODELS),
+    "alibaba-token-plan": list(_ALIBABA_TOKEN_PLAN_MODELS),
+    "alibaba-token-plan-cn": list(_ALIBABA_TOKEN_PLAN_MODELS),
+    "huggingface": [
+        "moonshotai/Kimi-K2.5", "Qwen/Qwen3.5-397B-A17B", "Qwen/Qwen3.5-35B-A3B",
+        "deepseek-ai/DeepSeek-V3.2", "MiniMaxAI/MiniMax-M2.5", "zai-org/GLM-5",
+        "XiaomiMiMo/MiMo-V2-Flash", "moonshotai/Kimi-K2-Thinking", "moonshotai/Kimi-K2.6",
+    ],
+    "bedrock": [
+        "us.anthropic.claude-sonnet-5", "us.anthropic.claude-sonnet-4-6", "us.anthropic.claude-opus-4-6-v1",
+        "us.anthropic.claude-haiku-4-5-20251001-v1:0", "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "openai.gpt-5.5", "openai.gpt-5.6-sol", "openai.gpt-5.6-terra", "openai.gpt-5.6-luna",
+        "us.amazon.nova-pro-v1:0", "us.amazon.nova-lite-v1:0", "us.amazon.nova-micro-v1:0", "deepseek.v3.2",
+        "us.meta.llama4-maverick-17b-instruct-v1:0", "us.meta.llama4-scout-17b-instruct-v1:0",
+    ],
+    "azure-foundry": [],
+    "vertex": [
+        "google/gemini-3.8-flash", "google/gemini-3.7-flash",
+        "google/gemini-3.1-pro-preview", "google/gemini-3-pro-preview", "google/gemini-3.6-flash",
+        "google/gemini-3.5-flash", "google/gemini-3.5-flash-lite", "google/gemini-3-flash-preview",
+        "google/gemini-3.1-flash-lite-preview", "google/gemini-3.1-flash-lite",
+    ],
+    "novita": [
+        "moonshotai/kimi-k2.5", "minimax/minimax-m2.7", "zai-org/glm-5", "deepseek/deepseek-v3-0324",
+        "deepseek/deepseek-r1-0528", "qwen/qwen3-235b-a22b-fp8",
+    ],
+    "ai-gateway": [mid for mid, _ in VERCEL_AI_GATEWAY_MODELS],
+}
+
+
+
+class ProviderEntry(NamedTuple):
+    slug: str
+    label: str
+    tui_desc: str
+
+
+CANONICAL_PROVIDERS: list[ProviderEntry] = [ProviderEntry(*row) for row in (
+    ("portal", "Arkos Portal", "Arkos Portal (Everything your agent needs, 300+ models with bundled tool use)"),
+    ("fireworks", "Fireworks AI", "Fireworks AI (OpenAI-compatible direct model API)"),
+    ("openrouter", "OpenRouter", "OpenRouter (Pay-per-use API aggregator)"),
+    ("moa", "Mixture of Agents", "Mixture of Agents (named presets; aggregator acts after reference models)"),
+    ("novita", "NovitaAI", "NovitaAI (Cloud: Model API, Agent Sandbox, GPU Cloud)"),
+    ("lmstudio", "LM Studio", "LM Studio (Local desktop app with built-in model server)"),
+    ("anthropic", "Anthropic", "Anthropic (Claude models via API key or Claude Code)"),
+    ("openai-codex", "ChatGPT or Codex Subscription", "ChatGPT or Codex Subscription (Sign in with your ChatGPT account, uses Codex models)"),
+    ("openai-api", "OpenAI API", "OpenAI API (api.openai.com, API key)"),
+    ("alibaba", "Qwen Cloud", "Qwen Cloud / DashScope (Qwen + multi-provider)"),
+    ("xai-oauth", "xAI Grok OAuth (SuperGrok / Premium+)", "xAI Grok OAuth (SuperGrok / Premium+ subscription)"),
+    ("xiaomi", "Xiaomi MiMo", "Xiaomi MiMo (MiMo-V2.5 and V2 models: pro, omni, flash)"),
+    ("tencent-tokenhub", "Tencent TokenHub", "Tencent TokenHub (Hy4 preview via tokenhub.tencentmaas.com)"),
+    ("tencent-tokenplan", "Tencent TokenPlan", "Tencent TokenPlan (Hy4 preview via api.lkeap.cloud.tencent.com, Anthropic Messages)"),
+    ("nvidia", "NVIDIA NIM", "NVIDIA NIM (Nemotron models via build.nvidia.com or local NIM)"),
+    ("copilot", "GitHub Copilot", "GitHub Copilot (Uses GITHUB_TOKEN or gh auth token)"),
+    ("copilot-acp", "GitHub Copilot ACP", "GitHub Copilot ACP (Spawns copilot --acp --stdio)"),
+    ("huggingface", "Hugging Face", "Hugging Face Inference Providers"),
+    ("gemini", "Google AI Studio", "Google AI Studio (Native Gemini API)"),
+    ("vertex", "Google Vertex AI", "Google Vertex AI (Gemini via GCP; OAuth2 service account or ADC, GCP billing/quotas)"),
+    ("deepseek", "DeepSeek", "DeepSeek (V3, R1, coder, direct API)"), ("xai", "xAI", "xAI Grok (Direct API)"),
+    ("zai", "Z.AI / GLM", "Z.AI / GLM (Zhipu direct API)"),
+    ("kimi-coding", "Kimi / Kimi Coding Plan", "Kimi Coding Plan (api.kimi.com & Moonshot API)"),
+    ("kimi-coding-cn", "Kimi / Moonshot (China)", "Kimi / Moonshot China (Domestic direct API)"),
+    ("stepfun", "StepFun Step Plan", "StepFun Step Plan (Agent / coding models via Step Plan API)"),
+    ("minimax", "MiniMax", "MiniMax (Global direct API)"),
+    ("minimax-oauth", "MiniMax (OAuth)", "MiniMax via OAuth browser login (Coding Plan, minimax.io)"),
+    ("minimax-cn", "MiniMax (China)", "MiniMax China (Domestic direct API)"),
+    ("ollama-cloud", "Ollama Cloud", "Ollama Cloud (Cloud-hosted open models, ollama.com)"),
+    ("arcee", "Arcee AI", "Arcee AI (Trinity models, direct API)"),
+    ("gmi", "GMI Cloud", "GMI Cloud (Multi-model direct API)"),
+    ("kilocode", "Kilo Code", "Kilo Code (Kilo Gateway API)"),
+    ("opencode-zen", "OpenCode Zen", "OpenCode Zen (Curated models, pay-as-you-go)"),
+    ("opencode-go", "OpenCode Go", "OpenCode Go (Open models subscription)"),
+    ("bedrock", "AWS Bedrock", "AWS Bedrock (Claude, Nova, Llama, DeepSeek; IAM or API key)"),
+    ("azure-foundry", "Azure Foundry", "Azure Foundry (OpenAI-style or Anthropic-style endpoint, your Azure AI deployment)"),
+    ("ai-gateway", "Vercel AI Gateway", "Vercel AI Gateway (Multi-model aggregator)"),
+    ("qwen-oauth", "Qwen OAuth (Portal)", "Qwen OAuth (Reuses local Qwen CLI login)"),
+)]
+
+
+_canonical_slugs = {p.slug for p in CANONICAL_PROVIDERS}
+try:
+    from providers import list_providers as _list_providers_for_canonical
+    for _pp in _list_providers_for_canonical():
+        if _pp.name in _canonical_slugs or _pp.auth_type in {
+            "oauth_device_code", "oauth_external", "external_process", "aws_sdk", "copilot", "vertex",
+        }:
+            continue
+        _label = _pp.display_name or _pp.name
+        CANONICAL_PROVIDERS.append(ProviderEntry(_pp.name, _label, _pp.description or f"{_label} (direct API)"))
+        _canonical_slugs.add(_pp.name)
+except Exception:
+    pass
+
+
+_PROVIDER_LABELS = {p.slug: p.label for p in CANONICAL_PROVIDERS}
+_PROVIDER_LABELS["custom"] = "Custom endpoint"
+
+
+PROVIDER_GROUPS: dict[str, tuple[str, str, list[str]]] = {
+    "kimi":     ("Kimi / Moonshot", "Coding Plan, Moonshot global & China endpoints", ["kimi-coding", "kimi-coding-cn"]),
+    "minimax":  ("MiniMax",         "Global, OAuth Coding Plan & China endpoints",     ["minimax", "minimax-oauth", "minimax-cn"]),
+    "xai":      ("xAI Grok",        "Direct API or SuperGrok / Premium+ OAuth",        ["xai", "xai-oauth"]),
+    "google":   ("Google Gemini",   "Google AI Studio (API key)",                     ["gemini"]),
+    "openai":   ("OpenAI",          "ChatGPT/Codex subscription or direct OpenAI API", ["openai-codex", "openai-api"]),
+    "qwen":     ("Qwen",            "Qwen Cloud / DashScope, Coding Plan, Token Plan & Qwen CLI OAuth", ["alibaba", "alibaba-cn", "alibaba-coding-plan", "alibaba-coding-plan-cn", "alibaba-token-plan", "alibaba-token-plan-cn", "qwen-oauth"]),
+    "opencode": ("OpenCode",        "Zen pay-as-you-go, Go subscription, or free tier", ["opencode-zen", "opencode-go", "opencode-free"]),
+    "copilot":  ("GitHub Copilot",  "GitHub token API or copilot --acp process",       ["copilot", "copilot-acp"]),
+    "tencent":  ("Tencent Hy",      "Hy4 / Hy3 via TokenHub & TokenPlan", ["tencent-tokenhub", "tencent-tokenplan"]),
+}
+
+_SLUG_TO_GROUP: dict[str, str] = {
+    slug: gid for gid, (_label, _desc, members) in PROVIDER_GROUPS.items() for slug in members
+}
+
+
+def provider_group_for_slug(slug: str) -> str:
+    """Return the group_id a provider slug belongs to, or "" if ungrouped."""
+    return _SLUG_TO_GROUP.get(str(slug or "").strip().lower(), "")
+
+
+def group_providers(slugs):
+    """Fold a flat ordered slug iterable into picker rows by provider group (DISPLAY ONLY).
+
+    A group row appears at the position of its FIRST present member, in input order; later
+    members fold into it. Member order inside a group follows ``PROVIDER_GROUPS`` declaration,
+    restricted to the members present in ``slugs``.
+    """
+    present = set(slugs)
+    group_members = {
+        gid: [m for m in members if m in present]
+        for gid, (_label, _desc, members) in PROVIDER_GROUPS.items()
+    }
+    rows = []
+    seen: set[str] = set()
+    emitted_groups: set[str] = set()
+    for slug in slugs:
+        s = str(slug or "").strip().lower()
+        if not s or s in seen:
+            continue
+        seen.add(s)
+        gid = _SLUG_TO_GROUP.get(s, "")
+        if not gid:
+            rows.append({"kind": "single", "slug": s})
+            continue
+        if gid in emitted_groups:
+            continue
+        emitted_groups.add(gid)
+        members = group_members.get(gid) or [s]
+        if len(members) <= 1:
+            rows.append({"kind": "single", "slug": members[0]})
+        else:
+            label, desc, _ = PROVIDER_GROUPS[gid]
+            rows.append({"kind": "group", "group_id": gid, "label": label,
+                         "description": desc, "members": list(members)})
+    return rows
+
+
+_PROVIDER_ALIASES = dict((
+    ("glm", "zai"), ("z-ai", "zai"), ("z.ai", "zai"), ("zhipu", "zai"), ("github", "copilot"),
+    ("github-copilot", "copilot"), ("github-models", "copilot"), ("github-model", "copilot"),
+    ("github-copilot-acp", "copilot-acp"), ("copilot-acp-agent", "copilot-acp"), ("google", "gemini"),
+    ("google-gemini", "gemini"), ("google-ai-studio", "gemini"), ("google-vertex", "vertex"), ("vertex-ai", "vertex"),
+    ("gcp-vertex", "vertex"), ("vertexai", "vertex"), ("kimi", "kimi-coding"), ("moonshot", "kimi-coding"),
+    ("kimi-cn", "kimi-coding-cn"), ("moonshot-cn", "kimi-coding-cn"), ("step", "stepfun"),
+    ("stepfun-coding-plan", "stepfun"), ("arcee-ai", "arcee"), ("arceeai", "arcee"), ("gmi-cloud", "gmi"),
+    ("gmicloud", "gmi"), ("fireworks-ai", "fireworks"), ("fw", "fireworks"), ("actual-computer", "actual"),
+    ("actualcomputer", "actual"), ("aci", "actual"), ("nebius", "nebius-token-factory"),
+    ("nebius-tokenfactory", "nebius-token-factory"), ("nebius-tf", "nebius-token-factory"),
+    ("token-factory", "nebius-token-factory"), ("tokenfactory", "nebius-token-factory"),
+    ("minimax-china", "minimax-cn"), ("minimax_cn", "minimax-cn"), ("minimax-portal", "minimax-oauth"),
+    ("minimax-global", "minimax-oauth"), ("minimax_oauth", "minimax-oauth"), ("claude", "anthropic"),
+    ("claude-code", "anthropic"), ("deep-seek", "deepseek"), ("opencode", "opencode-zen"), ("zen", "opencode-zen"),
+    ("go", "opencode-go"), ("opencode-go-sub", "opencode-go"), ("free", "opencode-free"),
+    ("opencode_free", "opencode-free"), ("aigateway", "ai-gateway"), ("vercel", "ai-gateway"),
+    ("vercel-ai-gateway", "ai-gateway"), ("kilo", "kilocode"), ("kilo-code", "kilocode"),
+    ("kilo-gateway", "kilocode"), ("dashscope", "alibaba"), ("aliyun", "alibaba"), ("qwen", "alibaba"),
+    ("alibaba-cloud", "alibaba"), ("qwen-portal", "qwen-oauth"), ("hf", "huggingface"),
+    ("hugging-face", "huggingface"), ("huggingface-hub", "huggingface"), ("novita-ai", "novita"),
+    ("novitaai", "novita"), ("mimo", "xiaomi"), ("xiaomi-mimo", "xiaomi"), ("tencent", "tencent-tokenhub"),
+    ("tokenhub", "tencent-tokenhub"), ("tencent-cloud", "tencent-tokenhub"), ("tencentmaas", "tencent-tokenhub"),
+    ("tokenplan", "tencent-tokenplan"), ("tencent-lkeap", "tencent-tokenplan"), ("aws", "bedrock"),
+    ("aws-bedrock", "bedrock"), ("amazon-bedrock", "bedrock"), ("amazon", "bedrock"), ("grok", "xai"),
+    ("grok-oauth", "xai-oauth"), ("xai-oauth", "xai-oauth"), ("x-ai-oauth", "xai-oauth"),
+    ("xai-grok-oauth", "xai-oauth"), ("x-ai", "xai"), ("x.ai", "xai"), ("nim", "nvidia"), ("nvidia-nim", "nvidia"),
+    ("build-nvidia", "nvidia"), ("nemotron", "nvidia"), ("lmstudio", "lmstudio"), ("lm-studio", "lmstudio"),
+    ("lm_studio", "lmstudio"),
+    ("ollama", "custom"),
+    ("ollama_cloud", "ollama-cloud"),
+))
+
+
+PREFERRED_SILENT_DEFAULT_MODEL = "z-ai/glm-5.2"
+
+
+_SILENT_DEFAULT_PROVIDERS: frozenset[str] = frozenset({"portal", "openrouter"})
+
+
+_PROVIDER_RETIRED_ALIASES: dict[str, tuple[str, ...]] = {
+    "deepseek": ("deepseek-chat", "deepseek-reasoner"),
+}
+
+
+_AGGREGATOR_PROVIDERS = frozenset({"portal", "openrouter", "ai-gateway", "copilot", "kilocode"})
+
+
+_OPENROUTER_VARIANT_SUFFIXES = frozenset({"nitro", "floor", "exacto", "online"})
+
+
+_BORROWED_MODEL_PROVIDERS: frozenset[str] = frozenset()
+
+
+_LIVE_FIRST_PICKER_PROVIDERS: frozenset[str] = frozenset({"opencode-zen", "opencode-go", "meta-ai"})
+
+
+_OPENAI_FAST_MODE_PREFIXES: tuple[str, ...] = ("gpt-", "o1", "o3", "o4")
+
+
+_MODELS_DEV_PREFERRED: frozenset[str] = frozenset({
+    "opencode-go", "opencode-zen", "deepseek", "kilocode", "fireworks", "mistral", "togetherai", "cohere",
+    "perplexity", "groq", "nvidia", "huggingface", "zai", "gemini", "google", "xai", "xai-oauth",
+})
+
+
+_KEYLESS_STABLE_CACHE_PROVIDERS = frozenset({"opencode-free"})
+
+
+_COPILOT_MODEL_ALIASES = dict((
+    ("openai/gpt-5", "gpt-5-mini"), ("openai/gpt-5-chat", "gpt-5-mini"), ("openai/gpt-5-mini", "gpt-5-mini"),
+    ("openai/gpt-5-nano", "gpt-5-mini"), ("openai/gpt-4.1", "gpt-4.1"), ("openai/gpt-4.1-mini", "gpt-4.1"),
+    ("openai/gpt-4.1-nano", "gpt-4.1"), ("openai/gpt-4o", "gpt-4o"), ("openai/gpt-4o-mini", "gpt-4o-mini"),
+    ("openai/o1", "gpt-5.2"), ("openai/o1-mini", "gpt-5-mini"), ("openai/o1-preview", "gpt-5.2"),
+    ("openai/o3", "gpt-5.3-codex"), ("openai/o3-mini", "gpt-5-mini"), ("openai/o4-mini", "gpt-5-mini"),
+    ("anthropic/claude-opus-4.6", "claude-opus-4.6"), ("anthropic/claude-sonnet-5", "claude-sonnet-5"),
+    ("anthropic/claude-sonnet-4.6", "claude-sonnet-4.6"), ("anthropic/claude-sonnet-4", "claude-sonnet-4"),
+    ("anthropic/claude-sonnet-4.5", "claude-sonnet-4.5"), ("anthropic/claude-haiku-4.5", "claude-haiku-4.5"),
+    ("claude-sonnet-5", "claude-sonnet-5"), ("claude-opus-4-6", "claude-opus-4.6"),
+    ("claude-sonnet-4-6", "claude-sonnet-4.6"), ("claude-sonnet-4-0", "claude-sonnet-4"),
+    ("claude-sonnet-4-5", "claude-sonnet-4.5"), ("claude-haiku-4-5", "claude-haiku-4.5"),
+    ("anthropic/claude-opus-4-6", "claude-opus-4.6"), ("anthropic/claude-sonnet-4-6", "claude-sonnet-4.6"),
+    ("anthropic/claude-sonnet-4-0", "claude-sonnet-4"), ("anthropic/claude-sonnet-4-5", "claude-sonnet-4.5"),
+    ("anthropic/claude-haiku-4-5", "claude-haiku-4.5"),
+))
+
+
+_AZURE_FOUNDRY_RESPONSES_PREFIXES = ("codex", "gpt-5", "o1", "o3", "o4")
