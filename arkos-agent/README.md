@@ -92,7 +92,7 @@ If attestation says "Verification succeeded" and the last line prints `True`, yo
 - **Bitdefender:** Add an exception in the Bitdefender console (Protection > Antivirus > Settings > Manage Exceptions)
 - Whitelist the **folder**, not the file hash — the agent updates `uv` and the hash changes every version
 
-For more context, see the upstream Astral issue reports: , , .
+For more context, see the upstream Astral issue reports in the [astral-sh/uv repository](https://github.com/astral-sh/uv/issues).
 
 ---
 
@@ -110,7 +110,7 @@ arkos update       # Update to the latest version
 arkos doctor       # Diagnose any issues
 ```
 
-📖 **Full documentation:** see `docs/` and the per-area `AGENTS.md` files.
+📖 **Full documentation:** see the per-area `AGENTS.md` files and `arkos --help`.
 
 ---
 
@@ -137,7 +137,6 @@ For the full command lists, see `arkos --help` and `arkos <command> --help`.
 ## Documentation
 
 - Per-area `AGENTS.md` files — development guides for each subsystem
-- `SECURITY.md` — security policy
 - `arkos --help` — full command reference
 
 ---

@@ -476,9 +476,13 @@ _HEX32 = set("0123456789abcdef")
 
 
 def _arkos_home_dir() -> Path:
-    """Resolved Arkos home (ARKOS_HOME override or ~/.arkos)."""
-    override = os.environ.get("ARKOS_HOME", "").strip()
-    return Path(override).expanduser() if override else Path.home() / ".arkos"
+    """Resolved Arkos home (profile-aware via get_arkos_home, else ARKOS_HOME or ~/.arkos)."""
+    try:
+        from arkos_constants import get_arkos_home
+        return get_arkos_home()
+    except Exception:
+        override = os.environ.get("ARKOS_HOME", "").strip()
+        return Path(override).expanduser() if override else Path.home() / ".arkos"
 
 
 def _is_hex(value: object, length: int) -> bool:

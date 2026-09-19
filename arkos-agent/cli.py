@@ -2642,7 +2642,7 @@ class ArkosCLI(CLIProcessNotificationsMixin, CLIAgentSetupMixin, CLICommandsMixi
         self.session_id = resume or f"{self.session_start.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
         getattr(self, "_write_terminal_breadcrumb", lambda: None)()
 
-        self._history_file = _arkos_home / ".arkos_history" if (_arkos_home / ".arkos_history").exists() or not (_arkos_home / ".arkos_history").exists() else _arkos_home / ".arkos_history"
+        self._history_file = _arkos_home / ".arkos_history"
         self._last_invalidate: float = 0.0
         self._init_ui_state()
 

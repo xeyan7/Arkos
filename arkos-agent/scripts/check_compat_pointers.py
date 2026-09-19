@@ -89,12 +89,12 @@ def main() -> int:
                     if fac in facades and name in compat[fac]:
                         hits.append(f"{rel}:{node.lineno}: \"{dotted}\" (string patch target)")
     if hits:
-        print("❌ in-tree code depends on plugin-compat pointers (scheduled for removal):")
+        print("FAIL: in-tree code depends on plugin-compat pointers (scheduled for removal):")
         for h in sorted(set(hits)):
             print("  " + h)
         print(f"\n{len(set(hits))} site(s). Import from the defining module instead (see COMPAT_MANIFEST.md).")
         return 1
-    print(f"✅ no in-tree dependency on the {len(entries)} plugin-compat pointers")
+    print(f"OK: no in-tree dependency on the {len(entries)} plugin-compat pointers")
     return 0
 
 

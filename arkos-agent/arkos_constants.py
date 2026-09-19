@@ -277,7 +277,7 @@ def get_arkos_dir(new_subpath: str, old_name: str, *, home: Path | None = None) 
 def iter_arkos_node_dirs(home: Path | None = None) -> list[Path]:
     """Arkos-managed Node dirs in lookup order; both Windows and POSIX shapes so migrated installs work.
 
-    Keep in sync with arkosManagedNodePathEntries() in apps/desktop/electron/backend-env.ts.
+    Keep in sync with the desktop managed-Node path entries.
     """
     node_dir = (home or get_arkos_home()) / "node"
     return [node_dir, node_dir / "bin"] if sys.platform == "win32" else [node_dir / "bin", node_dir]
