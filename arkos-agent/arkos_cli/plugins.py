@@ -652,25 +652,10 @@ class PluginContext:
 
     @_serialized_replacement
     def register_dashboard_auth_provider(self, provider) -> Optional[PluginRegistration]:
-        """Register a :class:`arkos_cli.dashboard_auth.DashboardAuthProvider` for the dashboard
-        auth gate (non-loopback bind without ``--insecure``). Wrong type / duplicate name warn and
-        are ignored, never raised."""
-        from arkos_cli.dashboard_auth import DashboardAuthProvider
-        from arkos_cli.dashboard_auth.registry import register_global_provider, unregister_global_provider
-        if self._wrong_type(provider, DashboardAuthProvider, "dashboard-auth provider"):
-            return
-        registry_name = provider.name
-        try:
-            register_global_provider(provider)
-        except (TypeError, ValueError) as e:
-            logger.warning("Plugin '%s' failed to register dashboard-auth provider %r: %s",
-                           self.manifest.name, getattr(provider, "name", "?"), e)
-            return
-        handle = self._track("dashboard_auth_provider", registry_name,
-                             lambda: unregister_global_provider(registry_name, provider), persistent=True)
-        logger.info("Plugin '%s' registered dashboard-auth provider: %s (%s)", self.manifest.name,
-                    registry_name, provider.display_name)
-        return handle
+        """Dashboard auth removed in engine-only build; registration is a no-op."""
+        logger.warning("Plugin '%s' tried to register a dashboard-auth provider, "
+                       "but the dashboard frontend was removed.", self.manifest.name)
+        return None
 
     @_serialized_replacement
     def register_platform(
@@ -1386,8 +1371,7 @@ def _reset_plugin_managers_for_tests() -> None:
         _plugin_managers_by_home.clear()
         _plugin_manager = None
     try:
-        from arkos_cli.dashboard_auth.registry import clear_providers
-        clear_providers()
+        pass  # dashboard-auth registry removed with the dashboard frontend
     except Exception:
         logger.debug("dashboard-auth registry clear failed", exc_info=True)
 

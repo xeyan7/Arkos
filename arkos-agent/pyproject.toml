@@ -382,11 +382,6 @@ all = [
 requires = ["setuptools==83.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[project.scripts]
-arkos = "arkos_cli.main:main"
-arkos-agent = "run_agent:main"
-arkos-acp = "acp_adapter.entry:main"
-
 [tool.uv]
 override-dependencies = [
   # discord.py's latest published version, 2.7.1, pins pynacl at <1.6. however, pynacl 1.5.0 has known vulnerabilities.
@@ -557,7 +552,7 @@ youtube-transcript-api = false
 # and the drift broke installed wheels. Do not add the list back.
 
 [tool.setuptools.packages.find]
-include = ["agent", "agent.*", "tools", "tools.*", "arkos_cli", "arkos_cli.*", "gateway", "gateway.*", "tui_gateway", "tui_gateway.*", "cron", "cron.*", "acp_adapter", "plugins", "plugins.*", "providers", "providers.*"]
+include = ["agent", "agent.*", "tools", "tools.*", "arkos_cli", "arkos_cli.*", "gateway", "gateway.*", "cron", "cron.*", "plugins", "plugins.*", "providers", "providers.*"]
 
 [tool.setuptools.package-data]
 arkos_cli = ["observability/schemas/*.json", "data/*.json", "local_runtime/*.json"]

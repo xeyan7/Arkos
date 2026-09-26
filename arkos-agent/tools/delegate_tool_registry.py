@@ -102,7 +102,12 @@ def interrupt_subagent(subagent_id: str) -> bool:
         return False
 
 def _subagent_transport_matches(record, transport) -> bool:
-    from tui_gateway.transport import FanoutTransport
+    try:
+        from tui_gateway.transport import FanoutTransport
+    except ImportError:
+        # Engine-only build: tui_gateway frontend removed; fall back to identity.
+        bound = record.get("owner_transport")
+        return bound is transport
 
     bound = record.get("owner_transport")
     return bound is transport or (isinstance(bound, FanoutTransport) and bound.contains(transport))

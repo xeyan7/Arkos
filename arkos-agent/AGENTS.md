@@ -183,47 +183,40 @@ source .venv/bin/activate   # or: source venv/bin/activate
 Counts shift constantly; the filesystem is canonical. Load-bearing entry points:
 
 ```
-arkos/
+arkos-agent/  (engine-only build: all user-facing frontends removed)
 ├── run_agent.py          # AIAgent facade; the turn loop lives in agent/turn_*.py
 ├── model_tools.py        # Tool orchestration, discover_builtin_tools(), handle_function_call()
 ├── toolsets.py           # TOOLSETS dict, _ARKOS_CORE_TOOLS
-├── cli.py                # ArkosCLI (REPL, slash dispatch) + arkos_cli/cli_*_mixin.py
 ├── arkos_state.py       # SessionDB facade; arkos_state_*.py siblings
 ├── arkos_constants.py   # get_arkos_home(), display_arkos_home() — profile-aware paths
 ├── arkos_logging.py     # agent.log / errors.log / gateway.log (profile-aware)
-├── batch_runner.py       # Parallel batch processing
 ├── agent/                # turn_*.py loop phases, providers, memory, compression, prompt builder
-├── arkos_cli/           # CLI subcommands, setup, config, plugins loader, skins, updater
-│   └── web_routers/      # Dashboard FastAPI routers (one per surface); web_server.py mounts them
+├── arkos_cli/           # config, auth, models, profiles, plugins loader (library only, no CLI)
 ├── tools/                # Tool implementations, auto-discovered via tools/registry.py
 │   └── environments/     # Terminal backends (local, docker, ssh, modal, daytona, singularity)
-├── gateway/              # run.py facade + run_*.py phases + session*.py + platforms/
-│   ├── platforms/        # One adapter per platform; see platforms/ADDING_A_PLATFORM.md
+├── gateway/              # Engine plumbing (session_context, config, status, delivery)
+│   ├── platforms/        # Send-client helpers kept by engine tools (base, event, signal, yuanbao)
 │   └── builtin_hooks/    # Always-registered gateway hooks (extension point; none shipped)
 ├── plugins/              # memory/, context_engine/, model-providers/, kanban/, image_gen/, ...
 ├── skills/               # Built-in skills (by category)   optional-skills/: shipped, not active
-├── ui-tui/               # Ink (React) terminal UI — `arkos --tui`
-├── tui_gateway/          # Python JSON-RPC backend for TUI + Desktop — server.py + methods_*.py
-├── apps/shared/            # JSON-RPC/WS client shared by frontends
-├── acp_adapter/          # ACP server (VS Code / Zed / JetBrains)
 ├── cron/                 # jobs.py + scheduler.py (+ scheduler_*.py)
-└── scripts/              # installers, gateway launcher, node bootstrap, dev helpers
+└── scripts/              # dev helpers (check scripts)
 ```
 
 **User state:** `~/.arkos/config.yaml` (settings), `~/.arkos/.env` (secrets only),
 `~/.arkos/logs/` (`agent.log` INFO+, `errors.log` WARNING+, `gateway.log`); all
-profile-aware via `get_arkos_home()`. Browse logs with `arkos logs [--follow] [--level] [--session]`.
+profile-aware via `get_arkos_home()`.
 
 **Dependency chain:** `tools/registry.py` (no deps) ← `tools/*.py` (register at import) ←
-`model_tools.py` (discovery) ← `run_agent.py`, `cli.py`, `batch_runner.py`, `environments/`.
+`model_tools.py` (discovery) ← `run_agent.py`, `environments/`.
 
 ### Facade + siblings layout (Sep 2026 decomposition)
 
 Every former god file is a **facade** (public entry points + the names other packages import)
 plus **siblings** `<stem>_<topic>.py` in the same directory, each owning one topic. Largest
-families: `arkos_state.py` (21), `gateway/run.py` (15), `tools/mcp_tool.py` (15),
-`arkos_cli/kanban.py` (14), `arkos_cli/web_server.py` (13 + 24 routers), `arkos_cli/auth.py`
-(12), `tools/browser_tool.py` (11), `cli.py` (12 `arkos_cli/cli_*_mixin.py`), `run_agent.py`
+families: `arkos_state.py` (21), `tools/mcp_tool.py` (15),
+`arkos_cli/kanban.py` (14), `arkos_cli/auth.py`
+(12), `tools/browser_tool.py` (11), `run_agent.py`
 (`agent/turn_*.py`, `agent_init.py`, `conversation_loop.py`).
 
 - **Find code by topic, not by facade:** `grep -rn "def name" <dir>/<stem>_*.py`. Reading the
@@ -243,7 +236,7 @@ families: `arkos_state.py` (21), `gateway/run.py` (15), `tools/mcp_tool.py` (15)
   cyclomatic complexity 30 is the signal to split along `<stem>_<topic>` FIRST, in its own
   commit. New behaviour goes in a new or topical sibling — never appended to a facade.
 - **No `if/elif` ladders ≥ 4 branches keyed on a name/kind** — use a dict/table → handler
-  (`_SLASH_DISPATCH` in `cli.py`, `_command_handler_table` in the gateway are the shape).
+  (`TOOLSETS` in `toolsets.py` is the shape).
 - **No re-export shims for internal moves** ("keep the old name importable"). Internal paths
   are not API; external compat is handled ONCE by the compat layer, not per PR.
 - **Moving a symbol means fixing its docs in the same PR:** grep `docs/`,
@@ -392,15 +385,12 @@ extract, not to regex around it.
 | Area | Read | Covers |
 |---|---|---|
 | `run_agent.py`, `agent/` | `agent/AGENTS.md` | AIAgent + mixins, turn phases, caching integrity, message-flow invariants, compression, model/aux resolution |
-| `cli.py`, `arkos_cli/`, `main.py` | `arkos_cli/AGENTS.md` | CLI mixins, `_SLASH_DISPATCH`, slash registry, config system + loaders, skins, `arkos update` pipeline, profiles / multiplex |
-| `gateway/` | `gateway/AGENTS.md` | Adapters, two message guards, streaming contract, background notifications, gateway vs desktop lifecycle, token locks, scoped secrets |
+| `arkos_cli/` (library only) | `arkos_cli/AGENTS.md` | config system + loaders, profiles / multiplex |
 | `tools/`, `toolsets.py`, `model_tools.py` | `tools/AGENTS.md` | Adding tools, registry, toolsets, delegation, cross-tool references, backends |
 | `plugins/`, `arkos_cli/plugins*.py` | `plugins/AGENTS.md` | Plugin kinds, native compat contract, in-tree policy, Sep-2026 compat window |
-| `tui_gateway/`, `ui-tui/` | `tui_gateway/AGENTS.md` | Process model, JSON-RPC transport, key surfaces, slash flow, dev commands |
-| `arkos_cli/web_routers/` | (dashboard frontend not shipped slim) | JSON API routers behind the dashboard SPA |
 | `skills/`, `optional-skills/`, `agent/curator*.py` | `skills/AGENTS.md` | Frontmatter, HARDLINE authoring standards, curator |
 | `cron/`, kanban (`arkos_cli/kanban*.py`, `tools/kanban_tools.py`, `plugins/kanban/`) | `cron/AGENTS.md` | Scheduler invariants, job fields, kanban board/dispatcher |
-| `gateway/platforms/` new adapter | `gateway/platforms/ADDING_A_PLATFORM.md` | Step-by-step adapter guide |
+| `gateway/platforms/` send clients | `gateway/platforms/ADDING_A_PLATFORM.md` | Step-by-step adapter guide |
 
 Long-form background lives in *(docs site — not shipped slim)* (agent-loop, prompt-assembly,
 context-compression-and-caching, gateway-internals, tools-runtime, plugins/, cron-internals,

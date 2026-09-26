@@ -1402,9 +1402,6 @@ def main(
     print("\n👋 Agent execution completed!")
 
 
-if __name__ == "__main__":
-    import fire
-    fire.Fire(main)
 
 
 from types import SimpleNamespace  # noqa: F401,E402

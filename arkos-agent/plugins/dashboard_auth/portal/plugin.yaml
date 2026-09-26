@@ -1,7 +1,0 @@
-name: portal
-version: 1.0.0
-description: "Dashboard auth provider — OAuth 2.0 (authorization-code + PKCE)."
-author: Arkos
-kind: backend
-requires_env:
-  - ARKOS_DASHBOARD_OAUTH_CLIENT_ID

@@ -12,7 +12,8 @@ from typing import Dict, List, Optional, Any
 from arkos_cli.config import get_arkos_home
 
 from .config import Platform, GatewayConfig, PlatformConfig
-from .session import SessionSource
+# NOTE (engine-only): messaging session types removed with gateway/session.py.
+# ``origin`` is opaque to delivery routing (attribute access only).
 from .dead_targets import DeadTargetRegistry, classify_dead_error
 
 logger = logging.getLogger(__name__)
@@ -102,7 +103,7 @@ class DeliveryTarget:
     unknown_platform: Optional[str] = None
 
     @classmethod
-    def parse(cls, target: str, origin: Optional[SessionSource] = None) -> "DeliveryTarget":
+    def parse(cls, target: str, origin: Optional[Any] = None) -> "DeliveryTarget":
         """Parse "origin" | "local" | "<platform>" | "<platform>:<chat_id>[:<thread_id>]"."""
         target = target.strip()
         if target.lower() == "origin":
