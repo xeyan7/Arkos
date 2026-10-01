@@ -337,7 +337,10 @@ def scan_skill_commands() -> Dict[str, Dict[str, Any]]:
         from agent.skill_utils import (
             get_external_skills_dirs, get_project_skills_dirs, iter_project_skill_files, iter_skill_index_files,
         )
-        from arkos_cli.commands import resolve_command
+        try:
+            from arkos_cli.commands import resolve_command
+        except ImportError:
+            resolve_command = lambda name: None
         disabled = _get_disabled_skill_names()
         seen_names: set = set()
         skills_dir = _skills_dir()

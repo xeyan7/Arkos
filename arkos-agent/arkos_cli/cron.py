@@ -10,7 +10,13 @@ from typing import Any, Dict, Iterable, List, Optional
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from arkos_cli.colors import Colors, color
+try:
+    from arkos_cli.colors import Colors, color
+except ImportError:
+    class Colors:
+        RESET = BOLD = DIM = RED = GREEN = YELLOW = BLUE = MAGENTA = CYAN = ""
+    def color(text: str, *codes) -> str:
+        return text
 
 
 def _normalize_skills(single_skill=None, skills: Optional[Iterable[str]] = None) -> Optional[List[str]]:

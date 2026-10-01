@@ -6,11 +6,31 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
-from arkos_cli.cli_output import print_info as _print_info
-from arkos_cli.colors import Colors, color
+try:
+    from arkos_cli.cli_output import print_info as _print_info
+except ImportError:
+    def _print_info(text: str) -> None: pass
+
+try:
+    from arkos_cli.colors import Colors, color
+except ImportError:
+    class Colors:
+        RESET = BOLD = DIM = RED = GREEN = YELLOW = BLUE = MAGENTA = CYAN = ""
+    def color(text: str, *codes) -> str: return text
+
 from arkos_cli.config import cfg_get, load_config, save_config, get_env_value
-from arkos_cli.portal_subscription import (
-    PortalSubscriptionFeatures, apply_portal_managed_defaults, get_portal_subscription_features)
+
+try:
+    from arkos_cli.portal_subscription import (
+        PortalSubscriptionFeatures, apply_portal_managed_defaults, get_portal_subscription_features)
+except ImportError:
+    class PortalSubscriptionFeatures:
+        def __init__(self, **kw):
+            self.portal_auth_present = False
+            self.features = {}
+    def apply_portal_managed_defaults(cfg): pass
+    def get_portal_subscription_features(*a, **kw): return PortalSubscriptionFeatures()
+
 from arkos_cli.platforms import PLATFORMS as _PLATFORMS_REGISTRY
 from arkos_cli.toolset_scope import (
     _TOOLSET_PLATFORM_RESTRICTIONS, toolset_allowed_for_platform as _toolset_allowed_for_platform)

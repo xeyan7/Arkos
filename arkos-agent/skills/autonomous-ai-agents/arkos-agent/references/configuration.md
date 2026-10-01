@@ -46,15 +46,15 @@ Full enumeration: `TOOLSETS` dict in `toolsets.py` (`_ARKOS_CORE_TOOLS` is the d
 | `memory` | Persistent cross-session memory |
 | `session_search` | Search past conversations |
 | `context_engine` | Pluggable context-engine hooks |
-| `project` | Named multi-folder workspace tools |
+| `project` | Named multi-folder workspace tools [removed in engine build] |
 | `delegation` | Subagent task delegation |
 | `cronjob` | Scheduled task management |
 | `clarify` | Ask user clarifying questions |
 | `todo` | In-session task planning |
-| `kanban` | Multi-agent work-queue tools (gated to workers) |
+| `kanban` | Multi-agent work-queue tools [removed in engine build] |
 | `debugging` | Extra introspection tools (off by default) |
 | `safe` | Minimal low-risk toolset for locked-down sessions |
-| `spotify`, `homeassistant`, `discord`, `discord_admin`, `feishu_doc`, `feishu_drive`, `yuanbao` | Service integrations (gated on their credentials) |
+| `spotify`, `homeassistant`, `discord`, `discord_admin`, `feishu_doc`, `feishu_drive`, `yuanbao` | Service integrations [removed in engine build] |
 
 Tool changes take effect on `/reset` (new session) — never mid-conversation, to preserve prompt caching.
 

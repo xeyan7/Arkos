@@ -1,8 +1,15 @@
-# CLI Architecture — CLI, slash commands, config, skins, updater, profiles
+# CLI Architecture — engine library only (all interactive frontends removed)
+
+> Engine build: `cli.py` (REPL), `cli_*_mixin.py`, `commands.py` (slash registry),
+> `curses_ui.py`, `skin_engine.py`, `colors.py`, `cli_output.py`, `main.py`, `setup*.py`,
+> `update*.py`, `goal_command.py`, `portal*.py`, `auth_portal.py`, `kanban*.py`,
+> `diagnostics_upload.py`, `telegram_managed_bot.py`, `cli_billing_mixin.py` are deleted.
+> `arkos_cli/` remains as a config/auth/models/profiles/plugins library only. Sections
+> below marked REMOVED describe the deleted frontend; Config system and Profiles stay live.
 
 Applies on top of the root `AGENTS.md`. Long-form: *(docs site — not shipped slim)*.
 
-## CLI architecture
+## CLI architecture (REMOVED in engine build)
 
 `cli.py` holds `ArkosCLI` (REPL loop, config, slash dispatch); behaviour lives in mixins
 `arkos_cli/cli_commands_mixin.py`, `cli_stream_mixin.py`, `cli_status_bar_mixin.py`,
@@ -21,7 +28,7 @@ it leaks as literal `?[K` under prompt_toolkit's `patch_stdout`; space-pad inste
 `f"\r{line}{' ' * pad}"`. Wrapper CLIs extend via the protected hooks in `cli_tui_mixin.py`
 (*(docs site — not shipped slim)*), not by overriding `run()`.
 
-## Slash command registry (`arkos_cli/commands.py`)
+## Slash command registry (REMOVED: `arkos_cli/commands.py` deleted)
 
 `COMMAND_REGISTRY` (list of `CommandDef`) is the single source; everything derives from it: CLI
 dispatch (`resolve_command()`), gateway `GATEWAY_KNOWN_COMMANDS` + dispatch, `gateway_help_lines()`,
@@ -43,7 +50,7 @@ settings via `save_config_value()` in `cli.py`. **Adding an alias** = add to `al
 surface updates automatically. Commands that mutate system-prompt state default to deferred
 invalidation with `--now` opt-in (root invariant).
 
-### Shared goal commands
+### Shared goal commands (REMOVED: `arkos_cli/goal_command.py` deleted;
 
 `arkos_cli/goal_command.py::dispatch_goal_command` owns `/goal` parsing and manager
 mutations. CLI, messaging gateway, TUI/Desktop/dashboard and Desktop goal controls
@@ -66,14 +73,15 @@ Do not add a surface-specific goal parser. ACP has no goal command or goal loop 
   Non-secret settings go in config.yaml; if internal code needs an env mirror, bridge it in code
   (`gateway_timeout`; `terminal.cwd` → `TERMINAL_CWD`). `MESSAGING_CWD` is removed and `TERMINAL_CWD`
   in `.env` is deprecated — the loader warns; canonical is `terminal.cwd`.
-- **Three loaders — know which you're in:** `load_cli_config()` (CLI, `cli.py`); `load_config()`
-  (`arkos tools/setup`, most subcommands, `arkos_cli/config.py`, merges `DEFAULT_CONFIG`); raw
-  YAML (gateway runtime, `gateway/run.py` + `gateway/config.py`). If the CLI sees a key and the
+- **Three loaders — know which you're in:** `load_config()`
+  (`arkos_cli/config.py`, merges `DEFAULT_CONFIG`); raw
+  YAML (gateway runtime, `gateway/config.py`). (Engine build: `load_cli_config()`/`cli.py` and
+  `gateway/run.py` deleted.) If the CLI sees a key and the
   gateway doesn't (or vice versa), you're on the wrong loader — check `DEFAULT_CONFIG` coverage.
 - **Working directory:** CLI uses `os.getcwd()`; messaging uses `terminal.cwd`, bridged to
   `TERMINAL_CWD` for child tools.
 
-## Skin engine (`arkos_cli/skin_engine.py`)
+## Skin engine (REMOVED: `arkos_cli/skin_engine.py` deleted)
 
 Skins are **pure data** (`SkinConfig`); no code change to add one. `init_skin_from_config()` reads
 `display.skin` at startup; `get_active_skin()` (cached), `set_active_skin(name)` (`/skin`),
@@ -84,7 +92,7 @@ thinking_verbs, wings), `tool_prefix`, `tool_emojis`, `branding.*` (agent_name, 
 response_label, prompt_symbol). Consumers: `banner.py`, `display.py`, `cli.py`. Key-by-key table
 and YAML template: *(docs site — not shipped slim)*.
 
-## Update pipeline (`arkos update`) — transactional; every stage guards a real field failure
+## Update pipeline (REMOVED in engine build: updater deleted;
 
 Fleet-update campaign  (Aug 2026). A PR that weakens a stage must answer for the failure class
 it guards. `plan → snapshot → apply → restart-per-kind → verify → report`
@@ -126,8 +134,8 @@ matchers; parser-derived flag sets; never blanket-exclude gateway ancestors): ro
 
 ## Profiles (multi-instance)
 
-`_apply_profile_override()` in `arkos_cli/main.py` sets `ARKOS_HOME` before any module import, so
-every `get_arkos_home()` scopes to the active profile (rules in root). Profiles are independent
+`get_arkos_home()` scopes to the active profile (rules in root). (Engine build:
+profile override is applied before any module import; `arkos_cli/main.py` deleted.) Profiles are independent
 islands by design — no live config inheritance; `--clone` copies at creation. Multiplex
 (`gateway.multiplex_profiles`) secret-scope rules: `gateway/AGENTS.md`.
 

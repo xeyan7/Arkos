@@ -366,12 +366,7 @@ def _load_config() -> dict:
                 return cfg
         except Exception:
             pass
-    try:
-        from cli import CLI_CONFIG
-        cfg = CLI_CONFIG.get("delegation") or {}
-        return cfg if isinstance(cfg, dict) else {}
-    except Exception:
-        return {}
+    return {}
 
 _ROUTING_FILTER_DEFAULTS = (
     ("providers_allowed", None), ("providers_ignored", None), ("providers_order", None), ("provider_sort", None),

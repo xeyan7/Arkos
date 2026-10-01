@@ -852,13 +852,18 @@ def _send_media_via_adapter(
     """Send MEDIA files as native attachments (routed by extension, as in
     _process_message_background). Returns per-file error strings so a dropped attachment surfaces
     in run status, not just the gateway log."""
-    from gateway.platforms.base import (
-        BasePlatformAdapter, should_send_media_as_audio, validate_media_delivery_path)
+    try:
+        from gateway.platforms.base import (
+            BasePlatformAdapter, should_send_media_as_audio, validate_media_delivery_path)
+    except ImportError:
+        BasePlatformAdapter = None
+        should_send_media_as_audio = lambda *a, **kw: False
+        validate_media_delivery_path = lambda p: p
     from agent.async_utils import safe_schedule_threadsafe
     job_ref = {"id": job.get("id", "?")}
     errors: list = []
     requested = [(str(p), v) for p, v in (media_files or [])]
-    media_files = BasePlatformAdapter.filter_media_delivery_paths(media_files)
+    media_files = BasePlatformAdapter.filter_media_delivery_paths(media_files) if BasePlatformAdapter else []
     kept = {p for p, _ in media_files}
     for raw_path, _v in requested:
         try:
@@ -1081,8 +1086,12 @@ def _resolve_target_transport(
         pconfig = transport.config
         runtime_adapter = transport.adapter
     else:
-        from gateway.relay import relay_fronted_platforms
-        if platform_name in relay_fronted_platforms():
+        try:
+            from gateway.relay import relay_fronted_platforms
+            is_relay = platform_name in relay_fronted_platforms()
+        except ImportError:
+            is_relay = False
+        if is_relay:
             return None, (
                 f"platform '{platform_name}' is relay-fronted and has no "
                 "live gateway transport; start the gateway (its ticker "
@@ -1563,25 +1572,31 @@ def _deliver_result(
     else:
         delivery_content = content
 
-    from gateway.platforms.base import BasePlatformAdapter
-    from gateway.media_policy import apply_media_policy_env
-    apply_media_policy_env(user_cfg)
-    media_files, cleaned_delivery_content = BasePlatformAdapter.extract_media(delivery_content)
-    requested_media = len(media_files)
-    media_files = BasePlatformAdapter.filter_media_delivery_paths(media_files)
-    _policy_dropped = requested_media - len(media_files)
-    policy_drop_errors = [
-        f"{_policy_dropped} media attachment(s) dropped by media path "
-        "policy (missing file, denied prefix, or strict-mode miss); "
-        "see gateway.strict / media_delivery_allow_dirs in config.yaml"
-    ] if _policy_dropped > 0 else []
+    try:
+        from gateway.platforms.base import BasePlatformAdapter
+        from gateway.media_policy import apply_media_policy_env
+        apply_media_policy_env(user_cfg)
+        media_files, cleaned_delivery_content = BasePlatformAdapter.extract_media(delivery_content)
+        requested_media = len(media_files)
+        media_files = BasePlatformAdapter.filter_media_delivery_paths(media_files)
+        _policy_dropped = requested_media - len(media_files)
+        policy_drop_errors = [
+            f"{_policy_dropped} media attachment(s) dropped by media path "
+            "policy (missing file, denied prefix, or strict-mode miss); "
+            "see gateway.strict / media_delivery_allow_dirs in config.yaml"
+        ] if _policy_dropped > 0 else []
+    except Exception:
+        media_files, cleaned_delivery_content, policy_drop_errors = [], delivery_content, []
 
     try:
         mirror_enabled = _cron_mirror_delivery_enabled(job, user_cfg)
     except Exception:
         mirror_enabled = False
-    _, mirror_text = BasePlatformAdapter.extract_media(content)
-    mirror_text = (mirror_text or "").strip()
+    try:
+        _, mirror_text = BasePlatformAdapter.extract_media(content)
+        mirror_text = (mirror_text or "").strip()
+    except Exception:
+        mirror_text = ""
 
     try:
         config = load_gateway_config()

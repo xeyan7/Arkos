@@ -1,6 +1,7 @@
 """Skills Hub official sources: repo-shipped optional skills and the centralized Arkos index."""
 
 import logging
+import os
 from pathlib import Path, PurePosixPath
 from typing import Dict, List, Optional, Tuple, Union
 

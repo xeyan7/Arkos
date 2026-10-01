@@ -2707,13 +2707,8 @@ def _is_payment_error(exc: Exception) -> bool:
 
 
 def _portal_account_has_fresh_paid_access() -> bool:
-    """Return True only when the fresh Portal account API says paid access is allowed."""
-    try:
-        from arkos_cli.portal_account import get_portal_account_info
-        return get_portal_account_info(force_fresh=True).paid_service_access is True
-    except Exception as exc:
-        logger.debug("Auxiliary Portal paid-entitlement refresh check failed: %s", exc)
-        return False
+    """Portal paid-access check — removed in engine build (portal deleted). Always False."""
+    return False
 
 
 _RATE_LIMIT_KEYWORDS = (

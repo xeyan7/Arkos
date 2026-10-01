@@ -11,7 +11,10 @@ from __future__ import annotations
 import contextlib
 import subprocess
 
-from arkos_cli.cli_output import line_input
+try:
+    from arkos_cli.cli_output import line_input
+except ImportError:
+    line_input = input
 from arkos_cli.config import clear_model_endpoint_credentials
 
 _HTTP = ("http://", "https://")

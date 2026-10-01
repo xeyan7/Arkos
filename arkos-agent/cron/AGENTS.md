@@ -1,7 +1,6 @@
-# cron/ (+ kanban) — scheduled jobs and the multi-agent work queue
+# cron/ — scheduled jobs
 
 Applies on top of the root `AGENTS.md`. Long-form: *(docs site — not shipped slim)*;
-user docs *(docs site — not shipped slim)*, `kanban.md`.
 
 ## Cron
 
@@ -26,7 +25,10 @@ Hardening invariants — each guards a real failure; don't weaken without answer
 - Background `delegate_task` is process-local; work that must survive restarts is a cron job or a
   `terminal(background=True, notify_on_complete=True)` process.
 
-## Kanban (multi-agent work queue)
+## Kanban (multi-agent work queue) — removed in engine build
+
+The Kanban subsystem (`arkos_cli/kanban*.py`, `tools/kanban_tools.py`,
+`plugins/kanban/`) was removed for engine-only use. References below are historical.
 
 Durable SQLite-backed board letting multiple profiles/workers collaborate. Users: `arkos kanban
 <verb>`; dispatcher-spawned workers use a dedicated `kanban_*` toolset so their schema footprint is
@@ -56,8 +58,9 @@ substring (root).
 
 ## Tests
 
-`tests/cron/`, `tests/arkos_cli/test_kanban*.py`, `tests/tools/test_kanban*.py`. Schedule parsing
+`tests/cron/`. Schedule parsing
 and catch-up windows are pure functions — test them as data. Never assert on the verb list or
 toolset size (root: no change-detectors). Time-based tests use loose bounds (≥ 2s) and event sync.
+(Kanban tests `test_kanban*.py` removed with the subsystem.)
 
 *Part of Arkos, an AI agent engine.*

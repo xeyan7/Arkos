@@ -16,8 +16,37 @@ from tools.send_message_senders import (
     _AUDIO_EXTS, _DEFAULT_CAPTION_LIMIT, _IMAGE_EXTS, _NO_DELIVERABLE, _VIDEO_EXTS, _VOICE_EXTS,
     _adapter_media_method, _error, _live_adapter, _media_caption_split, _plugin_standalone_sender,
     _registry_standalone_send, _resolve_slack_user_target, _sanitize_error_text, _send_bluebubbles,
-    _send_matrix_via_adapter, _send_qqbot, _send_signal, _send_telegram, _send_weixin, _send_yuanbao)
+    _send_matrix_via_adapter, _send_qqbot, _send_signal, _send_telegram, _send_weixin, _send_yuanbao,
+)
 from tools.registry import tool_error
+
+try:
+    from gateway.platforms.base import BasePlatformAdapter
+except ImportError:
+    class BasePlatformAdapter:
+        @staticmethod
+        def extract_media(content: str):
+            import re
+            media = []
+            cleaned = content.replace("[[audio_as_voice]]", "").replace("[[as_document]]", "")
+            for m in re.finditer(r"MEDIA:([^\s\n\r]+)", content):
+                path = m.group(1).strip()
+                media.append((path, False))
+                cleaned = cleaned.replace(m.group(0), "")
+            return media, cleaned.strip()
+
+        @staticmethod
+        def filter_media_delivery_paths(media_files, session_key: str = ""):
+            import os
+            return [(p, is_v) for p, is_v in (media_files or []) if os.path.exists(p)]
+
+        @staticmethod
+        def truncate_message(text, limit=4096, len_fn=len):
+            chunks = []
+            while text:
+                chunks.append(text[:limit])
+                text = text[limit:]
+            return chunks
 
 
 
@@ -187,7 +216,10 @@ def _handle_send(args):
     platform, pconfig, entry, err = _resolve_platform_config(platform_name, config)
     if err:
         return tool_error(err)
-    from gateway.platforms.base import BasePlatformAdapter
+    try:
+        from gateway.platforms.base import BasePlatformAdapter
+    except ImportError:
+        pass
     force_document_attachments = "[[as_document]]" in message
     media_files, cleaned_message = BasePlatformAdapter.extract_media(message)
     media_files = BasePlatformAdapter.filter_media_delivery_paths(media_files)
@@ -350,7 +382,10 @@ async def _send_live_adapter_media(adapter, chat_id, message, media_files, *, th
         last_result = await adapter.send(chat_id=chat_id, content=separate_text, metadata=metadata)
         if not last_result.success:
             return {"error": f"Adapter send failed: {_bounded_send_error(last_result.error)}"}
-    from gateway.platforms.base import BasePlatformAdapter
+    try:
+        from gateway.platforms.base import BasePlatformAdapter
+    except ImportError:
+        pass
     total = len(media_files)
     for index, descriptor in enumerate(media_files):
         media_path = descriptor[0] if isinstance(descriptor, (list, tuple)) and descriptor else None
@@ -534,7 +569,10 @@ async def _send_to_platform(platform, pconfig, chat_id, message, thread_id=None,
         return await _send_telegram(
             pconfig.token, chat_id, message, media_files=media_files, thread_id=thread_id, force_document=force_document,
             disable_link_previews=bool(getattr(pconfig, "extra", {}) and pconfig.extra.get("disable_link_previews")))
-    from gateway.platforms.base import BasePlatformAdapter
+    try:
+        from gateway.platforms.base import BasePlatformAdapter
+    except ImportError:
+        pass
     max_len = _platform_max_length(platform)
     chunks = BasePlatformAdapter.truncate_message(message, max_len) if max_len else [message]
     if platform_name == "discord" or (media_files and platform_name in _PLUGIN_STANDALONE_MEDIA):

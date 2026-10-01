@@ -158,7 +158,8 @@ topologies — the tool is stripped from the schema while the platform hint tell
 is "inside the agent desktop app". The pattern:
 
 - **The toolset is the surface gate.** Keep such tools off `_ARKOS_CORE_TOOLS` and in a named
-  toolset (`desktop_ui`, `project`); the GUI gateway's `_load_enabled_toolsets(platform)`
+  toolset (e.g. GUI-only `desktop_ui`, `project` — both removed in the engine build);
+  the GUI gateway's `_load_enabled_toolsets(platform)`
   folds it in when the session's platform says GUI. One resolver, every topology.
 - **`check_fn` answers reachability or opt-in, not surface.** "Is the bridge wired?" — fine.
   "Was I spawned by Electron?" — not. `check_fn` results are TTL-cached process-wide
@@ -195,9 +196,10 @@ arkos-agent/  (engine-only build: all user-facing frontends removed)
 ├── tools/                # Tool implementations, auto-discovered via tools/registry.py
 │   └── environments/     # Terminal backends (local, docker, ssh, modal, daytona, singularity)
 ├── gateway/              # Engine plumbing (session_context, config, status, delivery)
-│   ├── platforms/        # Send-client helpers kept by engine tools (base, event, signal, yuanbao)
 │   └── builtin_hooks/    # Always-registered gateway hooks (extension point; none shipped)
-├── plugins/              # memory/, context_engine/, model-providers/, kanban/, image_gen/, ...
+│   (engine build: `gateway/platforms/` send-client helpers and `gateway/relay/` removed;
+│   remaining imports use guarded fallbacks)
+├── plugins/              # memory/, context_engine/, model-providers/, image_gen/, ...
 ├── skills/               # Built-in skills (by category)   optional-skills/: shipped, not active
 ├── cron/                 # jobs.py + scheduler.py (+ scheduler_*.py)
 └── scripts/              # dev helpers (check scripts)
@@ -215,8 +217,8 @@ profile-aware via `get_arkos_home()`.
 Every former god file is a **facade** (public entry points + the names other packages import)
 plus **siblings** `<stem>_<topic>.py` in the same directory, each owning one topic. Largest
 families: `arkos_state.py` (21), `tools/mcp_tool.py` (15),
-`arkos_cli/kanban.py` (14), `arkos_cli/auth.py`
-(12), `tools/browser_tool.py` (11), `run_agent.py`
+`arkos_cli/auth.py`
+(10), `tools/browser_tool.py` (11), `run_agent.py`
 (`agent/turn_*.py`, `agent_init.py`, `conversation_loop.py`).
 
 - **Find code by topic, not by facade:** `grep -rn "def name" <dir>/<stem>_*.py`. Reading the
@@ -389,8 +391,8 @@ extract, not to regex around it.
 | `tools/`, `toolsets.py`, `model_tools.py` | `tools/AGENTS.md` | Adding tools, registry, toolsets, delegation, cross-tool references, backends |
 | `plugins/`, `arkos_cli/plugins*.py` | `plugins/AGENTS.md` | Plugin kinds, native compat contract, in-tree policy, Sep-2026 compat window |
 | `skills/`, `optional-skills/`, `agent/curator*.py` | `skills/AGENTS.md` | Frontmatter, HARDLINE authoring standards, curator |
-| `cron/`, kanban (`arkos_cli/kanban*.py`, `tools/kanban_tools.py`, `plugins/kanban/`) | `cron/AGENTS.md` | Scheduler invariants, job fields, kanban board/dispatcher |
-| `gateway/platforms/` send clients | `gateway/platforms/ADDING_A_PLATFORM.md` | Step-by-step adapter guide |
+| `cron/` | `cron/AGENTS.md` | Scheduler invariants, job fields (kanban subsystem removed in engine build) |
+| `gateway/` engine plumbing | `gateway/AGENTS.md` | Session context, config, delivery (platform adapters removed in engine build) |
 
 Long-form background lives in *(docs site — not shipped slim)* (agent-loop, prompt-assembly,
 context-compression-and-caching, gateway-internals, tools-runtime, plugins/, cron-internals,

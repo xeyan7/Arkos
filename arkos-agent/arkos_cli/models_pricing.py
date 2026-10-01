@@ -270,30 +270,8 @@ _DEFAULT_PORTAL_INFERENCE_BASE = ""
 
 
 def _resolve_portal_pricing_credentials() -> tuple[str, str]:
-    """``(api_key, base_url)`` for Arkos Portal pricing; base_url is the bare origin (no ``/v1``).
-    Precedence mirrors runtime credential resolution: ``PORTAL_INFERENCE_BASE_URL`` (staging /
-    preview) → resolved credential ``base_url`` → production default. Without the override a
-    staging profile's sale ``pricing.original`` would never reach the pickers."""
-    try:
-        from arkos_cli.auth import _portal_inference_env_override
-
-        env_base = _portal_inference_env_override()
-    except Exception:
-        env_base = None
-    api_key = creds_base = ""
-    try:
-        from arkos_cli.auth import resolve_portal_runtime_credentials
-
-        creds = resolve_portal_runtime_credentials()
-        if creds:
-            api_key = creds.get("api_key", "") or ""
-            creds_base = (creds.get("base_url", "") or "").strip()
-    except Exception:
-        pass
-    base_url = (env_base or creds_base or _DEFAULT_PORTAL_INFERENCE_BASE).rstrip("/")
-    if base_url.endswith("/v1"):
-        base_url = base_url[:-3]
-    return (api_key, base_url)
+    """Portal pricing credentials — removed in engine build (portal deleted). Always ("", "")."""
+    return ("", "")
 
 
 _PORTAL_CATALOG_TTL_SECONDS = 300.0
@@ -313,22 +291,8 @@ def _fetch_portal_pricing(api_key: str, base_url: str, *, force_refresh: bool) -
 
 
 def portal_policy_allowed_ids(*, force_refresh: bool = False) -> Optional[set[str]]:
-    """The Portal model ids the caller's org may reach (keys of an authenticated ``GET /v1/models``,
-    which omits policy-blocked rows), or ``None`` to not filter: no policy (or a token too old to
-    say), an anonymous read (unfiltered catalog), or an empty read (a fetch failure, not an org
-    that may reach nothing)."""
-    try:
-        from arkos_cli.portal_account import portal_policy_present
-
-        if portal_policy_present() is not True:
-            return None
-    except Exception:
-        return None
-
-    api_key, base_url = _resolve_portal_pricing_credentials()
-    if not api_key or not base_url:
-        return None
-    return set(_fetch_portal_pricing(api_key, base_url, force_refresh=force_refresh)) or None
+    """Portal policy allowlist — removed in engine build (portal deleted). Always None (no filter)."""
+    return None
 
 
 _PORTAL_POLICY_APPEND_MAX = 64

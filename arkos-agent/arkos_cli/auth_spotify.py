@@ -352,7 +352,10 @@ def _spotify_interactive_setup(redirect_uri_hint: str) -> str:
         except Exception:
             pass
 
-    from arkos_cli.cli_output import line_input
+    try:
+        from arkos_cli.cli_output import line_input
+    except ImportError:
+        line_input = input
     try:
         raw = line_input("Spotify Client ID: ").strip()
     except (EOFError, KeyboardInterrupt):

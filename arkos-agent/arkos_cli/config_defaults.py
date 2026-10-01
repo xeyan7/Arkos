@@ -756,12 +756,6 @@ DEFAULT_CONFIG = {
         "model": "",
         "model_provider": "",
         "provider": "",
-        "chronos": {
-            "portal_url": "",
-            "callback_url": "",
-            "expected_audience": "",
-            "nas_jwks_url": "",
-        },
         "wrap_response": True,
         "delivery": {
             "notify": True,

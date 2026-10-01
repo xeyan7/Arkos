@@ -235,7 +235,19 @@ async def _send_telegram(token, chat_id, message, media_files=None, thread_id=No
         formatted, send_parse_mode, _has_html = _telegram_format(message)
         bot = _telegram_bot(token)
         from plugins.platforms.telegram.telegram_ids import normalize_telegram_chat_id
-        from gateway.platforms.base import BasePlatformAdapter, utf16_len
+        try:
+            from gateway.platforms.base import BasePlatformAdapter, utf16_len
+        except ImportError:
+            def utf16_len(s: str) -> int:
+                return len(s.encode("utf-16-le")) // 2
+            class BasePlatformAdapter:
+                @staticmethod
+                def truncate_message(text, limit=4096, len_fn=len):
+                    chunks = []
+                    while text:
+                        chunks.append(text[:limit])
+                        text = text[limit:]
+                    return chunks
         int_chat_id = normalize_telegram_chat_id(chat_id)
         media_files = media_files or []
         thread_kwargs = _telegram_thread_kwargs(thread_id)
@@ -402,8 +414,11 @@ async def _send_signal(extra, chat_id, message, media_files=None):
         import httpx
     except ImportError:
         return {"error": "httpx not installed"}
-    from gateway.platforms import signal_rate_limit as rl
-    from gateway.platforms.signal_format import markdown_to_signal
+    try:
+        from gateway.platforms import signal_rate_limit as rl
+        from gateway.platforms.signal_format import markdown_to_signal
+    except ImportError:
+        return {"error": "Signal platform adapter is not available"}
     try:
         http_url, account = extra.get("http_url", "http://127.0.0.1:8080").rstrip("/"), extra.get("account", "")
         if not account:

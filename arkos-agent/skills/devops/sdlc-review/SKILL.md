@@ -1,6 +1,6 @@
 ---
 name: sdlc-review
-description: Review Kanban handoffs and route verified outcomes.
+description: Review Kanban handoffs and route verified outcomes. [INACTIVE in engine build: requires deleted kanban toolset.]
 version: 1.1.0
 author: Arkos Team
 license: MIT
@@ -14,7 +14,11 @@ environments:
   - kanban
 ---
 
-# SDLC Review Skill
+# SDLC Review Skill [INACTIVE in engine build — kanban subsystem deleted]
+
+> Engine build: this skill requires the deleted `kanban` toolset
+> (`arkos_cli/kanban*.py`, `tools/kanban_tools.py`, `plugins/kanban/`).
+> Kept for reference; it cannot run.
 
 Independently verify work handed from a Kanban implementation run to the review lane, then approve it, request changes, or escalate. This skill reviews the deliverable and its evidence; it does not take over the implementer's work.
 

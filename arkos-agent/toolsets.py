@@ -20,24 +20,13 @@ _ARKOS_CORE_TOOLS = [
     "clarify",
     "execute_code", "delegate_task",
     "cronjob_manage",
-    "ha_list_entities", "ha_get_state", "ha_list_services", "ha_call_service",
-    "kanban_show", "kanban_list",
-    "kanban_complete", "kanban_block", "kanban_request_review",
-    "kanban_request_changes",
-    "kanban_heartbeat",
-    "kanban_comment", "kanban_create", "kanban_link",
-    "kanban_unblock",
-    "kanban_attach", "kanban_attach_url", "kanban_attachments",
     "computer_use",
 ]
 
 _ARKOS_WEBHOOK_SAFE_TOOLS = ["web_search", "web_extract", "vision_analyze", "clarify"]
-_HA_TOOLS = ["ha_list_entities", "ha_get_state", "ha_list_services", "ha_call_service"]
-_FEISHU_TOOLS = [
-    "feishu_doc_read", "feishu_drive_list_comments", "feishu_drive_list_comment_replies",
-    "feishu_drive_reply_comment", "feishu_drive_add_comment",
-]
-_YUANBAO_TOOLS = ["yb_query_group_info", "yb_query_group_members", "yb_send_dm", "yb_search_sticker", "yb_send_sticker"]
+_HA_TOOLS = []
+_FEISHU_TOOLS = []
+_YUANBAO_TOOLS = []
 
 
 def _ts(description, tools=(), includes=(), **extra):
@@ -55,7 +44,7 @@ def _core_without(*excluded, kanban=True):
     return [t for t in _ARKOS_CORE_TOOLS if t not in excluded and (kanban or not t.startswith("kanban_"))]
 
 
-_CODING_TOOLS = _core_without("image_generate", "text_to_speech", "cronjob_manage", "computer_use", *_HA_TOOLS, kanban=False)
+_CODING_TOOLS = _core_without("image_generate", "text_to_speech", "cronjob_manage", "computer_use", kanban=False)
 
 TOOLSETS = {
     "web": _ts("Web research and content extraction tools", ["web_search", "web_extract"]),
@@ -110,35 +99,11 @@ TOOLSETS = {
     "memory": _ts("Persistent memory across sessions (personal notes + user profile)", ["memory"]),
     "context_engine": _ts("Runtime tools exposed by the active context engine"),
     "session_search": _ts("Search and recall past conversations with summarization", ["session_search"]),
-    "project": _ts("Desktop Projects — create/switch named workspaces (GUI sessions only)", ["desktop_project"]),
     "bot_room": _ts("Verified text-only Group Chat turn capabilities"),
 
-    "desktop_ui": _ts(
-        "Desktop GUI affordances — in-app terminal/browser panes, pane focus, "
-        "reactions (GUI sessions only)",
-        ["read_terminal", "close_terminal", "desktop_preview", "drive_preview",
-         "annotate_preview", "read_window_below", "focus_pane", "react_to_message",
-         "setup_mcp", "gui_tour", "show_tip"],
-    ),
     "clarify": _ts("Ask the user clarifying questions (multiple-choice or open-ended)", ["clarify"]),
     "code_execution": _ts("Run Python scripts that call tools programmatically (reduces LLM round trips)", ["execute_code"]),
     "delegation": _ts("Spawn subagents with isolated context for complex subtasks", ["delegate_task"]),
-    "homeassistant": _ts("Home Assistant smart home control and monitoring", _HA_TOOLS),
-    "kanban": _ts(
-        "Kanban multi-agent coordination — only active when the agent is spawned by "
-        "the kanban dispatcher (ARKOS_KANBAN_TASK env set). The dispatcher runs "
-        "inside the gateway by default; see `kanban.dispatch_in_gateway` in "
-        "config.yaml. Lets workers mark tasks done with structured handoffs, enter "
-        "first-class review (request_review — not a block), return review changes, "
-        "block for human input, heartbeat during long ops, comment on threads, attach "
-        "files, and (for orchestrators) list, unblock, and fan out tasks.",
-        [t for t in _ARKOS_CORE_TOOLS if t.startswith("kanban_")],
-    ),
-    "discord": _ts("Discord read and participate tools (fetch messages, search members, create threads)", ["discord"]),
-    "discord_admin": _ts("Discord server management (list channels/roles, pin messages, assign roles)", ["discord_admin"]),
-    "yuanbao": _ts("Yuanbao platform tools - group info, member queries, DM, stickers", _YUANBAO_TOOLS),
-    "feishu_doc": _ts("Read Feishu/Lark document content", ["feishu_doc_read"]),
-    "feishu_drive": _ts("Feishu/Lark document comment operations (list, reply, add)", _FEISHU_TOOLS[1:]),
     "spotify": _ts(
         "Native Spotify playback, search, playlist, album, and library tools",
         ["spotify_playback", "spotify_devices", "spotify_queue", "spotify_search",
@@ -169,42 +134,28 @@ TOOLSETS = {
 
     "arkos-cron": _bundle("Default cron toolset - same core tools as arkos-cli; gated by `arkos tools`"),
     "arkos-telegram": _bundle("Telegram bot toolset - full access for personal use (terminal has safety checks)"),
-    "arkos-discord": _bundle(
-        "Discord bot toolset - full access (terminal has safety checks via dangerous "
-        "command approval)",
-        ["discord", "discord_admin"],
-    ),
     "arkos-whatsapp": _bundle("WhatsApp bot toolset - similar to Telegram (personal messaging, more trusted)"),
     "arkos-slack": _bundle("Slack bot toolset - full access for workspace use (terminal has safety checks)"),
-    "arkos-signal": _bundle("Signal bot toolset - encrypted messaging platform (full access)"),
     "arkos-bluebubbles": _bundle("BlueBubbles iMessage bot toolset - Apple iMessage via local BlueBubbles server"),
-    "arkos-homeassistant": _bundle("Home Assistant bot toolset - smart home event monitoring and control"),
     "arkos-email": _bundle("Email bot toolset - interact with Arkos via email (IMAP/SMTP)"),
     "arkos-mattermost": _bundle("Mattermost bot toolset - self-hosted team messaging (full access)"),
     "arkos-matrix": _bundle("Matrix bot toolset - decentralized encrypted messaging (full access)"),
     "arkos-dingtalk": _bundle("DingTalk bot toolset - enterprise messaging platform (full access)"),
-    "arkos-feishu": _bundle("Feishu/Lark bot toolset - enterprise messaging via Feishu/Lark (full access)", _FEISHU_TOOLS),
     "arkos-weixin": _bundle("Weixin bot toolset - personal WeChat messaging via iLink (full access)"),
     "arkos-qqbot": _bundle("QQBot toolset - QQ messaging via Official Bot API v2 (full access)"),
     "arkos-wecom": _bundle("WeCom bot toolset - enterprise WeChat messaging (full access)"),
     "arkos-wecom-callback": _bundle("WeCom callback toolset - enterprise self-built app messaging (full access)"),
-    "arkos-yuanbao": {
-        "description": "Yuanbao Bot 元宝消息平台工具集 - 群信息、成员查询、私聊、贴纸表情",
-        "tools": _ARKOS_CORE_TOOLS + _YUANBAO_TOOLS,
-        "module": "tools.yuanbao_tools",
-        "includes": [],
-    },
     "arkos-sms": _bundle("SMS bot toolset - interact with Arkos via SMS (Twilio)"),
     "arkos-webhook": _ts("Webhook toolset - receive and process external webhook events", _ARKOS_WEBHOOK_SAFE_TOOLS),
     "arkos-gateway": _ts(
         "Gateway toolset - union of all messaging platform tools",
         [],
         includes=[
-            "arkos-telegram", "arkos-discord", "arkos-whatsapp", "arkos-slack",
-            "arkos-signal", "arkos-bluebubbles", "arkos-homeassistant", "arkos-email",
+            "arkos-telegram", "arkos-whatsapp", "arkos-slack",
+            "arkos-bluebubbles", "arkos-email",
             "arkos-sms", "arkos-mattermost", "arkos-matrix", "arkos-dingtalk",
-            "arkos-feishu", "arkos-wecom", "arkos-wecom-callback", "arkos-weixin",
-            "arkos-qqbot", "arkos-webhook", "arkos-yuanbao",
+            "arkos-wecom", "arkos-wecom-callback", "arkos-weixin",
+            "arkos-qqbot", "arkos-webhook",
         ],
     ),
 }

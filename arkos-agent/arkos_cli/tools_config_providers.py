@@ -7,13 +7,39 @@ import logging
 from functools import partial
 from typing import Callable, Optional
 
-from arkos_cli.cli_output import (
-    print_info as _print_info, print_success as _print_success, print_warning as _print_warning, prompt as _prompt,
-)
-from arkos_cli.colors import Colors, color
+try:
+    from arkos_cli.cli_output import (
+        print_info as _print_info, print_success as _print_success, print_warning as _print_warning, prompt as _prompt,
+    )
+except ImportError:
+    def _print_info(t): pass
+    def _print_success(t): pass
+    def _print_warning(t): pass
+    def _prompt(q, d=None, **kw): return d or ""
+
+try:
+    from arkos_cli.colors import Colors, color
+except ImportError:
+    class Colors:
+        RESET = BOLD = DIM = RED = GREEN = YELLOW = BLUE = MAGENTA = CYAN = ""
+    def color(t, *c): return t
+
 from arkos_cli.config import cfg_get, get_env_value, load_config, save_config, save_env_value
-from arkos_cli.portal_account import format_portal_entitlement_message
-from arkos_cli.portal_subscription import MANAGED_FEATURE_COVERAGE_CATEGORY, PortalSubscriptionFeatures
+
+try:
+    from arkos_cli.portal_account import format_portal_entitlement_message
+except ImportError:
+    def format_portal_entitlement_message(*a, **kw): return ""
+
+try:
+    from arkos_cli.portal_subscription import MANAGED_FEATURE_COVERAGE_CATEGORY, PortalSubscriptionFeatures
+except ImportError:
+    MANAGED_FEATURE_COVERAGE_CATEGORY = {}
+    class PortalSubscriptionFeatures:
+        def __init__(self, **kw):
+            self.portal_auth_present = False
+            self.features = {}
+
 from tools.tool_backend_helpers import PORTAL_MANAGED_PROVIDER, fal_key_is_configured
 from utils import base_url_hostname, is_truthy_value
 
@@ -703,7 +729,10 @@ def _portal_provider_gate(provider: dict, config: dict, managed_feature, *, forc
     from arkos_cli.tools_config import get_portal_subscription_features
 
     if managed_feature:
-        from arkos_cli.portal_subscription import ensure_portal_access
+        try:
+            from arkos_cli.portal_subscription import ensure_portal_access
+        except ImportError:
+            ensure_portal_access = lambda *a, **kw: False
 
         if not ensure_portal_access(
             capability=f"{provider.get('name', 'the Portal Tool Gateway')}",

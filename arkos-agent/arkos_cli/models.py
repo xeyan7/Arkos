@@ -178,27 +178,8 @@ def _union_with_portal_recommendations(
     tier_key: str, curated_ids: list[str], pricing: dict[str, dict[str, str]], portal_base_url: str,
     *, force_refresh: bool, synthesize_free_pricing: bool,
 ) -> tuple[list[str], dict[str, dict[str, str]]]:
-    """Append the Portal's ``<tier_key>`` recommendations missing from ``curated_ids``.
-
-    Curated models show first, Portal-only picks follow. Failures (network, parse, missing field)
-    silently return the inputs unchanged — never block the picker on a Portal-side hiccup.
-    """
-    try:
-        payload = fetch_portal_recommended_models(portal_base_url, force_refresh=force_refresh)
-    except Exception:
-        payload = None
-    block = payload.get(tier_key) if isinstance(payload, dict) else None
-    entries = block if isinstance(block, list) else []
-    portal_ids = [name for entry in entries if (name := _extract_model_name(entry))]
-    if not portal_ids:
-        return (list(curated_ids), dict(pricing))
-
-    augmented_pricing = dict(pricing)
-    if synthesize_free_pricing:
-        for mid in portal_ids:
-            augmented_pricing.setdefault(mid, {"prompt": "0", "completion": "0"})
-    seen = set(curated_ids)
-    return (list(curated_ids) + [mid for mid in portal_ids if mid not in seen], augmented_pricing)
+    """Portal recommendations — removed in engine build. Returns inputs unchanged."""
+    return (list(curated_ids), dict(pricing))
 
 
 def union_with_portal_free_recommendations(
@@ -240,25 +221,8 @@ def get_cached_portal_free_tier() -> Optional[bool]:
 
 
 def check_portal_free_tier(*, force_fresh: bool = False, cached_only: bool = False) -> bool:
-    """True only when the Arkos Portal user is KNOWN to be free-tier (unknown/error → False so this
-    never blocks users). Cached ``_FREE_TIER_CACHE_TTL`` seconds so an upgrade shows within minutes.
-    ``cached_only`` returns the live cached answer or the fail-open ``False`` without contacting Portal."""
-    now = time.monotonic()
-    profile_key = _pricing_profile_key()
-    if not force_fresh:
-        cached_result = get_cached_portal_free_tier()
-        if cached_result is not None:
-            return cached_result
-    if cached_only:
-        return False
-    try:
-        from arkos_cli.portal_account import get_portal_account_info
-
-        result = get_portal_account_info(force_fresh=force_fresh).is_free_tier
-    except Exception:
-        result = False
-    _free_tier_cache[profile_key] = (result, now)
-    return result
+    """Portal free-tier check — removed in engine build (portal deleted). Always False."""
+    return False
 
 
 
@@ -298,45 +262,13 @@ def _write_portal_recommended_disk(base: str, data: dict[str, Any]) -> None:
 def fetch_portal_recommended_models(
     portal_base_url: str = "", timeout: float = 5.0, *, force_refresh: bool = False
 ) -> dict[str, Any]:
-    """Fetch the Portal's public ``/api/portal/recommended-models`` payload (no auth).
-
-    Cached per portal URL for ``_PORTAL_RECOMMENDED_CACHE_TTL`` seconds in process (``force_refresh``
-    bypasses); a successful fetch is also persisted as last-known-good on disk, which serves a live
-    failure so a transient Portal hiccup doesn't drop the recommendations.
-    """
-    base = (portal_base_url or "").rstrip("/")
-    if not base:
-        return {}
-    now = time.monotonic()
-    cached = _portal_recommended_cache.get(base)
-    if not force_refresh and cached is not None and now - cached[1] < _PORTAL_RECOMMENDED_CACHE_TTL:
-        return cached[0]
-    try:
-        data = _get_json(
-            f"{base}{PORTAL_RECOMMENDED_MODELS_PATH}", timeout=timeout, headers={"Accept": "application/json"}
-        )
-        if not isinstance(data, dict):
-            data = {}
-    except Exception:
-        data = {}
-    if data:
-        _write_portal_recommended_disk(base, data)
-    else:
-        data = _read_portal_recommended_disk(base) or data
-    _portal_recommended_cache[base] = (data, now)
-    return data
+    """Portal recommended models — removed in engine build (portal deleted). Always {}."""
+    return {}
 
 
 def _resolve_portal_url() -> str:
-    """Best-effort lookup of the Portal base URL the user is authed against."""
-    try:
-        from arkos_cli.auth import DEFAULT_PORTAL_URL, get_provider_auth_state
-
-        state = get_provider_auth_state("portal") or {}
-        portal = str(state.get("portal_base_url") or "").strip()
-        return (portal or str(DEFAULT_PORTAL_URL or "")).rstrip("/")
-    except Exception:
-        return ""
+    """Portal base URL — removed in engine build (portal deleted). Always ""."""
+    return ""
 
 
 def _extract_model_name(entry: Any) -> Optional[str]:
@@ -348,20 +280,8 @@ def _extract_model_name(entry: Any) -> Optional[str]:
 def get_portal_recommended_aux_model(
     *, vision: bool = False, free_tier: Optional[bool] = None, portal_base_url: str = "",
     force_refresh: bool = False) -> Optional[str]:
-    """The Portal's recommended model for an auxiliary task: free tier → free pick only; paid tier →
-    paid pick, falling back to the free one when the Portal returned ``null`` (staged rollouts)."""
-    base = portal_base_url or _resolve_portal_url()
-    payload = fetch_portal_recommended_models(base, force_refresh=force_refresh)
-    if not payload:
-        return None
-    if free_tier is None:
-        try:
-            free_tier = check_portal_free_tier()
-        except Exception:
-            free_tier = False
-    kind = "Vision" if vision else "Compaction"
-    tiers = ("free",) if free_tier else ("paid", "free")
-    return next((n for t in tiers if (n := _extract_model_name(payload.get(f"{t}Recommended{kind}Model")))), None)
+    """Portal recommended aux model — removed in engine build (portal deleted). Always None."""
+    return None
 
 
 def get_preferred_silent_default_model(provider: str = "openrouter") -> str:
@@ -1069,17 +989,8 @@ def _copilot_catalog(normalized: str, force_refresh: bool) -> Optional[list[str]
 
 
 def _portal_catalog(normalized: str, force_refresh: bool) -> Optional[list[str]]:
-    try:
-        from arkos_cli.auth import fetch_portal_models, resolve_portal_runtime_credentials
-
-        creds = resolve_portal_runtime_credentials()
-        if creds:
-            live = fetch_portal_models(api_key=creds.get("api_key", ""), inference_base_url=creds.get("base_url", ""))
-            if live:
-                return live
-    except Exception:
-        pass
-    return get_curated_portal_model_ids() or None
+    """Portal catalog — removed in engine build (portal deleted). Always None."""
+    return None
 
 
 def _api_key_credentials(normalized: str) -> tuple[str, str]:
@@ -2249,31 +2160,8 @@ from difflib import get_close_matches  # noqa: F401,E402
 import http.client  # noqa: F401,E402
 
 def is_portal_free_tier(account_info: dict[str, Any]) -> bool:
-    """Return True if the account info indicates a free (unpaid) tier.
-
-    Prefer the Portal's explicit ``paid_service_access.allowed`` entitlement
-    decision.  Legacy payloads fall back to ``subscription.monthly_charge == 0``.
-    Returns False when both signals are missing or unparseable.
-    """
-    paid_access = account_info.get("paid_service_access")
-    if isinstance(paid_access, dict):
-        allowed = paid_access.get("allowed")
-        if isinstance(allowed, bool):
-            return not allowed
-        paid = paid_access.get("paid_access")
-        if isinstance(paid, bool):
-            return not paid
-
-    sub = account_info.get("subscription")
-    if not isinstance(sub, dict):
-        return False
-    charge = sub.get("monthly_charge")
-    if charge is None:
-        return False
-    try:
-        return float(charge) == 0
-    except (TypeError, ValueError):
-        return False
+    """Portal free-tier check — removed in engine build (portal deleted). Always False."""
+    return False
 
 _OPENCODE_KEYLESS_EXTRA_SLUGS = frozenset({"big-pickle"})
 

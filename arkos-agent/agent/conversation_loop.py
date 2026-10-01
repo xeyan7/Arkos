@@ -386,15 +386,8 @@ def _ra():
 
 
 def _portal_entitlement_message(capability: str) -> str:
-    try:
-        from arkos_cli.portal_account import (
-            format_portal_entitlement_message,
-            get_portal_account_info,
-        )
-        account_info = get_portal_account_info(force_fresh=True)
-        return format_portal_entitlement_message(account_info, capability=capability) or ""
-    except Exception:
-        return ""
+    """Portal entitlement message — removed in engine build (portal deleted). Always ""."""
+    return ""
 
 
 def _print_guidance(agent, message: str) -> bool:
@@ -424,6 +417,7 @@ def _system_prompt_for_hooks(api_kwargs: Any, request_messages: Any) -> Any:
 
 
 def _is_portal_inference_route(provider: str, base_url: str) -> bool:
+    """Portal route check — removed in engine build. Always False."""
     return False
 
 

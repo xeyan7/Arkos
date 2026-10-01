@@ -1,9 +1,13 @@
-# Themes / Skins — Author an agent Color Theme
+# Themes / Skins — Author an agent Color Theme [REMOVED in engine build]
 
-Author an agent **skin** — one YAML file that themes the CLI, the TUI, and the
-desktop GUI at once. The skin engine (`arkos_cli/skin_engine.py`) resolves the
-active skin and the gateway pushes it to every surface, so a file dropped in
-`~/.arkos/skins/` is the theme analogue of a plugin: no code, all surfaces. This
+> Engine build: the skin engine (`arkos_cli/skin_engine.py`) is deleted along
+> with the CLI/TUI/desktop surfaces it themed. This skill is historical.
+
+Author an agent **skin** — one YAML file that themed the CLI, the TUI, and the
+desktop GUI at once. The skin engine (`arkos_cli/skin_engine.py`, deleted)
+resolved the
+active skin and the gateway pushed it to every surface, so a file dropped in
+`~/.arkos/skins/` was the theme analogue of a plugin: no code, all surfaces. This
 skill covers writing a good skin and activating it; it does not build GUI theme
 editors or ship built-in presets.
 
@@ -56,8 +60,8 @@ key in its row (element-specific keys fall back to the shared one when unset).
 Note the sharing: `ui_accent` colors tool markers **and** headings/links/chevrons,
 so to recolor *only* tool calls (the classic "change the gold `●`") set `ui_tool`.
 `branding` (`agent_name`, `prompt_symbol`, `welcome`, `goodbye`, `help_header`),
-`spinner`, and `tool_prefix` are optional flavor; full schema in
-`arkos_cli/skin_engine.py`.
+`spinner`, and `tool_prefix` are optional flavor; full schema was in
+`arkos_cli/skin_engine.py` (deleted in engine build).
 
 ## Procedure
 

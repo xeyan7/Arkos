@@ -151,7 +151,10 @@ def _prompt_model_selection(
     With *pricing* (``{model_id: {prompt, completion}}``) a compact price column is shown; models in
     *unavailable_models* render grayed out and unselectable with an upgrade link to *portal_url*.
     """
-    from arkos_cli.cli_output import line_input
+    try:
+        from arkos_cli.cli_output import line_input
+    except ImportError:
+        line_input = input
     _unavailable = unavailable_models or []
     sale_chrome = (confirm_provider or "").strip().lower() == "portal"
 
@@ -223,8 +226,17 @@ def _prompt_model_selection(
     except (ImportError, NotImplementedError, OSError, subprocess.SubprocessError):
         pass
 
-    from arkos_cli.curses_ui import format_radio_item_ansi
-    from arkos_cli.colors import Colors, color
+    try:
+        from arkos_cli.curses_ui import format_radio_item_ansi
+    except ImportError:
+        def format_radio_item_ansi(segments):
+            return " ".join(str(seg[0]) if isinstance(seg, (list, tuple)) else str(seg) for seg in segments) if isinstance(segments, list) else str(segments)
+    try:
+        from arkos_cli.colors import Colors, color
+    except ImportError:
+        class Colors:
+            YELLOW = ""
+        def color(text, *c): return text
     for line in menu_title.splitlines():
         print(line.replace("★", color("★", Colors.YELLOW), 1) if "★" in line else line)
     num_width = len(str(n + 2))
@@ -263,7 +275,7 @@ def _prompt_model_selection(
 
 
 def _save_model_choice(model_id: str) -> None:
-    """Save the selected model to config.yaml only — NOT .env, which would stomp in multi-agent setups."""
+    """Save the selected model to config.yaml only -- NOT .env, which would stomp in multi-agent setups."""
     from arkos_cli.config import save_config, load_config
     config = load_config()
     if isinstance(config.get("model"), dict):

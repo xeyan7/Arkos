@@ -145,11 +145,7 @@ def _detect_kanban() -> bool:
             owned = True
         if owned:
             return True
-    try:
-        from tools.kanban_tools import _profile_has_kanban_toolset
-        return bool(_profile_has_kanban_toolset())
-    except Exception:
-        return False
+    return False
 
 
 def _detect_docker() -> bool:

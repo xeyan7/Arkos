@@ -1,8 +1,8 @@
 # Slash Commands (In-Session)
 
-Registry of record: `arkos_cli/commands.py` (`COMMAND_REGISTRY`) — every
-consumer (autocomplete, `/help`, Telegram menu, Slack mapping) derives from
-it. New commands land often; `/help` in-session is always authoritative.
+Registry of record (deleted in engine build): `arkos_cli/commands.py` (`COMMAND_REGISTRY`) — every
+consumer (autocomplete, `/help`, Telegram menu, Slack mapping) derived from
+it. `/help` in-session is always authoritative.
 (CLI) = interactive CLI/TUI only. (GW) = gateway platforms only.
 
 ### Session
@@ -66,8 +66,8 @@ it. New commands land often; `/help` in-session is always authoritative.
 /cron [sub]              Manage scheduled tasks (CLI)
 /suggestions (/suggest)  Review suggested automations
 /blueprint (/bp) [name]  Set up an automation from a blueprint
-/curator [sub]           Skill maintenance (status, run, pin, archive, …)
-/kanban [sub]            Multi-profile collaboration board
+/curator [sub]           Skill maintenance (status, run, pin, archive, …) [CLI entry removed in engine build]
+/kanban [sub]            Multi-profile collaboration board [removed in engine build]
 /moa <prompt>            One prompt through the Mixture-of-Agents preset
 /reload                  Reload .env into the running session (CLI)
 /reload-mcp              Reload MCP servers
@@ -96,8 +96,8 @@ it. New commands land often; `/help` in-session is always authoritative.
 /profile                 Active profile info
 /platforms (/gateway)    Platform connection status (CLI)
 /journey (/learning)     Learned skills + memories timeline (CLI)
-/subscription (/upgrade) Plan info (CLI)
-/topup                   Balance / billing
+/subscription (/upgrade) Plan info (CLI) [removed in engine build]
+/topup                   Balance / billing [removed in engine build: portal deleted]
 /copy [N]                Copy last response to clipboard (CLI)
 /paste                   Attach clipboard image (CLI)
 /image <path>            Attach a local image file (CLI)

@@ -23,11 +23,13 @@ from typing import Dict, Any, Optional, List, Tuple, Set
 
 import yaml
 
-from arkos_cli.cli_output import line_input
-from arkos_cli.colors import Colors, color
 from arkos_cli import managed_scope
 from arkos_cli.default_soul import DEFAULT_SOUL_MD, is_legacy_template_soul
 from arkos_cli.secret_prompt import masked_secret_prompt
+try:
+    from arkos_cli.cli_output import line_input
+except ImportError:
+    line_input = input
 from arkos_constants import get_arkos_home, get_process_arkos_home  # noqa: F401
 from utils import atomic_replace, atomic_yaml_write, fast_safe_load
 

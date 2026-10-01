@@ -130,20 +130,6 @@ def _memory(agent, args: dict, ctx: InlineToolContext) -> Any:
     return result
 
 
-_read_preview = _callback_tool(
-    "tools.read_preview_tool", "read_preview_tool", "read_preview_callback",
-    ("start", "start"), ("count", "count"),
-)
-
-
-def _desktop_preview(agent, args: dict, ctx: InlineToolContext) -> Any:
-    if (args.get("action") or "").strip() == "read":
-        return _read_preview(agent, args, ctx)
-    from tools.preview_tool import _handle_preview
-
-    return _handle_preview(args)
-
-
 INLINE_TOOL_EXECUTORS: Dict[str, InlineToolExecutor] = {
     "todo_list": _tool(
         "tools.todo_tool", "todo_tool", ("todos", "todos"), ("merge", "merge", False),
@@ -160,32 +146,6 @@ INLINE_TOOL_EXECUTORS: Dict[str, InlineToolExecutor] = {
         ("question", "question", ""), ("choices", "choices"), ("multi_select", "multi_select", False),
         ("questions", "questions"),
         callback=lambda agent, ctx: agent.clarify_callback,
-    ),
-    "read_terminal": _callback_tool(
-        "tools.read_terminal_tool", "read_terminal_tool", "read_terminal_callback",
-        ("start_line", "start_line"), ("count", "count"),
-    ),
-    "desktop_preview": _desktop_preview,
-    "drive_preview": _callback_tool(
-        "tools.drive_preview_tool", "drive_preview_tool", "drive_preview_callback",
-        ("action", "action", ""), ("ref", "ref"), ("selector", "selector"), ("text", "text"),
-        ("key", "key"), ("submit", "submit"), ("amount", "amount"), ("to", "to"), ("limit", "max"),
-    ),
-    "annotate_preview": _callback_tool(
-        "tools.annotate_preview_tool", "annotate_preview_tool", "drive_preview_callback",
-        ("action", "action", "add"), ("ref", "ref"), ("selector", "selector"), ("label", "label"),
-    ),
-    "read_window_below": _callback_tool(
-        "tools.read_window_tool", "read_window_below_tool", "read_window_below_callback",
-    ),
-    "gui_tour": _callback_tool(
-        "tools.tour_tool", "tour_tool", "tour_callback",
-        ("action", "action", ""), ("surface", "surface"), ("selector", "selector"), ("title", "title"),
-        ("text", "text"), ("side", "side"), ("steps", "steps"), ("step_index", "step_index"),
-    ),
-    "setup_mcp": _callback_tool(
-        "tools.setup_mcp_tool", "setup_mcp_tool", "setup_mcp_callback",
-        ("server", "server", ""), ("action", "action", "install"), ("reason", "reason", ""),
     ),
     "delegate_task": lambda agent, args, ctx: agent._dispatch_delegate_task(args),
 }

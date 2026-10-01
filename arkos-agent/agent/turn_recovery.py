@@ -73,15 +73,8 @@ def _image_error_max_dimension(error: Exception) -> Optional[int]:
 
 
 def _try_refresh_portal_paid_entitlement_credentials(agent) -> bool:
-    """Refresh Portal runtime credentials after a fresh paid-entitlement check."""
-    try:
-        from arkos_cli.portal_account import get_portal_account_info
-
-        if get_portal_account_info(force_fresh=True).paid_service_access is not True:
-            return False
-        return agent._try_refresh_portal_client_credentials(force=True)
-    except Exception:
-        return False
+    """Portal entitlement refresh — removed in engine build (portal deleted). Always False."""
+    return False
 
 
 def _recover_unicode_encode_error(

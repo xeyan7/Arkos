@@ -50,20 +50,61 @@ from arkos_cli.auth_oauth_grants import (  # noqa: F401  re-exported
     SINGLE_USE_REFRESH_POOL_PROVIDERS, _oauth_heal_clean_marks, _oauth_heal_notices,
     consume_oauth_heal_notices, heal_forked_single_use_oauth_grants,
     strip_cloned_single_use_oauth_grants)
-from arkos_cli.auth_portal import (  # noqa: F401  re-exported
-    PORTAL_SESSION_TERMINAL, PORTAL_SESSION_UNKNOWN, PORTAL_SESSION_VALID, _ALLOWED_PORTAL_INFERENCE_HOSTS,
-    _agent_key_is_usable, _apply_portal_refreshed_tokens, _assert_portal_inference_jwt_usable,
-    _compute_portal_auth_status, _format_portal_entitlement_auth_error, _healed_portal_inference_url,
-    _login_portal, _merge_shared_portal_oauth_state, _migrate_stale_portal_url,
-    _portal_device_code_login, _portal_inference_env_override, _portal_invoke_jwt_is_usable,
-    _portal_invoke_jwt_status, _portal_env_override, _portal_shared_store_lock,
-    _portal_shared_store_path, _pool_first_oauth_status, _quarantine_portal_oauth_state,
-    _quarantine_portal_pool_entries, _read_shared_portal_state, _refresh_access_token,
-    _refresh_portal_or_quarantine, _select_portal_invoke_jwt, _sync_portal_pool_from_auth_store,
-    _token_fingerprint, _try_import_shared_portal_state, _validate_portal_inference_url_from_network,
-    _write_shared_portal_state, fetch_portal_models, get_portal_auth_status_local,
-    get_portal_session_validity, persist_portal_credentials, refresh_portal_oauth_from_state,
-    resolve_portal_runtime_credentials, step_up_portal_billing_scope)
+try:
+    from arkos_cli.auth_portal import (  # noqa: F401  re-exported
+        PORTAL_SESSION_TERMINAL, PORTAL_SESSION_UNKNOWN, PORTAL_SESSION_VALID, _ALLOWED_PORTAL_INFERENCE_HOSTS,
+        _agent_key_is_usable, _apply_portal_refreshed_tokens, _assert_portal_inference_jwt_usable,
+        _compute_portal_auth_status, _format_portal_entitlement_auth_error, _healed_portal_inference_url,
+        _login_portal, _merge_shared_portal_oauth_state, _migrate_stale_portal_url,
+        _portal_device_code_login, _portal_inference_env_override, _portal_invoke_jwt_is_usable,
+        _portal_invoke_jwt_status, _portal_env_override, _portal_shared_store_lock,
+        _portal_shared_store_path, _pool_first_oauth_status, _quarantine_portal_oauth_state,
+        _quarantine_portal_pool_entries, _read_shared_portal_state, _refresh_access_token,
+        _refresh_portal_or_quarantine, _select_portal_invoke_jwt, _sync_portal_pool_from_auth_store,
+        _token_fingerprint, _try_import_shared_portal_state, _validate_portal_inference_url_from_network,
+        _write_shared_portal_state, fetch_portal_models, get_portal_auth_status_local,
+        get_portal_session_validity, persist_portal_credentials, refresh_portal_oauth_from_state,
+        resolve_portal_runtime_credentials, step_up_portal_billing_scope)
+except ImportError:
+    PORTAL_SESSION_TERMINAL = "terminal"
+    PORTAL_SESSION_UNKNOWN = "unknown"
+    PORTAL_SESSION_VALID = "valid"
+    _ALLOWED_PORTAL_INFERENCE_HOSTS = ()
+    def _agent_key_is_usable(*a, **kw): return False
+    def _apply_portal_refreshed_tokens(*a, **kw): pass
+    def _assert_portal_inference_jwt_usable(*a, **kw): pass
+    def _compute_portal_auth_status(*a, **kw): return "logged_out"
+    def _format_portal_entitlement_auth_error(*a, **kw): return ""
+    def _healed_portal_inference_url(*a, **kw): return ""
+    def _login_portal(*a, **kw): pass
+    def _merge_shared_portal_oauth_state(*a, **kw): pass
+    def _migrate_stale_portal_url(*a, **kw): pass
+    def _portal_device_code_login(*a, **kw): pass
+    def _portal_inference_env_override(*a, **kw): return None
+    def _portal_invoke_jwt_is_usable(*a, **kw): return False
+    def _portal_invoke_jwt_status(*a, **kw): return "logged_out"
+    def _portal_env_override(*a, **kw): return None
+    def _portal_shared_store_lock(*a, **kw): pass
+    def _portal_shared_store_path(*a, **kw): return None
+    def _pool_first_oauth_status(*a, **kw): return "logged_out"
+    def _quarantine_portal_oauth_state(*a, **kw): pass
+    def _quarantine_portal_pool_entries(*a, **kw): pass
+    def _read_shared_portal_state(*a, **kw): return {}
+    def _refresh_access_token(*a, **kw): return None
+    def _refresh_portal_or_quarantine(*a, **kw): return None
+    def _select_portal_invoke_jwt(*a, **kw): return None
+    def _sync_portal_pool_from_auth_store(*a, **kw): pass
+    def _token_fingerprint(*a, **kw): return ""
+    def _try_import_shared_portal_state(*a, **kw): pass
+    def _validate_portal_inference_url_from_network(*a, **kw): pass
+    def _write_shared_portal_state(*a, **kw): pass
+    def fetch_portal_models(*a, **kw): return []
+    def get_portal_auth_status_local(*a, **kw): return "logged_out"
+    def get_portal_session_validity(*a, **kw): return "unknown"
+    def persist_portal_credentials(*a, **kw): pass
+    def refresh_portal_oauth_from_state(*a, **kw): return None
+    def resolve_portal_runtime_credentials(*a, **kw): return {}
+    def step_up_portal_billing_scope(*a, **kw): pass
 from arkos_cli.auth_minimax import (  # noqa: F401  re-exported
     _MINIMAX_OAUTH_ERROR_BODY_LIMIT, _login_minimax_oauth, _minimax_oauth_login, _minimax_pkce_pair,
     _minimax_poll_token, _minimax_post_form, _minimax_request_user_code,
@@ -2105,4 +2146,7 @@ def __getattr__(name):
     import importlib
     from arkos_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])
+    try:
+        return getattr(importlib.import_module(target[0]), target[1])
+    except (ImportError, AttributeError):
+        return None

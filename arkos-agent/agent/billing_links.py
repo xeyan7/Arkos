@@ -15,9 +15,9 @@ from utils import base_url_host_matches
 
 @dataclass
 class BillingBlock:
-    """Structured billing-wall descriptor shared across every surface. ``is_portal`` is the routing bit:
-    Portal has an in-app billing surface (Settings → Billing, ``/topup``) preferred over ``billing_url``;
-    third-party providers have none, so ``billing_url`` is the deep link needed."""
+    """Structured billing-wall descriptor shared across every surface.
+    Engine build: portal removed; ``is_portal`` is always False and ``billing_url``
+    is the provider's own billing page."""
 
     provider: str
     provider_label: str
@@ -59,11 +59,12 @@ _BY_SLUG: dict[str, _Provider] = {slug: p for p in _PROVIDERS for slug in p.slug
 
 
 def is_portal_inference_route(provider: str, base_url: str) -> bool:
+    """Portal route check — removed in engine build (portal deleted). Always False."""
     return False
 
 
 def _portal_billing_url() -> Optional[str]:
-    """Best-effort Arkos Portal billing URL."""
+    """Portal billing URL — removed in engine build. Always None."""
     return None
 
 
@@ -79,10 +80,9 @@ def _resolve_provider_link(slug: str, base_url: str) -> tuple[str, Optional[str]
 
 
 def build_billing_block(*, provider: str, base_url: str, model: str, message: str = "") -> BillingBlock:
-    """Billing descriptor for a billing-classified failure; ``message`` (agent-loop guidance) passes through unchanged."""
+    """Billing descriptor for a billing-classified failure; ``message`` (agent-loop guidance) passes through unchanged.
+    Engine build: portal removed; always the third-party provider branch."""
     slug = (provider or "").strip().lower()
     model = (model or "").strip()
-    if is_portal_inference_route(slug, base_url):
-        return BillingBlock(slug or "portal", "Arkos Portal", model, _portal_billing_url(), True, message or "")
     label, url = _resolve_provider_link(slug, base_url)
     return BillingBlock(slug, label, model, url, False, message or "")

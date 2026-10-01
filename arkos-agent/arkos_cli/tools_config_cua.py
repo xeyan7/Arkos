@@ -15,8 +15,13 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
-from arkos_cli.cli_output import (
-    print_info as _print_info, print_success as _print_success, print_warning as _print_warning)
+try:
+    from arkos_cli.cli_output import (
+        print_info as _print_info, print_success as _print_success, print_warning as _print_warning)
+except ImportError:
+    def _print_info(t): pass
+    def _print_success(t): pass
+    def _print_warning(t): pass
 
 logger = logging.getLogger("arkos_cli.tools_config")
 

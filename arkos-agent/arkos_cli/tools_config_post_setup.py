@@ -10,9 +10,15 @@ import sys
 from pathlib import Path
 from typing import Set
 
-from arkos_cli.cli_output import (
-    print_error as _print_error, print_info as _print_info, print_success as _print_success,
-    print_warning as _print_warning)
+try:
+    from arkos_cli.cli_output import (
+        print_error as _print_error, print_info as _print_info, print_success as _print_success,
+        print_warning as _print_warning)
+except ImportError:
+    def _print_error(t): pass
+    def _print_info(t): pass
+    def _print_success(t): pass
+    def _print_warning(t): pass
 from arkos_cli.config import get_env_value
 from arkos_cli.tools_config_cua import (
     _cua_driver_install_ready, _pip_install, _post_setup_no_window_flags, _run_text, install_cua_driver,
@@ -412,11 +418,16 @@ def _agent_browser_installed() -> bool:
     """True when everything ``_run_post_setup("agent_browser")`` installs is present: the agent-browser CLI
     *and* the Chromium build it drives (or the Lightpanda engine, which needs no Chromium), so "Run
     setup" flips to installed only when re-running it would be a no-op."""
-    from arkos_cli.portal_subscription import _local_browser_runnable
+    try:
+        from arkos_cli.portal_subscription import _local_browser_runnable
+        _runnable = _local_browser_runnable()
+    except ImportError:
+        import shutil
+        _runnable = shutil.which("agent-browser") is not None
 
     if (bt := sys.modules.get("tools.browser_tool")) is not None:
         bt._cached_chromium_installed = None
-    return _local_browser_runnable()
+    return _runnable
 
 
 def _camofox_installed() -> bool:
@@ -436,8 +447,12 @@ def _lightpanda_installed() -> bool:
 def _cloud_agent_browser_installed() -> bool:
     """Installed-check for the ``browserbase`` hook: cloud providers host their own Chromium, so
     presence of the agent-browser CLI is the whole contract."""
-    from arkos_cli.portal_subscription import _has_agent_browser
-    return _has_agent_browser()
+    try:
+        from arkos_cli.portal_subscription import _has_agent_browser
+        return _has_agent_browser()
+    except ImportError:
+        import shutil
+        return shutil.which("agent-browser") is not None
 
 
 _POST_SETUP_READY: dict = {

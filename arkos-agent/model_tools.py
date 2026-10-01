@@ -296,18 +296,6 @@ def _rewrite_execute_code(td: Dict[str, Any], available: set) -> Optional[Dict[s
     return _fn_def(build_execute_code_schema(SANDBOX_ALLOWED_TOOLS & available, mode=_get_execution_mode()))
 
 
-def _discord_rewriter(schema_fn_name: str):
-    """Schema depends on the bot's privileged intents and the config action allowlist; None drops the tool."""
-    def _rewrite(td: Dict[str, Any], available: set) -> Optional[Dict[str, Any]]:
-        try:
-            from tools import discord_tool as _dt
-            dynamic = getattr(_dt, schema_fn_name)()
-        except Exception:
-            dynamic = None
-        return None if dynamic is None else _fn_def(dynamic)
-    return _rewrite
-
-
 def _rewrite_browser_navigate(td: Dict[str, Any], available: set) -> Optional[Dict[str, Any]]:
     """Drop the "prefer web_search or web_extract" hint when neither web tool is present (else the model hallucinates them)."""
     if {"web_search", "web_extract"} & available:
@@ -351,8 +339,6 @@ def _rewrite_delegate_task(td: Dict[str, Any], available: set) -> Optional[Dict[
 
 _DYNAMIC_SCHEMA_REWRITERS = {
     "execute_code": _rewrite_execute_code,
-    "discord": _discord_rewriter("get_dynamic_schema_core"),
-    "discord_admin": _discord_rewriter("get_dynamic_schema_admin"),
     "browser_navigate": _rewrite_browser_navigate,
     "browser_exec": _rewrite_browser_exec,
     "delegate_task": _rewrite_delegate_task,
@@ -629,15 +615,6 @@ def _pre_dispatch_guards(function_name: str, function_args: Dict[str, Any], skip
         if block_message is not None:
             return function_args, (tool_error(block_message), "plugin_block", block_message)
 
-    try:
-        from acp_adapter.edit_approval import maybe_require_edit_approval
-        edit_block_message = maybe_require_edit_approval(function_name, function_args)
-        if edit_block_message is not None:
-            return function_args, (edit_block_message, "edit_approval_denied", None)
-    except Exception as _edit_approval_err:
-        logger.debug("ACP edit approval guard error: %s", _edit_approval_err)
-        if function_name in {"write_file", "patch"}:
-            return function_args, (tool_error("Edit approval denied: approval guard failed"), "edit_approval_error", None)
     return function_args, None
 
 

@@ -62,8 +62,8 @@ in the `arkos-agent-dev` skill.
 Background maintenance that tracks usage on agent-created skills and auto-archives stale ones;
 archives go to `~/.arkos/skills/.archive/` and are restorable. Core `agent/curator.py` (review
 loop, auto-transitions, LLM review prompt) + `agent/curator_backup.py` (pre-run tar.gz snapshots);
-CLI `arkos_cli/curator.py` → `arkos curator status|run|pause|resume|pin|unpin|archive|restore|
-prune|backup|rollback`; telemetry `tools/skill_usage.py` owns `~/.arkos/skills/.usage.json`
+CLI `arkos curator status|run|...` (engine build: `arkos_cli/curator.py` entry deleted,
+backend `agent/curator.py` remains); telemetry `tools/skill_usage.py` owns `~/.arkos/skills/.usage.json`
 (`use_count`, `view_count`, `patch_count`, `last_activity_at`, `state` active/stale/archived,
 `pinned`). Config `curator:` — `enabled, interval_hours, min_idle_hours, stale_after_days,
 archive_after_days, backup.*`; its LLM calls route through `auxiliary` (`agent/AGENTS.md`).

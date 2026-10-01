@@ -91,7 +91,7 @@ Profiles use `~/.arkos/profiles/<name>/` with the same layout. When a profile is
 | config.yaml sections, toolsets, voice/STT/TTS | `references/configuration.md` |
 | AGENTS.md / .arkos.md / CLAUDE.md project rules | `references/project-context-files.md` |
 | Secret redaction, PII, approval modes, "reset permissions" | `references/security-privacy.md` |
-| Delegation, cron, curator, kanban | `references/background-systems.md` |
+| Delegation, cron, curator, kanban [kanban removed in engine build] | `references/background-systems.md` |
 | MCP servers (add, catalog, `arkos mcp`) | `references/native-mcp.md` |
 | Webhook routes and event-driven runs | `references/webhooks.md` |
 | A custom theme/skin ("synthwave theme", "change the gold ●") | `references/themes.md` + `templates/skin.yaml` |

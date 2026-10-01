@@ -123,11 +123,13 @@ def _repair_explicit_computer_use_media_paths_inner(response: str, messages: Lis
     if not canonical_by_basename:
         return response
 
-    from gateway.platforms.base import BasePlatformAdapter
-
-    repaired = response
-    for emitted_path, _is_voice in BasePlatformAdapter.extract_media(response)[0]:
-        canonical = canonical_by_basename.get(_computer_use_capture_basename(emitted_path))
-        if canonical and emitted_path != canonical:
-            repaired = repaired.replace(emitted_path, canonical)
-    return repaired
+    try:
+        from gateway.platforms.base import BasePlatformAdapter
+        repaired = response
+        for emitted_path, _is_voice in BasePlatformAdapter.extract_media(response)[0]:
+            canonical = canonical_by_basename.get(_computer_use_capture_basename(emitted_path))
+            if canonical and emitted_path != canonical:
+                repaired = repaired.replace(emitted_path, canonical)
+        return repaired
+    except Exception:
+        return response

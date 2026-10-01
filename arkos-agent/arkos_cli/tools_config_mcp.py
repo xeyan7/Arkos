@@ -4,10 +4,23 @@ from __future__ import annotations
 
 from typing import List, Set
 
-from arkos_cli.cli_output import (
-    print_error as _print_error, print_info as _print_info, print_success as _print_success,
-    print_warning as _print_warning)
-from arkos_cli.colors import Colors, color
+try:
+    from arkos_cli.cli_output import (
+        print_error as _print_error, print_info as _print_info, print_success as _print_success,
+        print_warning as _print_warning)
+except ImportError:
+    def _print_error(t): pass
+    def _print_info(t): pass
+    def _print_success(t): pass
+    def _print_warning(t): pass
+
+try:
+    from arkos_cli.colors import Colors, color
+except ImportError:
+    class Colors:
+        RESET = BOLD = DIM = RED = GREEN = YELLOW = BLUE = MAGENTA = CYAN = ""
+    def color(t, *c): return t
+
 from arkos_cli.toolset_scope import (
     _TOOLSET_PLATFORM_RESTRICTIONS, toolset_allowed_for_platform as _toolset_allowed_for_platform)
 

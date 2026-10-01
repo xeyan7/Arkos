@@ -3127,11 +3127,11 @@ def _maybe_run_worktree_maintenance() -> None:
             repos = _worktree_maintenance_repos()
             if not repos:
                 return
-            from cli import _prune_stale_worktrees
+            from tools.subagent_worktree import _run_git
 
             for repo in repos:
                 try:
-                    _prune_stale_worktrees(repo)
+                    _run_git(["worktree", "prune"], cwd=repo)
                 except Exception:
                     logger.debug("Cron worktree maintenance failed for %s", repo, exc_info=True)
         except Exception:

@@ -45,8 +45,11 @@ Rules for tool code:
 - **No `offset`/`limit` on instructional tools** (skills, prompts, playbooks) — models read page 1
   and skip the rest (root rubric).
 - **`check_fn` answers reachability/opt-in, never surface.** It is TTL-cached process-wide, and one
-  process serves many sessions; GUI-only tools go in a named toolset (`desktop_ui`, `project`)
+  process serves many sessions; GUI-only tools went in a named toolset (`desktop_ui`, `project`)
   folded in by `_load_enabled_toolsets(platform)` (root: capability is a property of the SESSION).
+  Engine build: those toolsets/tools were removed (`annotate_preview`, `setup_mcp`,
+  `close_terminal`, `react_to_message`, `desktop_project` deleted; `gateway/platforms/`,
+  `gateway/relay/` dirs removed).
 - **Agent-level tools** (`todo`, `memory`) are intercepted before `handle_function_call()` via the
   `INLINE_TOOL_EXECUTORS` table (`agent/inline_tool_executors.py`; `agent/AGENTS.md`).
 - **`_last_resolved_tool_names`** is a process-global in `model_tools.py`; `_run_single_child()` in
@@ -56,10 +59,13 @@ Rules for tool code:
 
 ## Toolsets (`toolsets.py`)
 
-Single `TOOLSETS` dict. Keys today: `browser, clarify, code_execution, cronjob, debugging,
-delegation, discord, discord_admin, feishu_doc, feishu_drive, file, homeassistant, image_gen,
-kanban, memory, messaging, moa, rl, safe, search, session_search, skills, spotify, terminal, todo,
-tts, video, vision, web, yuanbao` (don't assert the list in tests). Per-platform enable/disable via
+Single `TOOLSETS` dict. Keys today: `browser, bot_room, clarify, code_execution, computer_use,
+cronjob, debugging, delegation, file, image_gen, video_gen, memory, context_engine,
+safe, search, session_search, skills, spotify, terminal, todo, tts, video, vision, web, x_search`
+plus `coding`/`safe`/`debugging` composites and `arkos-*` platform bundles (`arkos-cli`,
+`arkos-cron`, `arkos-telegram`, `arkos-slack`, ...). Removed in engine build: `discord`,
+`discord_admin`, `feishu_doc`, `feishu_drive`, `homeassistant`, `kanban`, `messaging`, `moa`,
+`rl`, `yuanbao`, `desktop_ui`, `project` (don't assert the list in tests). Per-platform enable/disable via
 `arkos tools` (curses) or `tools.<platform>.enabled/disabled` in config.yaml. `browser_exec`
 replaces the other browser tools when `browser.backend` is `browser-use`.
 

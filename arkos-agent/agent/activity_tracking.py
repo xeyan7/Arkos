@@ -65,13 +65,6 @@ class ActivityTrackingMixin:
             self._last_activity_desc = bound_activity_description(desc)
             self._last_activity_provenance = normalize_activity_provenance(provenance)
             self._turn_liveness_abort_claim = None
-        if os.environ.get("ARKOS_KANBAN_TASK"):
-            with suppress(Exception):
-                from tools.kanban_tools import (
-                    heartbeat_current_worker_from_env, inject_new_comments_from_env
-                )
-                heartbeat_current_worker_from_env()
-                inject_new_comments_from_env(self)
         if force_persist:
             reset_session_activity_persist_window(self)
         self._persist_session_activity_if_due()

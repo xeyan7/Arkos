@@ -52,8 +52,9 @@ so nothing is lost.
 
 - **CLI:** `arkos curator <verb>` — `status`, `usage`, `run`, `pause`,
   `resume`, `pin`, `unpin`, `archive`, `restore`, `list-archived`, `prune`,
-  `backup`, `rollback`.
-- **Slash:** `/curator <subcommand>` mirrors the CLI.
+  `backup`, `rollback`. (Engine build: CLI entry deleted; backend
+  `agent/curator.py` remains.)
+- **Slash:** `/curator <subcommand>` mirrors the CLI (CLI part deleted in engine build).
 - **Scope:** only touches skills with `created_by: "agent"` provenance.
   Bundled + hub-installed skills are off-limits. **Never deletes** —
   max destructive action is archive. Pinned skills are exempt from
@@ -71,7 +72,10 @@ Config: `curator.*` (`enabled`, `interval_hours`, `min_idle_hours`,
 `stale_after_days`, `archive_after_days`, `backup.*`).
 User docs:
 
-### Kanban (multi-agent work queue)
+### Kanban (multi-agent work queue) [REMOVED in engine build]
+
+> The kanban subsystem (`arkos_cli/kanban*.py`, `tools/kanban_tools.py`,
+> `plugins/kanban/`) is deleted. Section below is historical.
 
 Durable SQLite board for multi-profile / multi-worker collaboration.
 Users drive it via `arkos kanban <verb>`; dispatcher-spawned workers
