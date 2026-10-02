@@ -70,8 +70,17 @@ class RoomExecutionPolicy:
 def execution_policy_mapping(*, target_profile: str, config: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Resolve the effective API-server policy from the target's own config."""
     if config is None:
-        from gateway.run import _load_gateway_config
-        config = _load_gateway_config()
+        try:
+            from gateway.config import load_gateway_config
+            from dataclasses import asdict
+            cfg_obj = load_gateway_config()
+            config = asdict(cfg_obj)
+        except Exception:
+            try:
+                from arkos_cli.config import load_config
+                config = load_config()
+            except Exception:
+                config = {}
     if not isinstance(config, Mapping):
         raise RoomExecutionPolicyError("gateway config is invalid")
     from arkos_cli.config import resolve_turn_limit

@@ -358,7 +358,16 @@ def _run_create_profile_setup(*, prompt, select, cancelled, config: dict, provid
 def run_setup(arkos_home: str, config: dict) -> None:
     """Entry point for ``OpenVikingMemoryProvider.post_setup``."""
     from arkos_cli.config import save_config
-    from arkos_cli.memory_setup import _CANCELLED, _curses_select, _print_cancelled_setup, _prompt
+    try:
+        from arkos_cli.memory_setup import _CANCELLED, _curses_select, _print_cancelled_setup, _prompt
+    except ImportError:
+        _CANCELLED = -1
+        def _curses_select(title, items, default=0, cancel_returns=_CANCELLED):
+            return default
+        def _print_cancelled_setup():
+            print("Setup cancelled.")
+        def _prompt(label, default="", secret=False):
+            return default
 
     env_path = Path(arkos_home) / ".env"
     if not isinstance(config.get("memory"), dict):

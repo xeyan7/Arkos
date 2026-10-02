@@ -25,8 +25,11 @@ _PGVECTOR_CONTAINER, _PGVECTOR_IMAGE, _PGVECTOR_PASSWORD = "arkos-pgvector", "pg
 
 
 def _curses_select(title: str, items: list[tuple[str, str]], default: int = 0) -> int:
-    from arkos_cli.curses_ui import curses_radiolist
-    return curses_radiolist(title, [f"{label}  {desc}" if desc else label for label, desc in items], selected=default, cancel_returns=default)
+    try:
+        from arkos_cli.curses_ui import curses_radiolist
+        return curses_radiolist(title, [f"{label}  {desc}" if desc else label for label, desc in items], selected=default, cancel_returns=default)
+    except ImportError:
+        return default
 
 
 def _prompt(label: str, default: str | None = None, secret: bool = False) -> str:

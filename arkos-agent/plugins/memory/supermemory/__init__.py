@@ -334,7 +334,14 @@ class SupermemoryMemoryProvider(MemoryProvider):
 
     def post_setup(self, arkos_home: str, config: dict) -> None:
         from arkos_cli.config import save_config
-        from arkos_cli.memory_setup import _prompt, _write_env_vars
+        try:
+            from arkos_cli.memory_setup import _prompt, _write_env_vars
+        except ImportError:
+            def _prompt(prompt_text, secret=False):
+                import getpass
+                return (getpass.getpass if secret else input)(prompt_text + ": ").strip()
+            def _write_env_vars(env_dict, arkos_home=None):
+                pass
         print(f"\n  Configuring supermemory:\n\n  Get your API key at {_API_KEY_URL}\n")
         existing = os.environ.get("SUPERMEMORY_API_KEY", "")
         masked = f"...{existing[-4:]}" if len(existing) > 4 else "set"

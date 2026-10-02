@@ -810,8 +810,8 @@ DEFAULT_CONFIG = {
         "backup_count": 3,
     },
     "model_catalog": {
-        "enabled": True,
-        "url": "https://arkos.local/docs/api/model-catalog.json",
+        "enabled": False,
+        "url": "",
         "ttl_minutes": 20,
         "providers": {},
     },

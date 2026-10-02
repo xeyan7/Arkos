@@ -234,7 +234,11 @@ async def _send_telegram(token, chat_id, message, media_files=None, thread_id=No
     try:
         formatted, send_parse_mode, _has_html = _telegram_format(message)
         bot = _telegram_bot(token)
-        from plugins.platforms.telegram.telegram_ids import normalize_telegram_chat_id
+        try:
+            from plugins.platforms.telegram.telegram_ids import normalize_telegram_chat_id
+        except ImportError:
+            def normalize_telegram_chat_id(cid):
+                return int(cid) if str(cid).lstrip("-").isdigit() else cid
         try:
             from gateway.platforms.base import BasePlatformAdapter, utf16_len
         except ImportError:

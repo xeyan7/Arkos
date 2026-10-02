@@ -21,6 +21,9 @@ def check_api_key() -> bool:
 
 
 
+_client = None
+
+
 def get_async_client():
     """Return a shared async OpenAI-compatible client for OpenRouter.
 

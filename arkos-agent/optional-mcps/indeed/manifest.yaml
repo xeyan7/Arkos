@@ -4,7 +4,7 @@ manifest_version: 1
 
 name: indeed
 description: Search jobs and listings on Indeed.
-source: https://docs.indeed.com/indeed-mcp
+source: https://docs.indeed.com
 
 # Official vendor-hosted remote MCP (URL-only — Arkos never spawns a local
 # process for this entry). Native OAuth 2.1 + Dynamic Client Registration

@@ -1,20 +1,14 @@
-<p align="center">
-  <img src="assets/banner.png" alt="Arkos" width="100%">
-</p>
+# Arkos Agent Engine
 
-# Arkos
+**Autonomous AI agent engine with tool-calling capabilities.** Arkos executes tasks autonomously across system environments. It has a built-in learning loop — creating skills from experience, persisting knowledge, searching past conversations, and remembering preferences across sessions. Run it on a local machine, a VPS, or a GPU cluster.
 
-**The text-based personal AI assistant (Jarvis-like).** Arkos listens to your text prompts, understands what needs to be done, and executes tasks autonomously across your system. It has a built-in learning loop — creating skills from experience, persisting knowledge, searching past conversations, and remembering your preferences across sessions. Run it on a local machine, a $5 VPS, or a GPU cluster.
-
-Use any model you want — OpenRouter, OpenAI, your own local endpoint, and many others. Switch with `arkos model` — no code changes, no lock-in.
+Use any model you want — OpenRouter, OpenAI, Anthropic, or local endpoints — with no lock-in.
 
 <table>
-<tr><td><b>A real terminal interface</b></td><td>Full TUI with multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output.</td></tr>
-<tr><td><b>Lives where you do</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, and CLI — all from a single gateway process. Voice memo transcription, cross-platform conversation continuity.</td></tr>
 <tr><td><b>A closed learning loop</b></td><td>Agent-curated memory with periodic nudges. Autonomous skill creation after complex tasks. Skills self-improve during use. FTS5 session search with LLM summarization for cross-session recall. Dialectic user memory modeling. Built-in skills ecosystem compatible with open agent skill specifications.</td></tr>
-<tr><td><b>Scheduled automations</b></td><td>Built-in cron scheduler with delivery to any platform. Daily reports, nightly backups, weekly audits — all in natural language, running unattended.</td></tr>
+<tr><td><b>Scheduled automations</b></td><td>Built-in cron scheduler. Daily reports, nightly backups, weekly audits — all in natural language, running unattended.</td></tr>
 <tr><td><b>Delegates and parallelizes</b></td><td>Spawn isolated subagents for parallel workstreams. Write Python scripts that call tools via RPC, collapsing multi-step pipelines into zero-context-cost turns.</td></tr>
-<tr><td><b>Runs anywhere, not just your laptop</b></td><td>Seven terminal backends — local, Docker, SSH, Singularity, Modal, Daytona, and Vercel Sandbox. Daytona and Modal offer serverless persistence — your agent's environment hibernates when idle and wakes on demand. Run it on a $5 VPS or a GPU cluster.</td></tr>
+<tr><td><b>Runs anywhere</b></td><td>Pluggable execution backends — local, Docker, SSH, Singularity, Modal, Daytona, and Vercel Sandbox. Daytona and Modal offer serverless persistence — environments hibernate when idle and wake on demand.</td></tr>
 <tr><td><b>Research-ready</b></td><td>Batch trajectory generation, trajectory compression for evaluation and offline benchmarking.</td></tr>
 </table>
 
@@ -27,150 +21,79 @@ Use any model you want — OpenRouter, OpenAI, your own local endpoint, and many
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/xeyan7/Arkos.git
-cd Arkos/arkos-agent
+git clone <repository-url>
+cd arkos-agent
 uv pip install -e ".[all]"
 ```
 
 ### Windows (native, PowerShell)
 
-> **Heads up:** Native Windows runs the agent without WSL — CLI, gateway, TUI, and tools all work natively. If you'd rather use WSL2, follow the Linux instructions there too. Found a bug? Please report it to the maintainers.
+> **Heads up:** Native Windows runs the agent engine without WSL. MinGit/Git Bash is detected or provisioned automatically to run shell commands cleanly.
 
 Clone the repository and install dependencies from PowerShell:
 
 ```powershell
-git clone https://github.com/xeyan7/Arkos.git
-cd Arkos/arkos-agent
+git clone <repository-url>
+cd arkos-agent
 uv pip install -e ".[all]"
 ```
 
-The installer handles everything: uv, Python 3.11, Node.js, ripgrep, ffmpeg, **and a portable Git Bash** (MinGit, unpacked to `%LOCALAPPDATA%\arkos\git` — no admin required, completely isolated from any system Git install). The agent uses this bundled Git Bash to run shell commands.
+The installer or uv manages Python, dependencies, and environment configuration cleanly.
 
-If you already have Git installed, the installer detects it and uses that instead. Otherwise a ~45MB MinGit download is all you need — it won't touch or interfere with any system Git.
-
-> **Android / Termux:** On Termux, the agent installs a curated `.[termux]` extra because the full `.[all]` extra currently pulls Android-incompatible voice dependencies.
->
-> **Windows:** Native Windows is fully supported. If you'd rather use WSL2, the Linux instructions work there too. Native Windows install lives under `%LOCALAPPDATA%\arkos`; WSL2 installs under `~/.arkos` as on Linux.
-
-After installation:
-
-```bash
-source ~/.bashrc    # reload shell (or: source ~/.zshrc)
-arkos # start chatting!
-```
-
-### Troubleshooting
-
-#### Windows Defender or antivirus flags `uv.exe` as malware
-
-If your antivirus (Bitdefender, Windows Defender, etc.) quarantines `uv.exe` from the agent `bin` folder (`%LOCALAPPDATA%\arkos\bin\uv.exe`), this is a **false positive**. The file is Astral's `uv` — the Rust Python package manager the agent bundles to manage its Python environment. ML-based antivirus engines commonly flag unsigned Rust binaries that download and install packages.
-
-**To verify your copy is authentic:**
-
-```powershell
-# Install GitHub CLI if needed
-winget install --id GitHub.cli
-
-# Login to GitHub
-gh auth login
-
-# Run verification
-$uv = "$env:LOCALAPPDATA\arkos\bin\uv.exe"
-$ver = (& $uv --version).Split(' ')[1]
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$zip = "$env:TEMP\uv.zip"
-gh release download $ver --repo astral-sh/uv --pattern "uv-x86_64-pc-windows-msvc.zip" --output $zip
-gh attestation verify $zip --repo astral-sh/uv
-Expand-Archive $zip "$env:TEMP\uv_x" -Force
-(Get-FileHash "$env:TEMP\uv_x\uv.exe").Hash -eq (Get-FileHash $uv).Hash
-```
-
-If attestation says "Verification succeeded" and the last line prints `True`, you're good.
-
-**To whitelist the agent:**
-- **Windows Defender:** Run PowerShell as Admin → `Add-MpPreference -ExclusionPath "$env:LOCALAPPDATA\arkos\bin"`
-- **Bitdefender:** Add an exception in the Bitdefender console (Protection > Antivirus > Settings > Manage Exceptions)
-- Whitelist the **folder**, not the file hash — the agent updates `uv` and the hash changes every version
-
-For more context, see the upstream Astral issue reports in the [astral-sh/uv repository](https://github.com/astral-sh/uv/issues).
+> **Android / Termux:** On Termux, install the curated `.[termux]` extra to avoid Android-incompatible voice dependencies.
 
 ---
 
 ## Getting Started
 
-```bash
-arkos # Interactive CLI — start a conversation
-arkos model        # Choose your LLM provider and model
-arkos tools        # Configure which tools are enabled
-arkos config set   # Set individual config values
-arkos config get   # Print individual config values
-arkos gateway      # Start the messaging gateway (Telegram, Discord, etc.)
-arkos setup        # Run the full setup wizard (configures everything at once)
-arkos update       # Update to the latest version
-arkos doctor       # Diagnose any issues
+### Programmatic Usage
+
+Run the agent engine directly in Python:
+
+```python
+from run_agent import AIAgent
+
+# Initialize the agent with your target model
+agent = AIAgent(model="claude-3-5-sonnet")
+
+# Execute a conversation turn with tool calling
+response = agent.run_conversation("Check system status and summarize findings.")
+print(response)
 ```
 
-📖 **Full documentation:** see the per-area `AGENTS.md` files and `arkos --help`.
+### CLI / Script Invocation
+
+You can also run batch trajectories or one-shot executions:
+
+```bash
+python run_agent.py
+```
 
 ---
 
-## CLI vs Messaging Quick Reference
+## Subsystem Architecture & Documentation
 
-The agent has two entry points: start the terminal UI with `arkos`, or run the gateway and talk to it from Telegram, Discord, Slack, WhatsApp, Signal, or Email. Once you're in a conversation, many slash commands are shared across both interfaces.
+Each area of the engine contains a dedicated development guide:
 
-| Action                         | CLI                                           | Messaging platforms                                                              |
-| ------------------------------ | --------------------------------------------- | -------------------------------------------------------------------------------- |
-| Start chatting                 | `arkos`                                      | Run `arkos gateway setup` + `arkos gateway start`, then send the bot a message |
-| Start fresh conversation       | `/new` or `/reset`                            | `/new` or `/reset`                                                               |
-| Change model                   | `/model [provider:model]`                     | `/model [provider:model]`                                                        |
-| Set a personality              | `/personality [name]`                         | `/personality [name]`                                                            |
-| Retry or undo the last turn    | `/retry`, `/undo`                             | `/retry`, `/undo`                                                                |
-| Compress context / check usage | `/compress`, `/usage`, `/insights [--days N]` | `/compress`, `/usage`, `/insights [days]`                                        |
-| Browse skills                  | `/skills` or `/<skill-name>`                  | `/<skill-name>`                                                                  |
-| Interrupt current work         | `Ctrl+C` or send a new message                | `/stop` or send a new message                                                    |
-| Platform-specific status       | `/platforms`                                  | `/status`, `/sethome`                                                            |
-
-For the full command lists, see `arkos --help` and `arkos <command> --help`.
+- [AGENTS.md](AGENTS.md) — Root engine design invariants, caching rules, and contribution standards
+- [agent/AGENTS.md](agent/AGENTS.md) — Agent loop, turn phases, caching integrity, compression, and model resolution
+- [arkos_cli/AGENTS.md](arkos_cli/AGENTS.md) — Configuration system, auth, models, and profiles
+- [tools/AGENTS.md](tools/AGENTS.md) — Tool registry, toolsets, delegation, and execution backends
+- [gateway/AGENTS.md](gateway/AGENTS.md) — Session context, delivery routing, and engine plumbing
+- [cron/AGENTS.md](cron/AGENTS.md) — Scheduler invariants and cron jobs
+- [plugins/AGENTS.md](plugins/AGENTS.md) — Plugin architecture and lifecycle
+- [skills/AGENTS.md](skills/AGENTS.md) — Skills format, frontmatter, and authoring standards
 
 ---
-
-## Documentation
-
-- Per-area `AGENTS.md` files — development guides for each subsystem
-- `arkos --help` — full command reference
-
----
-
 
 ## Contributing
 
-Quick start for developers and contributors — work from a full git checkout
-(usually `~/.arkos/arkos-agent`). This matches the layout used by `arkos update`, the
-managed venv, lazy dependencies, gateway, and docs tooling.
+Quick start for developers working from a git checkout:
 
 ```bash
-cd "${ARKOS_HOME:-$HOME/.arkos}/arkos-agent"
+cd arkos-agent
 uv pip install -e ".[all,dev]"
 ```
-
-Manual clone fallback (for throwaway clones/CI where you intentionally do not
-want the managed install layout):
-
-Create the venv outside the cloned source tree — a venv inside the directory the agent operates from can be wiped by a relative-path command the agent runs
-against its own checkout, destroying the running runtime mid-session.
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv ~/.arkos/venvs/arkos-agent-dev --python 3.11
-source ~/.arkos/venvs/arkos-agent-dev/bin/activate
-uv pip install -e ".[all,dev]"
-```
-
----
-
-## Community
-
-- 📚 **Skills Hub** — Discover and install community skills directly via `arkos skills search`.
 
 ---
 

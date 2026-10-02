@@ -5,9 +5,9 @@
 # Uses uv for fast Python provisioning and package management.
 #
 # Usage:
-#   iex (irm https://arkos.local/install.ps1)
+#   .\install.ps1
 #
-# Or download and run with options:
+# Or run with options:
 #   .\install.ps1 -NoVenv -SkipSetup
 #
 # ============================================================================
@@ -5059,8 +5059,7 @@ try {
     Write-Host ""
     Write-Err "Installation failed: $_"
     Write-Host ""
-    Write-Info "If the error is unclear, try downloading and running the script directly:"
-    Write-Host "  Invoke-WebRequest -Uri 'https://arkos.local/install.ps1' -OutFile install.ps1" -ForegroundColor Yellow
+    Write-Info "If the error is unclear, try re-running the script directly:"
     Write-Host "  .\install.ps1" -ForegroundColor Yellow
     Write-Host ""
 }

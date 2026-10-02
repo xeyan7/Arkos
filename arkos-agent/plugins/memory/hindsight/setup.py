@@ -35,14 +35,17 @@ def _secret_prompt(label: str) -> str:
 
 def _select(title: str, items: list, values: list, current) -> str | None:
     """Curses pick from *values*, defaulting to *current*; None when cancelled."""
-    from arkos_cli.memory_setup import _CANCELLED, _curses_select, _print_cancelled_setup
-
-    default = values.index(current) if current in values else 0
-    idx = _curses_select(title, items, default=default, cancel_returns=_CANCELLED)
-    if idx == _CANCELLED:
-        _print_cancelled_setup()
-        return None
-    return values[idx]
+    try:
+        from arkos_cli.memory_setup import _CANCELLED, _curses_select, _print_cancelled_setup
+        default = values.index(current) if current in values else 0
+        idx = _curses_select(title, items, default=default, cancel_returns=_CANCELLED)
+        if idx == _CANCELLED:
+            _print_cancelled_setup()
+            return None
+        return values[idx]
+    except ImportError:
+        default = values.index(current) if current in values else 0
+        return values[default]
 
 
 def _write_env(env_path: Path, env_writes: dict) -> None:
@@ -150,15 +153,18 @@ def run_setup(provider, arkos_home: str, config: dict) -> None:
         _write_env(arkos_env, env_writes)
 
     if _hs_templates.supported_for_mode(mode):
-        from arkos_cli.memory_setup import _CANCELLED, _curses_select
+        try:
+            from arkos_cli.memory_setup import _CANCELLED, _curses_select
 
-        default_url = _DEFAULT_LOCAL_URL if mode == "local_external" else _DEFAULT_API_URL
-        _hs_templates.run_template_step(
-            api_url=provider_config.get("api_url") or default_url,
-            bank_id=provider_config.get("bank_id", "arkos"),
-            api_key=env_writes.get("HINDSIGHT_API_KEY") or os.environ.get("HINDSIGHT_API_KEY", "") or None,
-            select=_curses_select, cancelled=_CANCELLED,
-        )
+            default_url = _DEFAULT_LOCAL_URL if mode == "local_external" else _DEFAULT_API_URL
+            _hs_templates.run_template_step(
+                api_url=provider_config.get("api_url") or default_url,
+                bank_id=provider_config.get("bank_id", "arkos"),
+                api_key=env_writes.get("HINDSIGHT_API_KEY") or os.environ.get("HINDSIGHT_API_KEY", "") or None,
+                select=_curses_select, cancelled=_CANCELLED,
+            )
+        except ImportError:
+            pass
 
     if mode == "local_embedded":
         materialized_config = dict(provider_config)

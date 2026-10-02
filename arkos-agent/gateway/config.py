@@ -742,8 +742,11 @@ def _validate_gateway_config(config: "GatewayConfig") -> None:
 
 def _apply_env_overrides(config: GatewayConfig) -> None:
     """Apply environment variable overrides to config (see ``gateway.config_env``)."""
-    from gateway.config_env import _apply_env_overrides as _impl
-    _impl(config)
+    try:
+        from gateway.config_env import _apply_env_overrides as _impl
+        _impl(config)
+    except ImportError:
+        pass
 
 
 import json  # noqa: F401,E402

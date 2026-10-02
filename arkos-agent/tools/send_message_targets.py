@@ -46,8 +46,12 @@ def _parse_telegram(ref):
     parsed = _parse_regex_groups(_TELEGRAM_TOPIC_TARGET_RE)(ref)
     if parsed:
         return parsed
-    from plugins.platforms.telegram.telegram_ids import parse_telegram_username_target
-    return _parse_nonempty(parse_telegram_username_target(ref) or "")
+    try:
+        from plugins.platforms.telegram.telegram_ids import parse_telegram_username_target
+        return _parse_nonempty(parse_telegram_username_target(ref) or "")
+    except ImportError:
+        stripped = (ref or "").strip()
+        return (stripped, None) if stripped.startswith("@") else None
 
 
 _SLACK_FORMS = ((_SLACK_THREAD_TARGET_RE, "{}", True), (_SLACK_TARGET_RE, "{}", False),

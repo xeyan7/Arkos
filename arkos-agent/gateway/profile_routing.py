@@ -36,10 +36,12 @@ def _whatsapp_user_chat_ids_match(platform: str, left: Optional[str], right: Opt
         or _is_whatsapp_non_user_chat(left) or _is_whatsapp_non_user_chat(right)
     ):
         return False
-    from gateway.whatsapp_identity import expand_whatsapp_aliases
-
-    left_aliases = expand_whatsapp_aliases(str(left))
-    return bool(left_aliases and left_aliases & expand_whatsapp_aliases(str(right)))
+    try:
+        from gateway.whatsapp_identity import expand_whatsapp_aliases
+        left_aliases = expand_whatsapp_aliases(str(left))
+        return bool(left_aliases and left_aliases & expand_whatsapp_aliases(str(right)))
+    except ImportError:
+        return str(left).strip().lower() == str(right).strip().lower()
 
 
 class ProfileRouteRejected(RuntimeError):

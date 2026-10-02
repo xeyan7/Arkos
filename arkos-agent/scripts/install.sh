@@ -6,10 +6,10 @@
 # Uses uv for desktop/server installs and Python's stdlib venv + pip on Termux.
 #
 # Usage:
-#   curl -fsSL https://arkos.local/install.sh | bash
+#   ./install.sh
 #
 # Or with options:
-#   curl -fsSL ... | bash -s -- --no-venv --skip-setup
+#   ./install.sh --no-venv --skip-setup
 #
 # ============================================================================
 
@@ -535,7 +535,7 @@ detect_os() {
             OS="windows"
             DISTRO="windows"
             log_error "Windows detected. Please use the PowerShell installer:"
-            log_info "  iex (irm https://arkos.local/install.ps1)"
+            log_info "  .\\install.ps1"
             exit 1
             ;;
         *)

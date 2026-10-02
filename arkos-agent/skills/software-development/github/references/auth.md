@@ -36,7 +36,7 @@ This is the most portable method — works everywhere, no SSH config needed.
 
 **Step 1: Create a personal access token**
 
-Tell the user to go to: **https://github.com/settings/tokens**
+Tell the user to go to: [GitHub Settings Tokens](https://github.com/settings/tokens)
 
 - Click "Generate new token (classic)"
 - Give it a name like "arkos-agent"
@@ -115,7 +115,7 @@ ssh-keygen -t ed25519 -C "their-email@example.com" -f ~/.ssh/id_ed25519 -N ""
 cat ~/.ssh/id_ed25519.pub
 ```
 
-Tell the user to add the public key at: **https://github.com/settings/keys**
+Tell the user to add the public key at: [GitHub Settings Keys](https://github.com/settings/keys)
 - Click "New SSH key"
 - Paste the public key content
 - Give it a title like "arkos-agent-<machine-name>"

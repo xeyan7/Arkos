@@ -22,7 +22,7 @@ from tools.skills_hub_sources import BrowseShSource, LobeHubSource, UrlSource, W
 
 logger = logging.getLogger("tools.skills_hub")
 
-ARKOS_INDEX_URL = "https://arkos.local/docs/api/skills-index.json"
+ARKOS_INDEX_URL = os.environ.get("ARKOS_INDEX_URL", "")
 ARKOS_INDEX_TTL = 6 * 3600
 
 
@@ -46,6 +46,8 @@ def _load_arkos_index() -> Optional[dict]:
     cached = _read_json_if_fresh(cache_file, ARKOS_INDEX_TTL)
     if cached is not None:
         return cached
+    if not ARKOS_INDEX_URL:
+        return _load_stale_index_cache()
     data = None
     for accept_encoding in ("gzip, deflate", "identity"):
         try:

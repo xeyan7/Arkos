@@ -115,7 +115,9 @@ def _print_loopback_ssh_hint(redirect_uri: str, *, docs_url: str | None = None) 
         "Then open the authorize URL above in your local browser.")
     if docs_url:
         print(f"Provider docs:      {docs_url}")
-    print(f"SSH/jump-box guide: {OAUTH_OVER_SSH_DOCS_URL}\n{divider}\n")
+    if OAUTH_OVER_SSH_DOCS_URL:
+        print(f"SSH/jump-box guide: {OAUTH_OVER_SSH_DOCS_URL}")
+    print(f"{divider}\n")
 
 
 def _default_verify() -> bool | ssl.SSLContext:

@@ -225,16 +225,19 @@ def _seed_cron_session(
     The seeded key must equal the reply's ``build_session_key``: chat_type, user_id, thread_id and
     scope_id (Slack team id) are all part of it, so callers pass exactly what the reply carries."""
     from gateway.config import Platform
-    from gateway.session import SessionSource
     from gateway.mirror import mirror_to_session
     seeded_session_id: Optional[str] = None
     session_store = getattr(adapter, "_session_store", None)
     if session_store is not None:
         try:
+            from gateway.session import SessionSource
+        except ImportError:
+            SessionSource = None
+        try:
             platform_enum = Platform(platform_name.lower())
         except (ValueError, KeyError):
             platform_enum = None
-        if platform_enum is not None:
+        if platform_enum is not None and SessionSource is not None:
             seed_chat_id = (
                 str(thread_id)
                 if discord_keys_on_thread and platform_enum == Platform.DISCORD
