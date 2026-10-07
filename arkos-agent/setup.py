@@ -41,7 +41,7 @@ _BLOCK_MESSAGE = (
     "  uv sync          # or: uv pip install -e .\n"
     "\n"
     "If you are building with Nix (uv2nix), this error should not fire —\n"
-    "the Arkos Nix derivation sets ARKOS_NIX_BUILD=1. If it does, file a bug."
+    "the Arkos Nix derivation sets ARKOS_NIX_BUILD=1. If it does, report it internally."
 )
 
 

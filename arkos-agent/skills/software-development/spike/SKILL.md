@@ -2,7 +2,7 @@
 name: spike
 description: "Throwaway experiments to validate an idea before build."
 version: 1.0.0
-author: maintainers (adapted from gsd-build/get-shit-done)
+author: Arkos distribution
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
@@ -192,8 +192,8 @@ Propose 2-4 candidates as Given/When/Then. Let the user pick.
 - `README.md` per spike captures question, approach, results, verdict
 - Keep the code throwaway — a spike that takes 2 days to "clean up for production" was a bad spike
 
-## Attribution
+## Licensing
 
-Adapted from the GSD (Get Shit Done) project's `/gsd-spike` workflow — MIT © 2025 Lex Christopherson (**gsd-build/get-shit-done**). The full GSD system offers persistent spike state, MANIFEST tracking, and integration with a broader spec-driven development pipeline; install with `npx get-shit-done-cc --arkos --global`.
+Source credits and license information are recorded in `THIRD_PARTY_NOTICES.md` at the project root.
 
 *Part of Arkos, an AI agent engine.*

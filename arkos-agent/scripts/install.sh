@@ -220,7 +220,7 @@ print_banner() {
     echo "┌─────────────────────────────────────────────────────────┐"
     echo "│             ⚕ Arkos Installer                    │"
     echo "├─────────────────────────────────────────────────────────┤"
-    echo "│  An open source AI agent by Arkos.                      │"
+    echo "│  Arkos private AI agent engine.                        │"
     echo "└─────────────────────────────────────────────────────────┘"
     echo -e "${NC}"
 }

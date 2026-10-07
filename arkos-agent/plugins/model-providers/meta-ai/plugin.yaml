@@ -2,5 +2,5 @@ name: meta-ai-provider
 kind: model-provider
 version: 1.0.0
 description: Meta Model API — Muse Spark family (Meta Superintelligence Labs)
-author: Beto de Paola
+author: Arkos distribution
 homepage: https://developer.meta.com/ai/

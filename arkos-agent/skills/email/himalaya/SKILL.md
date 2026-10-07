@@ -2,7 +2,7 @@
 name: himalaya
 description: "Himalaya CLI: IMAP/SMTP email from terminal."
 version: 1.1.0
-author: community
+author: Arkos distribution
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

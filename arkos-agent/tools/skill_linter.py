@@ -1,7 +1,7 @@
 """Structural + convention linter for SKILL.md files.
 
 The hard validator (``skill_manager_tool._validate_frontmatter``) blocks the
-non-negotiables; this is the advisory companion encoding the CONTRIBUTING.md
+non-negotiables; this is the advisory companion encoding the internal AGENTS.md
 "Skill authoring standards" a human reviewer would otherwise catch. Findings
 never block by themselves — ``lint_skill`` returns ``LintFinding`` rows and the
 caller decides. Frontmatter parsing is delegated to ``agent.skill_utils`` so

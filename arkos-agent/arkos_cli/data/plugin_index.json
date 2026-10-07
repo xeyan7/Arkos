@@ -87,7 +87,7 @@
     {
       "name": "arkos-plugin-chrome-profiles",
       "description": "Switch Arkos browser tools between Chrome profiles via CDP.",
-      "author": "anpicasso",
+      "author": "",
       "tags": [
         "browser",
         "chrome",

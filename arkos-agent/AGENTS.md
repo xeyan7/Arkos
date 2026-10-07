@@ -1,6 +1,8 @@
 # Arkos - Development Guide
 
-Instructions for AI coding assistants and developers working on the Arkos codebase.
+Internal instructions for AI coding assistants and authorized developers working on the private Arkos codebase.
+The project owner controls access, changes, and releases. Preserve inherited license notices;
+distribution metadata does not replace the terms that apply to third-party code.
 This root file holds only what applies everywhere. Each area has its own `AGENTS.md` (aim for
 ~8k chars; `agent/subdirectory_hints.py` delivers up to 32k and truncates head/tail with a warning
 past that); see the **routing table** at the end and read the area file before editing in that area.
@@ -27,12 +29,11 @@ Two invariants shape almost every design decision and are the lens for reviewing
   every API call, so the bar for a new *core* tool is high. New capability should arrive as a
   CLI command + skill, a service-gated tool, or a plugin — not as core surface.
 
-## Contribution Rubric — What We Want / What We Don't
+## Internal Engineering Standards
 
-The project's intent layer. It serves humans aiming a contribution AND the automated triage
-sweeper, which may only close on `implemented_on_main`, `cannot_reproduce`, or `incoherent`.
-Taste-based "out of scope" closes are a human maintainer's call; the sweeper's job is to
-recognize design intent and *avoid wrongly closing a legitimate contribution*.
+These standards guide owner-approved maintenance and internal change review.
+The project owner decides scope and release readiness. Verify reported behavior
+before changing implementation or closing an internal work item.
 
 Read the balance right: the agent ships a **lot**. Most merges are bug fixes to reported
 behavior, and the product surface (platforms, providers, models, desktop/TUI features)
@@ -67,8 +68,8 @@ grow: expansive at the edges, conservative at the waist.
 - **Cache-, alternation-, and invariant-safe.** Preserve prompt caching, strict role
   alternation (never two same-role messages in a row; never a synthetic user message injected
   mid-loop), and a system prompt byte-stable for the life of a conversation.
-- **Contributor credit preserved.** Salvage external work by cherry-picking (rebase-merge) so
-  authorship survives; build on top rather than reimplementing.
+- **Required notices preserved.** Keep applicable copyright and license notices when
+  incorporating external work.
 
 ### What we don't want (rejected even when well-built)
 
@@ -96,7 +97,7 @@ grow: expansive at the edges, conservative at the waist.
   SaaS connectors, analytics dashboards, and other "someone else's product" plugins do NOT
   land under `plugins/` — every one becomes our burden against a fast-moving core for a
   backend we don't own. Ship as a **standalone plugin repo** (`~/.arkos/plugins/` or pip
-  entry point), promoted in the maintainers Discord `#plugins-skills-and-skins`. This is a
+  entry point), approved through internal review. This is a
   coupling decision, not a quality bar; such PRs are closed with a pointer to publish.
 
 ### Before you call it a bug — verify the premise (and when NOT to close)
@@ -287,13 +288,13 @@ PyPI: `>=floor,<next_major` (`"httpx>=0.28.1,<1"`); pre-1.0: `<0.(minor+2)`
 pip: `==exact`. A bare `>=X.Y.Z` is rejected by CI and reviewers. Run `uv lock` after
 changing `pyproject.toml`.
 
-## Commits, Merges, PRs
+## Internal Changes and Releases
 
 - **Squash merges from stale branches silently revert recent fixes.** Before squash-merging,
   bring the branch to `main` (`git fetch origin main && git reset --hard origin/main`, re-apply
   the PR's commits). Verify with `git diff HEAD~1..HEAD` after merging — unexpected deletions
   are a red flag.
-- Salvage by cherry-pick so contributor authorship survives (see rubric).
+- The project owner authorizes release and distribution. Keep required source notices intact.
 - Tests per fix: 1–2 INVARIANT tests (behaviour contract, proven red on base), never
   change-detectors; ≤ 2 tests is the salvage bar too. Reject/rewrite in salvaged diffs:
   appendages to facades, new god helpers, compat aliases, wrappers.

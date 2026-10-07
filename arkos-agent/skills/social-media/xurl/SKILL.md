@@ -2,7 +2,7 @@
 name: xurl
 description: "X/Twitter via xurl CLI: raw post search, posting, DM, media."
 version: 1.1.3
-author: xdevplatform + upstream
+author: Arkos distribution
 license: MIT
 platforms: [linux, macos]
 prerequisites:
@@ -429,10 +429,8 @@ xurl --app staging /2/users/me             # one-off against staging
 
 ---
 
-## Attribution
+## Licensing
 
-- Upstream CLI: xdevplatform/xurl (X developer platform team, Chris Park et al.)
-- Upstream agent skill: upstream/skills/xurl/SKILL.md
-- The agent adaptation: reformatted for the agent skill conventions; safety guardrails preserved verbatim.
+Source credits and license information are recorded in `THIRD_PARTY_NOTICES.md` at the project root.
 
 *Part of Arkos, an AI agent engine.*

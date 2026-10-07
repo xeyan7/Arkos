@@ -2,7 +2,7 @@
 name: arkos-agent-skill-authoring
 description: "Author in-repo SKILL.md files: frontmatter and structure."
 version: 2.0.0
-author: maintainers
+author: Arkos distribution
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
@@ -58,7 +58,7 @@ Repo-standard shape (all fields expected, even where the validator doesn't enfor
 name: my-skill-name               # lowercase, hyphens, ≤64 chars (MAX_NAME_LENGTH)
 description: Concise capability statement, under sixty chars.
 version: 0.1.0                    # semver; new skills start at 0.1.0
-author: Real Name (github-handle)
+author: Arkos distribution
 license: MIT
 platforms: [linux, macos, windows]   # audit, don't guess — see Platform Gating
 metadata:
@@ -81,9 +81,9 @@ Bad: `Use when a user asks to monitor named competitors or companies for product
 
 ### `author` rules
 
-- Credit the **human first**, then "Arkos" as secondary collaborator: `Ben Barclay (benbarclay), Arkos`.
-- Never `author: Arkos` alone for contributed skills — credit the human, not the tool, even (especially) when an agent drafted the text.
-- Maintainer-authored skills: `Arkos Maintainers`.
+- Bundled skills use `Arkos distribution` to identify the maintained product.
+- The metadata value does not claim original authorship or copyright ownership.
+- Preserve required copyright and license notices in their source files or `THIRD_PARTY_NOTICES.md` at the project root.
 
 ### `related_skills` rules
 
@@ -185,7 +185,7 @@ A skill exists to make the agent's process more predictable — the agent reliab
 
 1. **Using `skill_manage(action='create')` for an in-repo skill.** It writes to `~/.arkos/skills/`, not the repo tree. Use `write_file`.
 2. **Trusting the validator's limits as the standard.** The validator allows 1024-char descriptions; review rejects anything over 60. The validator doesn't check `platforms:`, author format, tests, or docs — review does.
-3. **`author: Arkos` on a contributed skill.** Credit the human first.
+3. **Treating distribution metadata as a copyright claim.** Keep required source and license notices intact.
 4. **Leading whitespace before `---`.** Validation fails on any leading blank line or BOM.
 5. **Description too generic or trigger buried past char 57.**
 6. **`related_skills` pointing at skills that don't exist in-repo** (user-local, planned, or in a sibling PR).
@@ -201,7 +201,7 @@ A skill exists to make the agent's process more predictable — the agent reliab
 - [ ] Frontmatter starts at byte 0 with `---`, closes with `\n---\n`
 - [ ] `name`, `description`, `version`, `author`, `license`, `platforms`, `metadata.arkos.{tags, related_skills}` all present
 - [ ] Description ≤ 60 chars, one sentence, ends with a period, no marketing words
-- [ ] `author` credits the human contributor first
+- [ ] `author` identifies the Arkos distribution; required source and license notices are preserved
 - [ ] `platforms:` audited against actual prose/scripts, not copied from a sibling
 - [ ] Every `related_skills` entry resolves in-repo
 - [ ] Body follows the modern section order; commands framed through the agent tools

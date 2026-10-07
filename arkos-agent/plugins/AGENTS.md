@@ -21,7 +21,7 @@ command. A hook with no concrete consumer is speculative infrastructure and is r
   the same path, integrated via `arkos memory setup` / `post_setup()`.
 - **No new third-party-product plugins (June 2026).** Observability/metrics backends, vendor SaaS
   connectors, analytics dashboards, paid-service tie-ins ship as standalone plugin repos
-  (`~/.arkos/plugins/` or pip entry point) promoted in Discord `#plugins-skills-and-skins`. Reason:
+  (`~/.arkos/plugins/` or pip entry point) and are approved through internal review. Reason:
   every absorbed product is our maintenance burden against a fast-moving core for a backend we don't
   own. `observability/`, `kanban/`, `disk-cleanup/` are precedent, not an invitation. Closing such a
   PR is a coupling decision, not a quality judgment.

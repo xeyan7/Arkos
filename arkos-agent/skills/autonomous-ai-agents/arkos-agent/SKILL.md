@@ -13,7 +13,7 @@ metadata:
 
 # Arkos
 
-Arkos is an open-source AI agent framework that runs in your terminal, a native desktop app, messaging platforms, and IDEs. It's in the same category as Claude Code (Anthropic), Codex (OpenAI), and upstream — autonomous coding and task-execution agents that use tool calling to interact with your system. The agent works with any LLM provider (OpenRouter, Anthropic, OpenAI, Google, DeepSeek, xAI, local models, and 20+ others) and runs on Linux, macOS, Windows, and WSL.
+Arkos is a private AI agent engine maintained for its owner's use. It uses tool calling to execute tasks, maintains memory and reusable skills, and supports multiple model providers. The current checkout is an engine build: interactive CLI, desktop, and messaging frontends are not shipped. References to those surfaces below describe broader engine integrations and must be verified against the current source tree before use. Access and releases are authorized by the project owner.
 
 What makes the agent different:
 
@@ -100,7 +100,7 @@ Profiles use `~/.arkos/profiles/<name>/` with the same layout. When a profile is
 | Pet mascots — install, select, scale, diagnose | `references/petdex.md` |
 | Windows-specific issues (keybinds, WinError 10106, BOM) | `references/windows-quirks.md` |
 | Debugging: voice, tools missing, gateway, aux models | `references/troubleshooting.md` |
-| Contributing code: adding tools, slash commands, tests | `references/contributor-guide.md` |
+| Internal development: adding tools and tests | Root `AGENTS.md` and the relevant area guide |
 | delegate_task "capped at N" reports | `references/delegate-task-concurrency-diagnosis.md` |
 | Connecting a messaging platform (Telegram, Discord, Slack, WhatsApp, …) | docs: `/user-guide/messaging` |
 

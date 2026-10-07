@@ -2,7 +2,7 @@
 name: requesting-code-review
 description: "Pre-commit review: security scan, quality gates, auto-fix."
 version: 2.0.0
-author: maintainers (adapted from obra/superpowers + MorAlekss)
+author: Arkos distribution
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

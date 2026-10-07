@@ -39,9 +39,10 @@ Every new or modernised skill — bundled, optional, or contributed — meets al
    bash heredocs, `osascript`, `apt`, `systemctl`) require a platform declaration. Fix cross-platform
    first (`tempfile.gettempdir`, `pathlib.Path`, `psutil.pid_exists`, Python filtering instead of
    `grep`); gate narrower only when the dependency is genuinely platform-bound.
-4. **`author` credits the human first.** External contributor's real name + GitHub handle first,
- "Arkos" second. A commit authored as "Arkos" (they drafted with the agent) is replaced
-   with the human's name — credit the human, not the tool.
+4. **Bundled metadata identifies the Arkos distribution.** Use `author: Arkos distribution`
+   for shipped skills. This identifies the maintained distribution, not original copyright
+   ownership. Preserve required source copyright and license notices in the source or
+   `THIRD_PARTY_NOTICES.md`; do not copy personal contributor labels into product metadata.
 5. **Modern section order:** `# <Skill> Skill`, 2–3 sentence intro (what it does and doesn't),
    `## When to Use`, `## Prerequisites`, `## How to Run`, `## Quick Reference`, `## Procedure`,
    `## Pitfalls`, `## Verification`. ~200 lines for a complex skill, ~100 simple. Cut intro fluff,
