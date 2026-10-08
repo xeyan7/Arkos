@@ -380,7 +380,7 @@ DEFAULT_CONFIG = {
         "startup_orphan_sweep": True,
         "oauth": {
             "client_id": "",
-            "portal_url": "",
+
         },
         "basic_auth": {
             "username": "",
@@ -988,10 +988,7 @@ DEFAULT_CONFIG = {
         },
     },
 
-    "portal": {
-        "keepalive_interval_seconds": 900,
-        "anthropic_wire": "chat",
-    },
+
     "vertex": {
         "project_id": "",
         "region": "global",
@@ -1049,7 +1046,7 @@ def _base_url(name, prompt_name=None):
 
 
 OPTIONAL_ENV_VARS = {
-    "PORTAL_BASE_URL": _base_url("Arkos Portal"),
+
     "OPENROUTER_API_KEY": _env("OpenRouter API key (for vision, web scraping helpers, and MoA)",
         "OpenRouter API key", url="https://openrouter.ai/keys", password=True, tools=["vision_analyze"],
         category="provider", advanced=True),
@@ -1164,21 +1161,8 @@ OPTIONAL_ENV_VARS = {
         "https://firecrawl.dev/", tools=["web_search", "web_extract"]),
     "FIRECRAWL_API_URL": _tool("Firecrawl API URL for self-hosted instances (optional)",
         "Firecrawl API URL (leave empty for cloud)", None, password=False, advanced=True),
-    "FIRECRAWL_GATEWAY_URL": _tool(
-        "Exact Firecrawl tool-gateway origin override for Portal Subscribers only (optional)",
-        "Firecrawl gateway URL (leave empty to derive from domain)", None, password=False,
-        advanced=True),
-    "TOOL_GATEWAY_DOMAIN": _tool(
-        "Shared tool-gateway domain suffix, used to derive vendor "
-        "hosts, e.g. example.com -> firecrawl-gateway.example.com",
-        "Tool-gateway domain suffix", None, password=False, advanced=True),
-    "TOOL_GATEWAY_SCHEME": _tool(
-        "Shared tool-gateway URL scheme for Portal Subscribers only, used to derive vendor hosts "
-        "(`https` by default, set `http` for local gateway testing)", "Tool-gateway URL scheme",
-        None, password=False, advanced=True),
-    "TOOL_GATEWAY_USER_TOKEN": _tool(
-        "Explicit Portal Subscriber access token for tool-gateway requests (optional; otherwise "
-        "read from the Arkos auth store)", "Tool-gateway user token", None, advanced=True),
+
+
     "TAVILY_API_KEY": _tool(
         "Tavily API key for AI-native web search and extract (optional — keyless works when "
         "Tavily is selected)", "Tavily API key", "https://app.tavily.com/home",

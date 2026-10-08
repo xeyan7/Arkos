@@ -96,8 +96,6 @@ it. `/help` in-session is always authoritative.
 /profile                 Active profile info
 /platforms (/gateway)    Platform connection status (CLI)
 /journey (/learning)     Learned skills + memories timeline (CLI)
-/subscription (/upgrade) Plan info (CLI) [removed in engine build]
-/topup                   Balance / billing [removed in engine build: portal deleted]
 /copy [N]                Copy last response to clipboard (CLI)
 /paste                   Attach clipboard image (CLI)
 /image <path>            Attach a local image file (CLI)

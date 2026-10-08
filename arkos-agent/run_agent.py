@@ -113,7 +113,7 @@ from agent.api_error_summary import ApiErrorSummaryMixin
 from agent.interrupt_control import InterruptControlMixin
 from agent.turn_explainers import TurnExplainersMixin
 from agent.activity_tracking import ActivityTrackingMixin
-from agent.rate_limit_credits import RateLimitCreditsMixin
+from agent.rate_limits import RateLimitMixin
 from agent.session_persistence import SessionPersistenceMixin
 from agent.compression_facade import CompressionFacadeMixin
 from agent.turn_facade import TurnFacadeMixin
@@ -208,7 +208,7 @@ class _StreamErrorEvent(Exception):
 
 class AIAgent(
     ClientLifecycleMixin, StreamDeliveryMixin, StatusOutputMixin, ApiRequestHooksMixin, ApiErrorSummaryMixin,
-    InterruptControlMixin, TurnExplainersMixin, ActivityTrackingMixin, RateLimitCreditsMixin,
+    InterruptControlMixin, TurnExplainersMixin, ActivityTrackingMixin, RateLimitMixin,
     SessionPersistenceMixin, CompressionFacadeMixin, TurnFacadeMixin, VisionMessagePrepMixin, ReasoningParamsMixin,
 ):
     """AI Agent with tool calling capabilities."""
@@ -609,7 +609,7 @@ class AIAgent(
     def _provider_model_requires_responses_api(model: str, *, provider: Optional[str] = None) -> bool:
         """Return True when this provider/model pair should use Responses API."""
         normalized_provider = (provider or "").strip().lower()
-        if normalized_provider in ("portal", "custom"):
+        if normalized_provider in ('custom',):
             return False
         if normalized_provider == "copilot":
             try:
@@ -1234,7 +1234,7 @@ class AIAgent(
     _handle_max_iterations = _forward("agent.chat_completion_helpers", "handle_max_iterations")
 
     def _conversation_root_id(self) -> Optional[str]:
-        """Session-lineage ROOT id for Portal usage attribution, so one conversation keeps a single
+        """Session-lineage ROOT id for conversation tracking, so one conversation keeps a single
         ``conversation=`` tag across compression rotation; subagents resolve via ``_parent_session_id``."""
         sid = getattr(self, "session_id", None)
         if not sid:
@@ -1248,160 +1248,6 @@ class AIAgent(
         except Exception:
             logger.debug("Conversation root lineage walk failed", exc_info=True)
             return start
-
-
-_BASIC_TOOLSETS = {"web", "terminal", "vision", "creative", "reasoning"}
-_COMPOSITE_TOOLSETS = {"research", "development", "analysis", "content_creation", "full_stack"}
-_LIST_TOOLS_USAGE = """
-💡 Usage Examples:
-  # Use predefined toolsets
-  python run_agent.py --enabled_toolsets=research --query='search for Python news'
-  python run_agent.py --enabled_toolsets=development --query='debug this code'
-  python run_agent.py --enabled_toolsets=safe --query='analyze without terminal'
-
-  # Combine multiple toolsets
-  python run_agent.py --enabled_toolsets=web,vision --query='analyze website'
-
-  # Disable toolsets
-  python run_agent.py --disabled_toolsets=terminal --query='no command execution'
-
-  # Run with trajectory saving enabled
-  python run_agent.py --save_trajectories --query='your question here'"""
-
-
-def _print_tool_listing() -> None:
-    """``--list_tools``: print toolsets (basic / composite / scenario / legacy), every tool, and usage examples."""
-    from model_tools import get_all_tool_names, get_available_toolsets
-    from toolsets import get_all_toolsets, get_toolset_info
-
-    print("📋 Available Tools & Toolsets:")
-    print("-" * 50)
-    print("\n🎯 Predefined Toolsets (New System):")
-    print("-" * 40)
-    basic_toolsets, composite_toolsets, scenario_toolsets = [], [], []
-    for name in get_all_toolsets():
-        info = get_toolset_info(name)
-        if info:
-            bucket = basic_toolsets if name in _BASIC_TOOLSETS else composite_toolsets if name in _COMPOSITE_TOOLSETS else scenario_toolsets
-            bucket.append((name, info))
-    print("\n📌 Basic Toolsets:")
-    for name, info in basic_toolsets:
-        print(f"  • {name:15} - {info['description']}")
-        print(f"    Tools: {', '.join(info['resolved_tools']) if info['resolved_tools'] else 'none'}")
-    print("\n📂 Composite Toolsets (built from other toolsets):")
-    for name, info in composite_toolsets:
-        print(f"  • {name:15} - {info['description']}")
-        print(f"    Includes: {', '.join(info['includes']) if info['includes'] else 'none'}")
-        print(f"    Total tools: {info['tool_count']}")
-    print("\n🎭 Scenario-Specific Toolsets:")
-    for name, info in scenario_toolsets:
-        print(f"  • {name:20} - {info['description']}")
-        print(f"    Total tools: {info['tool_count']}")
-    print("\n📦 Legacy Toolsets (for backward compatibility):")
-    for name, info in get_available_toolsets().items():
-        print(f"  {'✅' if info['available'] else '❌'} {name}: {info['description']}")
-        if not info["available"]:
-            print(f"    Requirements: {', '.join(info['requirements'])}")
-    all_tools = get_all_tool_names()
-    print(f"\n🔧 Individual Tools ({len(all_tools)} available):")
-    for tool_name in sorted(all_tools):
-        print(f"  📌 {tool_name} (from {get_toolset_for_tool(tool_name)})")
-    print(_LIST_TOOLS_USAGE)
-
-
-def _parse_toolset_arg(raw: Optional[str], label: str) -> Optional[List[str]]:
-    """Comma-separated toolset CLI arg → list (echoed), or None when absent."""
-    if not raw:
-        return None
-    names = [t.strip() for t in raw.split(",")]
-    print(f"{label}: {names}")
-    return names
-
-
-def _save_sample_trajectory(agent: "AIAgent", result: dict, user_query: str, model: str) -> None:
-    """``--save_sample``: write one trajectory (same format as batch_runner) to a UUID-named JSON file."""
-    sample_filename = f"sample_{str(uuid.uuid4())[:8]}.json"
-    entry = {
-        "conversations": agent._convert_to_trajectory_format(result['messages'], user_query, result['completed']),
-        "timestamp": datetime.now().isoformat(), "model": model, "completed": result['completed'], "query": user_query,
-    }
-    try:
-        with open(sample_filename, "w", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False, indent=2))
-        print(f"\n💾 Sample trajectory saved to: {sample_filename}")
-    except Exception as e:
-        print(f"\n⚠️ Failed to save sample: {e}")
-
-
-def main(
-    query: str = None, model: str = "", api_key: str = None, base_url: str = "", max_turns: int = 10,
-    enabled_toolsets: str = None, disabled_toolsets: str = None, list_tools: bool = False,
-    save_trajectories: bool = False, save_sample: bool = False, verbose: bool = False, log_prefix_chars: int = 20,
-):
-    """
-    Main function for running the agent directly.
-
-    Args:
-        query (str): Natural language query for the agent. Defaults to Python 3.13 example.
-        model (str): Model name to use (OpenRouter format: provider/model). Defaults to anthropic/claude-
-        sonnet-4.6.
-        api_key (str): API key for authentication. Uses OPENROUTER_API_KEY env var if not provided.
-        base_url (str): Base URL for the model API. Defaults to https://openrouter.ai/api/v1
-        max_turns (int): Maximum number of API call iterations. Defaults to 10.
-        enabled_toolsets (str): Comma-separated list of toolsets to enable. Supports predefined
-                              toolsets (e.g., "research", "development", "safe").
-                              Multiple toolsets can be combined: "web,vision"
-        disabled_toolsets (str): Comma-separated list of toolsets to disable (e.g., "terminal")
-        list_tools (bool): Just list available tools and exit
-        save_trajectories (bool): Save conversation trajectories to JSONL files (appends to
-        trajectory_samples.jsonl). Defaults to False.
-        save_sample (bool): Save a single trajectory sample to a UUID-named JSONL file for inspection.
-        Defaults to False.
-        verbose (bool): Enable verbose logging for debugging. Defaults to False.
-        log_prefix_chars (int): Number of characters to show in log previews for tool calls/responses.
-        Defaults to 20.
-
-    Toolset Examples:
-        - "research": Web search, extract, crawl + vision tools
-    """
-    print("🤖 AI Agent with Tool Calling")
-    print("=" * 50)
-    if list_tools:
-        return _print_tool_listing()
-
-    enabled_toolsets_list = _parse_toolset_arg(enabled_toolsets, "🎯 Enabled toolsets")
-    disabled_toolsets_list = _parse_toolset_arg(disabled_toolsets, "🚫 Disabled toolsets")
-    if save_trajectories:
-        print("💾 Trajectory saving: ENABLED")
-        print("   - Successful conversations → trajectory_samples.jsonl")
-        print("   - Failed conversations → failed_trajectories.jsonl")
-
-    try:
-        agent = AIAgent(
-            base_url=base_url, model=model, api_key=api_key, max_iterations=max_turns,
-            enabled_toolsets=enabled_toolsets_list, disabled_toolsets=disabled_toolsets_list,
-            save_trajectories=save_trajectories, verbose_logging=verbose, log_prefix_chars=log_prefix_chars,
-        )
-    except RuntimeError as e:
-        print(f"❌ Failed to initialize agent: {e}")
-        return
-
-    user_query = query if query is not None else ("Tell me about the latest developments in Python 3.13 and what new features "
-                                                  "developers should know about. Please search for current information and try it out.")
-    print(f"\n📝 User Query: {user_query}")
-    print("\n" + "=" * 50)
-
-    result = agent.run_conversation(user_query)
-
-    print("\n" + "=" * 50 + "\n📋 CONVERSATION SUMMARY\n" + "=" * 50)
-    print(f"✅ Completed: {result['completed']}\n📞 API Calls: {result['api_calls']}\n💬 Messages: {len(result['messages'])}")
-    if result['final_response']:
-        print("\n🎯 FINAL RESPONSE:\n" + "-" * 30 + "\n" + result['final_response'])
-    if save_sample:
-        _save_sample_trajectory(agent, result, user_query, model)
-    print("\n👋 Agent execution completed!")
-
-
 
 
 from types import SimpleNamespace  # noqa: F401,E402

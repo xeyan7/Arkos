@@ -1,5 +1,5 @@
 """Configuration management for Arkos: config.yaml / .env loading, saving,
-validation, migration, and the ``arkos config`` command."""
+validation, and migration for embedding hosts."""
 
 import copy
 import difflib
@@ -25,11 +25,7 @@ import yaml
 
 from arkos_cli import managed_scope
 from arkos_cli.default_soul import DEFAULT_SOUL_MD, is_legacy_template_soul
-from arkos_cli.secret_prompt import masked_secret_prompt
-try:
-    from arkos_cli.cli_output import line_input
-except ImportError:
-    line_input = input
+
 from arkos_constants import get_arkos_home, get_process_arkos_home  # noqa: F401
 from utils import atomic_replace, atomic_yaml_write, fast_safe_load
 
@@ -208,7 +204,6 @@ _EXTRA_ENV_KEYS = frozenset({
     "LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY", "LANGFUSE_BASE_URL",
     "ARKOS_ACP_AUTH_METHOD", "ARKOS_ACP_AUTO_APPROVE", "ARKOS_COPILOT_ACP_COMMAND",
     "ARKOS_COPILOT_ACP_ARGS", "COPILOT_CLI_PATH", "COPILOT_ACP_BASE_URL"})
-
 
 
 _MANAGED_TRUE_VALUES = ("true", "1", "yes")
@@ -418,7 +413,6 @@ def get_container_exec_info() -> Optional[dict]:
         "arkos_bin": info.get("arkos_bin", "/data/current-package/bin/arkos")}
 
 
-
 def get_config_path() -> Path:
     """Get the main config file path."""
     return get_arkos_home() / "config.yaml"
@@ -586,7 +580,6 @@ def ensure_arkos_home():
         return
     from arkos_cli.config_home import initialize_home
     initialize_home(home, _ARKOS_HOME_SUBDIRS, _ARKOS_HOME_ENSURED)
-
 
 
 from arkos_cli.config_defaults import DEFAULT_CONFIG, OPTIONAL_ENV_VARS  # noqa: E402,F401
@@ -838,8 +831,7 @@ def _unset_nested(config, dotted_key: str) -> bool:
 _ENV_CONFIG_KEYS = frozenset({
     'OPENROUTER_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'VOICE_TOOLS_OPENAI_KEY',
     'EXA_API_KEY', 'PARALLEL_API_KEY', 'FIRECRAWL_API_KEY', 'FIRECRAWL_API_URL',
-    'FIRECRAWL_GATEWAY_URL', 'TOOL_GATEWAY_DOMAIN', 'TOOL_GATEWAY_SCHEME',
-    'TOOL_GATEWAY_USER_TOKEN', 'TAVILY_API_KEY', 'PERPLEXITY_API_KEY', 'API_SERVER_KEY',
+    'TAVILY_API_KEY', 'PERPLEXITY_API_KEY', 'API_SERVER_KEY',
     'BROWSERBASE_API_KEY', 'BROWSERBASE_PROJECT_ID', 'BROWSER_USE_API_KEY',
     'FAL_KEY', 'TELEGRAM_BOT_TOKEN', 'DISCORD_BOT_TOKEN',
     'TERMINAL_SSH_HOST', 'TERMINAL_SSH_USER', 'TERMINAL_SSH_KEY',
@@ -957,7 +949,6 @@ def check_config_version(*, raise_on_parse_error: bool = False) -> Tuple[int, in
     return _coerce_config_version(config.get("_config_version")), latest
 
 
-
 _EXTRA_KNOWN_ROOT_KEYS = {
     "custom_providers",
     "fallback_model",
@@ -969,7 +960,6 @@ _EXTRA_KNOWN_ROOT_KEYS = {
     "platform_toolsets",
     "known_plugin_toolsets",
     "known_builtin_toolsets",
-    "tool_gateway_declined_tools",
     "group_sessions_per_user", "thread_sessions_per_user",
     "stt_echo_transcripts", "reset_triggers", "always_log_local", "filter_silence_narration",
     "multiplex_profiles", "profile_routes", "platforms", "require_mention",
@@ -1187,27 +1177,14 @@ def _persist_migration(config: Dict[str, Any]) -> None:
     save_config(config)
 
 
-def _prompt_and_save_env(name: str, info: Dict[str, Any], prompt: str, results: Dict[str, Any]) -> bool:
-    """Prompt for one env var (masked when ``info['password']``), save it, record it; False if skipped."""
-    value = masked_secret_prompt(prompt) if info.get("password") else line_input(prompt).strip()
-    if not value:
-        return False
-    save_env_value(name, value)
-    results["env_added"].append(name)
-    print(f"  ✓ Saved {name}")
-    return True
 
 
-def _ask_yes_no(prompt: str) -> bool:
-    try:
-        answer = input(prompt).strip().lower()
-    except (EOFError, KeyboardInterrupt):
-        answer = "n"
-    return answer in {"y", "yes"}
 
 
-def migrate_config(interactive: bool = True, quiet: bool = False) -> Dict[str, Any]:
-    """Migrate config to latest version, prompting for new required fields."""
+def migrate_config(interactive: bool = False, quiet: bool = False) -> Dict[str, Any]:
+    """Migrate config without reading terminal input; hosts supply missing settings."""
+    if interactive:
+        raise ValueError("Interactive migration is unavailable; supply settings through the host API.")
     results = {"env_added": [], "config_added": [], "warnings": []}
 
     current_ver, latest_ver = check_config_version(raise_on_parse_error=True)
@@ -1219,57 +1196,22 @@ def migrate_config(interactive: bool = True, quiet: bool = False) -> Dict[str, A
     except Exception:
         pass
 
-    from arkos_cli.config_migrations import (
-        SUPPORT_FLOOR_VERSION, run_migrations, support_floor_message)
-
-    try:
-        has_explicit_version = "_config_version" in read_user_config_raw()
-    except Exception:
-        has_explicit_version = False
-    floor_refused = (
-        has_explicit_version and current_ver < SUPPORT_FLOOR_VERSION and current_ver < latest_ver)
-    if floor_refused:
-        msg = support_floor_message()
-        results["warnings"].append(msg)
-        sys.stderr.write(f"⚠ arkos config: {msg}\n")
-        if not quiet:
-            print(f"  ⚠ {msg}")
-    else:
-        run_migrations(current_ver, results, quiet)
+    if current_ver < latest_ver:
+        results["warnings"].append(
+            f"Configuration schema {current_ver} predates engine schema {latest_ver}. "
+            "Automatic legacy transformations are not available in this build; "
+            "review settings before upgrading. The stored version is unchanged."
+        )
 
     _disable_suspicious_mcp_servers(results, quiet)
     _warn_invalid_platform_toolsets(results, quiet)
-
-    if current_ver < latest_ver and not quiet and not floor_refused:
-        print(f"Config version: {current_ver} → {latest_ver}")
 
     missing_env = get_missing_env_vars(required_only=True)
     if missing_env and not quiet:
         print("\n⚠️  Missing required environment variables:")
         for var in missing_env:
             print(f"   • {var['name']}: {var['description']}")
-    if interactive and missing_env:
-        print("\nLet's configure them now:\n")
-        for var in missing_env:
-            if var.get("url"):
-                print(f"  Get your key at: {var['url']}")
-            if not _prompt_and_save_env(var["name"], var, f"  {var['prompt']}: ", results):
-                results["warnings"].append(f"Skipped {var['name']} - some features may not work")
-            print()
-
-    if interactive and not quiet:
-        _offer_new_optional_env_vars(current_ver, latest_ver, results)
-
     results["config_added"].extend(field["key"] for field in get_missing_config_fields())
-
-    if current_ver < latest_ver and not floor_refused:
-        config = read_raw_config()
-        config["_config_version"] = latest_ver
-        _persist_migration(config)
-
-    missing_skill_config = get_missing_skill_config_vars()
-    if missing_skill_config and interactive and not quiet:
-        _offer_skill_config_vars(missing_skill_config, results)
 
     return results
 
@@ -1319,66 +1261,10 @@ def _warn_invalid_platform_toolsets(results: Dict[str, Any], quiet: bool) -> Non
         logger.debug("platform_toolsets validation skipped: %s", _ts_val_err)
 
 
-def _offer_list(heading: str, items: List[str], question: str) -> bool:
-    """Print a bulleted offer list and ask; False (with the "set later" hint) when declined."""
-    print(heading)
-    for item in items:
-        print(f"    • {item}")
-    print()
-    if not _ask_yes_no(question):
-        print("  Set later with: arkos config set <key> <value>")
-        return False
-    print()
-    return True
 
 
-def _offer_new_optional_env_vars(current_ver: int, latest_ver: int, results: Dict[str, Any]) -> None:
-    """Interactively offer env vars that are NEW since the user's previous config version."""
-    new_var_names: set = set()
-    for ver in range(current_ver + 1, latest_ver + 1):
-        new_var_names.update(ENV_VARS_BY_VERSION.get(ver, []))
-    new_and_unset = [
-        (name, OPTIONAL_ENV_VARS[name])
-        for name in sorted(new_var_names)
-        if not get_env_value(name) and name in OPTIONAL_ENV_VARS]
-    if not new_and_unset or not _offer_list(
-        f"\n  {len(new_and_unset)} new optional key(s) in this update:",
-        [f"{name} — {info.get('description', '')}" for name, info in new_and_unset],
-        "  Configure new keys? [y/N]: "):
-        return
-    for name, info in new_and_unset:
-        print(f"  {info.get('description', name)}")
-        if info.get("url"):
-            print(f"  Get your key at: {info['url']}")
-        _prompt_and_save_env(name, info, f"  {info.get('prompt', name)} (Enter to skip): ", results)
-        print()
 
 
-def _offer_skill_config_vars(missing_skill_config: List[Dict[str, Any]], results: Dict[str, Any]) -> None:
-    """Prompt for skill-declared settings that are missing/empty and persist the answers."""
-    if not _offer_list(
-        f"\n  {len(missing_skill_config)} skill setting(s) not configured:",
-        [f"{v['key']} — {v['description']} (from skill: {v.get('skill', 'unknown')})" for v in missing_skill_config],
-        "  Configure skill settings? [y/N]: "):
-        return
-    config = read_raw_config()
-    try:
-        from agent.skill_utils import SKILL_CONFIG_PREFIX
-    except Exception:
-        SKILL_CONFIG_PREFIX = "skills.config"
-    for var in missing_skill_config:
-        default = var.get("default", "")
-        default_hint = f" (default: {default})" if default else ""
-        value = line_input(f"  {var['prompt']}{default_hint}: ").strip() or str(default or "")
-        if value:
-            _set_nested(config, f"{SKILL_CONFIG_PREFIX}.{var['key']}", value)
-            results["config_added"].append(var["key"])
-            print(f"  ✓ Saved {var['key']} = {value}")
-        else:
-            results["warnings"].append(
-                f"Skipped {var['key']} — skill '{var.get('skill', '?')}' may ask for it later")
-        print()
-    _persist_migration(config)
 
 
 def _merge_partial_save(raw: dict, override: dict) -> dict:
@@ -2111,7 +1997,6 @@ _FALLBACK_COMMENT = """
 # Supported providers:
 #   openrouter   (OPENROUTER_API_KEY)  — routes to any model
 #   openai-codex (OAuth — arkos auth) — OpenAI Codex
-#   portal         (OAuth — arkos auth) — Arkos Portal
 #   zai          (ZAI_API_KEY)         — Z.AI / GLM
 #   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
 #   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
@@ -2489,13 +2374,6 @@ def save_anthropic_api_key(value: str, save_fn=None):
     _write_anthropic_slots("", value, save_fn, token_first=False)
 
 
-def save_env_value_secure(key: str, value: str) -> Dict[str, Any]:
-    """Save via the unified credential lifecycle (also refreshes any config.yaml mirror of the old
-    value and lifts a prior env-source suppression)."""
-    from arkos_cli.credential_lifecycle import save_provider_env_credential
-
-    save_provider_env_credential(key, value)
-    return {"success": True, "stored_as": key, "validated": False}
 
 
 def reload_env() -> int:
@@ -2551,11 +2429,10 @@ def get_env_value_prefer_dotenv(key: str) -> Optional[str]:
     return load_env().get(key) or _scoped_environ_get(key)
 
 
-
 def redact_key(key: str) -> str:
     """Redact an API key for display."""
     from agent.redact import mask_secret
-    return mask_secret(key, empty=color("(not set)", Colors.DIM))
+    return mask_secret(key, empty="(not set)")
 
 
 _SECRET_CONFIG_KEYS = frozenset({
@@ -2584,7 +2461,7 @@ def redact_config_value(value: Any, _depth: int = 0) -> Any:
 
 def _section(title: str) -> None:
     print()
-    print(color(f"◆ {title}", Colors.CYAN, Colors.BOLD))
+    print(f"◆ {title}")
 
 
 def _show_managed_banner() -> None:
@@ -2595,12 +2472,11 @@ def _show_managed_banner() -> None:
     if not managed_keys and not managed_env:
         return
     print()
-    print(color(
-        f"  ⚷ Some settings are managed by your administrator ({managed_scope.get_managed_dir()}) "
-        f"and cannot be changed", Colors.YELLOW, Colors.BOLD))
+    print(f"  ⚷ Some settings are managed by your administrator ({managed_scope.get_managed_dir()}) "
+        f"and cannot be changed")
     for label, keys in (("config", managed_keys), ("env", managed_env)):
         if keys:
-            print(color(f"    Managed {label} keys: {', '.join(sorted(keys))}", Colors.YELLOW))
+            print(f"    Managed {label} keys: {', '.join(sorted(keys))}")
 
 
 _SHOW_CONFIG_API_KEYS = (
@@ -2626,8 +2502,8 @@ def _show_model_section(config: Dict[str, Any]) -> None:
     except Exception:
         env_ghost = None
     if env_ghost is not None and str(env_ghost).strip() != str(cfg_max_turns).strip():
-        print(color(f"                ⚠ .env has stale ARKOS_MAX_ITERATIONS={env_ghost} "
-                    f"(run 'arkos doctor --fix' to remove)", Colors.YELLOW))
+        print(f"                ⚠ .env has stale ARKOS_MAX_ITERATIONS={env_ghost} "
+                    f"(run 'arkos doctor --fix' to remove)")
 
 
 def _show_display_section(config: Dict[str, Any]) -> None:
@@ -2702,105 +2578,11 @@ def _show_compression_section(config: Dict[str, Any]) -> None:
         print(f"  Provider:     {comp_provider}")
 
 
-def _show_aux_overrides(config: Dict[str, Any]) -> None:
-    aux_tasks = {"Vision": config.get('auxiliary', {}).get('vision', {})}
-    overrides = {
-        label: (t.get('provider', 'auto'), t.get('model', ''))
-        for label, t in aux_tasks.items()
-        if t.get('provider', 'auto') != 'auto' or t.get('model', '')}
-    if not overrides:
-        return
-    _section("Auxiliary Models (overrides)")
-    for label, (prov, mdl) in overrides.items():
-        parts = [f"provider={prov}"] + ([f"model={mdl}"] if mdl else [])
-        print(f"  {label:12s}  {', '.join(parts)}")
 
 
-def _show_skill_settings() -> None:
-    try:
-        from agent.skill_utils import discover_all_skill_config_vars, resolve_skill_config_values
-        skill_vars = discover_all_skill_config_vars()
-        if not skill_vars:
-            return
-        resolved = resolve_skill_config_values(skill_vars)
-        _section("Skill Settings")
-        for var in skill_vars:
-            value = resolved.get(var["key"], "")
-            display_val = str(value) if value else color("(not set)", Colors.DIM)
-            skill_tag = color(f"[{var.get('skill', '')}]", Colors.DIM)
-            print(f"  {var['key']:<20s} {display_val}  {skill_tag}")
-    except Exception:
-        pass
 
 
-def show_config():
-    """Display current configuration."""
-    config = load_config()
 
-    print()
-    print(color("┌─────────────────────────────────────────────────────────┐", Colors.CYAN))
-    print(color("│              ⚕ Arkos Configuration                    │", Colors.CYAN))
-    print(color("└─────────────────────────────────────────────────────────┘", Colors.CYAN))
-    _show_managed_banner()
-
-    _section("Paths")
-    print(f"  Config:       {get_config_path()}")
-    print(f"  Secrets:      {get_env_path()}")
-    print(f"  Install:      {get_project_root()}")
-
-    _section("API Keys")
-    for env_key, name in _SHOW_CONFIG_API_KEYS:
-        print(f"  {name:<14} {redact_key(get_env_value(env_key))}")
-    from arkos_cli.auth import get_anthropic_key
-    print(f"  {'Anthropic':<14} {redact_key(get_anthropic_key())}")
-
-    _show_model_section(config)
-    _show_display_section(config)
-    _show_terminal_section(config)
-
-    _section("Timezone")
-    tz = config.get('timezone', '')
-    print(f"  Timezone:     {tz or color('(server-local)', Colors.DIM)}")
-
-    _show_compression_section(config)
-    _show_aux_overrides(config)
-
-    _section("Messaging Platforms")
-    for label, env_key in (("Telegram", "TELEGRAM_BOT_TOKEN"), ("Discord", "DISCORD_BOT_TOKEN")):
-        state = 'configured' if get_env_value(env_key) else color('not configured', Colors.DIM)
-        print(f"  {label + ':':<13} {state}")
-
-    _show_skill_settings()
-
-    print()
-    print(color("─" * 60, Colors.DIM))
-    print(color("  arkos config edit     # Edit config file", Colors.DIM))
-    print(color("  arkos config set <key> <value>", Colors.DIM))
-    print(color("  arkos setup           # Run setup wizard", Colors.DIM))
-    print()
-
-
-def edit_config():
-    """Open config file in user's editor."""
-    if is_managed():
-        managed_error("edit configuration")
-        return
-    config_path = get_config_path()
-    if not config_path.exists():
-        save_config(DEFAULT_CONFIG, strip_defaults=False)
-        print(f"Created {config_path}")
-
-    candidates = (['notepad', 'code', 'vim', 'vi', 'nano'] if sys.platform == "win32"
-                  else ['nano', 'vim', 'vi', 'code', 'notepad'])
-    editor = os.getenv('EDITOR') or os.getenv('VISUAL') or next(
-        (cmd for cmd in candidates if shutil.which(cmd)), None)
-    if not editor:
-        print("No editor found. Config file is at:")
-        print(f"  {config_path}")
-        return
-
-    print(f"Opening {config_path} in {editor}...")
-    subprocess.run([editor, str(config_path)])
 
 
 
@@ -3212,16 +2994,6 @@ def _guard_section_overwrite(key: str, value: Any, user_config: Dict[str, Any], 
     sys.exit(1)
 
 
-def _touch_skin_file(key: str, value: Any) -> None:
-    """``display.skin`` set means "apply NOW": bump the skin file's mtime so the gateway watcher's
-    (name, mtime) signature moves even when the name is unchanged. Best-effort."""
-    if key == "display.skin" and isinstance(value, str) and value:
-        try:
-            skin_file = get_arkos_home() / "skins" / f"{value}.yaml"
-            if skin_file.exists():
-                skin_file.touch()
-        except Exception:
-            pass
 
 
 def _exit_invalid(msg: str) -> None:
@@ -3236,298 +3008,18 @@ def _write_user_config(config_path: Path, user_config: Dict[str, Any]) -> None:
 
 
 def _print_unknown_key_notice(key: str, suggestion: Optional[str]) -> None:
-    print(color(
-        f"⚠ '{key}' is not a recognized config key — it was saved anyway, "
-        "but Arkos may not read it.", Colors.YELLOW))
+    print(f"⚠ '{key}' is not a recognized config key — it was saved anyway, "
+        "but Arkos may not read it.")
     if suggestion:
-        print(color(f"  Did you mean: {suggestion}", Colors.YELLOW))
-    print(color(
-        "  (Custom top-level keys are supported and bridged to the "
+        print(f"  Did you mean: {suggestion}")
+    print("  (Custom top-level keys are supported and bridged to the "
         "environment for skills/external tools. Use --force to skip "
-        "this notice.)", Colors.DIM))
-
-
-def set_config_value(key: str, value: str, force: bool = False):
-    """Set a configuration value at a dotted ``key``; ``value`` is auto-coerced to bool/int/float.
-    ``force`` skips the unknown-key warning AND authorizes replacing a mapping section with a
-    scalar. Without it, scalar writes over mappings are refused and bare ``model`` is redirected
-    to ``model.default``."""
-    if is_managed():
-        managed_error("set configuration values")
-        return
-    if key != key.strip() or not key.strip():
-        _exit_invalid(f"✗ Invalid config key: {key!r} (empty or surrounding whitespace).")
-    if "" in _split_key_path(key):
-        _exit_invalid(
-            f"✗ Invalid config key: {key!r} — contains an empty path segment "
-            "(leading, trailing, or doubled '.').")
-    _exit_if_key_managed(key, "set")
-    if _is_env_config_key(key):
-        from arkos_cli.credential_lifecycle import save_provider_env_credential
-
-        save_provider_env_credential(key.upper(), value)
-        print(f"✓ Set {key} in {get_env_path()}")
-        return
-
-    key, _redirect_note = _redirect_platform_display_key(key)
-    if _redirect_note:
-        print(_redirect_note)
-    is_known, suggestion = _validate_config_key(key)
-
-    config_path = get_config_path()
-    user_config = require_readable_config_before_write(config_path)
-    value = _coerce_config_set_value(key, value)
-    _model_val = user_config.get("model")
-    if key.strip().lower().startswith("model.") and isinstance(_model_val, str) and _model_val:
-        user_config["model"] = {"default": _model_val}
-    key = _guard_section_overwrite(key, value, user_config, force)
-    try:
-        _set_nested(user_config, key, value)
-    except ValueError as e:
-        _exit_invalid(f"✗ {e}")
-    if key.strip().lower() in ("model.api_base", "api_base"):
-        user_config = _normalize_root_model_keys(user_config)
-        key = "model.base_url"
-        print("  (note: 'api_base' is an alias — saved as model.base_url)")
-    _write_user_config(config_path, user_config)
-
-    env_var = terminal_config_env_var_for_key(key)
-    if env_var and key != "terminal.cwd":
-        save_env_value(env_var, _terminal_env_value(value))
-
-    _touch_skin_file(key, value)
-
-    _display_value = value
-    if key.rsplit(".", 1)[-1].lower() in _SECRET_CONFIG_KEYS and isinstance(value, str) and value:
-        from agent.redact import mask_secret
-        _display_value = mask_secret(value)
-    print(f"✓ Set {key} = {_display_value} in {config_path}")
-    warn_unpinned_cron_jobs_after_model_config_change(key, value, user_config)
-
-    if not is_known and not force:
-        _print_unknown_key_notice(key, suggestion)
-
-
-def get_config_value(key: str, *, as_json: bool = False):
-    """Print a resolved configuration value."""
-    if _is_env_config_key(key):
-        env_value = get_env_value(key.upper())
-        value = _MISSING if env_value is None else env_value
-    else:
-        key, _ = _redirect_platform_display_key(key)
-        value = _get_nested(load_config(), key)
-
-    if value is _MISSING:
-        _exit_invalid(f"Config key not set: {key}")
-
-    print(_format_config_get_value(value, as_json=as_json))
-
-
-def unset_config_value(key: str):
-    """Remove a user-set configuration or .env value."""
-    if is_managed():
-        managed_error("unset configuration values")
-        return
-    _exit_if_key_managed(key, "unset")
-
-    if _is_env_config_key(key):
-        from arkos_cli.credential_lifecycle import remove_provider_env_credential
-
-        if not remove_provider_env_credential(key.upper()).get("found"):
-            _exit_invalid(f"Config key not set: {key}")
-        print(f"✓ Unset {key} from {get_env_path()}")
-        return
-
-    config_path = get_config_path()
-    user_config = require_readable_config_before_write(config_path)
-
-    key, _redirect_note = _redirect_platform_display_key(key)
-    if _redirect_note:
-        print(_redirect_note.replace("saved as", "resolved as"))
-    removed = _unset_nested(user_config, key)
-
-    env_var = terminal_config_env_var_for_key(key)
-    if env_var and key != "terminal.cwd":
-        removed = remove_env_value(env_var) or removed
-
-    if not removed:
-        _exit_invalid(f"Config key not set: {key}")
-
-    _write_user_config(config_path, user_config)
-    print(f"✓ Unset {key} from {config_path}")
+        "this notice.)")
 
 
 
-def _usage_exit(usage: str, examples: List[str], extra: Optional[List[str]] = None) -> None:
-    print(usage)
-    print()
-    print("Examples:")
-    for line in examples:
-        print(f"  {line}")
-    for line in extra or ():
-        print(line)
-    sys.exit(1)
 
 
-def _run_write_command(fn, *args) -> None:
-    """Run a config writer, surfacing the fail-closed write guard's RuntimeError as a clean CLI
-    error instead of a traceback."""
-    try:
-        fn(*args)
-    except RuntimeError as exc:
-        _exit_invalid(f"✗ {exc}")
-
-
-_USAGE_GET = ("Usage: arkos config get <key> [--json]", [
-    "arkos config get model", "arkos config get terminal.backend",
-    "arkos config get skills.config --json"], None)
-_USAGE_SET = ("Usage: arkos config set [--force] <key> <value>", [
-    "arkos config set model anthropic/claude-sonnet-4", "arkos config set terminal.backend docker",
-    "arkos config set OPENROUTER_API_KEY sk-or-..."], [
-    "", "  --force: skip the unknown-key notice for unrecognized keys,",
-    "           and allow a scalar to replace a whole mapping section"])
-_USAGE_UNSET = ("Usage: arkos config unset <key>", [
-    "arkos config unset model", "arkos config unset terminal.backend",
-    "arkos config unset OPENROUTER_API_KEY"], None)
-
-
-def _cmd_config_get(args):
-    key = getattr(args, 'key', None)
-    if not key:
-        _usage_exit(*_USAGE_GET)
-    get_config_value(key, as_json=getattr(args, 'json', False))
-
-
-def _cmd_config_set(args):
-    key = getattr(args, 'key', None)
-    value = getattr(args, 'value', None)
-    if not key or value is None:
-        _usage_exit(*_USAGE_SET)
-    _run_write_command(set_config_value, key, value, bool(getattr(args, 'force', False)))
-
-
-def _cmd_config_unset(args):
-    key = getattr(args, 'key', None)
-    if not key:
-        _usage_exit(*_USAGE_UNSET)
-    _run_write_command(unset_config_value, key)
-
-
-def _tools_suffix(info: Dict[str, Any], fmt: str) -> str:
-    tools = info.get("tools", [])
-    return fmt.format(", ".join(tools[:2])) if tools else ""
-
-
-def _print_banner(text: str) -> None:
-    print()
-    print(color(text, Colors.CYAN, Colors.BOLD))
-    print()
-
-
-def _cmd_config_migrate(args):
-    _print_banner("🔄 Checking configuration for updates...")
-
-    missing_env = get_missing_env_vars(required_only=False)
-    missing_config = get_missing_config_fields()
-    current_ver, latest_ver = check_config_version(raise_on_parse_error=True)
-
-    if not missing_env and not missing_config and current_ver >= latest_ver:
-        print(color("✓ Configuration is up to date!", Colors.GREEN))
-        print()
-        return
-
-    if current_ver < latest_ver:
-        print(f"  Config version: {current_ver} → {latest_ver}")
-
-    if missing_config:
-        print(f"\n  {len(missing_config)} new config option(s) will be added with defaults")
-
-    required_missing = [v for v in missing_env if v.get("is_required")]
-    optional_missing = [v for v in missing_env if not v.get("is_required") and not v.get("advanced")]
-    for heading, group, suffix in (
-        ("⚠️  {} required API key(s) missing:", required_missing, ""),
-        ("ℹ️  {} optional API key(s) not configured:", optional_missing, " (enables: {})")):
-        if group:
-            print(f"\n  {heading.format(len(group))}")
-            for var in group:
-                print(f"     • {var['name']}{_tools_suffix(var, suffix) if suffix else ''}")
-
-    print()
-    results = migrate_config(interactive=True, quiet=False)
-    print()
-    if results["env_added"] or results["config_added"]:
-        print(color("✓ Configuration updated!", Colors.GREEN))
-    if results["warnings"]:
-        print()
-        for warning in results["warnings"]:
-            print(color(f"  ⚠️  {warning}", Colors.YELLOW))
-    print()
-
-
-def _cmd_config_check(args):
-    """Non-interactive report of what's missing."""
-    _print_banner("📋 Configuration Status")
-
-    current_ver, latest_ver = check_config_version(raise_on_parse_error=True)
-    if current_ver >= latest_ver:
-        print(f"  Config version: {current_ver} ✓")
-    else:
-        print(color(f"  Config version: {current_ver} → {latest_ver} (update available)", Colors.YELLOW))
-
-    groups = (
-        ("Required", REQUIRED_ENV_VARS, lambda n, i: color(f"    ✗ {n} (missing)", Colors.RED)),
-        ("Optional", OPTIONAL_ENV_VARS,
-         lambda n, i: color(f"    ○ {n}{_tools_suffix(i, ' → {}')}", Colors.DIM)))
-    for title, table, missing_line in groups:
-        print()
-        print(color(f"  {title}:", Colors.BOLD))
-        for var_name, info in table.items():
-            print(f"    ✓ {var_name}" if get_env_value(var_name) else missing_line(var_name, info))
-
-    missing_config = get_missing_config_fields()
-    if missing_config:
-        print()
-        print(color(f"  {len(missing_config)} new config option(s) available", Colors.YELLOW))
-        print("    Run 'arkos config migrate' to add them")
-
-    print()
-
-
-_CONFIG_SUBCOMMANDS = {
-    None: lambda args: show_config(),
-    "show": lambda args: show_config(),
-    "edit": lambda args: edit_config(),
-    "get": _cmd_config_get,
-    "set": _cmd_config_set,
-    "unset": _cmd_config_unset,
-    "path": lambda args: print(get_config_path()),
-    "env-path": lambda args: print(get_env_path()),
-    "migrate": _cmd_config_migrate,
-    "check": _cmd_config_check}
-
-_CONFIG_USAGE = """Available commands:
-  arkos config           Show current configuration
-  arkos config edit      Open config in editor
-  arkos config get <key>          Print a resolved config value
-  arkos config set <key> <value>   Set a config value
-  arkos config unset <key>        Remove a config value
-  arkos config check     Check for missing/outdated config
-  arkos config migrate   Update config with new options
-  arkos config path      Show config file path
-  arkos config env-path  Show .env file path"""
-
-
-def config_command(args):
-    """Handle config subcommands."""
-    subcmd = getattr(args, 'config_command', None)
-    handler = _CONFIG_SUBCOMMANDS.get(subcmd)
-    if handler is not None:
-        handler(args)
-        return
-    print(f"Unknown config command: {subcmd}")
-    print()
-    print(_CONFIG_USAGE)
-    sys.exit(1)
 
 
 
@@ -3606,7 +3098,6 @@ def _inject_platform_plugin_env_vars() -> None:
 
 
 _inject_platform_plugin_env_vars()
-
 
 
 def _install_method_project_root(project_root: Optional[Path] = None) -> Path:

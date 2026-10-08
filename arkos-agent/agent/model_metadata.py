@@ -30,7 +30,6 @@ from agent.message_metadata import PERSISTENCE_ONLY_MESSAGE_FIELDS
 logger = logging.getLogger(__name__)
 
 
-
 def _ensure_requests():
     if "requests" not in globals():
         import requests as _requests
@@ -263,7 +262,7 @@ def _get_endpoint_metadata_cache_path() -> Path:
 
 def _endpoint_disk_cache_get(normalized: str) -> Optional[Dict[str, Dict[str, Any]]]:
     """Fresh cross-process memo of a remote ``/models`` probe (same TTL as in-memory): one-shot
-    runs (``arkos -q``, cron) start cold and Portal bypasses the persistent context cache, so
+    runs (``arkos -q``, cron) start cold, so
     without this every launch paid the live probe. Local endpoints are never memoized."""
     models = _ttl_memo_get(_get_endpoint_metadata_cache_path(), normalized, _ENDPOINT_MODEL_CACHE_TTL, ts_key="at", value_key="models")
     return models if isinstance(models, dict) else None
@@ -1296,7 +1295,7 @@ def _query_local_context_length_uncached(model: str, base_url: str, api_key: str
 
 
 def _normalize_model_version(model: str) -> str:
-    """Dots -> dashes so Portal ids (claude-opus-4-6) compare with OpenRouter's (claude-opus-4.6)."""
+    """Normalize dots and dashes to compare model IDs across providers."""
     return model.replace(".", "-")
 
 
@@ -1474,38 +1473,6 @@ def _resolve_codex_oauth_context_length_with_source(model: str, access_token: st
     return _apply_verified_bump(hit[1], "fallback") if hit else (None, "")
 
 
-def _resolve_portal_context_length(model: str, base_url: str = "", api_key: str = "") -> Tuple[Optional[int], str]:
-    """``(context_length, source)`` for a Arkos Portal model: portal /v1/models is authoritative
-    ("portal"). Fallback matches OR's prefixed ids against the bare Portal id with dot/dash
-    normalisation ("openrouter" — callers must NOT persist it, or a portal blip freezes the wrong value)."""
-    if base_url:
-        portal_ctx = _resolve_endpoint_context_length(model, base_url, api_key=api_key)
-        if portal_ctx is not None:
-            return portal_ctx, "portal"
-    metadata = fetch_model_metadata()
-    def _safe_ctx(or_id: str, entry: dict) -> Optional[int]:
-        """Context length minus the known stale 32K underreports (same guard as step 6)."""
-        ctx = entry.get("context_length")
-        if ctx is not None and ctx <= 32768 and _model_name_suggests_stale_32k_underreport(or_id):
-            logger.info("Rejecting OpenRouter metadata context=%s for %r (known 32K underreport, Portal path); falling through to hardcoded defaults", ctx, or_id)
-            return None
-        return ctx
-    model_lower, normalized = model.lower(), _normalize_model_version(model).lower()
-    def _pairs(or_id: str):
-        bare = or_id.split("/", 1)[1] if "/" in or_id else or_id
-        return ((bare.lower(), model_lower), (_normalize_model_version(bare).lower(), normalized))
-    def _exact(or_id: str) -> bool:
-        return any(candidate == query for candidate, query in _pairs(or_id))
-    def _prefix(or_id: str) -> bool:
-        return any(candidate.startswith(query) and (len(candidate) == len(query) or candidate[len(query)] in "-:.") for candidate, query in _pairs(or_id))
-    for matcher in (lambda or_id: or_id == model, _exact, _prefix):
-        for or_id, entry in metadata.items():
-            ctx = _safe_ctx(or_id, entry) if matcher(or_id) else None
-            if ctx is not None:
-                return ctx, "openrouter"
-    return None, ""
-
-
 def _validate_cached_context_length(model: str, base_url: str, cached: int, is_bedrock_context: bool, *, api_key: str = "") -> Optional[int]:
     """Step 1 of get_model_context_length: accept, repair, or drop a persisted entry. Returns the
     value to use, or None to fall through to live resolution. Order matters: a value must be
@@ -1522,9 +1489,6 @@ def _validate_cached_context_length(model: str, base_url: str, cached: int, is_b
             log(msg, model, base_url, shown)
             _invalidate_cached_context_length(model, base_url)
             return None
-    if _infer_provider_from_url(base_url) == "portal":
-        logger.debug("Bypassing persistent cache for %s@%s (Arkos Portal authoritative)", model, base_url)
-        return None
     if is_bedrock_context:
         try:
             from agent.bedrock_adapter import get_bedrock_context_length
@@ -1641,7 +1605,7 @@ def _resolve_provider_aware_context_length(model: str, base_url: str, api_key: s
             if ctx:
                 return ctx
     sourced = {
-        "portal": lambda: _resolve_portal_context_length(model, base_url=base_url or "", api_key=api_key or "") + ("portal",),
+
         "openai-codex": lambda: _resolve_codex_oauth_context_length_with_source(model, access_token=api_key or "") + ("live",),
     }.get(effective_provider)
     if sourced is not None:
@@ -1681,10 +1645,10 @@ def get_model_context_length(
     provider: str = "", custom_providers: list | None = None,
 ) -> int:
     """Context length for a model. Resolution order: 0 config override / MoA aggregator /
-    model_overrides / custom_providers / endpoint-scoped; 1 persistent cache (Portal, LM
+    model_overrides / custom_providers / endpoint-scoped; 1 persistent cache (LM
     Studio, Codex OAuth bypass it) and Bedrock; 2-3 custom endpoints (/models, local
     probe, Ollama); 4 Anthropic /v1/models (API keys only); 5 provider-aware (Copilot,
-    Portal, Codex OAuth, GMI, Ollama, OpenRouter live, models.dev); 6 OpenRouter for
+    Codex OAuth, GMI, Ollama, OpenRouter live, models.dev); 6 OpenRouter for
     unknown providers; 7 local server; 8 hardcoded defaults; 9 256K fallback."""
     if isinstance(config_context_length, int) and config_context_length > 0:
         return config_context_length

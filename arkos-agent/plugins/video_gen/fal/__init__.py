@@ -3,7 +3,7 @@
 The user picks a **model family** (e.g. "Pixverse v6"); the plugin routes to its text-to-video endpoint without
 ``image_url`` and to its image-to-video endpoint otherwise (gemini-omni-flash is i2v only). Active-family precedence:
 tool ``model=`` → ``FAL_VIDEO_MODEL`` env → ``video_gen.fal.model`` → ``video_gen.model`` (family id or an endpoint
-path containing one) → ``DEFAULT_MODEL``. Auth via ``FAL_KEY`` or the managed Portal gateway; output is an HTTPS URL.
+path containing one) → ``DEFAULT_MODEL``. Auth via ``FAL_KEY``; output is an HTTPS URL.
 """
 
 from __future__ import annotations
@@ -145,10 +145,6 @@ def _video_url_from_result(result: Any) -> Tuple[Any, Optional[str]]:
 _fal_client: Any = None
 _fal_client_lock = threading.Lock()
 
-_managed_fal_video_client: Any = None
-_managed_fal_video_client_config: Any = None
-_managed_fal_video_client_lock = threading.Lock()
-
 
 def _load_fal_client() -> Any:
     """Lazy-load ``fal_client`` once via ``tools.fal_common``."""
@@ -160,60 +156,17 @@ def _load_fal_client() -> Any:
         return _fal_client
 
 
-def _resolve_managed_fal_video_gateway():
-    """Resolve the FAL video route from the stored ``video_gen`` selection: ``"portal"`` → managed only (unentitled ⇒
-    selection-naming error); other stored provider → direct only (missing FAL_KEY ⇒ error); never-configured → autodetect."""
-    from tools.managed_tool_gateway import resolve_managed_tool_gateway
-    from tools.tool_backend_helpers import PORTAL_MANAGED_PROVIDER, fal_key_is_configured, read_selection, selection_error
-    selected = read_selection("video_gen")
-    if selected == PORTAL_MANAGED_PROVIDER:
-        gateway = resolve_managed_tool_gateway("fal-queue")
-        if gateway is None:
-            raise ValueError(selection_error("video_gen", PORTAL_MANAGED_PROVIDER, "the Portal Tool Gateway is not available (not entitled or unreachable)"))
-        return gateway
-    if selected is not None:
-        if not fal_key_is_configured():
-            raise ValueError(selection_error("video_gen", selected, "FAL_KEY is not set"))
-        return None
-    return None if fal_key_is_configured() else resolve_managed_tool_gateway("fal-queue")
-
-
 def _fal_video_available() -> bool:
-    """True if the selected (or, never-configured, any) FAL backend is reachable; raises on a stored-but-broken selection."""
     from tools.tool_backend_helpers import fal_key_is_configured
-    return _resolve_managed_fal_video_gateway() is not None or fal_key_is_configured()
-
-
-def _get_managed_fal_video_client(managed_gateway):
-    """Reuse the managed FAL client so its internal httpx.Client is not leaked per call."""
-    global _managed_fal_video_client, _managed_fal_video_client_config
-    from tools.fal_common import _ManagedFalSyncClient
-    client_config = (managed_gateway.gateway_origin.rstrip("/"), managed_gateway.portal_user_token)
-    with _managed_fal_video_client_lock:
-        if _managed_fal_video_client is None or _managed_fal_video_client_config != client_config:
-            _managed_fal_video_client = _ManagedFalSyncClient(_load_fal_client(), key=managed_gateway.portal_user_token,
-                                                              queue_run_origin=managed_gateway.gateway_origin)
-            _managed_fal_video_client_config = client_config
-        return _managed_fal_video_client
+    return fal_key_is_configured()
 
 
 def _submit_fal_video_request(endpoint: str, arguments: Dict[str, Any]):
-    """Submit via direct credentials or the managed queue gateway; ``.get()`` blocks."""
-    client = _load_fal_client()
-    headers = {"x-idempotency-key": str(uuid.uuid4())}
-    managed_gateway = _resolve_managed_fal_video_gateway()
-    if managed_gateway is None:
-        return client.submit(endpoint, arguments=arguments, headers=headers)
-    try:
-        return _get_managed_fal_video_client(managed_gateway).submit(endpoint, arguments=arguments, headers=headers)
-    except Exception as exc:
-        from tools.fal_common import _extract_http_status
-        status = _extract_http_status(exc)
-        if status is not None and 400 <= status < 500:
-            raise ValueError(f"Portal Subscription gateway rejected endpoint '{endpoint}' (HTTP {status}). This model may not yet be enabled "
-                             f"on the Arkos Portal's FAL proxy. Either:\n  • Set FAL_KEY in your environment to use FAL.ai directly, or\n"
-                             f"  • Pick a different model via `arkos tools` → Video Generation.") from exc
-        raise
+    """Submit directly to FAL with vendor credentials."""
+    from tools.tool_backend_helpers import fal_key_is_configured
+    if not fal_key_is_configured():
+        raise ValueError("FAL_KEY is not set")
+    return _load_fal_client().submit(endpoint, arguments=arguments, headers={"x-idempotency-key": str(uuid.uuid4())})
 
 
 UPSCALER_ENDPOINT = "fal-ai/seedvr/upscale/video"
@@ -225,10 +178,7 @@ def _upscale_video(video_url: str, source_request_id: Optional[str] = None) -> O
     try:
         logger.info("Upscaling video with SeedVR2 (%dx)...", UPSCALER_FACTOR)
         arguments: Dict[str, Any] = {"video_url": video_url, "upscale_mode": "factor", "upscale_factor": UPSCALER_FACTOR}
-        if _resolve_managed_fal_video_gateway() is not None:
-            if not source_request_id:
-                raise RuntimeError("Managed SeedVR upscale requires the source FAL request id")
-            arguments["source_request_id"] = source_request_id
+        pass
         result = _submit_fal_video_request(UPSCALER_ENDPOINT, arguments).get()
     except Exception as exc:  # noqa: BLE001
         logger.warning("Video upscale failed: %s", exc)
@@ -239,8 +189,7 @@ def _upscale_video(video_url: str, source_request_id: Optional[str] = None) -> O
     return url
 
 
-_NO_BACKEND_MSG = ("No FAL backend available. Either set FAL_KEY (run `arkos tools` → Video Generation → FAL to configure) "
-                   "or sign in to Portal (`arkos setup`) for managed gateway access.")
+_NO_BACKEND_MSG = ("No FAL backend available. Set FAL_KEY using `arkos tools` → Video Generation → FAL.")
 _MODALITY_MISSING_MSG = {
     "image": "FAL family {fid} has no image-to-video endpoint. Pick a family with image-to-video support via `arkos tools` → Video Generation.",
     "text": "FAL family {fid} has no text-to-video endpoint. Pass an image_url to use its image-to-video endpoint, or pick a different family.",

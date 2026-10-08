@@ -9,6 +9,7 @@ cache reads) is still read from there at call time.
 from __future__ import annotations
 
 import logging
+import os
 import httpx
 import json
 from pathlib import Path

@@ -18,7 +18,6 @@ from tools.delegate_tool_child_run import _detach_child, _fabricated_entry, _sig
 from tools.delegate_tool_progress import (
     SUBAGENT_FAILURE_STATUSES, _clean_error_text, _print_completion_line, _quiet, format_batch_tag,
 )
-from tools.delegate_tool_registry import _capture_gateway_steer_authority
 from tools.delegate_tool_results import _finalize_child_results
 
 logger = logging.getLogger("tools.delegate_tool")
@@ -63,7 +62,7 @@ def _announce_batch(parent_agent, n_tasks: int, live_deleg_id: Optional[str]) ->
     """Announce the batch tag once so interleaved ``[tag n/N]`` lines are attributable."""
     if n_tasks > 1 and live_deleg_id:
         _hdr = f"  🔀 [{format_batch_tag(live_deleg_id, parent_agent)}] delegating {n_tasks} tasks"
-        _print_completion_line(parent_agent, getattr(parent_agent, "_delegate_spinner", None), _hdr, console_line=_hdr)
+        _print_completion_line(parent_agent, _hdr, console_line=_hdr)
 
 def _capture_origin() -> tuple[str, str, Any, Any]:
     """``(wake_sid, ui_session_id, owner_transport, owner_session_record)`` of the
@@ -75,9 +74,9 @@ def _capture_origin() -> tuple[str, str, Any, Any]:
     with _quiet(None):
         from gateway.session_context import get_session_env
         _origin_ui_session_id = get_session_env("ARKOS_UI_SESSION_ID", "")
-    return (_origin_wake_sid, _origin_ui_session_id, *_capture_gateway_steer_authority(_origin_ui_session_id))
+    return (_origin_wake_sid, _origin_ui_session_id, None, None)
 
-def _report_child_done(parent_agent, spinner_ref, entry, tag, task_labels, n_tasks, remaining) -> None:
+def _report_child_done(parent_agent, entry, tag, task_labels, n_tasks, remaining) -> None:
     """Print one completion line for a finished child and refresh the spinner text. Failed/errored/timed-out children
     say WHY on the same line — a bare ✗ reads as "silently dropped"."""
     idx = entry["task_index"]
@@ -88,10 +87,7 @@ def _report_child_done(parent_agent, spinner_ref, entry, tag, task_labels, n_tas
     _err_line = _clean_error_text(entry.get("error"), max_chars=120) if status in SUBAGENT_FAILURE_STATUSES else ""
     if _err_line:
         completion_line += f" — {_err_line}"
-    _print_completion_line(parent_agent, spinner_ref, completion_line)
-    if spinner_ref and remaining > 0:
-        with _quiet("Spinner update_text failed: %s"):
-            spinner_ref.update_text(f"🔀 {'[' + tag + '] ' if tag else ''}{remaining} task{'s' if remaining != 1 else ''} remaining")
+    _print_completion_line(parent_agent, completion_line)
 
 def _run_children_parallel(batch: _Batch, results: list, *, honor_parent_interrupt: bool) -> None:
     """Run the batch's children in parallel, appending entries to ``results`` (sorted by task_index on return, one
@@ -101,7 +97,6 @@ def _run_children_parallel(batch: _Batch, results: list, *, honor_parent_interru
     from tools.daemon_pool import DaemonThreadPoolExecutor
     parent_agent, n_tasks = batch.parent_agent, len(batch.task_list)
     task_labels = [t["goal"][:40] for t in batch.task_list]
-    spinner_ref = getattr(parent_agent, "_delegate_spinner", None)
     _tag = format_batch_tag(batch.live_deleg_id, parent_agent)
     _child_by_index = {i: child for (i, _, child) in batch.children}
     n_here = len(batch.children)
@@ -129,7 +124,7 @@ def _run_children_parallel(batch: _Batch, results: list, *, honor_parent_interru
                 results.append(entry)
                 if not honor_parent_interrupt and batch.unit_id:
                     record_unit_child(batch.unit_id, entry)
-                _report_child_done(parent_agent, spinner_ref, entry, _tag, task_labels, n_tasks, n_here - len(results))
+                _report_child_done(parent_agent, entry, _tag, task_labels, n_tasks, n_here - len(results))
                 if (not honor_parent_interrupt and batch.unit_id and entry.get("status") in SUBAGENT_FAILURE_STATUSES
                         and len(results) < n_here):
                     with _quiet("task failure notice failed", exc_info=True):

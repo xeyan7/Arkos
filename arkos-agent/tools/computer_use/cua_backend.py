@@ -174,7 +174,7 @@ def _maybe_repair_runtime_contract(contract: Dict[str, Any]) -> Dict[str, Any]:
     logger.info("computer_use: installed cua-driver is not usable (%s); attempting automatic repair",
                 contract.get("reason") or "runtime contract is incomplete")
     try:
-        from arkos_cli.tools_config import install_cua_driver
+        from tools.cua_install import install_cua_driver
         repaired = install_cua_driver(upgrade=False, show_installer_progress=False)
     except Exception as exc:
         logger.warning("computer_use: automatic cua-driver repair failed: %s", exc)

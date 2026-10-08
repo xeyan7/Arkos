@@ -1,7 +1,7 @@
 """Rate limit tracking for inference API responses.
 
 Captures ``x-ratelimit-{limit,remaining,reset}-{requests,tokens}[-1h]``
-headers (Arkos Portal format, also used by OpenRouter / OpenAI-compatible APIs)
+headers from OpenRouter / OpenAI-compatible APIs
 and formats them for the /usage slash command. Reset values are seconds.
 """
 
@@ -102,8 +102,6 @@ def parse_rate_limit_headers(headers: Mapping[str, str], provider: str = "") -> 
         for attr, tag in _BUCKET_TAGS
     }
     return RateLimitState(captured_at=now, provider=provider, **buckets)
-
-
 
 
 def _fmt_count(n: int) -> str:

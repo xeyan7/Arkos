@@ -1,7 +1,7 @@
 """Shared constants, the lazy ``httpx`` proxy and :class:`AuthError` for the auth package.
 
 Pure leaf: imports nothing from ``arkos_cli.auth`` so the per-provider modules
-(``auth_portal``, ``auth_codex``, ...) can import it at module scope without cycles."""
+(``auth_codex``, ...) can import it at module scope without cycles."""
 
 from __future__ import annotations
 
@@ -43,16 +43,7 @@ else:
 AUTH_STORE_VERSION = 1
 AUTH_LOCK_TIMEOUT_SECONDS = 15.0
 
-DEFAULT_PORTAL_URL = ""
-DEFAULT_PORTAL_INFERENCE_URL = ""
-DEFAULT_PORTAL_CLIENT_ID = "arkos-cli"
-PORTAL_INFERENCE_INVOKE_SCOPE = "inference:invoke"
-PORTAL_BILLING_MANAGE_SCOPE = "billing:manage"
-DEFAULT_PORTAL_SCOPE = PORTAL_INFERENCE_INVOKE_SCOPE
-PORTAL_DEVICE_CODE_SOURCE = "device_code"
-PORTAL_AUTH_PATH_INVOKE_JWT = "invoke_jwt"
 ACCESS_TOKEN_REFRESH_SKEW_SECONDS = 120
-PORTAL_INVOKE_JWT_MIN_TTL_SECONDS = ACCESS_TOKEN_REFRESH_SKEW_SECONDS
 DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS = 1
 DEVICE_CODE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code"
 _FORM_JSON_HEADERS = {"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json"}
@@ -131,7 +122,6 @@ def _provider_error_factory(provider: str) -> Callable[..., AuthError]:
     return factory
 
 
-_portal_err = _provider_error_factory("portal")
 _xai_err = _provider_error_factory("xai-oauth")
 _codex_err = _provider_error_factory("openai-codex")
 _spotify_err = _provider_error_factory("spotify")

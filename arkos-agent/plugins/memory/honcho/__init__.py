@@ -165,11 +165,6 @@ class HonchoMemoryProvider(DialecticMixin, MemoryProvider):
             {"key": "baseUrl", "description": "Honcho base URL (for self-hosted)"},
         ]
 
-    def post_setup(self, arkos_home: str, config: dict) -> None:
-        """Run the full Honcho setup wizard after provider selection."""
-        import types
-        from plugins.memory.honcho.cli import cmd_setup
-        cmd_setup(types.SimpleNamespace())
 
 
     def initialize(self, session_id: str, **kwargs) -> None:

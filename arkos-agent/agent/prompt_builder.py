@@ -416,7 +416,6 @@ GOOGLE_MODEL_OPERATIONAL_GUIDANCE = (
 )
 
 
-
 STEER_MARKER_OPEN = (
     "[OUT-OF-BAND USER MESSAGE — a direct message from the user, delivered "
     "once at this position; not tool output and not a new delivery when replayed from conversation history]"
@@ -662,7 +661,7 @@ WSL_ENVIRONMENT_HINT = (
 )
 
 
-_REMOTE_TERMINAL_BACKENDS = frozenset({"docker", "singularity", "modal", "daytona", "ssh", "vercel_sandbox", "managed_modal"})
+_REMOTE_TERMINAL_BACKENDS = frozenset({"docker", "singularity", "modal", "daytona", "ssh", "vercel_sandbox"})
 
 _BACKEND_FALLBACK_DESCRIPTIONS: dict[str, str] = {
     "docker": "a Docker container (Linux)",

@@ -14,18 +14,14 @@ import json
 from pathlib import Path
 import logging
 import os
-import random
 import threading
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
-from agent.display import (
-    KawaiiSpinner,
+from agent.tool_feedback import (
     build_tool_preview as _build_tool_preview,
-    build_tool_label as _build_tool_label,
-    get_cute_tool_message as _get_cute_tool_message_impl,
-    get_tool_emoji as _get_tool_emoji,
+    format_tool_completion as _format_tool_completion,
     redact_tool_args_for_display as _redact_tool_args_for_display,
     _detect_tool_failure,
 )
@@ -1325,7 +1321,7 @@ def _append_batch_results(agent, messages: list, effective_task_id: str, batch: 
         _persisted, display_function_result, risk_metadata = committed
 
         if agent._should_emit_quiet_tool_messages():
-            cute_msg = _get_cute_tool_message_impl(ref.name, ref.args, tool_duration, result=display_function_result)
+            cute_msg = _format_tool_completion(ref.name, ref.args, tool_duration, result=display_function_result)
             agent._safe_print(f"  {cute_msg}")
         elif _tool_progress_enabled(agent):
             _print_tool_completed(agent, i + 1, tool_duration, _multimodal_text_summary(display_function_result))
@@ -1364,13 +1360,7 @@ def execute_tool_calls_concurrent(agent, assistant_message, messages: list, effe
     agent._current_tool = tool_names_str
     agent._touch_activity(f"executing {num_tools} tools concurrently: {tool_names_str}")
 
-    spinner = _start_quiet_tool_spinner(agent, "", {}, label=f"⚡ running {num_tools} tools concurrently")
-    try:
-        batch.run()
-    finally:
-        if spinner:
-            finished = [r for r in batch.results if r is not None]
-            spinner.stop(f"⚡ {len(finished)}/{num_tools} tools completed in {sum(r.duration for r in finished):.1f}s total")
+    batch.run()
 
     if not _append_batch_results(agent, messages, effective_task_id, batch, _tool_budget):
         return
@@ -1380,55 +1370,26 @@ def execute_tool_calls_concurrent(agent, assistant_message, messages: list, effe
 
 
 
-def _start_quiet_tool_spinner(agent, function_name: str, function_args: dict, *, gate: bool = True, label: Optional[str] = None):
-    """Start the quiet-mode kawaii spinner for one tool call, or return None; ``gate=False``
-    skips ``_should_start_quiet_spinner`` (context-engine tools always spin)."""
-    if not agent._should_emit_quiet_tool_messages() or (gate and not agent._should_start_quiet_spinner()):
-        return None
-    face = random.choice(KawaiiSpinner.get_waiting_faces())
-    if label is None:
-        display_args = _redact_tool_args_for_display(function_name, function_args) or function_args
-        label = f"{_get_tool_emoji(function_name)} {_build_tool_label(function_name, display_args) or function_name}"
-    spinner = KawaiiSpinner(f"{face} {label}", spinner_type='dots', print_fn=agent._print_fn)
-    spinner.start()
-    return spinner
 
 
-def _finish_quiet_tool_spinner(agent, spinner, function_name: str, function_args: dict, tool_duration: float, result) -> None:
-    """Stop the spinner with the cute completion line, or print it when no spinner ran."""
-    if spinner or agent._should_emit_quiet_tool_messages():
-        cute = _get_cute_tool_message_impl(function_name, function_args, tool_duration, result=result)
-        spinner.stop(cute) if spinner else agent._vprint(f"  {cute}")
 
 
-def _delegate_spinner_label(function_args: dict) -> str:
-    action = str(function_args.get("action") or "").strip().lower()
-    tasks = function_args.get("tasks")
-    if action in ("list", "steer", "stop"):
-        return f"🔀 subagent {action}"
-    if tasks and isinstance(tasks, list):
-        return f"🔀 delegating {len(tasks)} tasks · (/agents to monitor)"
-    goal_preview = (function_args.get("goal") or "")[:30]
-    return f"🔀 {goal_preview} · (/agents to monitor)" if goal_preview else "🔀 delegating · (/agents to monitor)"
 
 
 @dataclass
 class _SequentialDispatch:
-    """How one sequential call executes: the callable plus its spinner/error policy."""
+    """How one sequential call executes: the callable plus its error policy."""
 
     execute: Callable[[dict], Any]
-    spinner: Any = None
     middleware_trace_arg: Optional[list] = None
     error_result: Optional[Callable[[Exception], str]] = None
     error_log: str = ""
     handles_keyboard_interrupt: bool = False
     is_delegate: bool = False
-    finish_spinner: bool = True
-    finish_in_finally: bool = True
 
 
 def _resolve_sequential_dispatch(agent, ref: _ToolCallRef, messages: list) -> _SequentialDispatch:
-    """Pick the execute callable for one sequential call and start its spinner. Precedence:
+    """Pick the execute callable for one sequential call. Precedence:
     inline agent-level tools, delegate_task, context-engine tools, memory-provider tools,
     then the registry."""
     function_name, function_args, effective_task_id, tool_call_id, middleware_trace = (
@@ -1437,22 +1398,18 @@ def _resolve_sequential_dispatch(agent, ref: _ToolCallRef, messages: list) -> _S
     if function_name != "delegate_task" and function_name in INLINE_TOOL_EXECUTORS:
         inline_executor = INLINE_TOOL_EXECUTORS[function_name]
         inline_ctx = InlineToolContext(effective_task_id=effective_task_id, tool_call_id=tool_call_id, messages=messages)
-        return _SequentialDispatch(lambda next_args: inline_executor(agent, next_args, inline_ctx), finish_in_finally=False)
+        return _SequentialDispatch(lambda next_args: inline_executor(agent, next_args, inline_ctx))
     if function_name == "delegate_task":
-        spinner = _start_quiet_tool_spinner(agent, function_name, function_args, label=_delegate_spinner_label(function_args))
-        agent._delegate_spinner = spinner
-        return _SequentialDispatch(agent._dispatch_delegate_task, spinner=spinner, is_delegate=True)
+        return _SequentialDispatch(agent._dispatch_delegate_task, is_delegate=True)
     if agent._context_engine_tool_names and function_name in agent._context_engine_tool_names:
         return _SequentialDispatch(
             execute=lambda next_args: agent.context_compressor.handle_tool_call(function_name, next_args, messages=messages),
-            spinner=_start_quiet_tool_spinner(agent, function_name, function_args, gate=False),
             error_result=lambda e: json.dumps({"error": f"Context engine tool '{function_name}' failed: {e}"}),
             error_log="context_engine.handle_tool_call raised for %s: %s",
         )
     if agent._memory_manager and agent._memory_manager.has_tool(function_name):
         return _SequentialDispatch(
             execute=lambda next_args: agent._memory_manager.handle_tool_call(function_name, next_args),
-            spinner=_start_quiet_tool_spinner(agent, function_name, function_args),
             error_result=lambda e: json.dumps({"error": f"Memory tool '{function_name}' failed: {e}"}),
             error_log="memory_manager.handle_tool_call raised for %s: %s",
         )
@@ -1480,12 +1437,10 @@ def _resolve_sequential_dispatch(agent, ref: _ToolCallRef, messages: list) -> _S
 
     return _SequentialDispatch(
         execute=_execute,
-        spinner=_start_quiet_tool_spinner(agent, function_name, function_args) if agent.quiet_mode else None,
         middleware_trace_arg=middleware_trace,
         error_result=lambda e: f"Error executing tool '{function_name}': {e}",
         error_log="handle_function_call raised for %s: %s",
         handles_keyboard_interrupt=True,
-        finish_spinner=bool(agent.quiet_mode),
     )
 
 
@@ -1531,7 +1486,7 @@ def _run_sequential_call(
     except KeyboardInterrupt:
         if not dispatch.handles_keyboard_interrupt:
             raise
-        _spinner_result = ref.emit_cancelled(agent, tool_start_time)
+        ref.emit_cancelled(agent, tool_start_time)
         with contextlib.suppress(Exception):
             agent.interrupt("keyboard interrupt")
         _append_skipped_tool_results(
@@ -1546,13 +1501,7 @@ def _run_sequential_call(
         logger.error(dispatch.error_log, ref.name, tool_error, exc_info=True)
         managed = _ManagedToolResult(result=function_result, args=ref.args, middleware_trace=ref.trace, blocked=False, dispatched=False)
     finally:
-        if dispatch.is_delegate:
-            agent._delegate_spinner = None
         tool_duration = time.time() - tool_start_time
-        if dispatch.finish_spinner and dispatch.finish_in_finally:
-            _finish_quiet_tool_spinner(agent, dispatch.spinner, ref.name, ref.args, tool_duration, _spinner_result)
-    if dispatch.finish_spinner and not dispatch.finish_in_finally:
-        _finish_quiet_tool_spinner(agent, dispatch.spinner, ref.name, ref.args, tool_duration, _spinner_result)
     return managed, tool_duration
 
 

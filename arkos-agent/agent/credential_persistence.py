@@ -10,13 +10,7 @@ import re
 from typing import Any, Dict, Mapping
 
 
-_PERSISTABLE_PROVIDER_SOURCES = frozenset({
-    ("anthropic", "arkos_pkce"),
-    ("minimax-oauth", "oauth"),
-    ("portal", "device_code"),
-    ("openai-codex", "device_code"),
-    ("xai-oauth", "device_code"),
-})
+_PERSISTABLE_PROVIDER_SOURCES = frozenset({('anthropic', 'arkos_pkce'), ('minimax-oauth', 'oauth'), ('openai-codex', 'device_code'), ('xai-oauth', 'device_code')})
 
 _SAFE_SECRETISH_METADATA_KEYS = frozenset({
     "secret_fingerprint", "secret_source", "token_type", "scope", "client_id",

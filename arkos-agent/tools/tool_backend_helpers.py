@@ -11,19 +11,6 @@ from utils import is_truthy_value
 
 logger = logging.getLogger(__name__)
 _DEFAULT_BROWSER_PROVIDER = "local"
-_DEFAULT_MODAL_MODE = "auto"
-_VALID_MODAL_MODES = {"auto", "direct", "managed"}
-
-
-def managed_portal_tools_enabled(*, force_fresh: bool = False) -> bool:
-    """Managed remote vendor tools are disabled: Arkos uses direct vendor API keys."""
-    return False
-
-
-def portal_tool_gateway_unavailable_message(capability: str = "This tool", *,
-                                          force_fresh: bool = False) -> str:
-    """Return guidance when direct vendor API keys are required."""
-    return f"{capability} requires configuring a direct vendor API key."
 
 
 def normalize_browser_cloud_provider(value: object | None) -> str:
@@ -33,9 +20,8 @@ def normalize_browser_cloud_provider(value: object | None) -> str:
 
 
 def coerce_modal_mode(value: object | None) -> str:
-    """Return the requested modal mode when valid, else the default."""
-    mode = str(value or _DEFAULT_MODAL_MODE).strip().lower()
-    return mode if mode in _VALID_MODAL_MODES else _DEFAULT_MODAL_MODE
+    """Modal execution uses direct vendor credentials."""
+    return "direct"
 
 
 normalize_modal_mode = coerce_modal_mode
@@ -51,23 +37,9 @@ def has_direct_modal_credentials() -> bool:
         return False
 
 
-def resolve_modal_backend_state(modal_mode: object | None, *, has_direct: bool,
-                                managed_ready: bool,
-                                managed_enabled: bool | None = None) -> Dict[str, Any]:
-    """Resolve direct vs managed Modal backend: ``direct``/``managed`` are exclusive; ``auto``
-    prefers managed when available, else direct."""
-    requested_mode = coerce_modal_mode(modal_mode)
-    if managed_enabled is None:
-        managed_enabled = managed_portal_tools_enabled()
-    managed_ok = managed_enabled and managed_ready
-    exclusive = {"managed": "managed" if managed_ok else None,
-                 "direct": "direct" if has_direct else None}
-    selected_backend = exclusive.get(
-        requested_mode, "managed" if managed_ok else "direct" if has_direct else None)
-    return {"requested_mode": requested_mode, "mode": requested_mode, "has_direct": has_direct,
-            "managed_ready": managed_ready,
-            "managed_mode_blocked": requested_mode == "managed" and not managed_enabled,
-            "selected_backend": selected_backend}
+def resolve_modal_backend_state(modal_mode: object | None, *, has_direct: bool) -> Dict[str, Any]:
+    return {"requested_mode": "direct", "mode": "direct", "has_direct": has_direct,
+            "selected_backend": "direct" if has_direct else None}
 
 
 def _scoped_credential(name: str) -> str:
@@ -139,17 +111,6 @@ def resolve_openai_audio_api_key() -> str:
             or resolve_provider_secret("OPENAI_API_KEY", "openai-api"))
 
 
-def prefers_gateway(config_section: str) -> bool:
-    """True when ``<section>.use_gateway`` is set in config.yaml. Never raises."""
-    try:
-        from arkos_cli.config import load_config
-        section = (load_config() or {}).get(config_section)
-        return isinstance(section, dict) and is_truthy_value(section.get("use_gateway"))
-    except Exception:
-        return False
-
-
-PORTAL_MANAGED_PROVIDER = "portal"
 _EXTRA_SELECTION_KEYS = {"web": ("search_backend", "extract_backend")}
 _SELECTION_NAME_KEYS = {"browser": ("cloud_provider",), "web": ("backend",)}
 _DEFAULT_NAME_KEYS = ("provider", "backend", "cloud_provider")
@@ -167,21 +128,15 @@ def _raw_section(section: str) -> Dict[str, Any] | None:
 
 
 def read_selection(section: str) -> str | None:
-    """THE single runtime read of the persisted `arkos tools` selection: ``"portal"`` (managed
-    gateway row), a vendor name (direct, own credentials), or ``None`` (never configured ->
-    legacy autodetect allowed). Reads the RAW config.yaml so key presence means "actually
-    written", not "schema default"; a raw ``local`` is therefore a real user selection.
-    Legacy shim: ``use_gateway: true`` was only ever written by the managed row, so it maps
-    to ``"portal"`` regardless of the name key. Never raises."""
+    """Read an explicitly configured vendor selection from the raw profile settings."""
     raw = _raw_section(section)
     if raw is None:
         return None
-    if is_truthy_value(raw.get("use_gateway")):
-        return PORTAL_MANAGED_PROVIDER
     for key in _SELECTION_NAME_KEYS.get(section, _DEFAULT_NAME_KEYS):
-        text = str(raw.get(key)).strip().lower() if raw.get(key) is not None else ""
-        if text:
-            return text
+        value = raw.get(key)
+        name = str(value).strip().lower() if value is not None else ""
+        if name:
+            return name
     return None
 
 

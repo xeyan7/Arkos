@@ -534,16 +534,6 @@ class ClientLifecycleMixin:
             return False
         return self._adopt_openai_credentials(api_key, base_url, reason=f"{self.provider}_credential_refresh")
 
-    def _try_refresh_portal_client_credentials(self, *, force: bool = True, require_account: str | None = None) -> bool:
-        """Portal credential refresh — removed in engine build (portal deleted). Always False."""
-        return False
-
-    _PORTAL_KEY_ADOPT_SKEW_S = 180
-
-    def _adopt_portal_key_before_expiry(self) -> bool:
-        """Portal key pre-expiry adoption — removed in engine build (portal deleted). Always False."""
-        return False
-
 
     def _resolve_env_credentials(self) -> Optional[tuple]:
         """Current ``.env``-sourced ``(api_key, base_url, default_base)`` for this provider, or ``None``.

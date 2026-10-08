@@ -21,7 +21,7 @@ _DEP_CHECKS = {
     "ffmpeg": lambda: shutil.which("ffmpeg") is not None,
 }
 
-_DEP_DESCRIPTIONS = {"node": "Node.js (required for browser tools and TUI)",
+_DEP_DESCRIPTIONS = {"node": "Node.js (required for browser tools)",
                      "browser": "Browser engine (Chromium, for web browsing tools)",
                      "ripgrep": "ripgrep (fast file search)", "ffmpeg": "ffmpeg (TTS voice messages)"}
 
@@ -80,13 +80,8 @@ def ensure_dependency(dep: str, interactive: bool = True) -> bool:
             print(f"  {desc} is not installed and no install script was found.")
             print(f"  Install {dep} manually and try again.")
         return False
-    if interactive and sys.stdin.isatty():
-        try:
-            reply = input(f"{desc} is not installed. Install now? [Y/n] ").strip().lower()
-        except (EOFError, KeyboardInterrupt):
-            return False
-        if reply not in ("", "y", "yes"):
-            return False
+    if interactive:
+        return False  # The embedding host must authorize installation explicitly.
     if shell == "powershell":
         from arkos_constants import get_arkos_home
         ps_bin = shutil.which("powershell") or shutil.which("pwsh")

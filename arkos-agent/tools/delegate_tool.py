@@ -39,7 +39,7 @@ from tools.delegate_tool_progress import (  # noqa: F401
     _safe_progress, format_batch_tag, format_subagent_failure_line,
 )
 from tools.delegate_tool_registry import (  # noqa: F401
-    _CONTROL_ACTIONS, _active_subagents, _active_subagents_lock, _capture_gateway_steer_authority,
+    _CONTROL_ACTIONS, _active_subagents, _active_subagents_lock,
     _handle_control_action, _is_descendant_of, _owns_subagent_record, _register_subagent, _unregister_subagent,
     get_subagent_attribution, interrupt_subagent, is_spawn_paused, list_active_subagents, set_spawn_paused,
     steer_subagent,
@@ -623,7 +623,6 @@ _PLUGIN_COMPAT_LAZY = {
     'MAX_DEPTH': ('tools.delegate_tool_config', 'MAX_DEPTH'),
     'TOOLSETS': ('toolsets', 'TOOLSETS'),
     'base_url_hostname': ('utils', 'base_url_hostname'),
-    'file_state': ('tools', 'file_state'),
     'request_hard_interrupt': ('agent.interrupt_compat', 'request_hard_interrupt'),
 }
 

@@ -25,8 +25,7 @@ _VENDOR_PREFIXES: dict[str, str] = {
     "llama": "meta-llama",
     "step": "stepfun"}
 
-_AGGREGATOR_PROVIDERS: frozenset[str] = frozenset({
-    "openrouter", "portal", "ai-gateway", "kilocode"})
+_AGGREGATOR_PROVIDERS: frozenset[str] = frozenset({'openrouter', 'ai-gateway', 'kilocode'})
 
 _DOT_TO_HYPHEN_PROVIDERS: frozenset[str] = frozenset({
     "anthropic"})

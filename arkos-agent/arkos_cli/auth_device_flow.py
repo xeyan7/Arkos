@@ -15,9 +15,7 @@ import webbrowser
 from pathlib import Path
 from typing import Any, Callable, Dict, FrozenSet, Optional
 from urllib.parse import urlparse
-from arkos_cli.auth_constants import (
-    AuthError, DEFAULT_PORTAL_URL, DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS,
-    DEVICE_CODE_GRANT_TYPE, OAUTH_OVER_SSH_DOCS_URL, httpx)
+from arkos_cli.auth_constants import AuthError, DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS, DEVICE_CODE_GRANT_TYPE, OAUTH_OVER_SSH_DOCS_URL, httpx
 from utils import is_truthy_value
 
 logger = logging.getLogger("arkos_cli.auth")
@@ -160,40 +158,6 @@ def _resolve_verify(
     return _default_verify()
 
 
-def _request_device_code(
-    client: httpx.Client, portal_base_url: str, client_id: str, scope: Optional[str],
-) -> Dict[str, Any]:
-    """POST to the device code endpoint. Returns device_code, user_code, etc."""
-    response = client.post(
-        f"{portal_base_url}/api/oauth/device/code",
-        data={"client_id": client_id, **({"scope": scope} if scope else {})})
-    response.raise_for_status()
-    data = response.json()
-    required_fields = [
-        "device_code", "user_code", "verification_uri", "verification_uri_complete", "expires_in",
-        "interval"]
-    missing = [f for f in required_fields if f not in data]
-    if missing:
-        raise ValueError(f"Device code response missing fields: {', '.join(missing)}")
-    return data
-
-
-def _portal_device_auth_timeout_message(portal_base_url: str) -> str:
-    """Actionable timeout text: the usual cause is Portal sign-in failing in the browser tab.
-
-    A bare "Timed out waiting for device authorization" gives the user nothing to act on. The most common
-    cause is Portal sign-in failing in the opened browser tab (including the server-side CAPTCHA loop from
-    20605), so point at the Portal login page and the retry command..
-    """
-    portal = (portal_base_url or DEFAULT_PORTAL_URL).rstrip("/")
-    return (
-        "Timed out waiting for device authorization.\n"
-        "  Portal sign-in is required before the device code can be approved.\n"
-        "  If the browser showed a CAPTCHA / 'You did not pass CAPTCHA' error,\n"
-        "  finish signing in at the Portal in a normal browser tab, then retry.\n"
-        f"  Portal login: {portal}/login")
-
-
 def _print_device_code_instructions(
     verification_url: str, user_code: str, *, open_browser: bool, failure_dash: str = "--",
     swallow_open_errors: bool = False) -> None:
@@ -226,7 +190,7 @@ def _poll_device_token_generic(
     on_non_json_error: Callable[["httpx.Response"], Exception],
     on_error: Callable[["httpx.Response", Dict[str, Any]], Exception],
     on_timeout: Callable[[], Exception]) -> Dict[str, Any]:
-    """RFC 8628 device-code polling loop shared by the Portal and xAI flows.
+    """RFC 8628 device-code polling loop shared by OAuth flows.
 
     ``authorization_pending`` sleeps and retries; ``slow_down`` grows the interval by 1s (cap 30s).
     Every other error, a non-JSON error body, and the deadline become provider-specific exceptions
@@ -257,40 +221,6 @@ def _poll_device_token_generic(
     raise on_timeout()
 
 
-def _poll_for_token(
-    client: httpx.Client, portal_base_url: str, client_id: str, device_code: str,
-    expires_in: int, poll_interval: int) -> Dict[str, Any]:
-    """Poll the Portal token endpoint until the user approves or the code expires."""
-    def _validate(payload: Dict[str, Any]) -> None:
-        if "access_token" not in payload:
-            raise ValueError("Token response did not include access_token")
-
-    def _error(_response, error_payload) -> Exception:
-        error_code = error_payload.get("error", "")
-        description = error_payload.get("error_description") or "Unknown authentication error"
-        return RuntimeError(f"{error_code}: {description}")
-
-    return _poll_device_token_generic(
-        lambda: client.post(
-            f"{portal_base_url}/api/oauth/token",
-            data={
-                "grant_type": DEVICE_CODE_GRANT_TYPE, "client_id": client_id,
-                "device_code": device_code}),
-        expires_in=expires_in,
-        poll_interval=max(1, min(poll_interval, DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS)),
-        validate_success=_validate, on_error=_error,
-        on_non_json_error=lambda _r: RuntimeError(
-            "Token endpoint returned a non-JSON error response"),
-        on_timeout=lambda: TimeoutError(_portal_device_auth_timeout_message(portal_base_url)))
-
-
-def _prompt_yes_no(prompt: str, *, default: str) -> bool:
-    """``input()`` a [Y/n]-style question; EOF/Ctrl-C count as *default*."""
-    try:
-        answer = input(prompt).strip().lower()
-    except (EOFError, KeyboardInterrupt):
-        answer = default
-    return answer in {"", "y", "yes"} if default == "y" else answer in {"y", "yes"}
 
 
 def _print_login_success(
@@ -303,11 +233,11 @@ def _print_login_success(
     print(f"  Config updated: {config_path} (model.provider={provider_id})")
 
 
-def _offer_existing_oauth_credentials(
+def reuse_existing_oauth_credentials(
     provider_id: str, *, resolve: Callable[[], Dict[str, Any]],
     is_expiring: Callable[[str, int], bool], display_name: str, default_base_url: str,
     expired_notice: Optional[str] = None) -> bool:
-    """Offer to reuse still-valid stored OAuth credentials. Returns True when the user accepted.
+    """Reuse valid credentials already stored in the selected profile.
 
     *resolve* attempts a refresh, so a resolved token should be valid — but double-check the
     expiry before telling the user "Login successful!".
@@ -318,11 +248,10 @@ def _offer_existing_oauth_credentials(
         api_key = existing.get("api_key", "")
         if isinstance(api_key, str) and api_key and not is_expiring(api_key, 60):
             print(f"Existing {display_name} credentials found in Arkos auth store.")
-            if _prompt_yes_no("Use existing credentials? [Y/n]: ", default="y"):
-                config_path = _update_config_for_provider(
-                    provider_id, existing.get("base_url", default_base_url))
-                _print_login_success(provider_id, config_path)
-                return True
+            config_path = _update_config_for_provider(
+                provider_id, existing.get("base_url", default_base_url))
+            _print_login_success(provider_id, config_path)
+            return True
         elif expired_notice:
             print(expired_notice)
     except AuthError:

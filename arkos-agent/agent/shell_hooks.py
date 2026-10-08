@@ -484,21 +484,7 @@ def _prompt_and_record(event: str, command: str, *, accept_hooks: bool) -> bool:
         _record_approval(event, command)
         logger.info("shell hook auto-approved via --accept-hooks / env / config: %s -> %s", event, command)
         return True
-    if not sys.stdin.isatty():
-        return False
-    print(
-        f"\n⚠ Arkos is about to register a shell hook that will run a\n  command on your behalf.\n\n"
-        f"    Event:   {event}\n    Command: {command}\n\n"
-        f"  Commands run with your full user credentials.  Only approve\n  commands you trust."
-    )
-    try:
-        answer = input("Allow this hook to run? [y/N]: ").strip().lower()
-    except (EOFError, KeyboardInterrupt):
-        print()
-        return False
-    if answer in {"y", "yes"}:
-        _record_approval(event, command)
-    return answer in {"y", "yes"}
+    return False  # Unseen hooks require explicit host approval via accept_hooks.
 
 
 def _record_approval(event: str, command: str) -> None:

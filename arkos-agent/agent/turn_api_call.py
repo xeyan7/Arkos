@@ -1,10 +1,4 @@
-"""The provider call for the conversation turn's retry loop: ``portal_rate_limit_guard`` (skip
-the attempt while another session's Arkos Portal rate limit is active), ``perform_api_call``
-(streaming decision, MoA prepared-request handshake, LLM execution middleware wrapper, the
-redirect ``_model_request_active`` bracket and the response-vs-redirect crossing check) and
-``handle_api_interrupt`` (``InterruptedError`` mid-call). Nothing here imports
-``agent.conversation_loop`` at module level (cycle).
-"""
+"""Provider calls for the conversation retry loop: streaming, request middleware, redirects, and interrupts."""
 
 from __future__ import annotations
 
@@ -183,66 +177,3 @@ def handle_api_interrupt(
         final_response = f"{INTERRUPT_WAITING_FOR_MODEL_PREFIX}{api_elapsed:.1f}s elapsed)."
     agent._persist_session(messages, conversation_history)
     return ApiInterruptVerdict("break", thinking_spinner, interrupted, final_response)
-
-
-@dataclass
-class PortalRateGuardVerdict:
-    """``action``: ``"fallthrough"`` (no active limit — make the call), ``"break"``
-    (fallback armed on ``_retry``) or ``"return"`` (``result``: no fallback available)."""
-
-    action: str
-    active_system_prompt: Any
-    retry_count: Any
-    compression_attempts: Any
-    result: Optional[Dict[str, Any]] = None
-
-
-def portal_rate_limit_guard(
-    agent: Any, *, _retry: Any, api_messages: Any, messages: Any, conversation_history: Any,
-    active_system_prompt: Any, retry_count: Any, compression_attempts: Any, api_call_count: Any,
-) -> PortalRateGuardVerdict:
-    """Skip the call if another session recorded a Arkos Portal rate limit: every attempt (incl.
-    SDK retries) counts against RPH. Never lets the guard itself break the agent loop."""
-    from agent.conversation_loop import _arm_fallback_restart
-
-    def _verdict(action: str, result: Optional[Dict[str, Any]] = None) -> PortalRateGuardVerdict:
-        return PortalRateGuardVerdict(
-            action=action, active_system_prompt=active_system_prompt, retry_count=retry_count,
-            compression_attempts=compression_attempts, result=result,
-        )
-
-    if agent.provider == "portal":
-        try:
-            from agent.arkos_rate_guard import (
-                portal_rate_limit_remaining, format_remaining as _fmt_portal_remaining
-            )
-            _portal_remaining = portal_rate_limit_remaining()
-            if _portal_remaining is not None and _portal_remaining > 0:
-                _portal_msg = (
-                    f"Arkos Portal rate limit active — resets in {_fmt_portal_remaining(_portal_remaining)}."
-                )
-                agent._buffer_vprint(f"⏳ {_portal_msg} Trying fallback...")
-                agent._buffer_status(f"⏳ {_portal_msg}")
-                if agent._try_activate_fallback():
-                    active_system_prompt = _arm_fallback_restart(
-                        agent, api_messages, active_system_prompt, _retry)
-                    retry_count = 0
-                    compression_attempts = 0
-                    return _verdict("break")
-                agent._flush_status_buffer()
-                agent._persist_session(messages, conversation_history)
-                return _verdict("return", {
-                    "final_response": (
-                        f"⏳ {_portal_msg}\n\n"
-                        "No fallback provider available. Try again after the reset, or add a "
-                        "fallback provider in config.yaml."
-                    ),
-                    "messages": messages,
-                    "api_calls": api_call_count,
-                    "completed": False,
-                    "failed": True,
-                    "error": _portal_msg,
-                })
-        except Exception:
-            pass
-    return _verdict("fallthrough")

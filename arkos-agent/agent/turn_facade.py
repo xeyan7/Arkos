@@ -1,7 +1,7 @@
 """``AIAgent.run_conversation`` / ``chat`` façade.
 
 Turn admission around ``conversation_loop.run_conversation``: durable cross-process session turn lease +
-refresher thread and liveness watchdog (``agent.turn_facade_lease``), relay/accounting/portal scopes, and
+refresher thread and liveness watchdog (``agent.turn_facade_lease``), relay/accounting/request scopes, and
 balanced start/finish marks. Extracted from ``run_agent.py``; every method resolves through ``AIAgent``'s
 MRO unchanged.
 """
@@ -35,7 +35,7 @@ class TurnFacadeMixin:
         from agent.aux_accounting import reset_accounting_context, set_accounting_context
         from agent.auxiliary_client import scoped_runtime_main
         from agent.conversation_loop import run_conversation
-        from agent.portal_tags import (
+        from agent.request_context import (
             reset_affinity_scope, reset_conversation_context, set_affinity_scope,
             set_conversation_context,
         )

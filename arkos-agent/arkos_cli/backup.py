@@ -545,80 +545,8 @@ def _collect_external_entries() -> tuple[list[tuple[Path, str]], list[str]]:
     return external_to_add, skipped_external
 
 
-def run_backup(args) -> None:
-    """Create a zip backup of the Arkos home directory."""
-    arkos_root = get_default_arkos_root()
-
-    if not arkos_root.is_dir():
-        print(f"Error: Arkos home directory not found at {arkos_root}")
-        sys.exit(1)
-
-    try:
-        with _backup_operation_lock(arkos_root):
-            _run_backup_locked(args, arkos_root)
-    except BackupInProgressError as exc:
-        print(f"Error: {exc}")
-        raise SystemExit(2) from exc
 
 
-def _run_backup_locked(args, arkos_root: Path) -> None:
-    """Write a full backup while the cross-process backup slot is held."""
-    out_path = _resolve_backup_output_path(args.output)
-    scan_started = time.monotonic()
-    logger.info("backup phase=scan status=started")
-    print(f"Scanning {display_arkos_home()} ...")
-    skipped_dirs: set = set()
-    files_to_add: list[tuple[Path, Path]] = list(_iter_backup_files(arkos_root, out_path, skipped_dirs))
-    external_to_add, skipped_external = _collect_external_entries()
-    if not files_to_add and not external_to_add:
-        logger.info("backup phase=scan status=empty duration_ms=%.1f", (time.monotonic() - scan_started) * 1000)
-        print("No files to back up.")
-        return
-
-    file_count = len(files_to_add) + len(external_to_add)
-    logger.info("backup phase=scan status=complete duration_ms=%.1f files=%d",
-                (time.monotonic() - scan_started) * 1000, file_count)
-    logger.info("backup phase=archive status=started files=%d", file_count)
-    print(f"Backing up {file_count} files ...")
-    errors = []
-    t0 = time.monotonic()
-
-    def _progress(i: int) -> None:
-        print(f"  {i}/{file_count} files ...")
-        logger.info("backup phase=archive status=progress completed=%d total=%d", i, file_count)
-
-    with _atomic_output_path(out_path) as archive_path, zipfile.ZipFile(
-            archive_path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
-        total_bytes = _write_zip_entries(
-            zf, files_to_add, out_path, on_progress=_progress, track_bytes=True,
-            on_db_failure=lambda rel: errors.append(f"{rel}: SQLite safe copy failed"),
-            on_error=lambda rel, exc: errors.append(f"{rel}: {exc}"))
-        for abs_path, arcname in external_to_add:
-            try:
-                zf.write(abs_path, arcname=arcname)
-                total_bytes += abs_path.stat().st_size
-            except (PermissionError, OSError, ValueError) as exc:
-                errors.append(f"{arcname}: {exc}")
-    elapsed = time.monotonic() - t0
-    zip_size = out_path.stat().st_size
-    logger.info("backup phase=archive status=complete duration_ms=%.1f files=%d errors=%d bytes=%d",
-                elapsed * 1000, file_count, len(errors), zip_size)
-    print(f"\nBackup {'incomplete' if errors else 'complete'}: {out_path}\n"
-          f"  Files:       {file_count}\n"
-          f"  Original:    {_format_size(total_bytes)}\n"
-          f"  Compressed:  {_format_size(zip_size)}\n"
-          f"  Time:        {elapsed:.1f}s")
-    if external_to_add:
-        print(f"\n  Included {len(external_to_add)} memory-provider file(s) stored outside {display_arkos_home()}.")
-    if skipped_external:
-        print(f"\n  Skipped {len(skipped_external)} memory-provider path(s) outside your home directory "
-              "(not portable):\n" + "\n".join(f"    {p}" for p in sorted(skipped_external)[:10]))
-    if skipped_dirs:
-        print("\n  Excluded directories:\n" + "\n".join(f"    {d}/" for d in sorted(skipped_dirs)))
-    if errors:
-        _print_capped(f"\n  Warnings ({len(errors)} files skipped):", errors, "  ")
-    else:
-        print(f"\nRestore with: arkos import {out_path.name}")
 
 
 
@@ -753,21 +681,6 @@ def _import_db_member(
             os.unlink(tmp_name)
 
 
-def _confirm_import_overwrite(arkos_root: Path) -> bool:
-    """Prompt before importing over an existing installation; True when import may proceed."""
-    if not any((arkos_root / m).exists() for m in ("config.yaml", ".env")):
-        return True
-    print("\nWarning: Target directory already has Arkos configuration.\n"
-          "Importing will overwrite existing files with backup contents.\n")
-    try:
-        answer = input("Continue? [y/N] ").strip().lower()
-    except (EOFError, KeyboardInterrupt):
-        print("\nAborted.")
-        sys.exit(1)
-    if answer in {"y", "yes"}:
-        return True
-    print("Aborted.")
-    return False
 
 
 def _import_members(
@@ -836,63 +749,6 @@ def _import_members(
     return restored, restored_external, errors, skipped_runtime, db_shrunk
 
 
-def run_import(args) -> None:
-    """Restore a Arkos backup from a zip file."""
-    zip_path = Path(args.zipfile).expanduser().resolve()
-    if not zip_path.is_file():
-        print(f"Error: File not found: {zip_path}")
-        sys.exit(1)
-    if not zipfile.is_zipfile(zip_path):
-        print(f"Error: Not a valid zip file: {zip_path}")
-        sys.exit(1)
-    arkos_root = get_arkos_home()
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        ok, reason = _validate_backup_zip(zf)
-        if not ok:
-            print(f"Error: {reason}")
-            sys.exit(1)
-        prefix = _detect_prefix(zf)
-        members = [n for n in zf.namelist() if not n.endswith("/")]
-        file_count = len(members)
-        print(f"Backup contains {file_count} files\nTarget: {display_arkos_home()}")
-        if prefix:
-            print(f"Detected archive prefix: {prefix!r} (will be stripped)")
-        if not args.force and not _confirm_import_overwrite(arkos_root):
-            return
-        print(f"\nImporting {file_count} files ...")
-        arkos_root.mkdir(parents=True, exist_ok=True)
-        t0 = time.monotonic()
-        restored, restored_external, errors, skipped_runtime, db_shrunk = _import_members(
-            zf, members, prefix, arkos_root, file_count)
-        elapsed = time.monotonic() - t0
-        print(f"\nImport complete: {restored} files restored in {elapsed:.1f}s\n  Target: {display_arkos_home()}")
-        if restored_external:
-            print(f"\n  Restored {restored_external} memory-provider file(s) to "
-                  f"their original location(s) outside {display_arkos_home()}.")
-        if errors:
-            _print_capped(f"\n  Warnings ({len(errors)} files skipped):", errors, "  ")
-        if db_shrunk:
-            print("\n  ⚠ Session data replaced by older backup contents:")
-            for rel, before, after in db_shrunk:
-                print(f"    {rel}: {before[0]} session(s) / {before[1]} message(s)"
-                      f" -> {after[0]} / {after[1]}")
-            print("    Anything recorded after the backup was taken is not in it. "
-                  "Recover from a newer backup or snapshot: arkos snapshot list")
-        if skipped_runtime:
-            _print_capped(f"\n  Preserved {len(skipped_runtime)} runtime state "
-                          f"file(s) (kept this machine's, not the backup's):",
-                          sorted(skipped_runtime), "    ")
-        restored_profiles = _restore_profile_wrappers(arkos_root)
-        print()
-        if not (arkos_root / "arkos-agent").is_dir() and not (arkos_root / "arkos-agent").is_dir():
-            print("Note: The arkos-agent codebase was not included in the backup.\n"
-                  "  If this is a fresh install, run: arkos update")
-        if restored_profiles:
-            print("\nTo re-enable gateway services for profiles:")
-            for pname in restored_profiles:
-                print(f"  arkos -p {pname} gateway install")
-        _revive_gateway_after_import(arkos_root)
-        print("Done. Your Arkos configuration has been restored.")
 
 
 def _restore_profile_wrappers(arkos_root: Path) -> List[str]:
@@ -1398,15 +1254,6 @@ def prune_quick_snapshots(keep: int = _QUICK_DEFAULT_KEEP, arkos_home: Optional[
     return _prune_oldest(_snapshot_dirs(_quick_snapshot_root(arkos_home)), keep, shutil.rmtree, "snapshot")
 
 
-def run_quick_backup(args) -> None:
-    """CLI entry point for arkos backup --quick."""
-    snap_id = create_quick_snapshot(label=getattr(args, "label", None))
-    if snap_id:
-        print(f"State snapshot created: {snap_id}\n"
-              f"  {len(list_quick_snapshots())} snapshot(s) stored in {display_arkos_home()}/state-snapshots/\n"
-              f"  Restore with: /snapshot restore {snap_id}")
-    else:
-        print("No state files found to snapshot.")
 
 
 

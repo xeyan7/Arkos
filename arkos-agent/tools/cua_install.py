@@ -1,5 +1,4 @@
-"""cua-driver installer, lock hygiene and pip-install helper for `arkos tools` /
-`arkos computer-use install`."""
+"""cua-driver installer, lock hygiene and pip-install helper for engine tool recovery."""
 
 from __future__ import annotations
 
@@ -15,15 +14,7 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
-try:
-    from arkos_cli.cli_output import (
-        print_info as _print_info, print_success as _print_success, print_warning as _print_warning)
-except ImportError:
-    def _print_info(t): pass
-    def _print_success(t): pass
-    def _print_warning(t): pass
-
-logger = logging.getLogger("arkos_cli.tools_config")
+logger = logging.getLogger("arkos_cli.tool_configuration")
 
 _CUA_INSTALLER_TIMEOUT = 660
 _CUA_INSTALLER_DRAIN_GRACE = 15
@@ -35,7 +26,7 @@ _CUA_INSTALL_PS1_URL = (
 _CUA_INSTALL_SH_URL = (
     "https://raw.githubusercontent.com/trycua/cua/main/libs/cua-driver/scripts/install.sh")
 _CUA_MANUAL_README = "https://github.com/trycua/cua/blob/main/libs/cua-driver/README.md"
-_UPGRADE_CMD = "arkos computer-use install --upgrade"
+_UPGRADE_CMD = "tools.cua_install.install_cua_driver(upgrade=True)"
 
 
 def _run_text(cmd: list, *, timeout, capture_output: bool = True,
@@ -47,9 +38,9 @@ def _run_text(cmd: list, *, timeout, capture_output: bool = True,
 
 def _fail(message: str, *hints: str, warn: bool = True) -> bool:
     """Print ``message`` (warning, or info when ``warn=False``) plus info hints; returns False."""
-    (_print_warning if warn else _print_info)(message)
+    (logger.warning if warn else logger.info)(message)
     for hint in hints:
-        _print_info(hint)
+        logger.info(hint)
     return False
 
 
@@ -57,7 +48,7 @@ def _print_output_tail(result: subprocess.CompletedProcess, printer=None) -> Non
     """Echo the last three lines of a failed command's stderr (or stdout) as indented info.
     ``printer`` lets another module route through its own (test-patchable) ``_print_info``."""
     for line in (result.stderr or result.stdout or "").strip().splitlines()[-3:]:
-        (printer or _print_info)(f"      {line[:200]}")
+        (printer or logger.info)(f"      {line[:200]}")
 
 
 def _post_setup_no_window_flags(*, streams_to_console: bool = False) -> int:
@@ -166,8 +157,6 @@ def _pip_install(args: List[str], *, timeout: int = 300, capture_output: bool = 
                      creationflags=install_flags)
 
 
-
-
 def _cua_install_target_writable() -> bool:
     """Return whether the upstream installer can write its app bundle target."""
     if sys.platform != "darwin":
@@ -206,7 +195,7 @@ def _confirmed_update_check(driver_cmd: str, require_confirmed_update: bool) -> 
                   f"    Force a refresh with: {_UPGRADE_CMD}", warn=False)
         return not require_confirmed_update, None
     if not _state.get("update_available"):
-        _print_success(f"    {driver_cmd} is already on the latest release "
+        logger.info(f"    {driver_cmd} is already on the latest release "
                        f"({_state.get('current_version') or 'unknown'}).")
         return False, None
     _latest = str(_state.get("latest_version") or "").strip().lstrip("vV")
@@ -225,9 +214,9 @@ def _report_repair_or_upgrade(ok: bool, *, repair_existing: bool, binary, before
     if ok and before:
         after = _cua_driver_version(binary)
         if after and after != before:
-            _print_success(f"    {driver_cmd} upgraded: {before} → {after}")
+            logger.info(f"    {driver_cmd} upgraded: {before} → {after}")
         elif after:
-            _print_info(f"    {driver_cmd} up to date: {after}")
+            logger.info(f"    {driver_cmd} up to date: {after}")
     return ok
 
 
@@ -240,7 +229,7 @@ def install_cua_driver(upgrade: bool = False, require_confirmed_update: bool = F
     system = platform.system()
     if system not in ("Darwin", "Windows", "Linux"):
         if not upgrade:
-            _print_warning(
+            logger.warning(
                 "    Computer Use (cua-driver) is unsupported on this platform; skipping.")
         return False
     is_windows, is_linux = system == "Windows", system == "Linux"
@@ -267,13 +256,13 @@ def install_cua_driver(upgrade: bool = False, require_confirmed_update: bool = F
     if binary and not upgrade and not repair_existing:
         version = _cua_driver_version(binary)
         suffix = "" if version is None else f": {version or 'unknown version'}"
-        _print_success(f"    {driver_cmd} already installed{suffix}.")
+        logger.info(f"    {driver_cmd} already installed{suffix}.")
         if is_windows and not _repair_cua_driver_autostart_windows(binary, verbose=False):
             return _fail("    cua-driver is compatible, but Windows autostart repair failed.")
         _print_cua_platform_notes(is_windows, is_linux, fresh_install=False)
         return True
     if repair_existing:
-        _print_warning(f"    Found cua-driver {contract.get('version') or 'unknown version'}, but "
+        logger.warning(f"    Found cua-driver {contract.get('version') or 'unknown version'}, but "
                        "Arkos cannot use its current runtime contract: "
                        f"{contract.get('reason') or 'required runtime features are missing'}.")
         if override:
@@ -284,14 +273,14 @@ def install_cua_driver(upgrade: bool = False, require_confirmed_update: bool = F
                          "repair installer.",
                          f"    Repair it from an interactive terminal with: {_UPGRADE_CMD}",
                          warn=False)
-        _print_info("    Repairing it with the current upstream installer.")
+        logger.info("    Repairing it with the current upstream installer.")
 
     if not _cua_install_target_writable():
-        _print_info("    /Applications is not writable; skipping cua-driver refresh.")
-        _print_info(f"    Run `{_UPGRADE_CMD}` from an admin account to update it.")
+        logger.info("    /Applications is not writable; skipping cua-driver refresh.")
+        logger.info(f"    Run `{_UPGRADE_CMD}` from an admin account to update it.")
         return bool(binary)
     if not shutil.which(fetch_tool):
-        _print_warning(f"    {fetch_tool} not found — cannot refresh cua-driver.")
+        logger.warning(f"    {fetch_tool} not found — cannot refresh cua-driver.")
         return bool(binary)
     confirmed_version = None
     if binary and not repair_existing:
@@ -362,7 +351,7 @@ def _clear_stale_windows_cua_install_lock() -> None:
             logger.debug("Windows cua install lock probe succeeded but %s remains", lock_file)
             return
         logger.info("Cleared stale Windows cua-driver install lock at %s", lock_file)
-        _print_info(f"    Cleared stale cua-driver install lock ({lock_file}).")
+        logger.info(f"    Cleared stale cua-driver install lock ({lock_file}).")
     except Exception as e:
         logger.debug("stale Windows cua install lock check failed: %s", e)
 
@@ -401,7 +390,7 @@ def _clear_stale_cua_install_lock() -> None:
                 return
         shutil.rmtree(lock_dir, ignore_errors=True)
         logger.info("Cleared stale cua-driver install lock at %s", lock_dir)
-        _print_info(f"    Cleared stale cua-driver install lock ({lock_dir}).")
+        logger.info(f"    Cleared stale cua-driver install lock ({lock_dir}).")
     except Exception as e:
         logger.debug("stale cua install lock check failed: %s", e)
 
@@ -480,7 +469,7 @@ def _repair_cua_driver_autostart_windows(driver_cmd: str, *, verbose: bool) -> b
     ps_cmd = (f"$exe = {_ps_single_quote(binary)}; "
               "$proc = Start-Process -FilePath $exe -ArgumentList @('autostart','enable') "
               "-Verb RunAs -Wait -PassThru -ErrorAction Stop; exit $proc.ExitCode")
-    _print_info("    Registering cua-driver auto-start..." if verbose
+    logger.info("    Registering cua-driver auto-start..." if verbose
                 else "    Repairing cua-driver auto-start registration...")
     try:
         result = _run_text([ps, "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_cmd],
@@ -491,9 +480,9 @@ def _repair_cua_driver_autostart_windows(driver_cmd: str, *, verbose: bool) -> b
         return _fail(f"    cua-driver autostart registration failed: {exc}")
     if result.returncode == 0:
         return True
-    _print_warning("    cua-driver autostart registration failed.")
+    logger.warning("    cua-driver autostart registration failed.")
     _print_output_tail(result)
-    _print_info("    From an elevated shell, run: cua-driver autostart enable")
+    logger.info("    From an elevated shell, run: cua-driver autostart enable")
     return False
 
 
@@ -505,17 +494,17 @@ def _remove_quietly(path: str) -> None:
 def _print_cua_platform_notes(is_windows: bool, is_linux: bool, *, fresh_install: bool) -> None:
     """Host-specific follow-up notes after an install or a compatible-install check."""
     if is_windows:
-        _print_info("    cua-driver may spawn a UIAccess worker (cua-driver-uia.exe);")
-        _print_info("    Windows/SmartScreen may prompt the first time it runs.")
+        logger.info("    cua-driver may spawn a UIAccess worker (cua-driver-uia.exe);")
+        logger.info("    Windows/SmartScreen may prompt the first time it runs.")
     elif is_linux:
-        _print_warning("    Linux support is alpha.")
+        logger.warning("    Linux support is alpha.")
     else:
-        _print_info("    IMPORTANT — grant macOS permissions now:" if fresh_install
+        logger.info("    IMPORTANT — grant macOS permissions now:" if fresh_install
                     else "    Grant macOS permissions if not done yet:")
-        _print_info("      System Settings > Privacy & Security > Accessibility")
-        _print_info("      System Settings > Privacy & Security > Screen Recording")
+        logger.info("      System Settings > Privacy & Security > Accessibility")
+        logger.info("      System Settings > Privacy & Security > Screen Recording")
         if fresh_install:
-            _print_info("    Both must allow the terminal / Arkos process.")
+            logger.info("    Both must allow the terminal / Arkos process.")
 
 
 def _kill_installer_tree(proc, *, is_windows: bool) -> None:
@@ -591,7 +580,7 @@ def _cua_installer_command(is_windows: bool):
     except (subprocess.TimeoutExpired, OSError) as e:
         failure = str(e)
     if failure is not None:
-        _print_warning(f"    cua-driver installer download failed: {failure}")
+        logger.warning(f"    cua-driver installer download failed: {failure}")
         _remove_quietly(script_path)
         return None, None, None
     return ["/bin/bash", script_path], manual_hint, script_path
@@ -610,7 +599,7 @@ def _unattended_installer_preflight(install_cmd: list, is_windows: bool):
               f"    If no install is really running, retry with: {_UPGRADE_CMD}", warn=False)
         return None
     if not _cua_release_endpoint_reachable():
-        _print_info("    github.com is unreachable — skipping cua-driver refresh "
+        logger.info("    github.com is unreachable — skipping cua-driver refresh "
                     "(will retry on the next update).")
         return None
     if is_windows:
@@ -667,7 +656,7 @@ def _run_cua_driver_installer(label: str = "Installing", verbose: bool = True,
     if install_cmd is None:
         return False
     if show_progress:
-        _print_info(f"    {label} cua-driver (background computer-use)..." if verbose
+        logger.info(f"    {label} cua-driver (background computer-use)..." if verbose
                     else f"→ {label} cua-driver (Computer Use)...")
     driver_cmd = _cua_driver_cmd()
     timeout = _CUA_INSTALLER_TIMEOUT if installer_timeout is None else installer_timeout
@@ -695,19 +684,19 @@ def _run_cua_driver_installer(label: str = "Installing", verbose: bool = True,
         if proc.returncode == 0 and installed_binary:
             if is_windows and not _repair_cua_driver_autostart_windows(installed_binary,
                                                                         verbose=verbose):
-                _print_warning("    cua-driver installed, but auto-start was not registered.")
+                logger.warning("    cua-driver installed, but auto-start was not registered.")
             if verbose:
-                _print_success(f"    {driver_cmd} installed.")
+                logger.info(f"    {driver_cmd} installed.")
                 _print_cua_platform_notes(is_windows, is_linux, fresh_install=True)
             return True
         return _fail(f"    cua-driver {label.lower()} did not complete. Re-run manually:",
                      f"      {manual_hint}")
     except subprocess.TimeoutExpired:
-        _print_warning(f"    cua-driver {label.lower()} timed out after {timeout}s.")
+        logger.warning(f"    cua-driver {label.lower()} timed out after {timeout}s.")
         if not is_windows:
-            _print_info("    If this repeats, a stale installer lock may be present — check "
+            logger.info("    If this repeats, a stale installer lock may be present — check "
                         f"{_cua_install_lock_dir()}")
-        _print_info(f"    Re-run manually:  {manual_hint}")
+        logger.info(f"    Re-run manually:  {manual_hint}")
         return False
     except Exception as e:
         return _fail(f"    cua-driver {label.lower()} failed: {e}")

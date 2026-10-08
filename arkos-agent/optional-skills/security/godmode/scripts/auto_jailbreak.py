@@ -38,13 +38,17 @@ _TEMPLATES_DIR = _SKILL_DIR / "templates"
 _parseltongue_path = _SCRIPTS_DIR / "parseltongue.py"
 _race_path = _SCRIPTS_DIR / "godmode_race.py"
 
-import inspect as _inspect
-_caller_globals = _inspect.stack()[0][0].f_globals if len(_inspect.stack()) > 0 else globals()
+import runpy
 
-if _parseltongue_path.exists():
-    exec(compile(open(_parseltongue_path).read(), str(_parseltongue_path), 'exec'), _caller_globals)
-if _race_path.exists():
-    exec(compile(open(_race_path).read(), str(_race_path), 'exec'), _caller_globals)
+_helper_namespace = {}
+for _helper_path in (_parseltongue_path, _race_path):
+    if _helper_path.exists():
+        _helper_namespace.update(runpy.run_path(str(_helper_path), run_name="_arkos_skill_support"))
+
+score_response = _helper_namespace.get("score_response")
+escalate_encoding = _helper_namespace.get("escalate_encoding")
+if not callable(score_response) or not callable(escalate_encoding):
+    raise ImportError("The optional skill requires godmode_race.py and parseltongue.py alongside it.")
 
 
 ARKOS_HOME = Path(os.getenv("ARKOS_HOME", Path.home() / ".arkos"))
@@ -274,7 +278,7 @@ def _detect_model_family(model: str) -> str:
         return "gemini"
     if "grok" in model_lower or "x-ai" in model_lower:
         return "grok"
-    if "arkos" in model_lower or "portal" in model_lower:
+    if "arkos" in model_lower:
         return "arkos"
     if "deepseek" in model_lower:
         return "deepseek"

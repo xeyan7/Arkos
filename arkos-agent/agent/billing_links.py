@@ -15,15 +15,11 @@ from utils import base_url_host_matches
 
 @dataclass
 class BillingBlock:
-    """Structured billing-wall descriptor shared across every surface.
-    Engine build: portal removed; ``is_portal`` is always False and ``billing_url``
-    is the provider's own billing page."""
-
+    """Structured descriptor for third-party provider billing failures."""
     provider: str
     provider_label: str
     model: str
     billing_url: Optional[str]
-    is_portal: bool
     message: str
 
     def to_dict(self) -> dict:
@@ -58,16 +54,6 @@ _PROVIDERS: tuple[_Provider, ...] = (
 _BY_SLUG: dict[str, _Provider] = {slug: p for p in _PROVIDERS for slug in p.slugs}
 
 
-def is_portal_inference_route(provider: str, base_url: str) -> bool:
-    """Portal route check — removed in engine build (portal deleted). Always False."""
-    return False
-
-
-def _portal_billing_url() -> Optional[str]:
-    """Portal billing URL — removed in engine build. Always None."""
-    return None
-
-
 def _resolve_provider_link(slug: str, base_url: str) -> tuple[str, Optional[str]]:
     """Resolve ``(label, url)``: exact slug → base_url host → readable-label fallback."""
     base = str(base_url or "")
@@ -80,9 +66,8 @@ def _resolve_provider_link(slug: str, base_url: str) -> tuple[str, Optional[str]
 
 
 def build_billing_block(*, provider: str, base_url: str, model: str, message: str = "") -> BillingBlock:
-    """Billing descriptor for a billing-classified failure; ``message`` (agent-loop guidance) passes through unchanged.
-    Engine build: portal removed; always the third-party provider branch."""
+    """Billing descriptor for a billing-classified failure; ``message`` (agent-loop guidance) passes through unchanged."""
     slug = (provider or "").strip().lower()
     model = (model or "").strip()
     label, url = _resolve_provider_link(slug, base_url)
-    return BillingBlock(slug, label, model, url, False, message or "")
+    return BillingBlock(slug, label, model, url, message or "")

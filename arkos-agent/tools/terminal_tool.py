@@ -50,7 +50,7 @@ from tools.terminal_tool_config import (
 from tools.terminal_tool_backends import (
     _REQUIREMENT_CHECKERS, _VERCEL_SANDBOX_DEFAULT_CWD, _check_plugin_requirements,
 )
-from tools.tool_backend_helpers import coerce_modal_mode, managed_portal_tools_enabled
+from tools.tool_backend_helpers import coerce_modal_mode
 
 
 def _safe_parse_import_env(name: str, default: Any, converter, type_label: str):
@@ -1268,9 +1268,8 @@ _PLUGIN_COMPAT_LAZY = {
     'get_active_env': ('tools.terminal_tool_lifecycle', 'get_active_env'),
     'has_direct_modal_credentials': ('tools.tool_backend_helpers', 'has_direct_modal_credentials'),
     'is_interrupted': ('tools.interrupt', 'is_interrupted'),
-    'is_managed_tool_gateway_ready': ('tools.managed_tool_gateway', 'is_managed_tool_gateway_ready'),
     'is_persistent_env': ('tools.terminal_tool_lifecycle', 'is_persistent_env'),
-    'portal_tool_gateway_unavailable_message': ('tools.tool_backend_helpers', 'portal_tool_gateway_unavailable_message'),
+
     'resolve_modal_backend_state': ('tools.tool_backend_helpers', 'resolve_modal_backend_state'),
     'strip_inert_heredoc_bodies': ('tools.shell_heredoc', 'strip_inert_heredoc_bodies'),
 }

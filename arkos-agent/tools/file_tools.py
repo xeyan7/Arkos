@@ -602,7 +602,6 @@ def read_file_tool(path: str, offset: int = 1, limit: int = DEFAULT_READ_LIMIT, 
         return tool_error(str(e))
 
 
-
 def _resolve_or_none(filepath: str, task_id: str) -> str | None:
     """Task-resolved path string, or None when resolution fails for any reason."""
     try:
@@ -1019,7 +1018,7 @@ def _is_openai_family_main() -> bool:
 
     Provider-family-coarse on purpose (no per-model training-diet table to
     go stale): direct OpenAI providers always qualify; on aggregators
-    (openrouter/portal/azure...) the MODEL slug decides (gpt-*/o-series/
+    (openrouter/azure...) the MODEL slug decides (gpt-*/o-series/
     codex). Fail-closed to the universal replace-only schema.
     """
     try:

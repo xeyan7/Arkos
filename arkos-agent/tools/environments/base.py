@@ -434,7 +434,6 @@ class BaseEnvironment(ABC):
     def _before_execute(self) -> None:
         """Hook before each command. Remote backends (SSH, Modal, Daytona)
         trigger their FileSyncManager here; bind-mount backends and Local don't."""
-        pass
 
     def execute(
         self,

@@ -1,7 +1,7 @@
 """Live model pricing.
 
 OpenRouter-compatible ``/v1/models`` pricing fetch with a per-endpoint/per-credential cache,
-Arkos Portal sale chrome and org-policy filtering, and the Vercel AI Gateway / Novita / Fireworks /
+and the Vercel AI Gateway / Novita / Fireworks /
 DeepInfra pricing adapters. Split out of ``arkos_cli.models``; helpers still defined there are
 looked up on ``arkos_cli.models`` at call time so ``patch("arkos_cli.models.<name>")`` mocks keep
 intercepting.
@@ -131,7 +131,7 @@ def _sale_pct(current: Any, original: Any) -> int | None:
 
 
 def compute_sale_discount(prompt: str, completion: str, original: Any) -> tuple[int, str, str] | None:
-    """Sale chrome from gateway ``pricing.original`` (Arkos Portal only; callers gate on the provider
+    """Sale chrome from gateway ``pricing.original`` (callers gate on the provider
     and opted in via ``include_sale_original=True``): ``(discount_percent, was_prompt_raw,
     was_completion_raw)`` when ``original`` is a dict and the current prompt (fallback: completion)
     rate is strictly below the original. Free / $0 models get a flat 100% off, with "was" prices
@@ -202,7 +202,7 @@ def fetch_models_with_pricing(
 ) -> dict[str, dict[str, Any]]:
     """Fetch ``/v1/models`` (any OpenRouter-compatible endpoint) → ``{model_id: {prompt, completion,
     ...}}``, cached per *base_url* and per credential so one caller's catalog never answers
-    another's read. *include_sale_original* (Arkos Portal only) copies the gateway's pre-discount
+    another's read. *include_sale_original*  copies the gateway's pre-discount
     ``pricing.original`` rates through as a nested ``original`` dict for sale chrome."""
     from arkos_cli.models import _ARKOS_USER_AGENT
     url_root = (base_url or "").rstrip("/")
@@ -266,58 +266,6 @@ def _resolve_openrouter_api_key() -> str:
     return os.getenv("OPENROUTER_API_KEY", "").strip()
 
 
-_DEFAULT_PORTAL_INFERENCE_BASE = ""
-
-
-def _resolve_portal_pricing_credentials() -> tuple[str, str]:
-    """Portal pricing credentials — removed in engine build (portal deleted). Always ("", "")."""
-    return ("", "")
-
-
-_PORTAL_CATALOG_TTL_SECONDS = 300.0
-
-
-def _fetch_portal_pricing(api_key: str, base_url: str, *, force_refresh: bool) -> dict[str, dict[str, Any]]:
-    """Shared by pricing and policy lookups so both read one cache entry."""
-    if not base_url:
-        return {}
-    return fetch_models_with_pricing(
-        api_key=api_key,
-        base_url=base_url,
-        force_refresh=force_refresh,
-        include_sale_original=True,
-        cache_ttl_seconds=_PORTAL_CATALOG_TTL_SECONDS,
-    )
-
-
-def portal_policy_allowed_ids(*, force_refresh: bool = False) -> Optional[set[str]]:
-    """Portal policy allowlist — removed in engine build (portal deleted). Always None (no filter)."""
-    return None
-
-
-_PORTAL_POLICY_APPEND_MAX = 64
-
-
-def restrict_to_portal_policy(
-    model_ids: list[str],
-    allowed: Optional[set[str]],
-    *,
-    rescue_empty: bool = False,
-) -> list[str]:
-    """*model_ids* narrowed to *allowed*, preserving order. A ``:free`` sibling is kept when its
-    base model is reachable (the gateway admits a row when any requestable id passes); over-listing
-    costs a 403 from the authoritative gate, hiding a servable row is unrecoverable client-side.
-    *rescue_empty*: an allowlist naming only models the curated manifest lacks would leave an empty
-    picker — worse than no filter — so return the allowlist itself. Opt-in per list: an already-
-    empty list (a paid tier's gated models) means "nothing to gate", not "nothing survived"."""
-    if not allowed:
-        return list(model_ids)
-    kept = [mid for mid in model_ids if mid in allowed or mid.split(":", 1)[0] in allowed]
-    if rescue_empty and not kept and len(allowed) <= _PORTAL_POLICY_APPEND_MAX:
-        return sorted(allowed)
-    return kept
-
-
 def _remember_provider_cache_key(provider: str, cache_key: str) -> None:
     from arkos_cli.models import _pricing_profile_key
     _pricing_provider_cache_keys[(_pricing_profile_key(), provider)] = cache_key
@@ -347,14 +295,6 @@ def _fetch_fireworks_pricing_for_provider(*, force_refresh: bool = False) -> dic
     return _fireworks_pricing_from_models_dev(force_refresh=force_refresh)
 
 
-def _fetch_portal_pricing_for_provider(*, force_refresh: bool = False) -> dict[str, dict[str, Any]]:
-    api_key, base_url = _resolve_portal_pricing_credentials()
-    if not base_url:
-        return {}
-    _remember_provider_cache_key("portal", base_url.rstrip("/"))
-    return _fetch_portal_pricing(api_key, base_url, force_refresh=force_refresh)
-
-
 _OPENROUTER_PRICING_BASE = "https://openrouter.ai/api"
 _FIREWORKS_PRICING_KEY = "models.dev/fireworks"
 
@@ -366,20 +306,6 @@ def _ai_gateway_pricing_scope() -> str:
 
 def _novita_pricing_scope() -> str:
     return (os.getenv("NOVITA_BASE_URL", "").strip() or "https://api.novita.ai/openai/v1").rstrip("/")
-
-
-def get_cached_portal_inference_base_url() -> str:
-    """The profile's persisted Portal endpoint (bare origin, no ``/v1``) without refreshing auth."""
-    try:
-        from arkos_cli.auth import (
-            _load_auth_store, _load_provider_state, _optional_base_url, _validate_portal_inference_url_from_network,
-        )
-
-        state = _load_provider_state(_load_auth_store(), "portal") or {}
-        url = _validate_portal_inference_url_from_network(_optional_base_url(state.get("inference_base_url"))) or ""
-        return url.rstrip("/").removesuffix("/v1")
-    except Exception:
-        return ""
 
 
 _STATIC_PRICING_SCOPES = {
@@ -401,21 +327,6 @@ def pricing_cache_scope(provider: str, *, current_provider: str = "", current_ba
         return static()
     if normalized == "deepinfra":
         return _deepinfra_catalog_url()[0]
-    if normalized == "portal":
-        try:
-            from arkos_cli.auth import _portal_inference_env_override
-
-            env_base = _portal_inference_env_override()
-        except Exception:
-            env_base = None
-        if env_base:
-            return env_base.rstrip("/").removesuffix("/v1")
-        if normalize_provider(current_provider) == "portal" and current_base_url:
-            return current_base_url.rstrip("/").removesuffix("/v1")
-        persisted_base = get_cached_portal_inference_base_url()
-        if persisted_base:
-            return persisted_base
-        return _pricing_provider_cache_keys.get((_pricing_profile_key(), normalized), _DEFAULT_PORTAL_INFERENCE_BASE)
     return ""
 
 
@@ -434,7 +345,7 @@ def _cached_only_pricing(normalized: str) -> dict[str, dict[str, str]]:
 def get_pricing_for_provider(
     provider: str, *, force_refresh: bool = False, cached_only: bool = False
 ) -> dict[str, dict[str, str]]:
-    """Return live pricing for providers that support it (openrouter, portal, ai-gateway, novita,
+    """Return live pricing for providers that support it (openrouter, ai-gateway, novita,
     deepinfra, fireworks); ``{}`` for everything else. ``cached_only`` never starts provider I/O:
     normal picker opens use it so cold endpoints cannot hold the response path, while a background
     prewarm fills the same caches for later opens."""
@@ -537,5 +448,5 @@ _PRICING_FETCHERS = {
     "novita": _fetch_novita_pricing_for_provider,
     "deepinfra": _fetch_deepinfra_pricing,
     "fireworks": _fetch_fireworks_pricing_for_provider,
-    "portal": _fetch_portal_pricing_for_provider,
+
 }

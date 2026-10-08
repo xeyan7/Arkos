@@ -1321,7 +1321,6 @@ _PLUGIN_COMPAT_LAZY = {
     'SearchMatch': ('tools.file_operations_common', 'SearchMatch'),
     'build_write_denied_paths': ('agent.file_safety', 'build_write_denied_paths'),
     'build_write_denied_prefixes': ('agent.file_safety', 'build_write_denied_prefixes'),
-    'tool_interrupt': ('tools', 'interrupt'),
 }
 
 

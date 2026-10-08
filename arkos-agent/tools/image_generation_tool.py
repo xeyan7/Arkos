@@ -27,58 +27,17 @@ def _load_fal_client() -> Any:
 
 
 from tools.debug_helpers import DebugSession
-from tools.fal_common import _ManagedFalSyncClient, _extract_http_status, _normalize_fal_queue_url_format
+from tools.fal_common import _extract_http_status
 from tools.image_generation_catalog import (
     DEFAULT_ASPECT_RATIO, DEFAULT_MODEL, FAL_MODELS, UPSCALER_CREATIVITY, UPSCALER_DEFAULT_PROMPT,
     UPSCALER_FACTOR, UPSCALER_GUIDANCE_SCALE, UPSCALER_MODEL, UPSCALER_NEGATIVE_PROMPT,
     UPSCALER_NUM_INFERENCE_STEPS, UPSCALER_RESEMBLANCE, UPSCALER_SAFETY_CHECKER, VALID_ASPECT_RATIOS,
 )
-from tools.managed_tool_gateway import resolve_managed_tool_gateway
-from tools.tool_backend_helpers import (
-    PORTAL_MANAGED_PROVIDER, fal_key_is_configured, managed_portal_tools_enabled,
-    portal_tool_gateway_unavailable_message, read_selection, selection_error)
+from tools.tool_backend_helpers import fal_key_is_configured, read_selection, selection_error
 
 logger = logging.getLogger(__name__)
 
 _debug = DebugSession("image_tools", env_var="IMAGE_TOOLS_DEBUG")
-_managed_fal_client = None
-_managed_fal_client_config = None
-_managed_fal_client_lock = threading.Lock()
-
-
-def _resolve_managed_fal_gateway():
-    """Managed gateway config for the stored `arkos tools` selection, or ``None`` for direct FAL.
-
-    ``"portal"`` (or legacy ``use_gateway: true``) → managed ONLY (unreachable = selection-naming
-    error, never a silent FAL_KEY fallback). Other stored provider → direct ONLY (missing FAL_KEY
-    = error naming the selection). Never configured → autodetect: direct if FAL_KEY, else managed.
-    """
-    selected = read_selection("image_gen")
-    if selected == PORTAL_MANAGED_PROVIDER:
-        gateway = resolve_managed_tool_gateway("fal-queue")
-        if gateway is None:
-            raise ValueError(selection_error(
-                "image_gen", PORTAL_MANAGED_PROVIDER,
-                "the Portal Tool Gateway is not available (not entitled or unreachable)"))
-        return gateway
-    if selected is not None:
-        if fal_key_is_configured():
-            return None
-        raise ValueError(selection_error("image_gen", selected, "FAL_KEY is not set"))
-    return None if fal_key_is_configured() else resolve_managed_tool_gateway("fal-queue")
-
-
-def _get_managed_fal_client(managed_gateway):
-    """Reuse the managed FAL client so its internal httpx.Client is not leaked per call."""
-    global _managed_fal_client, _managed_fal_client_config
-    client_config = (managed_gateway.gateway_origin.rstrip("/"), managed_gateway.portal_user_token)
-    with _managed_fal_client_lock:
-        if _managed_fal_client is None or _managed_fal_client_config != client_config:
-            _managed_fal_client = _ManagedFalSyncClient(
-                _load_fal_client(), key=managed_gateway.portal_user_token,
-                queue_run_origin=managed_gateway.gateway_origin)
-            _managed_fal_client_config = client_config
-        return _managed_fal_client
 
 
 class ImageGenerationInterrupted(Exception):
@@ -112,29 +71,10 @@ def _wait_fal_result(handler, *, poll_seconds: float = 0.5):
 
 
 def _submit_fal_request(model: str, arguments: Dict[str, Any]):
-    """Submit a FAL request using direct credentials or the managed queue gateway."""
-    _load_fal_client()
-    request_headers = {"x-idempotency-key": str(uuid.uuid4())}
-    managed_gateway = _resolve_managed_fal_gateway()
-    if managed_gateway is None:
-        return fal_client.submit(model, arguments=arguments, headers=request_headers)
-    try:
-        return _get_managed_fal_client(managed_gateway).submit(
-            model, arguments=arguments, headers=request_headers)
-    except Exception as exc:
-        status = _extract_http_status(exc)
-        if status is not None and 400 <= status < 500:
-            gateway_message = ""
-            if status in {401, 402, 403}:
-                gateway_message = "\n\n" + portal_tool_gateway_unavailable_message(
-                    "managed FAL image generation", force_fresh=True)
-            raise ValueError(
-                f"Portal Subscription gateway rejected model '{model}' (HTTP {status}). This model "
-                f"may not yet be enabled on the Arkos Portal's FAL proxy. Either:\n"
-                f"  • Set FAL_KEY in your environment to use FAL.ai directly, or\n"
-                f"  • Pick a different model via `arkos tools` → Image Generation."
-                f"{gateway_message}") from exc
-        raise
+    """Submit directly to FAL using the configured vendor credentials."""
+    if not fal_key_is_configured():
+        raise ValueError("FAL_KEY is not set")
+    return _load_fal_client().submit(model, arguments=arguments, headers={"x-idempotency-key": str(uuid.uuid4())})
 
 
 def _read_image_gen_key(key: str) -> Optional[str]:
@@ -169,9 +109,9 @@ def _read_configured_image_provider():
 
 
 def _plugin_provider_name() -> Optional[str]:
-    """Configured provider that must go through the plugin registry; None for unset/fal/portal."""
+    """Configured provider that must go through the plugin registry; None for unset/fal."""
     configured = _read_configured_image_provider()
-    if not configured or configured in ("fal", PORTAL_MANAGED_PROVIDER):
+    if not configured or configured in ('fal',):
         return None
     return configured
 
@@ -357,7 +297,7 @@ def _prepare_fal_request(model_id, meta, prompt, aspect_ratio, seed, overrides, 
     """Validate inputs and return ``(endpoint, arguments)``; raises ValueError with the user-facing message."""
     if not isinstance(prompt, str) or not prompt.strip():
         raise ValueError("Prompt is required and must be a non-empty string")
-    if not (fal_key_is_configured() or _resolve_managed_fal_gateway()):
+    if not (fal_key_is_configured()):
         raise ValueError(_build_no_backend_setup_message())
     edit_endpoint, display = meta.get("edit_endpoint"), meta.get("display", model_id)
     if source_images and not edit_endpoint:
@@ -452,37 +392,14 @@ def image_generate_tool(
 
 
 def check_fal_api_key() -> bool:
-    """True if the selected FAL backend (never configured: any FAL backend) is available.
-
-    A stored-but-broken selection reports False here (registry gating); the naming error
-    surfaces at call time from ``_resolve_managed_fal_gateway``.
-    """
-    try:
-        gateway = _resolve_managed_fal_gateway()
-    except ValueError:
-        return False
-    return bool(gateway) or fal_key_is_configured()
+    """Whether direct FAL credentials are configured."""
+    return fal_key_is_configured()
 
 
 def _build_no_backend_setup_message() -> str:
-    """Actionable no-backend error: FAL_KEY signup, managed-gateway status, plugin alternative."""
-    managed = managed_portal_tools_enabled()
-    lines = ["Image generation is unavailable in this environment.", "", "Missing requirements:"]
-    if managed:
-        lines.append("  - FAL_KEY is not set and the managed FAL gateway is unreachable")
-    else:
-        lines.append("  - FAL_KEY environment variable is not set")
-        if gateway_message := portal_tool_gateway_unavailable_message("managed FAL image generation"):
-            lines.append(f"  - {gateway_message}")
-    lines += ["", "To enable image generation, do one of:",
-              "  1. Get a free API key at https://fal.ai and set FAL_KEY=<your-key> "
-              "(then restart the session)"]
-    if managed:
-        lines.append("  2. Sign in to a Portal account that has the managed FAL gateway enabled "
-                     "(`arkos setup`)")
-    lines.append("  3. Configure a different image_gen provider via `arkos tools` → Image Generation "
-                 "(run `arkos plugins list` to see installed backends)")
-    return "\n".join(lines)
+    """Explain how to enable a direct image-generation backend."""
+    return ("Image generation requires FAL_KEY. Get a key at https://fal.ai, "
+            "or configure another image_gen provider with its own credentials.")
 
 
 def _get_plugin_provider(name: str, *, force: bool = False):
@@ -577,7 +494,7 @@ def _dispatch_to_plugin_provider(
     prompt: str, aspect_ratio: str, image_url: Optional[str] = None,
     reference_image_urls: Optional[list] = None, upscale: Optional[bool] = None):
     """JSON result from the selected plugin provider, or ``None`` to fall through to in-tree FAL
-    (provider unset / ``"fal"`` / ``"portal"``). Providers without ``upscale`` ignore it via ``**kwargs``."""
+    (provider unset / ``"fal"``). Providers without ``upscale`` ignore it via ``**kwargs``."""
     configured = _plugin_provider_name()
     if configured is None:
         return None
@@ -626,40 +543,6 @@ def _normalize_krea_model(model_id: Optional[str]) -> Optional[str]:
     return candidate if candidate in _KREA_NATIVE_MODELS else None
 
 
-def _maybe_route_managed_krea(
-    prompt: str, aspect_ratio: str, image_url: Optional[str] = None,
-    reference_image_urls: Optional[list] = None, upscale: Optional[bool] = None) -> Optional[str]:
-    """JSON result from the managed Krea gateway, or ``None`` to fall through.
-
-    Fires only for a native ``krea-2-*`` model with no ``image_gen.provider`` other than
-    ``"portal"`` stored (a picker choice dispatches normally) and a resolvable Krea gateway.
-    """
-    configured_provider = _read_configured_image_provider()
-    if configured_provider is not None and configured_provider != PORTAL_MANAGED_PROVIDER:
-        return None
-    normalized = _normalize_krea_model(_read_configured_image_model())
-    if normalized is None:
-        return None
-    try:
-        from plugins.image_gen.krea import _resolve_managed_krea_gateway
-        if _resolve_managed_krea_gateway() is None:
-            return None
-        provider = _get_plugin_provider("krea")
-    except Exception as exc:  # noqa: BLE001
-        logger.debug("Managed Krea routing unavailable: %s", exc)
-        return None
-    if provider is None:
-        return None
-    kwargs: Dict[str, Any] = {"prompt": prompt, "aspect_ratio": aspect_ratio, "model": normalized}
-    try:
-        _add_provider_kwargs(kwargs, image_url, reference_image_urls, upscale)
-        result = provider.generate(**kwargs)
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Managed Krea routing failed: %s", exc)
-        return _provider_error(f"Managed Krea generation error: {exc}", "provider_exception")
-    return _provider_result(result, "Krea provider returned a non-dict result")
-
-
 def _confine_source_images(image_url, reference_image_urls, task_id, *, permitted: tuple = ("image",)):
     """Resolve path-like sources to ``data:`` URLs under a non-local terminal backend.
 
@@ -699,7 +582,7 @@ def _handle_image_generate(args, **kw):
     sources = dict(image_url=image_url, reference_image_urls=reference_image_urls,
                    upscale=upscale if isinstance(upscale, bool) else None)
     raw = None
-    for route in (_dispatch_to_plugin_provider, _maybe_route_managed_krea, image_generate_tool):
+    for route in (_dispatch_to_plugin_provider, image_generate_tool):
         raw = route(prompt, aspect_ratio, **sources)
         if raw is not None:
             break
@@ -808,7 +691,6 @@ registry.register(
     is_async=False,
     emoji="🎨", dynamic_schema_overrides=_build_dynamic_image_schema,
 )
-
 
 
 def is_krea_model(model_id: Optional[str]) -> bool:

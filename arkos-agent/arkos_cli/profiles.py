@@ -1004,27 +1004,6 @@ def _rmtree_with_retry(profile_dir: Path, onexc_handler) -> None:
         raise last_exc
 
 
-def _print_delete_summary(canon: str, profile_dir: Path, gw_running: bool, wrapper_path: Optional[Path]) -> None:
-    """Show what ``delete_profile`` is about to remove."""
-    model, provider = _read_config_model(profile_dir)
-    skill_count = _count_skills(profile_dir)
-    dist_name, dist_version, dist_source = _read_distribution_meta(profile_dir)
-    print(f"\nProfile: {canon}")
-    print(f"Path:    {profile_dir}")
-    if model:
-        print(f"Model:   {model}" + (f" ({provider})" if provider else ""))
-    if skill_count:
-        print(f"Skills:  {skill_count}")
-    if dist_name:
-        print(f"Distribution: {dist_name}@{dist_version or '?'}")
-        if dist_source:
-            print(f"Installed from: {dist_source}")
-    print("\nThis will permanently delete:")
-    print("  • All config, API keys, memories, sessions, skills, cron jobs")
-    if wrapper_path is not None:
-        print(f"  • Command alias ({wrapper_path})")
-    if gw_running:
-        print("  ⚠ Gateway is running — it will be stopped.")
 
 
 def delete_profile(name: str, yes: bool = False) -> Path:
@@ -1037,17 +1016,8 @@ def delete_profile(name: str, yes: bool = False) -> Path:
     gw_running = _check_gateway_running(profile_dir)
     wrapper_path = _get_wrapper_dir() / canon
     has_wrapper = wrapper_path.exists()
-    _print_delete_summary(canon, profile_dir, gw_running, wrapper_path if has_wrapper else None)
     if not yes:
-        print()
-        try:
-            confirm = input(f"Type '{canon}' to confirm: ").strip()
-        except (KeyboardInterrupt, EOFError):
-            confirm = None
-            print()
-        if confirm != canon:
-            print("Cancelled.")
-            return profile_dir
+        raise ValueError("Deleting a profile requires explicit host confirmation (yes=True).")
 
     _cleanup_gateway_service(canon, profile_dir)
     _maybe_unregister_gateway_service(canon)

@@ -123,53 +123,6 @@ def _is_finite_num(v: Any) -> TypeGuard[float]:
     return _is_num(v) and not isinstance(v, bool) and math.isfinite(v)
 
 
-def _portal_snapshot(windows: list, details: list, tail: list, *, source: str, plan: Optional[str] = None) -> Optional[AccountUsageSnapshot]:
-    """Portal snapshot — removed in engine build (portal deleted). Always None."""
-    return None
-
-
-def build_portal_credits_snapshot(account_info) -> Optional[AccountUsageSnapshot]:
-    """PortalAccountInfo → /usage snapshot — removed in engine build. Always None."""
-    return None
-
-
-def _portal_logged_in() -> bool:
-    """Portal auth-state check — removed in engine build (portal deleted). Always False."""
-    return False
-
-
-def _fetch_portal_account(timeout: float):
-    """Portal account fetch — removed in engine build. Always None."""
-    return None
-
-
-def portal_credits_lines(*, markdown: bool = False, timeout: float = 10.0) -> list[str]:
-    """Rendered Portal-credits /usage lines — removed in engine build. Always []."""
-    return []
-
-
-def _snapshot_from_credits_state(state) -> Optional[AccountUsageSnapshot]:
-    """Header-shaped CreditsState → /usage snapshot — removed in engine build. Always None."""
-    return None
-
-
-@dataclass(frozen=True)
-class CreditsView:
-    """Surface-agnostic ``/topup`` balance view: one portal fetch, consumed identically by every money surface.
-    Fail-open: not logged in / portal unreachable → ``logged_in`` False, ``topup_url`` None."""
-
-    logged_in: bool
-    balance_lines: tuple[str, ...] = ()
-    identity_line: Optional[str] = None
-    topup_url: Optional[str] = None
-    depleted: bool = False
-
-
-def build_credits_view(*, markdown: bool = False, timeout: float = 10.0) -> CreditsView:
-    """/topup view — removed in engine build (portal deleted). Always logged-out."""
-    return CreditsView(logged_in=False)
-
-
 def _codex_backend_urls(base_url: str) -> tuple[str, str, str]:
     """Codex backend endpoints (usage, reset-credits list, consume). Mirrors the Codex CLI's PathStyle
     split: ``/backend-api`` bases use the ChatGPT ``/wham/`` paths; everything else ``/api/codex/``."""

@@ -604,30 +604,16 @@ def _login_openai_codex(args, pconfig: ProviderConfig, *, force_new_login: bool 
     """OpenAI Codex login via device code flow. Tokens stored in ~/.arkos/auth.json."""
     from arkos_cli.auth import (
         _codex_access_token_is_expiring, _codex_device_code_login, _import_codex_cli_tokens,
-        _offer_existing_oauth_credentials, _print_login_success, _prompt_yes_no, _save_codex_tokens,
+        reuse_existing_oauth_credentials, _print_login_success, _save_codex_tokens,
         _update_config_for_provider, resolve_codex_runtime_credentials)
     del args, pconfig
     if not force_new_login:
-        if _offer_existing_oauth_credentials(
+        if reuse_existing_oauth_credentials(
             "openai-codex", resolve=resolve_codex_runtime_credentials,
             is_expiring=_codex_access_token_is_expiring, display_name="Codex",
             default_base_url=DEFAULT_CODEX_BASE_URL,
             expired_notice="Existing Codex credentials are expired. Starting fresh login..."):
             return
-        cli_tokens = _import_codex_cli_tokens()
-        if cli_tokens:
-            print("Found existing Codex CLI credentials at ~/.codex/auth.json")
-            print("Arkos will create its own session to avoid conflicts with Codex CLI / VS Code.")
-            if _prompt_yes_no(
-                "Import these credentials? (a separate login is recommended) [y/N]: ", default="n"):
-                _save_codex_tokens(cli_tokens)
-                config_path = _update_config_for_provider("openai-codex", _codex_base_url())
-                print()
-                print("Credentials imported. Note: if Codex CLI refreshes its token,")
-                print("Arkos will keep working independently with its own session.")
-                print(f"  Config updated: {config_path} (model.provider=openai-codex)")
-                return
-
     print()
     print("Signing in to OpenAI Codex...")
     print("(Arkos creates its own session — won't affect Codex CLI or VS Code)")

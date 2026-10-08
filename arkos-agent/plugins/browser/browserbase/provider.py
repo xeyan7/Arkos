@@ -1,8 +1,4 @@
-"""Browserbase cloud browser provider: direct ``BROWSERBASE_API_KEY`` + ``BROWSERBASE_PROJECT_ID``
-only (the Portal subscription routes through Browser Use). Config ``browser.cloud_provider:
-"browserbase"``; knobs ``BROWSERBASE_BASE_URL``, ``BROWSERBASE_PROXIES`` (true),
-``BROWSERBASE_ADVANCED_STEALTH`` (false), ``BROWSERBASE_KEEP_ALIVE`` (true),
-``BROWSERBASE_SESSION_TIMEOUT`` (seconds, max 21600)."""
+"""Browserbase cloud browser backend using direct vendor credentials."""
 
 from __future__ import annotations
 

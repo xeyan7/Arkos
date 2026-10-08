@@ -508,7 +508,7 @@ def _tool_result_observer_fields(tool_name: str, result: Any) -> tuple[str, Opti
     except Exception:
         pass
     try:
-        from agent.display import _detect_tool_failure
+        from agent.tool_feedback import _detect_tool_failure
         failed, suffix = _detect_tool_failure(tool_name, result)
         if failed:
             return "error", "tool_error", suffix.strip().strip("[]") or None

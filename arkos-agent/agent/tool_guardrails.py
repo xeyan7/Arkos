@@ -192,7 +192,7 @@ def canonical_tool_args(args: Mapping[str, Any]) -> str:
 
 def classify_tool_failure(tool_name: str, result: str | None) -> tuple[bool, str]:
     """Fallback classifier used only when callers don't pass ``failed``; mirrors
-    ``agent.display._detect_tool_failure`` so the guardrail never disagrees with the CLI's ``[error]`` tag."""
+    ``agent.tool_feedback._detect_tool_failure`` so the guardrail never disagrees with the CLI's ``[error]`` tag."""
     if result is None or file_mutation_result_landed(tool_name, result):
         return False, ""
 

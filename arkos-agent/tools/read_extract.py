@@ -141,8 +141,7 @@ def _anydoc_missing_error(path: str) -> str:
 
 def _hosted_ocr_config() -> tuple:
     """(enabled, api_key, api_url); never raises, no network. Maintainer decision: the ONLY route
-    is a direct ``FIRECRAWL_API_KEY`` (anydoc defaults api_url); the Portal gateway's Parse proxy
-    live-probed broken, so it is NOT used. ``file_tools.hosted_ocr: false`` disables even with a
+    uses a direct ``FIRECRAWL_API_KEY`` (anydoc defaults api_url). ``file_tools.hosted_ocr: false`` disables even with a
     key."""
     api_key = os.environ.get("FIRECRAWL_API_KEY") or None
     enabled = api_key is not None
@@ -528,7 +527,6 @@ def _cell_value(cell: ET.Element, shared: list[str], s: str) -> str:
 
 _STDLIB_EXTRACTORS: dict[str, Callable[[str], str]] = {
     ".ipynb": _extract_notebook, ".docx": _extract_docx, ".xlsx": _extract_xlsx}
-
 
 
 MAX_XLSX_BYTES = 50 * 1024 * 1024

@@ -389,8 +389,8 @@ def _gateway_liveness_notice(plural: bool = False) -> dict:
     for multi-job results (the ``list`` action).
     """
     try:
-        from arkos_cli.cron import _builtin_gateway_liveness
-        _gw = _builtin_gateway_liveness()
+        from cron.runtime_status import builtin_scheduler_liveness
+        _gw = builtin_scheduler_liveness()
     except Exception:
         return {"gateway_running": None}
     if _gw is False:

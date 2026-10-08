@@ -137,7 +137,7 @@ _XAI_MODELS = _xai_curated_models()
 
 _PROVIDER_MODELS: dict[str, list[str]] = {
     "moa": ["default"],
-    "portal": [mid for mid, _ in OPENROUTER_MODELS if mid not in _OPENROUTER_ONLY and not mid.endswith(":free")],
+
     "openai": list(_OPENAI_CHAT_MODELS),
     "openai-api": [
         "gpt-5.6-sol", "gpt-5.6-sol-pro", "gpt-5.6-terra", "gpt-5.6-terra-pro", "gpt-5.6-luna",
@@ -259,53 +259,13 @@ _PROVIDER_MODELS: dict[str, list[str]] = {
 }
 
 
-
 class ProviderEntry(NamedTuple):
     slug: str
     label: str
     tui_desc: str
 
 
-CANONICAL_PROVIDERS: list[ProviderEntry] = [ProviderEntry(*row) for row in (
-    ("portal", "Arkos Portal", "Arkos Portal (Everything your agent needs, 300+ models with bundled tool use)"),
-    ("fireworks", "Fireworks AI", "Fireworks AI (OpenAI-compatible direct model API)"),
-    ("openrouter", "OpenRouter", "OpenRouter (Pay-per-use API aggregator)"),
-    ("moa", "Mixture of Agents", "Mixture of Agents (named presets; aggregator acts after reference models)"),
-    ("novita", "NovitaAI", "NovitaAI (Cloud: Model API, Agent Sandbox, GPU Cloud)"),
-    ("lmstudio", "LM Studio", "LM Studio (Local desktop app with built-in model server)"),
-    ("anthropic", "Anthropic", "Anthropic (Claude models via API key or Claude Code)"),
-    ("openai-codex", "ChatGPT or Codex Subscription", "ChatGPT or Codex Subscription (Sign in with your ChatGPT account, uses Codex models)"),
-    ("openai-api", "OpenAI API", "OpenAI API (api.openai.com, API key)"),
-    ("alibaba", "Qwen Cloud", "Qwen Cloud / DashScope (Qwen + multi-provider)"),
-    ("xai-oauth", "xAI Grok OAuth (SuperGrok / Premium+)", "xAI Grok OAuth (SuperGrok / Premium+ subscription)"),
-    ("xiaomi", "Xiaomi MiMo", "Xiaomi MiMo (MiMo-V2.5 and V2 models: pro, omni, flash)"),
-    ("tencent-tokenhub", "Tencent TokenHub", "Tencent TokenHub (Hy4 preview via tokenhub.tencentmaas.com)"),
-    ("tencent-tokenplan", "Tencent TokenPlan", "Tencent TokenPlan (Hy4 preview via api.lkeap.cloud.tencent.com, Anthropic Messages)"),
-    ("nvidia", "NVIDIA NIM", "NVIDIA NIM (Nemotron models via build.nvidia.com or local NIM)"),
-    ("copilot", "GitHub Copilot", "GitHub Copilot (Uses GITHUB_TOKEN or gh auth token)"),
-    ("copilot-acp", "GitHub Copilot ACP", "GitHub Copilot ACP (Spawns copilot --acp --stdio)"),
-    ("huggingface", "Hugging Face", "Hugging Face Inference Providers"),
-    ("gemini", "Google AI Studio", "Google AI Studio (Native Gemini API)"),
-    ("vertex", "Google Vertex AI", "Google Vertex AI (Gemini via GCP; OAuth2 service account or ADC, GCP billing/quotas)"),
-    ("deepseek", "DeepSeek", "DeepSeek (V3, R1, coder, direct API)"), ("xai", "xAI", "xAI Grok (Direct API)"),
-    ("zai", "Z.AI / GLM", "Z.AI / GLM (Zhipu direct API)"),
-    ("kimi-coding", "Kimi / Kimi Coding Plan", "Kimi Coding Plan (api.kimi.com & Moonshot API)"),
-    ("kimi-coding-cn", "Kimi / Moonshot (China)", "Kimi / Moonshot China (Domestic direct API)"),
-    ("stepfun", "StepFun Step Plan", "StepFun Step Plan (Agent / coding models via Step Plan API)"),
-    ("minimax", "MiniMax", "MiniMax (Global direct API)"),
-    ("minimax-oauth", "MiniMax (OAuth)", "MiniMax via OAuth browser login (Coding Plan, minimax.io)"),
-    ("minimax-cn", "MiniMax (China)", "MiniMax China (Domestic direct API)"),
-    ("ollama-cloud", "Ollama Cloud", "Ollama Cloud (Cloud-hosted open models, ollama.com)"),
-    ("arcee", "Arcee AI", "Arcee AI (Trinity models, direct API)"),
-    ("gmi", "GMI Cloud", "GMI Cloud (Multi-model direct API)"),
-    ("kilocode", "Kilo Code", "Kilo Code (Kilo Gateway API)"),
-    ("opencode-zen", "OpenCode Zen", "OpenCode Zen (Curated models, pay-as-you-go)"),
-    ("opencode-go", "OpenCode Go", "OpenCode Go (Open models subscription)"),
-    ("bedrock", "AWS Bedrock", "AWS Bedrock (Claude, Nova, Llama, DeepSeek; IAM or API key)"),
-    ("azure-foundry", "Azure Foundry", "Azure Foundry (OpenAI-style or Anthropic-style endpoint, your Azure AI deployment)"),
-    ("ai-gateway", "Vercel AI Gateway", "Vercel AI Gateway (Multi-model aggregator)"),
-    ("qwen-oauth", "Qwen OAuth (Portal)", "Qwen OAuth (Reuses local Qwen CLI login)"),
-)]
+CANONICAL_PROVIDERS: list[ProviderEntry] = [ProviderEntry(*row) for row in (('fireworks', 'Fireworks AI', 'Fireworks AI (OpenAI-compatible direct model API)'), ('openrouter', 'OpenRouter', 'OpenRouter (Pay-per-use API aggregator)'), ('moa', 'Mixture of Agents', 'Mixture of Agents (named presets; aggregator acts after reference models)'), ('novita', 'NovitaAI', 'NovitaAI (Cloud: Model API, Agent Sandbox, GPU Cloud)'), ('lmstudio', 'LM Studio', 'LM Studio (Local desktop app with built-in model server)'), ('anthropic', 'Anthropic', 'Anthropic (Claude models via API key or Claude Code)'), ('openai-codex', 'ChatGPT or Codex Subscription', 'ChatGPT or Codex Subscription (Sign in with your ChatGPT account, uses Codex models)'), ('openai-api', 'OpenAI API', 'OpenAI API (api.openai.com, API key)'), ('alibaba', 'Qwen Cloud', 'Qwen Cloud / DashScope (Qwen + multi-provider)'), ('xai-oauth', 'xAI Grok OAuth (SuperGrok / Premium+)', 'xAI Grok OAuth (SuperGrok / Premium+ subscription)'), ('xiaomi', 'Xiaomi MiMo', 'Xiaomi MiMo (MiMo-V2.5 and V2 models: pro, omni, flash)'), ('tencent-tokenhub', 'Tencent TokenHub', 'Tencent TokenHub (Hy4 preview via tokenhub.tencentmaas.com)'), ('tencent-tokenplan', 'Tencent TokenPlan', 'Tencent TokenPlan (Hy4 preview via api.lkeap.cloud.tencent.com, Anthropic Messages)'), ('nvidia', 'NVIDIA NIM', 'NVIDIA NIM (Nemotron models via build.nvidia.com or local NIM)'), ('copilot', 'GitHub Copilot', 'GitHub Copilot (Uses GITHUB_TOKEN or gh auth token)'), ('copilot-acp', 'GitHub Copilot ACP', 'GitHub Copilot ACP (Spawns copilot --acp --stdio)'), ('huggingface', 'Hugging Face', 'Hugging Face Inference Providers'), ('gemini', 'Google AI Studio', 'Google AI Studio (Native Gemini API)'), ('vertex', 'Google Vertex AI', 'Google Vertex AI (Gemini via GCP; OAuth2 service account or ADC, GCP billing/quotas)'), ('deepseek', 'DeepSeek', 'DeepSeek (V3, R1, coder, direct API)'), ('xai', 'xAI', 'xAI Grok (Direct API)'), ('zai', 'Z.AI / GLM', 'Z.AI / GLM (Zhipu direct API)'), ('kimi-coding', 'Kimi / Kimi Coding Plan', 'Kimi Coding Plan (api.kimi.com & Moonshot API)'), ('kimi-coding-cn', 'Kimi / Moonshot (China)', 'Kimi / Moonshot China (Domestic direct API)'), ('stepfun', 'StepFun Step Plan', 'StepFun Step Plan (Agent / coding models via Step Plan API)'), ('minimax', 'MiniMax', 'MiniMax (Global direct API)'), ('minimax-oauth', 'MiniMax (OAuth)', 'MiniMax via OAuth browser login (Coding Plan, minimax.io)'), ('minimax-cn', 'MiniMax (China)', 'MiniMax China (Domestic direct API)'), ('ollama-cloud', 'Ollama Cloud', 'Ollama Cloud (Cloud-hosted open models, ollama.com)'), ('arcee', 'Arcee AI', 'Arcee AI (Trinity models, direct API)'), ('gmi', 'GMI Cloud', 'GMI Cloud (Multi-model direct API)'), ('kilocode', 'Kilo Code', 'Kilo Code (Kilo Gateway API)'), ('opencode-zen', 'OpenCode Zen', 'OpenCode Zen (Curated models, pay-as-you-go)'), ('opencode-go', 'OpenCode Go', 'OpenCode Go (Open models subscription)'), ('bedrock', 'AWS Bedrock', 'AWS Bedrock (Claude, Nova, Llama, DeepSeek; IAM or API key)'), ('azure-foundry', 'Azure Foundry', 'Azure Foundry (OpenAI-style or Anthropic-style endpoint, your Azure AI deployment)'), ('ai-gateway', 'Vercel AI Gateway', 'Vercel AI Gateway (Multi-model aggregator)'), ('qwen-oauth', 'Qwen OAuth (Portal)', 'Qwen OAuth (Reuses local Qwen CLI login)'))]
 
 
 _canonical_slugs = {p.slug for p in CANONICAL_PROVIDERS}
@@ -423,7 +383,7 @@ _PROVIDER_ALIASES = dict((
 PREFERRED_SILENT_DEFAULT_MODEL = "z-ai/glm-5.2"
 
 
-_SILENT_DEFAULT_PROVIDERS: frozenset[str] = frozenset({"portal", "openrouter"})
+_SILENT_DEFAULT_PROVIDERS: frozenset[str] = frozenset({'openrouter'})
 
 
 _PROVIDER_RETIRED_ALIASES: dict[str, tuple[str, ...]] = {
@@ -431,7 +391,7 @@ _PROVIDER_RETIRED_ALIASES: dict[str, tuple[str, ...]] = {
 }
 
 
-_AGGREGATOR_PROVIDERS = frozenset({"portal", "openrouter", "ai-gateway", "copilot", "kilocode"})
+_AGGREGATOR_PROVIDERS = frozenset({'openrouter', 'ai-gateway', 'copilot', 'kilocode'})
 
 
 _OPENROUTER_VARIANT_SUFFIXES = frozenset({"nitro", "floor", "exacto", "online"})

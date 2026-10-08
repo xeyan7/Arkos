@@ -45,7 +45,7 @@ class ReasoningParamsMixin:
 
     def _supports_reasoning_extra_body(self) -> bool:
         """True when reasoning extra_body is safe to send: OpenRouter forwards unknown extra_body upstream and
-        some routes 400 on ``reasoning``, so gate to known reasoning-capable families and direct Arkos Portal."""
+        some routes 400 on ``reasoning``, so gate to known reasoning-capable families ."""
         url = self._base_url_lower
         if base_url_host_matches(url, "ai-gateway.vercel.sh"):
             return True

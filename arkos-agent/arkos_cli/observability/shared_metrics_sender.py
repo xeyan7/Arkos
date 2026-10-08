@@ -1,4 +1,4 @@
-"""Transmit exported shared-metrics packages to the Portal telemetry service.
+"""Transmit exported shared-metrics packages to the configured telemetry endpoint.
 
 Sender side of the ingest contract (telemetry repo ``CONTRACT.md``): ``202`` durably stored,
 mark sent; ``400`` permanently malformed, never retry; ``429`` keep, retry after

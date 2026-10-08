@@ -41,8 +41,6 @@ def _entry_url(entry: Dict[str, Any]) -> str:
     return entry.get("api") or entry.get("url") or entry.get("base_url") or ""
 
 
-
-
 def _filter_capabilities(value: Any) -> Dict[str, bool]:
     """Return the string-keyed boolean capabilities accepted at runtime."""
     if not isinstance(value, dict):
@@ -59,7 +57,6 @@ def _lift_model_capabilities(entry: Dict[str, Any], model: Optional[str], result
         capabilities.update(_filter_capabilities(model_config))
     if capabilities:
         result["capabilities"] = capabilities
-
 
 
 def _lift_extra_headers(entry: Dict[str, Any], result: Dict[str, Any]) -> None:
@@ -86,14 +83,12 @@ def _lift_common_custom_fields(entry: Dict[str, Any], result: Dict[str, Any], *,
     _lift_model_capabilities(entry, None, result)
 
 
-
-
 def _shadowed_by_builtin(requested_norm: str) -> bool:
     """Raw names map to custom providers only when they are not canonical built-ins. Explicit
     ``custom:<name>`` keys always target the saved entry, and bare ``custom`` is exempt: a user may
     literally name a ``providers:`` entry "custom" (returning None before the config scan made such
     cron jobs fail with ``auth_unavailable``). Defer to the built-in only when the raw name IS the
-    canonical provider (``portal``); an entry matching merely an alias (``kimi`` → ``kimi-coding``)
+    canonical provider (``openrouter``); an entry matching merely an alias (``kimi`` → ``kimi-coding``)
     is the user's target."""
     if requested_norm == "custom" or requested_norm.startswith("custom:"):
         return False
@@ -177,8 +172,6 @@ def has_named_custom_provider(requested_provider: str) -> bool:
         return _rp()._get_named_custom_provider(requested_provider) is not None
     except Exception:
         return False
-
-
 
 
 def _find_custom_identity(matches: Callable[[Dict[str, Any]], bool]) -> Optional[str]:
@@ -297,8 +290,6 @@ def is_routable_provider(provider: Optional[str]) -> bool:
         return resolve_provider_full(name, config.get("providers"), rp.get_compatible_custom_providers(config)) is not None
     except Exception:
         return False
-
-
 
 
 def _try_resolve_from_custom_pool(

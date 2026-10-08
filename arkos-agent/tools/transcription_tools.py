@@ -2,7 +2,7 @@
 """Speech-to-text transcription used by the gateway for voice messages.
 
 Built-in providers: local (faster-whisper, default/free), local_command, groq, openai
-(also serves the managed ``portal`` selection), mistral, xai, elevenlabs, deepinfra; plus
+mistral, xai, elevenlabs, deepinfra; plus
 user-declared command providers and plugin providers. ``transcribe_audio(path)`` returns
 ``{"success", "transcript", "error"?, "provider"?}``. This module owns provider resolution,
 the dispatcher and the cached local model + idle-unload state; backends live in
@@ -232,8 +232,6 @@ def _get_provider(stt_config: dict) -> str:
         return "none"
     explicit = "provider" in stt_config
     provider = stt_config.get("provider", DEFAULT_PROVIDER)
-    if isinstance(provider, str) and provider.strip().lower() == "portal":
-        provider = "openai"
     if explicit and provider == "local":
         try:
             from tools.tool_backend_helpers import read_selection
@@ -527,9 +525,8 @@ _PLUGIN_COMPAT_LAZY = {
     'OPENAI_MODELS': ('tools.transcription_common', 'OPENAI_MODELS'),
     'SUPPORTED_FORMATS': ('tools.transcription_common', 'SUPPORTED_FORMATS'),
     'XAI_STT_BASE_URL': ('tools.transcription_common', 'XAI_STT_BASE_URL'),
-    'managed_portal_tools_enabled': ('tools.tool_backend_helpers', 'managed_portal_tools_enabled'),
-    'portal_tool_gateway_unavailable_message': ('tools.tool_backend_helpers', 'portal_tool_gateway_unavailable_message'),
-    'resolve_managed_tool_gateway': ('tools.managed_tool_gateway', 'resolve_managed_tool_gateway'),
+
+
     'resolve_openai_audio_api_key': ('tools.tool_backend_helpers', 'resolve_openai_audio_api_key'),
     'windows_hide_flags': ('arkos_cli._subprocess_compat', 'windows_hide_flags'),
 }

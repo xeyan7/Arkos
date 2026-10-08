@@ -14,12 +14,7 @@ from typing import Any, Dict, List, Optional
 from utils import normalize_proxy_env_vars
 
 from agent.anthropic_credentials import _is_oauth_token
-from agent.anthropic_endpoints import (
-    _base_url_needs_context_1m_beta, _is_azure_anthropic_endpoint, _is_kimi_coding_endpoint,
-    _is_minimax_anthropic_endpoint, _is_portal_endpoint, _is_opencode_endpoint,
-    _is_third_party_anthropic_endpoint, _model_name_is_kimi_family, _normalize_base_url_text,
-    _requires_bearer_auth,
-)
+from agent.anthropic_endpoints import _base_url_needs_context_1m_beta, _is_azure_anthropic_endpoint, _is_kimi_coding_endpoint, _is_minimax_anthropic_endpoint, _is_opencode_endpoint, _is_third_party_anthropic_endpoint, _model_name_is_kimi_family, _normalize_base_url_text, _requires_bearer_auth
 from agent.anthropic_message_convert import (
     convert_messages_to_anthropic, convert_tools_to_anthropic, normalize_model_name,
 )
@@ -300,7 +295,7 @@ def _build_anthropic_client_with_bearer_hook(
 def _new_sdk_client(sdk, kwargs: Dict[str, Any], headers: Dict[str, str]):
     """``sdk.Anthropic(**kwargs)`` with ``headers`` attached. Bearer-only construction leaves
     ``api_key`` unset, so the SDK fills it from ANTHROPIC_API_KEY (loaded from ~/.arkos/.env) and
-    sends dual auth — X-Api-Key *and* Authorization: Bearer — on every Portal/MiniMax/OAuth/Entra
+    sends dual auth — X-Api-Key *and* Authorization: Bearer — on every MiniMax/OAuth/Entra
     request; clear it whenever we intentionally authenticated via auth_token."""
     if headers:
         kwargs["default_headers"] = headers
@@ -481,8 +476,7 @@ def build_anthropic_kwargs(
     ``fast_mode`` adds ``extra_body.speed="fast"`` plus the fast-mode beta on native Anthropic only."""
     system, anthropic_messages = convert_messages_to_anthropic(messages, base_url=base_url, model=model)
     anthropic_tools = convert_tools_to_anthropic(tools) if tools else []
-    if not _is_portal_endpoint(base_url):
-        model = normalize_model_name(model, preserve_dots=preserve_dots)
+    model = normalize_model_name(model, preserve_dots=preserve_dots)
     effective_max_tokens = _resolve_anthropic_messages_max_tokens(max_tokens, model, context_length=context_length)
     if context_length and effective_max_tokens > context_length:
         effective_max_tokens = max(context_length - 1, 1)
@@ -575,8 +569,7 @@ def create_anthropic_message(
     turn path and fall back to ``create()`` only for providers that explicitly don't support
     streaming (restricted Bedrock roles). Both callbacks are best-effort and fire only on the
     streaming path: ``on_stream_event(event)`` lets liveness watchdogs see forward progress;
-    ``on_response(httpx_response)`` exposes headers the parsed Message drops (Arkos Portal's
-    ``x-portal-credits-*`` balance family)."""
+    ``on_response(httpx_response)`` exposes headers the parsed Message drops (provider rate-limit headers)."""
     sanitize_anthropic_kwargs(api_kwargs, log_prefix=log_prefix)
     messages_api = getattr(client, "messages", None)
     stream_fn = getattr(messages_api, "stream", None)

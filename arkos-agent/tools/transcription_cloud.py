@@ -2,7 +2,7 @@
 
 OpenAI-SDK-shaped backends (groq, openai, deepinfra), Mistral Voxtral, REST multipart
 backends (xAI, ElevenLabs), and OpenAI audio credential resolution (config > keyless
-local server > env > managed Portal gateway). Facade-owned state and helpers
+local server > env). Facade-owned state and helpers
 (``_HAS_OPENAI``, ``_resolve_provider_key``, ``_resolve_stt_language``, ``_load_stt_config``,
 ``get_env_value``) are read lazily from ``tools.transcription_tools``.
 """
@@ -359,44 +359,13 @@ def _direct_openai_credentials(cfg_api_key: str, cfg_base_url: str) -> Optional[
 
 
 def _resolve_openai_audio_client_config() -> tuple[str, str]:
-    """``(api_key, base_url)`` for the OpenAI STT client, strict on the stored ``stt`` selection:
-    ``"portal"`` -> managed gateway ONLY (a direct OPENAI_API_KEY must NOT override it); any other
-    stored provider -> direct credentials ONLY (no silent managed fallback); never-configured ->
-    legacy ladder: direct credentials, then the managed gateway. Failures raise ValueError."""
+    """Resolve direct OpenAI transcription credentials and endpoint."""
     from tools.transcription_tools import _load_stt_config
-    from tools.managed_tool_gateway import resolve_managed_tool_gateway
-    from tools.tool_backend_helpers import (
-        PORTAL_MANAGED_PROVIDER, managed_portal_tools_enabled, portal_tool_gateway_unavailable_message,
-        read_selection, selection_error)
-    openai_cfg = _load_stt_config().get("openai") or {}
-    selected = read_selection("stt")
-
-    def _managed() -> Optional[tuple[str, str]]:
-        gateway = resolve_managed_tool_gateway("openai-audio")
-        if gateway is None:
-            return None
-        return gateway.portal_user_token, urljoin(f"{gateway.gateway_origin.rstrip('/')}/", "v1")
-
-    if selected == PORTAL_MANAGED_PROVIDER:
-        managed = _managed()
-        if managed is None:
-            raise ValueError(selection_error("stt", PORTAL_MANAGED_PROVIDER,
-                                             "the Portal Tool Gateway is not available (not entitled or unreachable)"))
-        return managed
-    direct = _direct_openai_credentials(openai_cfg.get("api_key", ""), openai_cfg.get("base_url", ""))
-    if direct is not None:
-        return direct
-    if selected is not None:
-        raise ValueError(selection_error(
-            "stt", selected,
-            "neither stt.openai.api_key in config nor VOICE_TOOLS_OPENAI_KEY/OPENAI_API_KEY is set"))
-    managed = _managed()
-    if managed is None:
-        message = "Neither stt.openai.api_key in config nor VOICE_TOOLS_OPENAI_KEY/OPENAI_API_KEY is set"
-        if managed_portal_tools_enabled():
-            message += ". " + portal_tool_gateway_unavailable_message("managed OpenAI audio for transcription")
-        raise ValueError(message)
-    return managed
+    cfg = _load_stt_config().get("openai") or {}
+    direct = _direct_openai_credentials(cfg.get("api_key", ""), cfg.get("base_url", ""))
+    if direct is None:
+        raise ValueError("Set stt.openai.api_key or VOICE_TOOLS_OPENAI_KEY/OPENAI_API_KEY to enable OpenAI transcription")
+    return direct
 
 
 def _extract_transcript_text(transcription: Any) -> str:

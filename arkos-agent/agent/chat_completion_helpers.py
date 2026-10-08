@@ -429,23 +429,6 @@ def _prompt_cache_scope_for_agent(agent) -> "str | None":
         return None
 
 
-def _merge_portal_messages_extra_body(agent, anthropic_kwargs: dict) -> dict:
-    """Merge Portal ``tags`` / ``session_id`` onto an Anthropic Messages kwargs dict.
-    The Portal profile is only consulted by the OpenAI-wire transport; ``session_id``
-    only — never ``provider_preferences`` (an OpenAI-wire routing object)."""
-    if getattr(agent, "provider", None) not in {"portal", "portal-portal", "arkos-portal"}:
-        return anthropic_kwargs
-    try:
-        from providers import get_provider_profile
-        portal_profile = get_provider_profile("portal")
-        if portal_profile is not None:
-            anthropic_kwargs.setdefault("extra_body", {}).update(
-                portal_profile.build_extra_body(session_id=getattr(agent, "session_id", None)))
-    except Exception as exc:  # noqa: BLE001 — never block a turn on tagging
-        logger.debug("Arkos Portal extra_body merge failed: %s", exc)
-    return anthropic_kwargs
-
-
 def _estimate_chunk_bytes(chunk: Any) -> int:
     """Cheap per-chunk size estimate for the stream diagnostic counters: delta
     string lengths plus a framing floor (~3x cheaper than ``len(repr(chunk))``
@@ -493,7 +476,6 @@ def _codex_wait_notice_recovery(*, stale_timeout: float, ttfb_enabled: bool, ttf
     if not deadlines or min(deadlines) <= elapsed:
         return ""
     return f"; auto-reconnect at {int(min(deadlines))}s"
-
 
 
 def _stale_streak(agent) -> int:
@@ -1072,7 +1054,6 @@ def _codex_silent_hang_hint(agent, api_kwargs: dict) -> Optional[str]:
     return None
 
 
-
 def interruptible_api_call(agent, api_kwargs: dict):
     """Run the API call on a worker thread so the caller can detect interrupts
     without waiting for the full HTTP round-trip. Each worker gets its own
@@ -1172,7 +1153,7 @@ def _build_anthropic_kwargs(agent, api_messages, tools_for_api, reasoning_config
         base_url=getattr(agent, "_anthropic_base_url", None),
         fast_mode=request_overrides.get("speed") == "fast",
         drop_context_1m_beta=bool(getattr(agent, "_oauth_1m_beta_disabled", False)))
-    return _merge_portal_messages_extra_body(agent, anthropic_kwargs)
+    return anthropic_kwargs
 
 
 def _build_bedrock_kwargs(agent, api_messages, tools_for_api):
@@ -1206,7 +1187,6 @@ def _build_codex_kwargs(agent, api_messages, tools_for_api, reasoning_config, re
         github_reasoning_extra=agent._github_models_reasoning_extra_body() if is_github_responses else None,
         replay_encrypted_reasoning=bool(getattr(agent, "_codex_reasoning_replay_enabled", True)),
         context_management=context_management)
-
 
 
 def _build_chat_completions_kwargs(agent, api_messages, tools_for_api, reasoning_config, request_overrides, cache_scope_id):
@@ -1251,7 +1231,6 @@ def _build_chat_completions_kwargs(agent, api_messages, tools_for_api, reasoning
         **_common,
         model_lower=(agent.model or "").lower(),
         is_openrouter=_is_or,
-        is_portal=False,
         is_qwen_portal=_is_qwen,
         is_github_models=_is_gh,
         is_nvidia_nim=base_url_host_matches(_host, "integrate.api.nvidia.com"),
@@ -1453,16 +1432,8 @@ def _fallback_entry_key(fb: dict) -> tuple[str, str, str]:
 
 
 def _fallback_entry_unavailable_without_network(agent, fb: dict) -> Optional[str]:
-    """Return a skip reason for fallback entries known to be unusable locally."""
-    if (fb.get("provider") or "").strip().lower() != "portal":
-        return None
-    try:
-        from arkos_cli.auth import get_provider_auth_state
-        state = get_provider_auth_state("portal") or {}
-    except Exception as exc:
-        return f"portal_auth_unreadable:{type(exc).__name__}"
-    has_token = any(isinstance(t, str) and t.strip() for t in (state.get("access_token"), state.get("refresh_token")))
-    return None if has_token else "portal_token_missing"
+    """No provider-specific offline exclusion applies."""
+    return None
 
 
 _FALLBACK_REASON_LABELS = {
@@ -1523,9 +1494,6 @@ def _fallback_api_mode_resolved(agent, fb_provider: str, fb_model: str, fb_base_
     landed on the chat_completions default (never called for an explicit api_mode)."""
     if fb_provider == "openai-codex":
         return "codex_responses"
-    if fb_provider in {"portal", "portal-portal", "arkos-portal"}:
-        from arkos_cli.providers import portal_api_mode
-        return portal_api_mode(fb_model)
     if _is_anthropic_wire_url(fb_base_url):
         return "anthropic_messages"
     if agent._is_azure_openai_url(fb_base_url):
@@ -1749,8 +1717,6 @@ def try_activate_fallback(agent, reason: "FailoverReason | None" = None) -> bool
                 model=agent.model, base_url=agent.base_url, provider=fb_provider, is_codex_backend=fb_provider == "openai-codex")
             return True
         except Exception as e:
-            if fb_provider == "portal":
-                unavailable.add(fb_key)
             logger.error("Failed to activate fallback %s: %s", fb_model, e)
             continue
 
@@ -1881,7 +1847,7 @@ def _anthropic_summary_attempt(agent, api_messages: list, api_request_id: str):
             model=agent.model, messages=api_messages, tools=None, max_tokens=agent.max_tokens,
             reasoning_config=agent.reasoning_config, is_oauth=agent._is_anthropic_oauth,
             preserve_dots=agent._anthropic_preserve_dots(), base_url=getattr(agent, "_anthropic_base_url", None))
-        ant_kw = _merge_portal_messages_extra_body(agent, ant_kw)
+        ant_kw = ant_kw
         response = _managed_summary_call(agent, api_request_id, ant_kw, agent._anthropic_messages_create, retry_count=retry_count)
         return _summary_text(agent, response, strip_tool_prefix=agent._is_anthropic_oauth)
     return _attempt
@@ -2444,7 +2410,6 @@ class _StreamingCall(StreamingWaitMonitor):
     def _chat_stream_created(self, raw_stream: Any) -> None:
         response = self._attempt_stream_response = getattr(raw_stream, "response", None)
         self.agent._capture_rate_limits(response)
-        self.agent._capture_credits(response)
         self.agent._stream_diag_capture_response(self.clients.diag, response)
         self.agent._check_openrouter_cache_status(response)
         self._writer_token = claim_stream_writer(self.agent)

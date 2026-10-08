@@ -746,7 +746,7 @@ class PluginContext:
         if not all(c.isalnum() or c == "_" for c in key):
             raise ValueError(f"Plugin '{me}' auxiliary task key {key!r} "
                              f"must contain only alphanumeric characters and underscores")
-        from arkos_cli.main_provider_setup import _AUX_TASKS as _BUILTIN_AUX_TASKS
+        from agent.auxiliary_tasks import BUILTIN_AUXILIARY_TASKS as _BUILTIN_AUX_TASKS
         if key in {k for k, _name, _desc in _BUILTIN_AUX_TASKS}:
             raise ValueError(f"Plugin '{me}' cannot register auxiliary task {key!r} — that key is reserved "
                              f"for a built-in task. Pick a plugin-namespaced key (e.g. '{me}_{key}').")

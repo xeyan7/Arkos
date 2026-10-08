@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 BUILTIN_BACKEND_NAMES = frozenset({
-    "local", "docker", "singularity", "modal", "managed_modal",
+    "local", "docker", "singularity", "modal",
     "daytona", "vercel_sandbox", "ssh",
 })
 

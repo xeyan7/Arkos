@@ -31,7 +31,7 @@ from agent.prompt_caching import (
 from agent.runtime_cwd import resolve_agent_cwd
 from agent.turn_context import PreflightCompressionTimedOut, build_turn_context
 from agent.turn_retry_state import TurnRetryState
-from agent.turn_api_call import handle_api_interrupt, portal_rate_limit_guard, perform_api_call
+from agent.turn_api_call import handle_api_interrupt, perform_api_call
 from agent.turn_api_error import handle_api_error
 from agent.turn_api_request import build_api_request
 from agent.turn_final_response import finish_text_response
@@ -385,11 +385,6 @@ def _ra():
     return run_agent
 
 
-def _portal_entitlement_message(capability: str) -> str:
-    """Portal entitlement message — removed in engine build (portal deleted). Always ""."""
-    return ""
-
-
 def _print_guidance(agent, message: str) -> bool:
     """Print each line of ``message`` as a 💡 hint; False when there is nothing to print."""
     if not message:
@@ -397,10 +392,6 @@ def _print_guidance(agent, message: str) -> bool:
     for line in message.splitlines():
         agent._vprint(f"{agent.log_prefix}   💡 {line}", force=True)
     return True
-
-
-def _print_portal_entitlement_guidance(agent, capability: str) -> bool:
-    return _print_guidance(agent, _portal_entitlement_message(capability))
 
 
 def _system_prompt_for_hooks(api_kwargs: Any, request_messages: Any) -> Any:
@@ -416,16 +407,9 @@ def _system_prompt_for_hooks(api_kwargs: Any, request_messages: Any) -> Any:
     return system_prompt
 
 
-def _is_portal_inference_route(provider: str, base_url: str) -> bool:
-    """Portal route check — removed in engine build. Always False."""
-    return False
-
-
 def _billing_or_entitlement_message(
     *, capability: str, provider: str, base_url: str, model: str, unverified: bool = False
 ) -> str:
-    if _is_portal_inference_route(provider, base_url):
-        return _portal_entitlement_message(capability)
 
     provider_label = (provider or "").strip() or "the selected provider"
     model_label = (model or "").strip() or "the selected model"
@@ -662,8 +646,7 @@ def _restore_or_build_system_prompt(agent, system_message, conversation_history)
         logger.warning("on_session_start hook failed: %s", exc)
 
     try:
-        from agent.credits_tracker import seed_credits_at_session_start
-        seed_credits_at_session_start(agent)
+        pass
     except Exception:
         logger.debug("cold-start credits seed failed (fail-open)", exc_info=True)
 
@@ -1223,11 +1206,6 @@ def _run_api_retry_loop(agent, s: _LoopState) -> Optional[Dict[str, Any]]:
     Returns a turn result dict when a phase ends the turn, else None once the loop is left
     (success, a restart armed on ``s._retry``, interrupt, or retries exhausted)."""
     while s.retry_count < s.max_retries:
-        _ng = _run_phase(portal_rate_limit_guard, agent, s)
-        if _ng.action == "return":
-            return _ng.result
-        if _ng.action == "break":
-            return None
         try:
             _run_phase(build_api_request, agent, s)
             if _run_phase(perform_api_call, agent, s).action == "break":
@@ -1393,7 +1371,6 @@ _PLUGIN_COMPAT_LAZY = {
     'COMPRESSION_RETRY_TOKENS_STATUS_TEMPLATE': ('agent.conversation_compression', 'COMPRESSION_RETRY_TOKENS_STATUS_TEMPLATE'),
     'COMPRESSION_RETRY_TOO_LARGE_STATUS_TEMPLATE': ('agent.conversation_compression', 'COMPRESSION_RETRY_TOO_LARGE_STATUS_TEMPLATE'),
     'FailoverReason': ('agent.error_classifier', 'FailoverReason'),
-    'KawaiiSpinner': ('agent.display', 'KawaiiSpinner'),
     'PARTIAL_STREAM_STUB_ID': ('arkos_constants', 'PARTIAL_STREAM_STUB_ID'),
     'PRE_API_COMPRESSION_STATUS_TEMPLATE': ('agent.conversation_compression', 'PRE_API_COMPRESSION_STATUS_TEMPLATE'),
     'adaptive_rate_limit_backoff': ('agent.retry_utils', 'adaptive_rate_limit_backoff'),

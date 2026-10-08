@@ -324,68 +324,13 @@ def get_spotify_auth_status() -> Dict[str, Any]:
     }
 
 
-def _spotify_interactive_setup(redirect_uri_hint: str) -> str:
-    """Walk the user through creating a Spotify developer app; persist the client_id to ~/.arkos/.env."""
-    from arkos_cli.auth import _is_remote_session
-    from arkos_cli.config import save_env_value
-    print(
-        f"\n{'=' * 70}\nSpotify first-time setup\n{'=' * 70}\n\n"
-        "Spotify requires every user to register their own lightweight\n"
-        "developer app. This takes about two minutes and only has to be\n"
-        "done once per machine.\n\n"
-        f"Full guide: {SPOTIFY_DOCS_URL}\n\n"
-        "Steps:\n"
-        f"  1. Opening {SPOTIFY_DASHBOARD_URL} in your browser...\n"
-        "  2. Click 'Create app' and fill in:\n"
-        "       App name:     anything (e.g. arkos-agent)\n"
-        "       Description:  anything\n"
-        f"       Redirect URI: {redirect_uri_hint}\n"
-        "       API/SDK:      Web API\n"
-        "  3. Agree to the terms, click Save.\n"
-        "  4. Open the app's Settings page and copy the Client ID.\n"
-        "  5. Paste it below.\n"
-    )
-
-    if not _is_remote_session():
-        try:
-            webbrowser.open(SPOTIFY_DASHBOARD_URL)
-        except Exception:
-            pass
-
-    try:
-        from arkos_cli.cli_output import line_input
-    except ImportError:
-        line_input = input
-    try:
-        raw = line_input("Spotify Client ID: ").strip()
-    except (EOFError, KeyboardInterrupt):
-        print()
-        raise SystemExit("Spotify setup cancelled.")
-
-    if not raw:
-        print(f"\nNo Client ID entered. See {SPOTIFY_DOCS_URL} for the full guide.")
-        raise SystemExit("Spotify setup cancelled: empty Client ID.")
-
-    save_env_value("ARKOS_SPOTIFY_CLIENT_ID", raw)
-    if redirect_uri_hint and redirect_uri_hint != DEFAULT_SPOTIFY_REDIRECT_URI:
-        save_env_value("ARKOS_SPOTIFY_REDIRECT_URI", redirect_uri_hint)
-
-    print("\nSaved ARKOS_SPOTIFY_CLIENT_ID to ~/.arkos/.env\n")
-    return raw
 
 
 def login_spotify_command(args) -> None:
     from arkos_cli.auth import _auth_store_lock, _can_open_graphical_browser, _is_remote_session, _load_auth_store, _print_loopback_ssh_hint, _save_auth_store, _store_provider_state, get_provider_auth_state
     existing_state = get_provider_auth_state("spotify") or {}
 
-    try:
-        client_id = _spotify_client_id(getattr(args, "client_id", None), existing_state)
-    except AuthError as exc:
-        if getattr(exc, "code", "") != "spotify_client_id_missing":
-            raise
-        client_id = _spotify_interactive_setup(
-            redirect_uri_hint=getattr(args, "redirect_uri", None) or DEFAULT_SPOTIFY_REDIRECT_URI,
-        )
+    client_id = _spotify_client_id(getattr(args, "client_id", None), existing_state)
 
     redirect_uri = _spotify_redirect_uri(getattr(args, "redirect_uri", None), existing_state)
     scope = _spotify_scope_string(getattr(args, "scope", None) or existing_state.get("scope"))

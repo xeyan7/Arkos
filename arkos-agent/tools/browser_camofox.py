@@ -468,12 +468,12 @@ def camofox_type(ref: str, text: str, task_id: Optional[str] = None) -> str:
             return blocked
         clean_ref = ref.lstrip("@")
         _post(_tab_path(session, "type"), {"userId": session["user_id"], "ref": clean_ref, "text": text})
-        from agent.display import redact_browser_typed_text_for_display, redact_tool_args_for_display
+        from agent.tool_feedback import redact_browser_typed_text_for_display, redact_tool_args_for_display
         display_text = (redact_tool_args_for_display("browser_type", {"text": text}) or {})["text"]
         response = {"success": True, "typed": display_text, "element": clean_ref}
         return json.dumps(redact_browser_typed_text_for_display(response, text))
     except Exception as e:
-        from agent.display import redact_browser_typed_text_for_display
+        from agent.tool_feedback import redact_browser_typed_text_for_display
         return tool_error(redact_browser_typed_text_for_display(str(e), text), success=False)
 
 

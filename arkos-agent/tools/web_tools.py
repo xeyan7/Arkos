@@ -15,9 +15,9 @@ import os
 from typing import List, Any, Optional
 _firecrawl_client = _firecrawl_client_config = _parallel_client = _async_parallel_client = _exa_client = None
 
-from plugins.web.firecrawl.provider import _is_tool_gateway_ready, check_firecrawl_api_key
+from plugins.web.firecrawl.provider import check_firecrawl_api_key
 from tools.debug_helpers import DebugSession
-from tools.tool_backend_helpers import PORTAL_MANAGED_PROVIDER, selection_exists
+from tools.tool_backend_helpers import selection_exists
 from tools.url_safety import async_is_safe_url
 from tools.web_tools_rescue import _rescue_eligible, _rescue_search
 from tools.web_tools_truncate import _effective_char_limit, _trim_results, _truncate_results, convert_base64_images_to_links
@@ -27,7 +27,6 @@ from tools.web_tools_extract import (
 )
 
 logger = logging.getLogger(__name__)
-
 
 
 def _env_value(name: str) -> str:
@@ -101,7 +100,7 @@ def _get_backend() -> str:
     Autodetect runs ONLY when no web selection has ever been stored."""
     configured = _configured_backend()
     if configured:
-        return "firecrawl" if configured == PORTAL_MANAGED_PROVIDER else configured
+        return configured
     if selection_exists("web"):
         return "firecrawl"
 
@@ -110,7 +109,7 @@ def _get_backend() -> str:
         ("exa", _has_env("EXA_API_KEY")),
         ("parallel", _has_env("PARALLEL_API_KEY")), ("keenable", _has_env("KEENABLE_API_KEY")),
         ("firecrawl", _has_env("FIRECRAWL_API_KEY") or _has_env("FIRECRAWL_API_URL")),
-        ("firecrawl", _is_tool_gateway_ready()), ("searxng", _has_env("SEARXNG_URL")),
+        ("searxng", _has_env("SEARXNG_URL")),
         ("brave-free", _has_env("BRAVE_SEARCH_API_KEY")), ("ddgs", _ddgs_package_importable()),
     )
     for backend, available in backend_candidates:
@@ -196,17 +195,13 @@ def _is_backend_available(backend: str) -> bool:
 
 
 def _web_requires_env() -> list[str]:
-    """Tool-registry metadata env vars for the web backends. Gateway vars are always listed: gating them
-    on ``managed_portal_tools_enabled()`` cost a synchronous portal HTTP refresh at every CLI startup.
-    Contract: set var -> tool sees it; extras are harmless for the not-logged-in."""
+    """Tool-registry credential and endpoint variables for direct web backends."""
     return [
         "EXA_API_KEY", "PARALLEL_API_KEY", "TAVILY_API_KEY", "PERPLEXITY_API_KEY", "KEENABLE_API_KEY", "FIRECRAWL_API_KEY",
-        "FIRECRAWL_API_URL", "FIRECRAWL_GATEWAY_URL", "TOOL_GATEWAY_DOMAIN", "TOOL_GATEWAY_SCHEME",
-        "TOOL_GATEWAY_USER_TOKEN",
+        "FIRECRAWL_API_URL",
     ]
 
 _debug = DebugSession("web_tools", env_var="WEB_TOOLS_DEBUG")
-
 
 
 def _ensure_web_plugins_loaded() -> None:
@@ -483,12 +478,9 @@ _PLUGIN_COMPAT_LAZY = {
     'DEFAULT_EXTRACT_CHAR_LIMIT': ('tools.web_tools_truncate', 'DEFAULT_EXTRACT_CHAR_LIMIT'),
     'Firecrawl': ('plugins.web.firecrawl.provider', 'Firecrawl'),
     'MAX_STORED_TEXT_CHARS': ('tools.web_tools_truncate', 'MAX_STORED_TEXT_CHARS'),
-    'build_vendor_gateway_url': ('tools.managed_tool_gateway', 'build_vendor_gateway_url'),
-    'managed_portal_tools_enabled': ('tools.tool_backend_helpers', 'managed_portal_tools_enabled'),
+
     'normalize_url_for_request': ('tools.url_safety', 'normalize_url_for_request'),
-    'portal_tool_gateway_unavailable_message': ('tools.tool_backend_helpers', 'portal_tool_gateway_unavailable_message'),
-    'prefers_gateway': ('tools.tool_backend_helpers', 'prefers_gateway'),
-    'resolve_managed_tool_gateway': ('tools.managed_tool_gateway', 'resolve_managed_tool_gateway'),
+
     'sensitive_query_param_name': ('tools.url_safety', 'sensitive_query_param_name'),
 }
 

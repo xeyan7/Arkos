@@ -21,18 +21,11 @@ from agent.credential_pool import (
     load_pool,
 )
 from agent.secret_scope import get_secret as _get_secret
-from arkos_cli.auth import (
-    ACTUAL_LOCAL_NOAUTH_PLACEHOLDER, AuthError, DEFAULT_CODEX_BASE_URL, DEFAULT_QWEN_BASE_URL, DEFAULT_XAI_OAUTH_BASE_URL,
-    PROVIDER_REGISTRY, _agent_key_is_usable, _portal_inference_env_override, format_auth_error, resolve_provider,
-    resolve_portal_runtime_credentials, resolve_codex_runtime_credentials, resolve_xai_oauth_runtime_credentials,
-    resolve_qwen_runtime_credentials, resolve_api_key_provider_credentials,
-    resolve_external_process_provider_credentials,  # noqa: F401
-    has_usable_secret, is_actual_local_base_url, normalize_actual_base_url,
-)
+from arkos_cli.auth import ACTUAL_LOCAL_NOAUTH_PLACEHOLDER, AuthError, DEFAULT_CODEX_BASE_URL, DEFAULT_QWEN_BASE_URL, DEFAULT_XAI_OAUTH_BASE_URL, PROVIDER_REGISTRY, format_auth_error, resolve_provider, resolve_codex_runtime_credentials, resolve_xai_oauth_runtime_credentials, resolve_qwen_runtime_credentials, resolve_api_key_provider_credentials, resolve_external_process_provider_credentials, has_usable_secret, is_actual_local_base_url, normalize_actual_base_url
 from arkos_cli import config as _config_mod
 from arkos_cli import models as _models
 from arkos_constants import OPENROUTER_BASE_URL
-from arkos_cli.providers import determine_api_mode, is_official_openai_host, portal_api_mode
+from arkos_cli.providers import determine_api_mode, is_official_openai_host
 from utils import base_url_host_matches, base_url_hostname, env_int
 
 
@@ -78,7 +71,6 @@ def _config_base_url_trustworthy_for_bare_custom(cfg_base_url: str, cfg_provider
     bu = (cfg_base_url or "").strip()
     return bool(bu) and (cfg_provider_norm == "custom" or _resolves_to_custom(cfg_provider_norm)
                          or (not base_url_host_matches(bu, "openrouter.ai") and _loopback_hostname(base_url_hostname(bu))))
-
 
 
 _HOST_MANDATED_API_MODES = {
@@ -211,7 +203,6 @@ def _maybe_apply_codex_app_server_runtime(*, provider: str, api_mode: str, model
     return api_mode
 
 
-
 _ANTHROPIC_DEFAULT_BASE_URL = "https://api.anthropic.com"
 _NO_ANTHROPIC_CREDENTIALS_MSG = ("No Anthropic credentials found. Set ANTHROPIC_TOKEN or ANTHROPIC_API_KEY, "
                                  "run 'claude setup-token', or authenticate with 'claude /login'.")
@@ -294,18 +285,6 @@ def _pool_entry_base_url(entry: Any) -> str:
     return getattr(entry, "runtime_base_url", None) or getattr(entry, "base_url", None) or ""
 
 
-def _portal_entry_key_usable(entry: Any, min_ttl: int) -> bool:
-    return _agent_key_is_usable({k: getattr(entry, k, None) for k in ("agent_key", "agent_key_expires_at", "scope")}, min_ttl)
-
-
-def _portal_min_key_ttl() -> int:
-    return max(60, env_int("ARKOS_PORTAL_MIN_KEY_TTL_SECONDS", 1800))
-
-
-def _resolve_portal_creds() -> Dict[str, Any]:
-    return resolve_portal_runtime_credentials(timeout_seconds=float(_getenv("ARKOS_PORTAL_TIMEOUT_SECONDS", "15")))
-
-
 def _finalize_base_url(provider: str, api_mode: str, base_url: str) -> str:
     """Shared tail for pool-entry and api-key paths: OpenCode /v1 rule (OpenCode URLs end with /v1
     for OpenAI-compatible models but the Anthropic SDK prepends its own /v1/messages — strip for
@@ -315,8 +294,6 @@ def _finalize_base_url(provider: str, api_mode: str, base_url: str) -> str:
     if provider == "lmstudio":
         base_url = auth_mod._normalize_lmstudio_runtime_base_url(base_url)
     return base_url
-
-
 
 
 def _auto_detect_local_model(base_url: str) -> str:
@@ -376,7 +353,6 @@ def resolve_requested_provider(requested: Optional[str] = None) -> str:
     return _getenv("ARKOS_INFERENCE_PROVIDER", "").strip().lower() or "auto"
 
 
-
 from arkos_cli.runtime_provider_custom import (  # noqa: E402,F401
     _apply_custom_provider_extras, _custom_provider_request_overrides, _filter_capabilities, _find_custom_identity,
     _get_named_custom_provider, _lift_common_custom_fields, _lift_extra_headers,
@@ -388,7 +364,6 @@ from arkos_cli.runtime_provider_backends import (  # noqa: E402,F401
     _is_external_process_provider, _resolve_azure_foundry_runtime, _resolve_bedrock_runtime,
     _resolve_external_process_runtime, _resolve_openrouter_runtime,
 )
-
 
 
 _POOL_ENTRY_SIMPLE_MODES: Dict[str, tuple] = {
@@ -406,8 +381,6 @@ def _pool_entry_mode_and_url(provider, entry, model_cfg, effective_model, base_u
         return api_mode, base_url or (default_url() if callable(default_url) else default_url)
     if provider == "anthropic":
         return "anthropic_messages", _anthropic_cfg_base_url(model_cfg) or base_url or _ANTHROPIC_DEFAULT_BASE_URL
-    if provider == "portal":
-        return portal_api_mode(effective_model), (_portal_inference_env_override() or "") or base_url
     if provider == "copilot":
         api_mode = _copilot_runtime_api_mode(model_cfg, getattr(entry, "runtime_api_key", ""), target_model=effective_model)
         return api_mode, base_url or PROVIDER_REGISTRY["copilot"].inference_base_url
@@ -444,27 +417,6 @@ def _openrouter_should_use_pool(requested_provider, model_cfg, explicit_api_key,
     return requested_provider in {"openrouter", "auto"} and not has_custom_endpoint and not bool(explicit_api_key or explicit_base_url)
 
 
-def _refresh_portal_pool_entry(pool: CredentialPool, entry: Any, pool_api_key: str):
-    """Portal pool entries carry the agent_key (an invoke JWT) which the pool does not refresh on
-    selection (avoids network calls in `arkos auth list`); refresh here before falling back to
-    singleton auth resolution. Returns (entry, pool_api_key) — key "" when still unusable."""
-    min_ttl = _portal_min_key_ttl()
-    if _portal_entry_key_usable(entry, min_ttl):
-        return entry, pool_api_key
-    logger.debug("Portal pool entry agent_key expired/missing, refreshing selected pool entry")
-    try:
-        refreshed = pool.try_refresh_current()
-    except Exception as exc:
-        logger.debug("Portal pool entry refresh failed: %s", exc)
-        refreshed = None
-    if refreshed is not None:
-        entry, pool_api_key = refreshed, _pool_entry_api_key(refreshed)
-    if not pool_api_key or not _portal_entry_key_usable(entry, min_ttl):
-        logger.debug("Portal pool entry agent_key still unavailable, falling through to runtime resolution")
-        pool_api_key = ""
-    return entry, pool_api_key
-
-
 def _resolve_from_pool(provider: str, requested_provider: str, model_cfg: Dict[str, Any], explicit_api_key, explicit_base_url,
                        target_model) -> Optional[Dict[str, Any]]:
     """Runtime from the provider's credential pool, or None to continue down the ladder."""
@@ -480,14 +432,10 @@ def _resolve_from_pool(provider: str, requested_provider: str, model_cfg: Dict[s
     if entry is None:
         return None
     pool_api_key = _pool_entry_api_key(entry)
-    if provider == "portal":
-        entry, pool_api_key = _refresh_portal_pool_entry(pool, entry, pool_api_key)
     if pool_api_key and credential_pool_matches_provider(pool, provider, base_url=_pool_entry_base_url(entry)):
         return _resolve_runtime_from_pool_entry(provider=provider, entry=entry, requested_provider=requested_provider,
                                                 model_cfg=model_cfg, pool=pool, target_model=target_model)
     return None
-
-
 
 
 def _explicit_anthropic(requested_provider, model_cfg, api_key, base_url, target_model):
@@ -510,18 +458,6 @@ def _explicit_codex(requested_provider, model_cfg, api_key, explicit_base_url, t
                                                       None, "last_refresh", resolve_codex_runtime_credentials)
     return _runtime("openai-codex", "codex_responses", base_url, api_key, source="explicit", last_refresh=last_refresh,
                     requested_provider=requested_provider)
-
-
-def _explicit_portal(requested_provider, model_cfg, api_key, explicit_base_url, target_model):
-    state = auth_mod.get_provider_auth_state("portal") or {}
-    base_url = (explicit_base_url or _portal_inference_env_override()
-                or str(state.get("inference_base_url") or auth_mod.DEFAULT_PORTAL_INFERENCE_URL).strip().rstrip("/"))
-    api_key = api_key or (str(state.get("agent_key") or "").strip() if _agent_key_is_usable(state, _portal_min_key_ttl()) else "")
-    api_key, base_url, expires_at = _creds_fallback(api_key, explicit_base_url, base_url,
-                                                    state.get("agent_key_expires_at") or state.get("expires_at"), "expires_at",
-                                                    _resolve_portal_creds)
-    return _runtime("portal", portal_api_mode(_effective_model(model_cfg, target_model)), base_url, api_key, source="explicit",
-                    expires_at=expires_at, requested_provider=requested_provider)
 
 
 def _actual_local_key(provider: str, api_key: str, base_url: str) -> str:
@@ -553,7 +489,7 @@ def _explicit_api_key_provider(provider, pconfig, requested_provider, model_cfg,
 
 
 _EXPLICIT_RESOLVERS: Dict[str, Callable[..., Dict[str, Any]]] = {
-    "anthropic": _explicit_anthropic, "openai-codex": _explicit_codex, "portal": _explicit_portal,
+    "anthropic": _explicit_anthropic, "openai-codex": _explicit_codex,
     "azure-foundry": lambda rq, mc, key, url, tm: _resolve_azure_foundry_runtime(requested_provider=rq, model_cfg=mc,
                                                                                  explicit_api_key=key, explicit_base_url=url),
 }
@@ -575,8 +511,6 @@ def _resolve_explicit_runtime(*, provider: str, requested_provider: str, model_c
     return _explicit_api_key_provider(provider, pconfig, requested_provider, model_cfg, explicit_api_key, explicit_base_url, target_model)
 
 
-
-
 @dataclass(frozen=True)
 class _OAuthRuntimeSpec:
     """Env/auth-store OAuth providers resolved by a single credential call."""
@@ -590,8 +524,7 @@ class _OAuthRuntimeSpec:
 
 
 _OAUTH_RUNTIME_PROVIDERS: Dict[str, _OAuthRuntimeSpec] = {
-    "portal": _OAuthRuntimeSpec(_resolve_portal_creds, portal_api_mode, "portal", "expires_at",
-                              "Auto-detected Portal provider but credentials failed"),
+
     "openai-codex": _OAuthRuntimeSpec(lambda: resolve_codex_runtime_credentials(), "codex_responses", "arkos-auth-store",
                                       "last_refresh", "Auto-detected Codex provider but credentials failed"),
     "xai-oauth": _OAuthRuntimeSpec(lambda: resolve_xai_oauth_runtime_credentials(), "codex_responses", "arkos-auth-store",
@@ -626,8 +559,6 @@ def _minimax_oauth_runtime(provider, requested_provider) -> Optional[Dict[str, A
     creds = auth_mod.resolve_minimax_oauth_runtime_credentials()
     return _runtime(provider, "anthropic_messages", creds["base_url"], creds["api_key"], source=creds.get("source", "oauth"),
                     requested_provider=requested_provider)
-
-
 
 
 def _azure_anthropic_env_key(model_cfg: Dict[str, Any]) -> str:
@@ -671,7 +602,6 @@ def _api_key_provider_runtime(provider, pconfig, requested_provider, model_cfg, 
     base_url = _finalize_base_url(provider, api_mode, base_url)
     api_key = _actual_local_key(provider, creds.get("api_key", ""), base_url)
     return _runtime(provider, api_mode, base_url, api_key, source=creds.get("source", "env"), requested_provider=requested_provider)
-
 
 
 _VERTEX_NAMES = ("vertex", "google-vertex", "vertex-ai", "gcp-vertex", "vertexai")
@@ -767,7 +697,7 @@ def resolve_runtime_provider(*, requested: Optional[str] = None, explicit_api_ke
       4. local-endpoint bypass (no explicit creds, config base_url at a non-cloud host)
       5. ``auth.resolve_provider`` → OpenCode free tier → explicit --api-key/--base-url path
       6. credential pool (OpenRouter pool only without custom endpoint/override)
-      7. OAuth specs (portal/codex/xai/qwen; "auto" swallows AuthError and logs) → minimax-oauth
+      7. OAuth specs (codex/xai/qwen; "auto" swallows AuthError and logs) → minimax-oauth
          → external-process → anthropic env → bedrock → registry api_key providers
       8. OpenRouter / bare-custom fallback
     target_model overrides model_cfg["default"] when computing provider-specific api_mode (e.g.

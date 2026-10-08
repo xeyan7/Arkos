@@ -60,7 +60,7 @@ def find_removal_step(provider: str, source: str) -> Optional[RemovalStep]:
 
 
 def _remove_env_source(provider: str, removed) -> RemovalResult:
-    """env:<VAR> — clear from ~/.arkos/.env; hint when the shell exports it."""
+    """env:<VAR> â€” clear from ~/.arkos/.env; hint when the shell exports it."""
     from arkos_cli.config import get_env_path, remove_env_value
 
     result = RemovalResult()
@@ -89,19 +89,19 @@ def _remove_env_source(provider: str, removed) -> RemovalResult:
             f"(not in ~/.arkos/.env).",
             "  Unset it there (shell profile, systemd EnvironmentFile, "
             "launchd plist, etc.) or it will keep being visible to Arkos.",
-            f"  The pool entry is now suppressed — Arkos will ignore "
+            f"  The pool entry is now suppressed â€” Arkos will ignore "
             f"{env_var} until you run `arkos auth add {provider}`.",
         ])
     else:
         result.hints.append(
-            f"Suppressed env:{env_var} — it will not be re-seeded even "
+            f"Suppressed env:{env_var} â€” it will not be re-seeded even "
             f"if the variable is re-exported later."
         )
     return result
 
 
 def _remove_arkos_pkce(provider: str, removed) -> RemovalResult:
-    """~/.arkos/.anthropic_oauth.json is ours — delete it outright."""
+    """~/.arkos/.anthropic_oauth.json is ours â€” delete it outright."""
     from arkos_constants import get_arkos_home
 
     result = RemovalResult()
@@ -116,9 +116,9 @@ def _remove_arkos_pkce(provider: str, removed) -> RemovalResult:
 
 
 def _remove_auth_store_oauth(provider: str, removed) -> RemovalResult:
-    """Clear auth.json ``providers.<provider>`` (portal, minimax-oauth, xai-oauth, openai-codex).
+    """Clear auth.json ``providers.<provider>`` (minimax-oauth, xai-oauth, openai-codex).
 
-    Suppression by the dispatcher is still required — otherwise
+    Suppression by the dispatcher is still required â€” otherwise
     ``_seed_from_singletons`` re-seeds from any path that rewrites the block.
     """
     from arkos_cli.auth import _auth_store_lock, _load_auth_store, _save_auth_store
@@ -137,7 +137,7 @@ def _remove_auth_store_oauth(provider: str, removed) -> RemovalResult:
 def _remove_xai_oauth_device_code(provider: str, removed) -> RemovalResult:
     result = _remove_auth_store_oauth(provider, removed)
     result.hints.append(
-        "Run `arkos model` → xAI Grok OAuth (SuperGrok / Premium+) to re-authenticate if needed."
+        "Run `arkos model` â†’ xAI Grok OAuth (SuperGrok / Premium+) to re-authenticate if needed."
     )
     return result
 
@@ -145,7 +145,7 @@ def _remove_xai_oauth_device_code(provider: str, removed) -> RemovalResult:
 def _remove_codex_device_code(provider: str, removed) -> RemovalResult:
     """Codex tokens also live in ~/.codex/auth.json (Codex CLI's file, kept).
 
-    Suppress the canonical ``device_code`` key — not just ``removed.source`` —
+    Suppress the canonical ``device_code`` key â€” not just ``removed.source`` â€”
     so a ``manual:device_code`` removal still blocks the re-seed path.
     """
     from arkos_cli.auth import suppress_credential_source
@@ -153,7 +153,7 @@ def _remove_codex_device_code(provider: str, removed) -> RemovalResult:
     result = _remove_auth_store_oauth(provider, removed)
     suppress_credential_source(provider, "device_code")
     result.hints.extend([
-        "Suppressed openai-codex device_code source — it will not be re-seeded.",
+        "Suppressed openai-codex device_code source â€” it will not be re-seeded.",
         "Note: Codex CLI credentials still live in ~/.codex/auth.json",
         "Run `arkos auth add openai-codex` to re-enable if needed.",
     ])
@@ -170,7 +170,7 @@ def _remove_copilot_gh(provider: str, removed) -> RemovalResult:
     for env_var in ("COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN"):
         suppress_credential_source(provider, f"env:{env_var}")
     return RemovalResult(hints=[
-        "Suppressed all copilot token sources (gh_cli + env vars) — they will not be re-seeded.",
+        "Suppressed all copilot token sources (gh_cli + env vars) â€” they will not be re-seeded.",
         "Note: Your gh CLI / shell environment is unchanged.",
         "Run `arkos auth add copilot` to re-enable if needed.",
     ])
@@ -201,7 +201,7 @@ _REGISTRY: List[RemovalStep] = [
     RemovalStep(
         provider="anthropic", source_id="claude_code",
         remove_fn=_suppress_only(
-            "Suppressed claude_code credential — it will not be re-seeded.",
+            "Suppressed claude_code credential â€” it will not be re-seeded.",
             "Note: Claude Code credentials still live in ~/.claude/.credentials.json",
             "Run `arkos auth add anthropic` to re-enable if needed.",
         ),
@@ -211,11 +211,6 @@ _REGISTRY: List[RemovalStep] = [
         provider="anthropic", source_id="arkos_pkce",
         remove_fn=_remove_arkos_pkce,
         description="~/.arkos/.anthropic_oauth.json",
-    ),
-    RemovalStep(
-        provider="portal", source_id="device_code",
-        remove_fn=_remove_auth_store_oauth,
-        description="auth.json providers.portal",
     ),
     RemovalStep(
         provider="openai-codex", source_id="device_code",
@@ -231,7 +226,7 @@ _REGISTRY: List[RemovalStep] = [
     RemovalStep(
         provider="qwen-oauth", source_id="qwen-cli",
         remove_fn=_suppress_only(
-            "Suppressed qwen-cli credential — it will not be re-seeded.",
+            "Suppressed qwen-cli credential â€” it will not be re-seeded.",
             "Note: Qwen CLI credentials still live in ~/.qwen/oauth_creds.json",
             "Run `arkos auth add qwen-oauth` to re-enable if needed.",
         ),
@@ -246,14 +241,13 @@ _REGISTRY: List[RemovalStep] = [
         provider="*", source_id="config:",
         match_fn=lambda src: src.startswith("config:") or src == "model_config",
         remove_fn=_suppress_only(
-            "Suppressed {source} — it will not be re-seeded.",
+            "Suppressed {source} â€” it will not be re-seeded.",
             "Note: The underlying value in config.yaml is unchanged.  Edit it "
             "directly if you want to remove the credential from disk.",
         ),
         description="Custom provider config.yaml api_key field",
     ),
 ]
-
 
 
 def register(step: RemovalStep) -> RemovalStep:

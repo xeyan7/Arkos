@@ -789,7 +789,7 @@ def browser_type(ref: str, text: str, task_id: Optional[str] = None) -> str:
         return blocked
     ref = _at_ref(ref)
     result = _session._run_browser_command(effective_task_id, "fill", [ref, text])
-    from agent.display import redact_browser_typed_text_for_display, redact_tool_args_for_display
+    from agent.tool_feedback import redact_browser_typed_text_for_display, redact_tool_args_for_display
     display_text = (redact_tool_args_for_display("browser_type", {"text": text}) or {})["text"]
     if result.get("success"):
         response = {"success": True, "typed": display_text, "element": ref}

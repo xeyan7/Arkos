@@ -299,10 +299,7 @@ def load_arkos_dotenv(
             logger.debug("multiplex: skipping process-global dotenv load for routed "
                          "profile home %s (credentials resolve via the profile scope)", home_path)
         if load_external_secrets:
-            from arkos_cli import _early_recovery
-
-            if not _early_recovery._should_skip_external_secret_sources():
-                hydrate_profile_secret_sources(home_path)
+            hydrate_profile_secret_sources(home_path)
         return []
 
     loaded: list[Path] = []
@@ -327,9 +324,7 @@ def load_arkos_dotenv(
         _load_dotenv_with_fallback(project_env_path, override=not loaded)
         loaded.append(project_env_path)
 
-    from arkos_cli import _early_recovery
-
-    if load_external_secrets and not _early_recovery._should_skip_external_secret_sources():
+    if load_external_secrets:
         _apply_external_secret_sources(home_path)
     _apply_managed_env()
 

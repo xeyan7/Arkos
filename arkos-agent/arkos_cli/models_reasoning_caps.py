@@ -1,16 +1,4 @@
-"""Per-model reasoning capabilities from OpenRouter-schema ``/v1/models`` catalogs.
-
-Split out of ``arkos_cli.models``. OpenRouter and
-Arkos Portal share one implementation parametrized by :class:`_CapsSource`; the per-source module
-globals (``_openrouter_reasoning_caps_cache``, ``_portal_caps_disk_checked``, ...) stay defined on
-``arkos_cli.models`` — tests reset them there — and are read/written by attribute name.
-
-Tri-state contract for callers deciding whether to emit reasoning controls: a dict with
-``supports_reasoning: True`` (+ ``supported_efforts``, ``mandatory``) — the route advertises
-reasoning controls; ``supports_reasoning: False`` — the catalog knows the model and it does NOT
-accept them (definitive negative); ``None`` — unknown (catalog not loaded, model not listed,
-malformed).
-"""
+"""Per-model reasoning capabilities from OpenRouter model catalogs. Returns advertised capabilities, definitive negatives, or None when unknown."""
 
 from __future__ import annotations
 
@@ -136,7 +124,7 @@ def _seed_reasoning_caps(url: str, items: Any) -> Optional[Caps]:
 
 def _fetch_reasoning_caps_catalog(url: str, timeout: float) -> Optional[Caps]:
     """Fetch one OpenRouter-shaped ``/v1/models`` catalog → per-model caps; None when unreachable or
-    empty so callers remember the failure. Sends a User-Agent: the Portal 403s anonymous reads."""
+    empty so callers remember the failure. Sends the configured User-Agent."""
     m = _origin()
     try:
         req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": m._ARKOS_USER_AGENT})
@@ -145,7 +133,6 @@ def _fetch_reasoning_caps_catalog(url: str, timeout: float) -> Optional[Caps]:
     except Exception:
         return None
     return _seed_reasoning_caps(url, payload.get("data"))
-
 
 
 @dataclass(frozen=True)
@@ -188,11 +175,7 @@ def _fetch_caps(src: _CapsSource, timeout: float = 6.0, *, force: bool = False) 
 
 
 def _caps_cached(src: _CapsSource) -> Optional[Caps]:
-    """Cache-only caps: memory, else the disk mirror. Never HTTP.
-
-    One disk attempt per process: for the Portal, naming the catalog means resolving credentials,
-    which can itself reach the network to refresh a token — too expensive for a per-turn caller.
-    """
+    """Cache-only capabilities: memory, then one disk attempt per process. Never HTTP."""
     if src.get("cache") is None and not src.get("disk_checked"):
         src.set("disk_checked", True)
         src.set("cache", _hydrate_reasoning_caps_from_disk(src.url(), lambda: _fetch_caps(src, force=True)))
@@ -224,7 +207,7 @@ def refresh_reasoning_caps_async(provider: Optional[str]) -> None:
     rejects. Called from the conversation loop's reasoning_mandatory recovery so the profile guard
     is right again on the next request; no-op for providers without a catalog.
     """
-    src = {"portal": _PORTAL_CAPS, "portal-portal": _PORTAL_CAPS, "arkos-portal": _PORTAL_CAPS,
+    src = {
            "openrouter": _OPENROUTER_CAPS}.get(str(provider or "").strip().lower())
     if src is not None:
         _warm_reasoning_caps_async(lambda: _fetch_caps(src, force=True))
@@ -237,18 +220,6 @@ _OPENROUTER_CAPS = _CapsSource(
     "_openrouter_caps_disk_checked", "_openrouter_caps_warm_started",
     lambda: _OPENROUTER_CATALOG_URL,
 )
-_PORTAL_CAPS = _CapsSource(
-    "_portal_reasoning_caps_cache", "_portal_reasoning_caps_failed_at",
-    "_portal_caps_disk_checked", "_portal_caps_warm_started",
-    lambda: portal_catalog_url(),
-)
-
-
-def portal_catalog_url() -> str:
-    """The Portal ``/v1/models`` URL for the endpoint we actually talk to (``PORTAL_INFERENCE_BASE_URL``
-    → resolved credential base → prod), so a staging profile reads staging's capabilities."""
-    from arkos_cli.models_pricing import _resolve_portal_pricing_credentials
-    return f"{_resolve_portal_pricing_credentials()[1]}/v1/models"
 
 
 def openrouter_model_reasoning_capabilities(
@@ -259,19 +230,6 @@ def openrouter_model_reasoning_capabilities(
     return _model_caps(_OPENROUTER_CAPS, model_id, timeout=timeout, allow_fetch=allow_fetch)
 
 
-def portal_model_reasoning_capabilities(
-    model_id: Optional[str], *, timeout: float = 6.0, allow_fetch: bool = False,
-) -> Optional[dict[str, Any]]:
-    """Arkos Portal counterpart of :func:`openrouter_model_reasoning_capabilities`; warm the cache
-    with :func:`warm_portal_reasoning_caps_async` from hot paths."""
-    return _model_caps(_PORTAL_CAPS, model_id, timeout=timeout, allow_fetch=allow_fetch)
-
-
 def warm_openrouter_reasoning_caps_async() -> None:
     """Warm the OpenRouter reasoning-capability cache in the background."""
     _warm_caps_async(_OPENROUTER_CAPS)
-
-
-def warm_portal_reasoning_caps_async() -> None:
-    """Arkos Portal counterpart of :func:`warm_openrouter_reasoning_caps_async`."""
-    _warm_caps_async(_PORTAL_CAPS)

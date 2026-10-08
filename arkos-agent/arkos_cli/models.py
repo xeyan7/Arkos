@@ -146,8 +146,6 @@ _openrouter_catalog_cache: list[tuple[str, str]] | None = None
 _ai_gateway_catalog_cache: list[tuple[str, str]] | None = None
 
 
-
-
 def _zero_priced(pricing: Any, keys: tuple[str, str], default: str) -> bool:
     """True when both pricing fields parse to 0 (missing fields read as ``default``)."""
     if not isinstance(pricing, dict):
@@ -163,44 +161,6 @@ def _is_model_free(model_id: str, pricing: dict[str, dict[str, str]]) -> bool:
     return bool(pricing.get(model_id)) and _zero_priced(pricing.get(model_id), ("prompt", "completion"), "1")
 
 
-def partition_portal_models_by_tier(
-    model_ids: list[str], pricing: dict[str, dict[str, str]], free_tier: bool
-) -> tuple[list[str], list[str]]:
-    """Split Portal models into (selectable, unavailable): free-tier users may only select free models
-    (paid ones are returned as unavailable, shown grayed out)."""
-    if not free_tier or not pricing:
-        return (model_ids, [])
-    selectable = [mid for mid in model_ids if _is_model_free(mid, pricing)]
-    return (selectable, [mid for mid in model_ids if mid not in selectable])
-
-
-def _union_with_portal_recommendations(
-    tier_key: str, curated_ids: list[str], pricing: dict[str, dict[str, str]], portal_base_url: str,
-    *, force_refresh: bool, synthesize_free_pricing: bool,
-) -> tuple[list[str], dict[str, dict[str, str]]]:
-    """Portal recommendations — removed in engine build. Returns inputs unchanged."""
-    return (list(curated_ids), dict(pricing))
-
-
-def union_with_portal_free_recommendations(
-    curated_ids: list[str], pricing: dict[str, dict[str, str]], portal_base_url: str = "", *,
-    force_refresh: bool = False) -> tuple[list[str], dict[str, dict[str, str]]]:
-    """Curated list + pricing plus the Portal's ``freeRecommendedModels``; Portal-only free picks get a
-    synthetic $0 pricing entry so tier partitioning sees them as free."""
-    return _union_with_portal_recommendations(
-        "freeRecommendedModels", curated_ids, pricing, portal_base_url,
-        force_refresh=force_refresh, synthesize_free_pricing=True)
-
-
-def union_with_portal_paid_recommendations(
-    curated_ids: list[str], pricing: dict[str, dict[str, str]], portal_base_url: str = "", *,
-    force_refresh: bool = False) -> tuple[list[str], dict[str, dict[str, str]]]:
-    """Curated list plus the Portal's ``paidRecommendedModels``; ``pricing`` is deliberately left untouched."""
-    return _union_with_portal_recommendations(
-        "paidRecommendedModels", curated_ids, pricing, portal_base_url,
-        force_refresh=force_refresh, synthesize_free_pricing=False)
-
-
 _FREE_TIER_CACHE_TTL: int = 180
 _free_tier_cache: dict[str, tuple[bool, float]] = {}
 
@@ -212,76 +172,10 @@ def _pricing_profile_key() -> str:
     return arkos_home_key()
 
 
-def get_cached_portal_free_tier() -> Optional[bool]:
-    """This profile's live cached entitlement, or ``None`` if unknown/expired."""
-    cached = _free_tier_cache.get(_pricing_profile_key())
-    if cached is None or time.monotonic() - cached[1] >= _FREE_TIER_CACHE_TTL:
-        return None
-    return cached[0]
-
-
-def check_portal_free_tier(*, force_fresh: bool = False, cached_only: bool = False) -> bool:
-    """Portal free-tier check — removed in engine build (portal deleted). Always False."""
-    return False
-
-
-
-PORTAL_RECOMMENDED_MODELS_PATH = "/api/portal/recommended-models"
-_PORTAL_RECOMMENDED_CACHE_TTL: int = 600
-_portal_recommended_cache: dict[str, tuple[dict[str, Any], float]] = {}
-
-
-def _portal_recommended_disk_path() -> "Path":
-    from arkos_constants import get_arkos_home
-    return get_arkos_home() / "cache" / "portal_recommended_cache.json"
-
-
-def _read_portal_recommended_disk(base: str) -> dict[str, Any] | None:
-    """Last-known-good payload for ``base`` from the per-base disk map
-    ``{"<base>": {"data": {...}, "ts": <epoch>}}`` (staging and prod don't collide), or None."""
-    blob = _read_json_cache(_portal_recommended_disk_path(), errors=(OSError, json.JSONDecodeError))
-    entry = (blob or {}).get(base)
-    data = entry.get("data") if isinstance(entry, dict) else None
-    return data if isinstance(data, dict) and data else None
-
-
-def _write_portal_recommended_disk(base: str, data: dict[str, Any]) -> None:
-    """Merge ``data`` into the per-base disk map atomically; failures are debug-logged (the in-process
-    cache still works)."""
-    if not data:
-        return
-    path = _portal_recommended_disk_path()
-    try:
-        blob = _read_json_cache(path, errors=(OSError, json.JSONDecodeError)) or {}
-        blob[base] = {"data": data, "ts": time.time()}
-        _write_json_cache(path, blob, indent=2)
-    except OSError as exc:
-        logger.debug("portal recommended-models disk cache write failed: %s", exc)
-
-
-def fetch_portal_recommended_models(
-    portal_base_url: str = "", timeout: float = 5.0, *, force_refresh: bool = False
-) -> dict[str, Any]:
-    """Portal recommended models — removed in engine build (portal deleted). Always {}."""
-    return {}
-
-
-def _resolve_portal_url() -> str:
-    """Portal base URL — removed in engine build (portal deleted). Always ""."""
-    return ""
-
-
 def _extract_model_name(entry: Any) -> Optional[str]:
     """Pull the ``modelName`` field from a recommended-model entry, else None."""
     model_name = entry.get("modelName") if isinstance(entry, dict) else None
     return model_name.strip() if isinstance(model_name, str) and model_name.strip() else None
-
-
-def get_portal_recommended_aux_model(
-    *, vision: bool = False, free_tier: Optional[bool] = None, portal_base_url: str = "",
-    force_refresh: bool = False) -> Optional[str]:
-    """Portal recommended aux model — removed in engine build (portal deleted). Always None."""
-    return None
 
 
 def get_preferred_silent_default_model(provider: str = "openrouter") -> str:
@@ -321,7 +215,7 @@ def _openrouter_model_is_free(pricing: Any) -> bool:
 
 def _openrouter_model_supports_tools(item: Any) -> bool:
     """True when ``supported_parameters`` advertises ``tools`` (arkos-agent is tool-calling-first).
-    Permissive when the field is absent/malformed: some OpenRouter-compatible gateways (Arkos Portal,
+    Permissive when the field is absent/malformed: some OpenRouter-compatible gateways (
     private mirrors) don't populate it, and the picker must not silently empty for them.
 
     .
@@ -334,10 +228,6 @@ _openrouter_reasoning_caps_cache: dict[str, Optional[dict[str, Any]]] | None = N
 _openrouter_reasoning_caps_failed_at: float | None = None
 _openrouter_caps_disk_checked = False
 _openrouter_caps_warm_started = False
-_portal_reasoning_caps_cache: dict[str, Optional[dict[str, Any]]] | None = None
-_portal_reasoning_caps_failed_at: float | None = None
-_portal_caps_disk_checked = False
-_portal_caps_warm_started = False
 
 
 from agent.reasoning_effort import clamp_effort as _clamp_effort, is_astra_model
@@ -417,17 +307,6 @@ def model_ids(*, force_refresh: bool = False) -> list[str]:
     return [mid for mid, _ in fetch_openrouter_models(force_refresh=force_refresh)]
 
 
-def get_curated_portal_model_ids() -> list[str]:
-    """Curated Arkos Portal model ids: the remote catalog manifest, else the in-repo
-    ``_PROVIDER_MODELS["portal"]`` snapshot. Always a list."""
-    try:
-        from arkos_cli.model_catalog import get_curated_portal_models
-        remote = get_curated_portal_models()
-    except Exception:
-        remote = None
-    return list(remote or _PROVIDER_MODELS.get("portal", []))
-
-
 def _ai_gateway_model_is_free(pricing: Any) -> bool:
     return _zero_priced(pricing, ("input", "output"), "0")
 
@@ -469,7 +348,6 @@ def fetch_ai_gateway_models(
 def ai_gateway_model_ids(*, force_refresh: bool = False) -> list[str]:
     """Return just the AI Gateway model-id strings."""
     return [mid for mid, _ in fetch_ai_gateway_models(force_refresh=force_refresh)]
-
 
 
 _KNOWN_PROVIDER_NAMES: set[str] = set(_PROVIDER_LABELS) | set(_PROVIDER_ALIASES) | {"openrouter", "custom"}
@@ -727,10 +605,10 @@ def _configured_provider_ids() -> set[str]:
 
 
 def _resolve_provider_prefix(model_name: str) -> Optional[tuple[str, str]]:
-    """Route an explicit ``vendor/model`` prefix (``portal/deepseek-v4-pro``, ``ollama/qwen3.5:4b``) to
+    """Route an explicit ``vendor/model`` prefix (``openrouter/deepseek-v4-pro``, ``ollama/qwen3.5:4b``) to
     a provider the user defined in ``providers:`` (by raw name or alias) instead of the default.
 
-    ``portal/deepseek-v4-pro`` or ``ollama/qwen3.5:4b`` should route to the named provider instead of falling
+    ``openrouter/deepseek-v4-pro`` or ``ollama/qwen3.5:4b`` should route to the named provider instead of falling
     back to the configured default (which silently sends non-default models to the wrong endpoint).
     """
     if "/" not in model_name:
@@ -988,11 +866,6 @@ def _copilot_catalog(normalized: str, force_refresh: bool) -> Optional[list[str]
     return list(_PROVIDER_MODELS.get("copilot", [])) if normalized == "copilot-acp" else None
 
 
-def _portal_catalog(normalized: str, force_refresh: bool) -> Optional[list[str]]:
-    """Portal catalog — removed in engine build (portal deleted). Always None."""
-    return None
-
-
 def _api_key_credentials(normalized: str) -> tuple[str, str]:
     """``(api_key, base_url)`` from ``resolve_api_key_provider_credentials``; empty strings on any miss."""
     try:
@@ -1082,7 +955,7 @@ _PROVIDER_CATALOG_FETCHERS: dict[str, Any] = {
     "openai-codex": _codex_catalog,
     "copilot": _copilot_catalog,
     "copilot-acp": _copilot_catalog,
-    "portal": _portal_catalog,
+
     "stepfun": _api_key_provider_live,
     "gmi": _api_key_provider_live,
     "anthropic": _anthropic_catalog,
@@ -1146,7 +1019,6 @@ def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) 
         return curated_static
     merged = _merge_with_models_dev(normalized, curated_static)
     return _xai_finalize_catalog(merged) if normalized in {"xai", "xai-oauth"} else merged
-
 
 
 _PROVIDER_MODELS_CACHE_TTL = 3600
@@ -1553,7 +1425,6 @@ def fetch_github_model_catalog(
             _github_model_catalog_cache_time = time.monotonic()
             return models
     return None
-
 
 
 _copilot_context_cache: dict[str, int] = {}
@@ -2105,13 +1976,13 @@ def cached_fetch_api_models(
     opens that must not block on a stopped local endpoint) still get a warm catalog instead of
     collapsing to the config-declared subset. ``fetch_models`` supplies native-aware discovery
     without minting a command token before cache admission."""
-    from arkos_cli.model_switch_providers import _NativePickerModelList
+    from arkos_cli.model_catalog_types import NativeModelCatalog
 
     def _catalog(entry):
-        return (_NativePickerModelList if entry.get("native_catalog") else list)(entry["models"])
+        return (NativeModelCatalog if entry.get("native_catalog") else list)(entry["models"])
 
     def _entry(live, at=None):
-        return {**_cache_entry(fp, live, at), "native_catalog": isinstance(live, _NativePickerModelList)}
+        return {**_cache_entry(fp, live, at), "native_catalog": isinstance(live, NativeModelCatalog)}
 
     def _live():
         if fetch_models is not None:
@@ -2140,13 +2011,13 @@ def cached_fetch_api_models(
         if age < _PROVIDER_MODELS_STALE_SERVE_MAX:
             def _refresh_custom():
                 live = _live()
-                return _entry(live) if live or isinstance(live, _NativePickerModelList) else None
+                return _entry(live) if live or isinstance(live, NativeModelCatalog) else None
 
             _spawn_swr_refresh(cache_key, _refresh_custom)
             return _catalog(entry)
 
     live = _live()
-    if live or isinstance(live, _NativePickerModelList):
+    if live or isinstance(live, NativeModelCatalog):
         stored = _entry(live, now)
         _store_cache_entry(cache_key, stored, cache)
         return _catalog(stored)
@@ -2159,9 +2030,6 @@ from typing import NamedTuple  # noqa: F401,E402
 from difflib import get_close_matches  # noqa: F401,E402
 import http.client  # noqa: F401,E402
 
-def is_portal_free_tier(account_info: dict[str, Any]) -> bool:
-    """Portal free-tier check — removed in engine build (portal deleted). Always False."""
-    return False
 
 _OPENCODE_KEYLESS_EXTRA_SLUGS = frozenset({"big-pickle"})
 
@@ -2192,13 +2060,12 @@ _PLUGIN_COMPAT_LAZY = {
     'fetch_lmstudio_models': ('arkos_cli.models_local', 'fetch_lmstudio_models'),
     'fetch_models_with_pricing': ('arkos_cli.models_pricing', 'fetch_models_with_pricing'),
     'fetch_ollama_local_models': ('arkos_cli.models_local', 'fetch_ollama_local_models'),
-    'get_cached_portal_inference_base_url': ('arkos_cli.models_pricing', 'get_cached_portal_inference_base_url'),
+
     'get_pricing_for_provider': ('arkos_cli.models_pricing', 'get_pricing_for_provider'),
     'group_providers': ('arkos_cli.models_catalog_static', 'group_providers'),
     'lmstudio_model_reasoning_options': ('arkos_cli.models_local', 'lmstudio_model_reasoning_options'),
-    'portal_catalog_url': ('arkos_cli.models_reasoning_caps', 'portal_catalog_url'),
-    'portal_model_reasoning_capabilities': ('arkos_cli.models_reasoning_caps', 'portal_model_reasoning_capabilities'),
-    'portal_policy_allowed_ids': ('arkos_cli.models_pricing', 'portal_policy_allowed_ids'),
+
+
     'ollama_model_supports_thinking': ('arkos_cli.models_local', 'ollama_model_supports_thinking'),
     'openrouter_model_reasoning_capabilities': ('arkos_cli.models_reasoning_caps', 'openrouter_model_reasoning_capabilities'),
     'parse_openrouter_reasoning_capabilities': ('arkos_cli.models_reasoning_caps', 'parse_openrouter_reasoning_capabilities'),
@@ -2208,11 +2075,10 @@ _PLUGIN_COMPAT_LAZY = {
     'probe_ollama_local_models': ('arkos_cli.models_local', 'probe_ollama_local_models'),
     'provider_group_for_slug': ('arkos_cli.models_catalog_static', 'provider_group_for_slug'),
     'refresh_reasoning_caps_async': ('arkos_cli.models_reasoning_caps', 'refresh_reasoning_caps_async'),
-    'restrict_to_portal_policy': ('arkos_cli.models_pricing', 'restrict_to_portal_policy'),
+
     'should_use_ollama_native_catalog': ('arkos_cli.models_local', 'should_use_ollama_native_catalog'),
     'url_origin': ('arkos_cli.urllib_security', 'url_origin'),
-    'validate_requested_model': ('arkos_cli.models_validate', 'validate_requested_model'),
-    'warm_portal_reasoning_caps_async': ('arkos_cli.models_reasoning_caps', 'warm_portal_reasoning_caps_async'),
+
     'warm_openrouter_reasoning_caps_async': ('arkos_cli.models_reasoning_caps', 'warm_openrouter_reasoning_caps_async'),
 }
 

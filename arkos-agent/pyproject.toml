@@ -3,7 +3,7 @@
 [project]
 name = "arkos-agent"
 version = "0.21.1"
-description = "Arkos: Autonomous AI desktop assistant with tool-calling capabilities"
+description = "Arkos: Embeddable AI engine with tool-calling capabilities"
 readme = "README.md"
 # Upper bound is load-bearing, not cosmetic. uv resolves the project's
 # Python from `requires-python`, and an inherited `UV_PYTHON` env var (or a
@@ -47,7 +47,6 @@ dependencies = [
   "openai==2.24.0",
   "certifi==2026.5.20",
   "python-dotenv==1.2.2",
-  "fire==0.7.1",
   "httpx[socks]==0.28.1",
   "rich==14.3.3",
   "tenacity==9.1.4",
@@ -69,8 +68,6 @@ dependencies = [
   # Responses API resource is exercised from a non-main thread, which is the
   # codex_responses dispatch in agent/chat_completion_helpers.py:_call.
   "pydantic==2.13.4",
-  # Interactive CLI (prompt_toolkit is used directly by cli.py)
-  "prompt_toolkit==3.0.52",
   # Cron scheduler (built-in feature — scheduled cron/interval jobs use croniter).
   "croniter==6.0.0",
   # Snowball stemming for tool_search's BM25 (tools/tool_search.py) —
@@ -130,16 +127,6 @@ dependencies = [
   # Browser CDP supervisor + browser_dialog import this directly. Keep core
   # so browser tool discovery doesn't fail on lean installs.
   "websockets==15.0.1",
-  # .gitignore-aware file matching for desktop build stamp.
-  "pathspec==1.1.1",
-  "fastapi>=0.104.0,<1",
-  # CIDR-aware forwarded_allow_ips requires uvicorn >=0.31.0.
-  "uvicorn[standard]>=0.31.0,<1",
-  # Streaming multipart uploads for the dashboard file manager.
-  # FastAPI's UploadFile/Form depend on python-multipart; it is NOT pulled in
-  # by fastapi itself, so the dashboard's multipart upload endpoint would 500
-  # without an explicit dependency here (and in the `web` extra below).
-  "python-multipart>=0.0.9,<1",
   "ptyprocess>=0.7.0,<1; sys_platform != 'win32'",
   "pywinpty>=2.0.0,<3; sys_platform == 'win32'",
   # Desktop SSH's Windows remote runtime (arkos_cli/windows_ssh_runtime.py)

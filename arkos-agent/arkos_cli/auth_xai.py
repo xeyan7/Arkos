@@ -444,10 +444,10 @@ def resolve_xai_oauth_runtime_credentials(
 
 
 def _login_xai_oauth(args, pconfig: ProviderConfig, *, force_new_login: bool = False) -> None:
-    from arkos_cli.auth import _is_remote_session, _offer_existing_oauth_credentials, _print_login_success, _update_config_for_provider, _xai_oauth_device_code_login, resolve_xai_oauth_runtime_credentials, unsuppress_credential_source
+    from arkos_cli.auth import _is_remote_session, reuse_existing_oauth_credentials, _print_login_success, _update_config_for_provider, _xai_oauth_device_code_login, resolve_xai_oauth_runtime_credentials, unsuppress_credential_source
     del pconfig
 
-    if not force_new_login and _offer_existing_oauth_credentials(
+    if not force_new_login and reuse_existing_oauth_credentials(
         "xai-oauth",
         resolve=resolve_xai_oauth_runtime_credentials,
         is_expiring=_xai_access_token_is_expiring,

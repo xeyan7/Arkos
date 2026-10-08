@@ -1,8 +1,7 @@
 """Endpoint-family detection for Anthropic-compatible base URLs.
 
 A dozen services speak the Anthropic Messages API but differ in auth style, accepted beta
-headers, and request quirks (MiniMax, Kimi/Moonshot, DeepSeek, OpenCode, Azure AI Foundry, Portal
-Portal, Bedrock). Every such difference is decided from the configured base URL, so the
+headers, and request quirks (MiniMax, Kimi/Moonshot, DeepSeek, OpenCode, Azure AI Foundry, Bedrock). Every such difference is decided from the configured base URL, so the
 predicates live together here as pure functions (no I/O, SDK or credentials) that both
 ``agent/anthropic_adapter.py`` and ``agent/anthropic_message_convert.py`` can import without a
 cycle.
@@ -67,7 +66,6 @@ def _is_kimi_family_endpoint(base_url: str | None, model: str | None = None) -> 
     )
 
 
-
 _DEEPSEEK_THINKING_MODEL_PREFIXES = (
     "deepseek-r", "deepseek-v4", "deepseek_v4", "deepseek-pro",
     "deepseek_pro", "deepseek-flash", "deepseek_flash",
@@ -99,22 +97,13 @@ def _is_deepseek_anthropic_endpoint(base_url: str | None) -> bool:
     return base_url_host_matches(base_url or "", "api.deepseek.com") and "/anthropic" in _normalized_lower(base_url)
 
 
-def _is_portal_endpoint(base_url: str | None) -> bool:
-    """Arkos Portal Messages route (disabled)."""
-    return False
-
-
 def _requires_bearer_auth(base_url: str | None) -> bool:
     """Providers needing ``Authorization: Bearer`` instead of ``x-api-key``: MiniMax, Azure AI
-    Foundry, Palantir Foundry's LLM proxy, CommandCode, Arkos Portal. Palantir/CommandCode use
+    Foundry, Palantir Foundry's LLM proxy, CommandCode. Palantir/CommandCode use
     hostname matching (not substring) so ``evil.com/palantirfoundry`` paths don't trigger it."""
     normalized = _normalized_lower(base_url)
     return (
-        _is_portal_endpoint(base_url)
-        or normalized.startswith(_MINIMAX_ANTHROPIC_PREFIXES)
-        or "azure.com" in normalized
-        or base_url_host_matches(normalized, "palantirfoundry.com")
-        or base_url_host_matches(normalized, "api.commandcode.ai")
+        normalized.startswith(_MINIMAX_ANTHROPIC_PREFIXES) or 'azure.com' in normalized or base_url_host_matches(normalized, 'palantirfoundry.com') or base_url_host_matches(normalized, 'api.commandcode.ai')
     )
 
 

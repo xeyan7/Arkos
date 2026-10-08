@@ -1,4 +1,4 @@
-"""OpenRouter-compatible image generation backend (OpenRouter + Arkos Portal).
+"""OpenRouter-compatible image generation backend (OpenRouter).
 
 Both speak the OpenAI-style ``/chat/completions`` image protocol (``modalities:
 ["image","text"]``, references as ``image_url`` parts, output in
@@ -472,7 +472,7 @@ def _image_api_extra(
 
 
 class OpenRouterCompatImageProvider(ImageGenProvider):
-    """One instance per backend (OpenRouter, Arkos Portal); they differ only in the runtime
+    """One instance per backend (OpenRouter); they differ only in the runtime
     provider supplying ``(base_url, api_key)``, the config namespace, and Image API support."""
 
     def __init__(
@@ -522,8 +522,7 @@ class OpenRouterCompatImageProvider(ImageGenProvider):
         return {"modalities": ["text", "image"], "max_reference_images": max_refs}
 
     def list_models(self) -> List[Dict[str, Any]]:
-        """Live catalog: OpenRouter = ``GET /images/models`` ∪ chat-completions image models (new
-        releases selectable); Arkos Portal = chat-completions only. Offline: default chain + snapshot."""
+        """Selectable OpenRouter image models; offline defaults and cached snapshots are supported."""
         merged: Dict[str, Dict[str, Any]] = {}
         if self._supports_image_api:
             merged = {entry["id"]: entry for entry in self._image_api_live_models()}
@@ -766,32 +765,16 @@ class OpenRouterCompatImageProvider(ImageGenProvider):
 
 
 def _build_providers() -> List[OpenRouterCompatImageProvider]:
-    return [
-        OpenRouterCompatImageProvider(
-            provider_name="openrouter", display_name="OpenRouter", runtime_name="openrouter",
-            config_key="openrouter", model_env_var="OPENROUTER_IMAGE_MODEL", supports_image_api=True,
-            setup_schema={
-                "name": "OpenRouter (image)",
-                "badge": "paid",
-                "tag": "Gemini Flash Image, gpt-image-2, Krea 2, Qwen Image 3 & more via OpenRouter; uses OPENROUTER_API_KEY",
-                "env_vars": [{
-                    "key": "OPENROUTER_API_KEY", "prompt": "OpenRouter API key", "url": "https://openrouter.ai/keys",
-                }],
-            }),
-        OpenRouterCompatImageProvider(
-            provider_name="portal", display_name="Arkos Portal", runtime_name="portal", config_key="portal",
-            model_env_var="PORTAL_IMAGE_MODEL",
-            setup_schema={
-                "name": "Arkos Portal (image)",
-                "badge": "subscription",
-                "tag": "Reference-grounded image generation via Arkos Portal (OpenRouter-backed)",
-                "env_vars": [],
-                "requires_portal_auth": True,
-            }),
-    ]
+    return [OpenRouterCompatImageProvider(
+        provider_name="openrouter", display_name="OpenRouter", runtime_name="openrouter",
+        config_key="openrouter", model_env_var="OPENROUTER_IMAGE_MODEL", supports_image_api=True,
+        setup_schema={"name": "OpenRouter (image)", "badge": "paid",
+                      "tag": "Image generation through OpenRouter using OPENROUTER_API_KEY",
+                      "env_vars": [{"key": "OPENROUTER_API_KEY", "prompt": "OpenRouter API key",
+                                    "url": "https://openrouter.ai/keys"}]})]
 
 
 def register(ctx: Any) -> None:
-    """Register the OpenRouter + Arkos Portal image gen providers."""
+    """Register the OpenRouter image gen providers."""
     for provider in _build_providers():
         ctx.register_image_gen_provider(provider)

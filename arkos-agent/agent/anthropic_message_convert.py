@@ -10,10 +10,7 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-from agent.anthropic_endpoints import (
-    _is_deepseek_anthropic_endpoint, _is_kimi_family_endpoint, _is_portal_endpoint,
-    _is_third_party_anthropic_endpoint, _model_name_is_deepseek_thinking,
-)
+from agent.anthropic_endpoints import _is_deepseek_anthropic_endpoint, _is_kimi_family_endpoint, _is_third_party_anthropic_endpoint, _model_name_is_deepseek_thinking
 
 logger = logging.getLogger(__name__)
 
@@ -513,16 +510,8 @@ def _keep_valid_latest_thinking(content: List[Any], signature_dead: bool) -> Lis
 
 
 def _manage_thinking_signatures(result: List[Dict[str, Any]], base_url: str | None, model: str | None) -> None:
-    """Strip or preserve thinking blocks per endpoint. Mutates ``result`` in place.
-
-    Anthropic signs thinking blocks against the full turn; any upstream mutation invalidates them
-    (400 "Invalid signature in thinking block"), so on direct Anthropic only the LATEST assistant
-    turn keeps signed blocks. Signatures are proprietary: third-party endpoints strip all thinking.
-    Kimi replays as-is; DeepSeek needs unsigned blocks round-tripped but rejects signed ones. Portal
-    Portal proxies Claude with sticky sessions and validates the same signatures, so it takes the
-    native path despite not being anthropic.com.
-    """
-    is_third_party = _is_third_party_anthropic_endpoint(base_url) and not _is_portal_endpoint(base_url)
+    """Strip or preserve thinking blocks per endpoint. Direct Anthropic keeps the latest signed turn; Kimi replays blocks and DeepSeek requires unsigned blocks."""
+    is_third_party = _is_third_party_anthropic_endpoint(base_url)
     is_kimi = _is_kimi_family_endpoint(base_url, model)
     is_deepseek = _is_deepseek_anthropic_endpoint(base_url) or (
         is_third_party and _model_name_is_deepseek_thinking(model)

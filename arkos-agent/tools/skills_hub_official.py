@@ -27,7 +27,7 @@ def _clean_rel_parts(path: str) -> Optional[List[str]]:
 
 
 class OptionalSkillSource(SkillSource):
-    """Skills from the repo's ``optional-skills/`` directory: official (Portal-maintained) but not
+    """Skills from the repo's ``optional-skills/`` directory: official (Arkos-maintained) but not
     activated by default — absent from the system prompt and not copied to ~/.arkos/skills/ at
     setup. Discoverable via the Skills Hub as source "official" with "builtin" trust."""
 

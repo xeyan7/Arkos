@@ -330,7 +330,7 @@ def auto_title_session(
         if not session_db or not session_id or _has_upgraded_title(session_db, session_id):
             return
         from agent.aux_accounting import set_accounting_context
-        from agent.portal_tags import set_conversation_context
+        from agent.request_context import set_conversation_context
         conversation_id = session_id
         with suppress(Exception):
             conversation_id = session_db.get_conversation_root(session_id) or session_id

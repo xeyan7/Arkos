@@ -808,14 +808,9 @@ def try_recover_primary_transport(
     agent, api_error: Exception, *, retry_count: int, max_retries: int,
 ) -> bool:
     """Rebuild the primary client once and retry after ``max_retries`` exhaust on a transient
-    transport error. Skipped for aggregators (OpenRouter, Portal) that manage retries server-side."""
+    transport error. Skipped for aggregators (OpenRouter) that manage retries server-side."""
     error_type = type(api_error).__name__
     if agent._fallback_activated or error_type not in _TRANSIENT_TRANSPORT_ERRORS or agent._is_openrouter_url():
-        return False
-    if (
-        (agent.provider or "").strip().lower() in {"portal", "portal-portal", "arkos-portal"}
-        and getattr(agent, "api_mode", None) != "anthropic_messages"
-    ):
         return False
     try:
         if getattr(agent, "client", None) is not None:
@@ -1323,7 +1318,6 @@ def anthropic_prompt_cache_policy(
     from agent.anthropic_endpoints import _model_name_is_kimi_family
     is_kimi = _model_name_is_kimi_family(eff_model) or "moonshot" in model_lower
     is_openrouter = base_url_host_matches(eff_base_url, "openrouter.ai")
-    is_portal = False
     is_anthropic_wire = eff_api_mode == "anthropic_messages"
     is_native_anthropic = is_anthropic_wire and (
         eff_provider == "anthropic" or base_url_hostname(eff_base_url) == "api.anthropic.com"
@@ -1358,9 +1352,7 @@ def anthropic_prompt_cache_policy(
             return False, False
     if is_native_anthropic:
         return True, True
-    if (is_openrouter or is_portal) and (is_claude or is_kimi) and not is_anthropic_wire:
-        return True, False
-    if is_portal and "qwen" in model_lower:
+    if is_openrouter and (is_claude or is_kimi) and (not is_anthropic_wire):
         return True, False
     if is_anthropic_wire and is_claude:
         return True, True
@@ -2767,7 +2759,6 @@ __all__ = [
     "extract_api_error_context", "apply_pending_steer_to_tool_results", "_iter_pool_sockets",
     "force_close_tcp_sockets",
 ]
-
 
 
 def agent_runtime_owns_post_tool_hook(agent: Any, function_name: str) -> bool:

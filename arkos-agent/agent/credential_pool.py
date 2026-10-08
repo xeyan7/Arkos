@@ -73,7 +73,6 @@ def _is_source_suppressed_fn() -> Callable[[str, str], bool]:
         return lambda _p, _s: False
 
 
-
 STATUS_OK = "ok"
 STATUS_EXHAUSTED = "exhausted"
 STATUS_DEAD = "dead"
@@ -123,15 +122,10 @@ CUSTOM_POOL_PREFIX = "custom:"
 
 _EXTRA_KEYS = frozenset({
     "token_type", "scope", "client_id", "portal_base_url", "obtained_at",
-    "expires_in", "agent_key_id", "agent_key_expires_in", "agent_key_reused",
-    "agent_key_obtained_at", "tls", "secret_source", "secret_fingerprint",
+    "expires_in", "tls", "secret_source", "secret_fingerprint",
     "failure_reason",
 })
 
-_PORTAL_EXTRA_STATE_KEYS = (
-    "obtained_at", "expires_in", "agent_key_id",
-    "agent_key_expires_in", "agent_key_reused", "agent_key_obtained_at",
-)
 
 _CLEAR_STATUS: Dict[str, Any] = {
     "last_status": None,
@@ -172,8 +166,6 @@ class PooledCredential:
     expires_at_ms: Optional[int] = None
     last_refresh: Optional[str] = None
     inference_base_url: Optional[str] = None
-    agent_key: Optional[str] = None
-    agent_key_expires_at: Optional[str] = None
     request_count: int = 0
     extra: Dict[str, Any] = None  # type: ignore[assignment]
 
@@ -217,26 +209,10 @@ class PooledCredential:
 
     @property
     def runtime_api_key(self) -> str:
-        if self.provider == "portal":
-            for token, expires_at in (
-                (self.agent_key, self.agent_key_expires_at),
-                (self.access_token, self.expires_at),
-            ):
-                if (
-                    isinstance(token, str)
-                    and token.strip()
-                    and auth_mod._portal_invoke_jwt_is_usable(
-                        token, scope=getattr(self, "scope", None), expires_at=expires_at,
-                    )
-                ):
-                    return token.strip()
-            return ""
         return str(self.access_token or "")
 
     @property
     def runtime_base_url(self) -> Optional[str]:
-        if self.provider == "portal":
-            return self.inference_base_url or self.base_url
         return self.base_url
 
 
@@ -378,8 +354,6 @@ def _exhausted_until(entry: PooledCredential, *, sole_credential: bool = False) 
             failure_reason=entry.failure_reason,
         )
     return None
-
-
 
 
 def _normalize_custom_pool_name(name: str) -> str:
@@ -639,8 +613,6 @@ def resolve_runtime_pool_key(provider: Optional[str], base_url: Optional[str]) -
 DEFAULT_MAX_CONCURRENT_PER_CREDENTIAL = 1
 
 
-
-
 def _guarded_global_root(global_path: Optional[Path]) -> Optional[Path]:
     """Apply the pytest seat belt to a resolved global-root auth.json path.
 
@@ -669,7 +641,7 @@ def _write_through_provider_state_to_global_root(
 ) -> None:
     """Persist a rotated OAuth ``state`` into the global-root auth.json.
 
-    Best-effort write-through for the multi-profile rotation hazard: portal,
+    Best-effort write-through for the multi-profile rotation hazard:
     openai-codex, and xai-oauth rotate the refresh_token on refresh, so when
     a profile pool refresh rotates a grant it resolved from the root fallback,
     the rotated chain must land back in root. Otherwise root keeps a revoked
@@ -813,7 +785,7 @@ _TOKENS_SINGLETON_PROVIDERS: Dict[str, Tuple[str, str, str, str]] = {
     "xai-oauth": ("xAI OAuth", "xAI", "refresh_xai_oauth_pure", "_is_terminal_xai_oauth_refresh_error"),
 }
 
-REFRESHABLE_OAUTH_PROVIDERS = frozenset({"anthropic", "portal", *_TOKENS_SINGLETON_PROVIDERS})
+REFRESHABLE_OAUTH_PROVIDERS = frozenset({'anthropic', *_TOKENS_SINGLETON_PROVIDERS})
 
 _SINGLE_USE_REFRESH_PROVIDERS = ("openai-codex", "xai-oauth", "anthropic")
 
@@ -824,7 +796,7 @@ _REFRESH_TIMEOUT_ENV_VARS = {
 
 _RESYNC_SOURCE = {
     "anthropic": "claude_code",
-    "portal": "device_code",
+
     "openai-codex": "device_code",
     "xai-oauth": "device_code",
 }
@@ -1154,47 +1126,13 @@ class CredentialPool(CredentialPoolAdminMixin):
             logger.debug("Failed to sync %s entry from auth.json: %s", display, exc)
         return entry
 
-    def _sync_portal_entry_from_auth_store(self, entry: PooledCredential) -> PooledCredential:
-        """Sync a Portal device_code entry from auth.json ``providers.portal`` if state differs.
-
-        Another process refreshing via ``resolve_portal_runtime_credentials``
-        writes fresh tokens under ``_auth_store_lock``; adopting them avoids a
-        "refresh token reuse" revocation on the Arkos Portal.
-        """
-        if self.provider != "portal" or entry.source != "device_code":
-            return entry
-        try:
-            with _auth_store_lock():
-                state = _load_provider_state(_load_auth_store(), "portal")
-            if not state:
-                return entry
-            comparable = {
-                key: state.get(key)
-                for key in (
-                    "access_token", "refresh_token", "expires_at",
-                    "agent_key", "agent_key_expires_at", "inference_base_url",
-                )
-            }
-            if not any(v not in (None, "") and getattr(entry, k, None) != v for k, v in comparable.items()):
-                return entry
-            logger.debug("Pool entry %s: syncing Portal state from auth.json", entry.id)
-            field_updates: Dict[str, Any] = dict(_CLEAR_STATUS)
-            field_updates.update({k: v for k, v in comparable.items() if v})
-            extra_updates = dict(entry.extra)
-            extra_updates.update(
-                {k: state[k] for k in _PORTAL_EXTRA_STATE_KEYS if state.get(k) is not None}
-            )
-            return self._adopt(entry, extra=extra_updates, **field_updates)
-        except Exception as exc:
-            logger.debug("Failed to sync Portal entry from auth.json: %s", exc)
-        return entry
 
     def _sync_device_code_entry_to_auth_store(self, entry: PooledCredential) -> None:
         """Write refreshed pool entry tokens back to auth.json ``providers.<id>``.
 
         Otherwise the next ``load_pool`` re-seeds the stale singleton state
         over the fresh entry — potentially a consumed single-use refresh
-        token. Applies to Portal, OpenAI Codex and xAI OAuth singletons.
+        token. Applies to OpenAI Codex and xAI OAuth singletons.
 
         ``set_active=False`` everywhere: a sync-back is a token-rotation side
         effect, not the user choosing a provider; ``_save_provider_state``
@@ -1208,7 +1146,7 @@ class CredentialPool(CredentialPoolAdminMixin):
         back to root ONLY and skip the profile store so it never accrues a
         shadowing key that blocks both the fallback and the write-through.
         """
-        if entry.source != "device_code" or self.provider not in ("portal", *_TOKENS_SINGLETON_PROVIDERS):
+        if entry.source != 'device_code' or self.provider not in (*_TOKENS_SINGLETON_PROVIDERS,):
             return
         try:
             with _auth_store_lock():
@@ -1232,18 +1170,6 @@ class CredentialPool(CredentialPoolAdminMixin):
 
     def _apply_entry_to_singleton_state(self, entry: PooledCredential, state: Dict[str, Any]) -> bool:
         """Copy *entry*'s tokens into the provider's auth.json ``state`` in place."""
-        if self.provider == "portal":
-            state["access_token"] = entry.access_token
-            for key in ("refresh_token", "expires_at", "agent_key", "agent_key_expires_at"):
-                if getattr(entry, key):
-                    state[key] = getattr(entry, key)
-            for extra_key in _PORTAL_EXTRA_STATE_KEYS:
-                val = entry.extra.get(extra_key)
-                if val is not None:
-                    state[extra_key] = val
-            if entry.inference_base_url:
-                state["inference_base_url"] = entry.inference_base_url
-            return True
         tokens = state.get("tokens")
         if not isinstance(tokens, dict):
             return False
@@ -1422,16 +1348,6 @@ class CredentialPool(CredentialPoolAdminMixin):
             elif self.provider in _TOKENS_SINGLETON_PROVIDERS:
                 entry = self._sync_entry_from_auth_store(entry)
                 updated = self._post_tokens_refresh(entry)
-            elif self.provider == "portal":
-                stale_key = entry.runtime_api_key or entry.agent_key or entry.access_token
-                synced = self._sync_portal_entry_from_auth_store(entry)
-                if synced is not entry:
-                    entry = synced
-                    if force and entry.runtime_api_key and entry.runtime_api_key != stale_key:
-                        logger.debug("Portal entry %s: adopting peer-rotated token, skipping refresh", entry.id)
-                        return entry
-                auth_mod.resolve_portal_runtime_credentials(force_refresh=force, stale_access_token=stale_key or None)
-                updated = self._sync_portal_entry_from_auth_store(entry)
             else:
                 return entry
         except _RefreshDone as done:
@@ -1496,24 +1412,6 @@ class CredentialPool(CredentialPoolAdminMixin):
                 self._clear_terminal_tokens_state(entry, exc)
                 self._quarantine_sources(entry, {"device_code"})
                 return None
-        elif self.provider == "portal":
-            synced = self._sync_portal_entry_from_auth_store(entry)
-            if synced.refresh_token != entry.refresh_token:
-                logger.debug("Portal refresh failed but auth.json has newer tokens — adopting")
-                updated = self._adopt(synced, **_MARK_OK)
-                self._sync_device_code_entry_to_auth_store(updated)
-                return updated
-            if isinstance(exc, TimeoutError):
-                logger.debug("Portal refresh skipped: auth store lock busy; not benching entry")
-                return entry
-            if auth_mod._is_terminal_portal_refresh_error(exc):
-                logger.debug("Portal refresh token is terminally invalid; clearing local token state")
-                self._clear_terminal_portal_state(entry, exc)
-                self._quarantine_sources(
-                    entry,
-                    {auth_mod.PORTAL_DEVICE_CODE_SOURCE, f"manual:{auth_mod.PORTAL_DEVICE_CODE_SOURCE}"},
-                )
-                return None
         self._mark_exhausted(entry, None)
         return None
 
@@ -1544,26 +1442,6 @@ class CredentialPool(CredentialPoolAdminMixin):
         except Exception as clear_exc:
             logger.debug("Failed to clear terminal %s OAuth state: %s", display, clear_exc)
 
-    def _clear_terminal_portal_state(self, entry: PooledCredential, exc: Exception) -> None:
-        try:
-            with _auth_store_lock():
-                auth_store = _load_auth_store()
-                state = _load_provider_state(auth_store, "portal") or {
-                    "client_id": entry.client_id,
-                    "portal_base_url": entry.portal_base_url,
-                    "inference_base_url": entry.inference_base_url,
-                    "token_type": entry.token_type,
-                    "scope": entry.scope,
-                    "tls": entry.tls,
-                }
-                store_refresh = str(state.get("refresh_token") or "").strip()
-                if not store_refresh or store_refresh == str(entry.refresh_token or "").strip():
-                    auth_mod._quarantine_portal_oauth_state(state, exc, reason="credential_pool_refresh_failure")
-                    auth_mod._quarantine_portal_pool_entries(auth_store, exc, reason="credential_pool_refresh_failure")
-                    _save_provider_state(auth_store, "portal", state)
-                    _save_auth_store(auth_store)
-        except Exception as clear_exc:
-            logger.debug("Failed to clear terminal Portal OAuth state: %s", clear_exc)
 
     def _codex_quota_restored_upstream(self, entry: PooledCredential) -> bool:
         """Live-check whether an exhausted Codex entry's quota reset early.
@@ -1640,8 +1518,6 @@ class CredentialPool(CredentialPoolAdminMixin):
             return entry
         if self.provider == "anthropic":
             return self._sync_anthropic_entry_from_credentials_file(entry)
-        if self.provider == "portal":
-            return self._sync_portal_entry_from_auth_store(entry)
         return self._sync_entry_from_auth_store(entry)
 
     def _available_entries(
@@ -1953,9 +1829,6 @@ class CredentialPool(CredentialPoolAdminMixin):
         return refreshed
 
 
-
-
-
 def _upsert_entry(entries: List[PooledCredential], provider: str, source: str, payload: Dict[str, Any]) -> bool:
     matching_indices = [idx for idx, entry in enumerate(entries) if entry.source == source]
     existing_idx = matching_indices[0] if matching_indices else None
@@ -2102,35 +1975,6 @@ def _seed_anthropic_singletons(seed: _Seeder) -> None:
             })
 
 
-def _seed_portal_singleton(seed: _Seeder, auth_store: Dict[str, Any]) -> None:
-    state = _load_provider_state(auth_store, "portal")
-    has_runtime_material = bool(
-        isinstance(state, dict)
-        and (str(state.get("access_token") or "").strip() or str(state.get("agent_key") or "").strip())
-    )
-    if state and not has_runtime_material:
-        seed.changed |= _retain_sources_not_in(seed.entries, {"device_code", "manual:device_code"})
-    if not (state and has_runtime_material):
-        return
-    custom_label = str(state.get("label") or "").strip()
-    seed.upsert("device_code", {
-        "auth_type": AUTH_TYPE_OAUTH,
-        "access_token": state.get("access_token", ""),
-        "refresh_token": state.get("refresh_token"),
-        "expires_at": state.get("expires_at"),
-        "token_type": state.get("token_type"),
-        "scope": state.get("scope"),
-        "client_id": state.get("client_id"),
-        "portal_base_url": state.get("portal_base_url"),
-        "inference_base_url": state.get("inference_base_url"),
-        "agent_key": state.get("agent_key"),
-        "agent_key_expires_at": state.get("agent_key_expires_at"),
-        **{key: state.get(key) for key in _PORTAL_EXTRA_STATE_KEYS},
-        "tls": state.get("tls") if isinstance(state.get("tls"), dict) else None,
-        "label": custom_label or label_from_token(state.get("access_token", ""), "device_code"),
-    })
-
-
 def _seed_copilot_singleton(seed: _Seeder) -> None:
     try:
         from arkos_cli.copilot_auth import (
@@ -2241,18 +2085,17 @@ def _seed_from_singletons(provider: str, entries: List[PooledCredential]) -> Tup
     auth_store = _load_auth_store()
     if provider == "anthropic":
         _seed_anthropic_singletons(seed)
-    elif provider == "portal":
-        _seed_portal_singleton(seed, auth_store)
-    elif provider == "copilot":
-        _seed_copilot_singleton(seed)
-    elif provider == "qwen-oauth":
-        _seed_qwen_singleton(seed)
-    elif provider == "minimax-oauth":
-        _seed_minimax_singleton(seed)
-    elif provider in _TOKENS_SINGLETON_PROVIDERS:
-        if provider == "openai-codex" and seed.is_suppressed(provider, "device_code"):
-            return seed.result
-        _seed_tokens_singleton(seed, auth_store)
+    else:
+        if provider == "copilot":
+            _seed_copilot_singleton(seed)
+        elif provider == "qwen-oauth":
+            _seed_qwen_singleton(seed)
+        elif provider == "minimax-oauth":
+            _seed_minimax_singleton(seed)
+        elif provider in _TOKENS_SINGLETON_PROVIDERS:
+            if provider == "openai-codex" and seed.is_suppressed(provider, "device_code"):
+                return seed.result
+            _seed_tokens_singleton(seed, auth_store)
     return seed.result
 
 

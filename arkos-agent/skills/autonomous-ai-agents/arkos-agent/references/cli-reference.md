@@ -118,7 +118,6 @@ Multiple credentials per provider form a pool that rotates automatically and ski
 arkos desktop / gui        Native desktop app
 arkos dashboard            Web admin panel + embedded chat (--stop / --status)
 arkos proxy                OpenAI-compatible local proxy backed by an OAuth provider
-arkos portal               Quick setup / sign in via the portal [removed in engine build]
 arkos kanban <verb>        Multi-agent work-queue board [removed in engine build]
 arkos project              Named multi-folder workspaces [removed in engine build]
 arkos skin list|use|set    Switch/tweak skins (see references/themes.md) [removed in engine build]

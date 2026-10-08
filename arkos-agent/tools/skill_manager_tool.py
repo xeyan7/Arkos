@@ -27,10 +27,7 @@ from agent.skill_utils import (
     is_skill_description_truncated_for_prompt,
     parse_frontmatter as _parse_frontmatter,
     SKILL_PROMPT_DESC_LIMIT)
-from tools.skill_manager_guards import (
-    _background_review_preflight, _background_review_read_before_write_guard, _background_review_write_guard,
-    _containing_skills_root, _curator_consolidation_delete_guard, _maybe_auto_propose_org_edit,
-    _org_mirror_write_guard, _pinned_guard, _validate_delete_target, _is_background_review, _refusal as _err)
+from tools.skill_manager_guards import _background_review_preflight, _background_review_read_before_write_guard, _background_review_write_guard, _containing_skills_root, _curator_consolidation_delete_guard, _org_mirror_write_guard, _pinned_guard, _validate_delete_target, _is_background_review, _refusal as _err
 from tools.skill_manager_batch import _skill_manage_batch
 from tools.skills_guard import scan_skill, should_allow_install, format_scan_report
 
@@ -96,7 +93,6 @@ def _display_create_dir() -> str:
         return display_skill_create_dir()
     except Exception:
         return f"{display_arkos_home()}/skills/"
-
 
 
 def _check_identifier(value: str, label: str, invalid: str) -> Optional[str]:
@@ -346,9 +342,6 @@ def _guarded_write(name: str, skill_dir: Path, target: Path, action: str, label:
 
 
 def _attach_org_note(result: Dict[str, Any], name: str, skill_dir: Path) -> Dict[str, Any]:
-    if org_note := _maybe_auto_propose_org_edit(name, skill_dir):
-        result["org_sharing"] = org_note
-        result["message"] = f"{result['message']} {org_note}"
     return result
 
 
@@ -379,7 +372,6 @@ def _attach_lint_findings(result: Dict[str, Any], skill_md: Path) -> None:
 
 def _clip(text: str, n: int, ellipsis: str) -> str:
     return text[:n] + (ellipsis if len(text) > n else "")
-
 
 
 def _create_skill(name: str, content: str, category: str = None) -> Dict[str, Any]:
@@ -553,7 +545,6 @@ def _remove_file(name: str, file_path: str) -> Dict[str, Any]:
     return {"success": True, "message": f"File '{file_path}' removed from skill '{name}'."}
 
 
-
 _skill_gate_bypass: "_ctxvars.ContextVar[bool]" = _ctxvars.ContextVar(
     "skill_gate_bypass", default=False)
 
@@ -616,28 +607,6 @@ _sync_push_lock = threading.Lock()
 _SYNC_PUSH_DEBOUNCE_S = 5.0
 
 
-def _maybe_debounced_sync_push(skill_name: str) -> None:
-    """Debounced best-effort sync push after a skill write; never blocks the caller. Skills not
-    opted into sync do nothing (no auth/network); ``maybe_push_skills`` enforces the access gate."""
-    global _sync_push_timer
-    try:
-        from tools.skill_usage import is_sync_enabled
-        if not is_sync_enabled(skill_name):
-            return
-    except Exception:
-        return
-    def _fire():
-        with suppress(Exception):
-            from tools.skills_sync_client import maybe_push_skills
-            maybe_push_skills(message=f"sync: {skill_name}")
-    with _sync_push_lock:
-        if _sync_push_timer is not None:
-            _sync_push_timer.cancel()
-        _sync_push_timer = threading.Timer(_SYNC_PUSH_DEBOUNCE_S, _fire)
-        _sync_push_timer.daemon = True
-        _sync_push_timer.start()
-
-
 def _act_patch(a):
     """Two shapes: old_string/new_string = targeted replacement (validated in _patch_skill so the
     tool and the helper give the same guidance); content alone = full rewrite (the old 'edit')."""
@@ -695,7 +664,7 @@ def _record_success(action, name, result, *, file_path, absorbed_into, task_id,
         elif action == "delete" and not result.get("_archived"):
             forget(name)
     with suppress(Exception):
-        _maybe_debounced_sync_push(name)
+        pass
 
 
 def skill_manage(
@@ -734,7 +703,6 @@ def skill_manage(
             action, name, result, file_path=file_path, absorbed_into=absorbed_into,
             task_id=task_id, session_id=session_id, ledger_before=_ledger_before)
     return json.dumps(result, ensure_ascii=False)
-
 
 
 SKILL_MANAGE_SCHEMA = {
@@ -831,8 +799,6 @@ registry.register(
     name="skill_manage", toolset="skills", schema=SKILL_MANAGE_SCHEMA, emoji="📝",
     handler=lambda args, **kw: _skill_manage_from(
         args, task_id=kw.get("task_id"), session_id=kw.get("session_id")))
-
-
 
 
 _PLUGIN_COMPAT_LAZY = {

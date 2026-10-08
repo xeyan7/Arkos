@@ -118,9 +118,6 @@ class Mem0MemoryProvider(MemoryProvider):
             {"key": "rerank", "description": "Enable reranking for recall", "default": "false", "choices": ["true", "false"]},
         ]
 
-    def post_setup(self, arkos_home: str, config: dict) -> None:
-        from ._setup import post_setup
-        post_setup(arkos_home, config)
 
     def _oss_hint(self, template: str, default: str = "vector store") -> str:
         """OSS-only hint; ``{vs}`` is the configured vector-store provider. "" in other modes."""

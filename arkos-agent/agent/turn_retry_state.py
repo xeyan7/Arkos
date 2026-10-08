@@ -16,8 +16,8 @@ class TurnRetryState:
 
     codex_auth_retry_attempted: bool = False
     anthropic_auth_retry_attempted: bool = False
-    portal_auth_retry_attempted: bool = False
-    portal_paid_entitlement_refresh_attempted: bool = False
+    pass
+    pass
     copilot_auth_retry_attempted: bool = False
     copilot_stale_cred_retry_attempted: bool = False
     vertex_auth_retry_attempted: bool = False

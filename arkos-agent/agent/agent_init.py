@@ -308,7 +308,6 @@ def _normalize_run_budget_seconds(value) -> Optional[float]:
     return seconds if seconds > 0 else None
 
 
-
 def _refuse_checkpoint_required_on_codex_app_server(
     checkpoint_required: bool, api_mode: Optional[str]
 ) -> None:
@@ -383,9 +382,6 @@ def _resolve_api_mode(agent, api_mode, provider_name, base_url):
         host.startswith("bedrock-runtime.") and base_url_host_matches(url, "amazonaws.com")
     ):
         agent.api_mode = "bedrock_converse"
-    elif agent.provider in {"portal", "portal-portal", "arkos-portal"}:
-        from arkos_cli.providers import portal_api_mode
-        agent.api_mode = portal_api_mode(agent.model)
     else:
         try:
             from arkos_cli.providers import host_mandated_api_mode as _host_mandated_api_mode
@@ -409,10 +405,6 @@ def _finalize_routing(agent, api_mode, credential_pool):
     with suppress(Exception):
         agent._get_transport()
 
-    if agent.provider == "portal":
-        with suppress(Exception):
-            from arkos_cli.auth_keepalive import start_portal_auth_keepalive
-            start_portal_auth_keepalive()
 
     with suppress(Exception):
         from arkos_cli.model_normalize import (
@@ -493,8 +485,8 @@ _TURN_STATE: Dict[str, Any] = {
     "_skip_mcp_refresh": False,
     "_tool_snapshot_generation": 0,
     "_rate_limit_state": None,
-    "_credits_state": None,
-    "_credits_session_start_micros": None,
+
+
     "_or_cache_hits": 0,
 }
 
@@ -556,8 +548,6 @@ def _init_prompt_cache_config(agent):
 def _init_turn_state(agent, run_budget_seconds):
     _set_defaults(agent, _TURN_STATE)
     agent.run_budget_seconds = _normalize_run_budget_seconds(run_budget_seconds)
-    from agent.credits_tracker import new_credits_latch
-    agent._credits_latch = new_credits_latch()
 
 
 def _setup_logging(agent):
@@ -2004,8 +1994,6 @@ def init_agent(
 
 
 __all__ = ["init_agent"]
-
-
 
 
 _PLUGIN_COMPAT_LAZY = {

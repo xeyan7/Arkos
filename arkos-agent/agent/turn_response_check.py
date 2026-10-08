@@ -189,12 +189,6 @@ def check_api_response(
         _last_preflight_pressure = None
 
     _retry.has_retried_429 = False
-    if agent.provider == "portal":
-        try:
-            from agent.arkos_rate_guard import clear_portal_rate_limit
-            clear_portal_rate_limit()
-        except Exception:
-            pass
     from agent import relay_llm
 
     relay_llm.complete_logical_call(api_request_id, outcome="success")

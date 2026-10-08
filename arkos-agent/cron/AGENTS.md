@@ -25,37 +25,6 @@ Hardening invariants — each guards a real failure; don't weaken without answer
 - Background `delegate_task` is process-local; work that must survive restarts is a cron job or a
   `terminal(background=True, notify_on_complete=True)` process.
 
-## Kanban (multi-agent work queue) — removed in engine build
-
-The Kanban subsystem (`arkos_cli/kanban*.py`, `tools/kanban_tools.py`,
-`plugins/kanban/`) was removed for engine-only use. References below are historical.
-
-Durable SQLite-backed board letting multiple profiles/workers collaborate. Users: `arkos kanban
-<verb>`; dispatcher-spawned workers use a dedicated `kanban_*` toolset so their schema footprint is
-zero outside a kanban task (footprint ladder rung 3).
-
-- **CLI:** `arkos_cli/kanban.py` facade + 14 `kanban_*.py` siblings (`boards`, `db`, `db_connect`,
-  `db_dispatch`, `db_notify`, `db_graph` (task initialization and decomposition), `workspace`, ...). Verbs: `init, create, list (ls), show, assign, link,
-  unlink, comment, attach, attachments, attach-rm, complete, request-review, request-changes,
-  reopen-review, block, unblock, archive, tail`, plus `watch, stats, runs, log, assignees, heartbeat,
-  notify-*, dispatch, daemon, gc`. Argparse alias dispatch must accept both `list` and `ls` (root).
-- **Toolset:** `tools/kanban_tools.py` — `kanban_show, kanban_complete, kanban_request_review,
-  kanban_request_changes, kanban_block, kanban_heartbeat, kanban_comment, kanban_create, kanban_link,
-  kanban_attach, kanban_attach_url, kanban_attachments`; profiles enabling `kanban` outside a
-  dispatched task also get `kanban_list` and `kanban_unblock` for board routing.
-- **Dispatcher:** long-lived loop (default 60s) that reclaims stale claims, promotes ready tasks,
-  atomically claims, and spawns assigned profiles. Runs **inside the gateway** by default
-  (`kanban.dispatch_in_gateway: true`). Standalone: `plugins/kanban/systemd/arkos-kanban-dispatcher.service`.
-- **Plugin assets:** `plugins/kanban/dashboard/` (web UI) + systemd unit. `kanban_db.connect` is its
-  own connection helper — do not alias it to `projects_db.connect` (a path-proximity generator did).
-
-Isolation: **board** is the hard boundary — workers get `ARKOS_KANBAN_BOARD` pinned in their env and
-cannot see other boards; **tenant** is a soft namespace within a board (workspace-path + memory-key
-isolation, one fleet serving several businesses). After `kanban.failure_limit` consecutive
-non-success attempts on a task (default 2) the dispatcher auto-blocks it to stop spin loops.
-Process-identity note: `kanban --preserve-cache` contains "serve" — never classify processes by argv
-substring (root).
-
 ## Tests
 
 `tests/cron/`. Schedule parsing

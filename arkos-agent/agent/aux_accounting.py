@@ -3,7 +3,7 @@
 Aux calls (vision, compression, title generation, web_extract, session_search, ...) go
 through ``agent.auxiliary_client`` which has no session handle, so their usage was
 historically discarded. The agent loop publishes ``(session_db, session_id)`` here
-(mirroring ``agent.portal_tags``) and the aux client records usage at its single
+(mirroring ``agent.request_context``) and the aux client records usage at its single
 response-validation chokepoint. ContextVar semantics isolate concurrent agents, propagate
 to worker threads via ``tools.thread_context`` and to asyncio tasks automatically.
 """
@@ -86,7 +86,6 @@ def record_aux_usage(
         )
     except Exception:
         logger.debug("Aux usage recording failed (non-fatal)", exc_info=True)
-
 
 
 def get_accounting_context() -> Optional[tuple]:

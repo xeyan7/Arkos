@@ -267,7 +267,7 @@ def _enabled_mcp_servers(config: Optional[dict[str, Any]]) -> list[str]:
     """Names of MCP servers the user has enabled — kept in the coding posture."""
     try:
         from arkos_cli.config import read_raw_config
-        from arkos_cli.tools_config import _parse_enabled_flag
+        from arkos_cli.tool_configuration import _parse_enabled_flag
         servers = read_raw_config().get("mcp_servers") or {}
         return [
             str(name) for name, cfg in servers.items()

@@ -371,10 +371,6 @@ class HindsightMemoryProvider(MemoryProvider):
         existing.update(values)
         atomic_json_write(config_path, existing, mode=0o600)
 
-    def post_setup(self, arkos_home: str, config: dict) -> None:
-        """Custom setup wizard — installs only the deps needed for the selected mode."""
-        from .setup import run_setup
-        run_setup(self, arkos_home, config)
 
     def get_config_schema(self):
         return [

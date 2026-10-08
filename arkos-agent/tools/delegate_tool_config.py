@@ -310,7 +310,7 @@ def _runtime_provider_credentials(v: dict, explicit_request_overrides) -> dict:
             f"Cannot resolve delegation provider '{configured_provider}': {exc}. "
             f"Check that the provider is configured (API key set, valid provider name), "
             f"or set delegation.base_url/delegation.api_key for a direct endpoint. "
-            f"Available providers: openrouter, portal, zai, kimi-coding, minimax."
+            f"Available providers: openrouter, zai, kimi-coding, minimax."
         ) from exc
 
     api_key = runtime.get("api_key", "")
@@ -373,8 +373,6 @@ _ROUTING_FILTER_DEFAULTS = (
     ("provider_require_parameters", False), ("provider_data_collection", ""),
 )
 
-_PORTAL_PROVIDERS = frozenset({"portal", "portal-portal", "arkos-portal"})
-
 
 def _resolve_child_fallback_chain(parent_agent, routing_cfg: Any, pinned: bool) -> Optional[List[Dict[str, Any]]]:
     """Fallback chain for a child, owned by the same config block as its route.
@@ -404,7 +402,7 @@ def _resolve_child_runtime(
 ) -> Dict[str, Any]:
     """Child credentials, transport and routing (config override > parent inherit) as ``AIAgent`` kwargs. Rules that
     are easy to break: api_mode is re-derived (not inherited) when the child's provider differs from the parent's
-    or is Arkos Portal (dual-wire); a pinned ``delegation.command`` must exist on PATH or the spawn fails loudly;
+    ; a pinned ``delegation.command`` must exist on PATH or the spawn fails loudly;
     ``override_provider`` clears the parent's ACP transport, fallback chain and OpenRouter routing filters so the
     pinned provider is actually honoured."""
     effective_model = model or parent_agent.model
@@ -413,13 +411,7 @@ def _resolve_child_runtime(
     _parent_provider = getattr(parent_agent, "provider", None) or ""
     if override_api_mode is not None:
         effective_api_mode = override_api_mode
-    elif (effective_provider or "").strip().lower() in _PORTAL_PROVIDERS:
-        from arkos_cli.providers import portal_api_mode
-        effective_api_mode = portal_api_mode(effective_model)
-    elif effective_provider != _parent_provider:
-        effective_api_mode = None
-    else:
-        effective_api_mode = getattr(parent_agent, "api_mode", None)
+    pass
     _require_pinned_command(
         override_acp_command, f"Pinned delegation command '{override_acp_command}' was not "
         f"found on PATH. Install it or remove delegation.command from config.yaml.",

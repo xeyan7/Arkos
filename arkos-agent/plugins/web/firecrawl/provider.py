@@ -1,7 +1,7 @@
-"""Firecrawl web search + extract provider (direct SDK, keyless cloud, or Portal tool-gateway).
+"""Firecrawl web search + extract provider (direct SDK or keyless cloud).
 
 Config: ``web.backend`` / ``web.search_backend`` / ``web.extract_backend: firecrawl``.
-Env: FIRECRAWL_API_KEY, FIRECRAWL_API_URL (self-hosted), FIRECRAWL_GATEWAY_URL / TOOL_GATEWAY_*.
+Env: FIRECRAWL_API_KEY and FIRECRAWL_API_URL (self-hosted).
 """
 
 from __future__ import annotations
@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional
 import httpx
 
 from plugins.web._common import BaseWebSearchProvider, keyless_extract, keyless_search, lazy_ensure, search_fail, search_ok, setup_schema
-from tools import managed_tool_gateway as _gateway
 from tools import tool_backend_helpers as _backend_helpers
 from tools.url_safety import is_safe_url
 from tools.website_policy import check_website_access
@@ -82,18 +81,10 @@ def _is_explicit_firecrawl_selection() -> bool:
 
 
 def _use_keyless_ring() -> bool:
-    """Route via the keyless ring only with no direct credentials, when the managed Portal
-    gateway isn't the selected path, and the keyless tier isn't disabled or pinned paid."""
+    """Use the keyless search ring when no direct credentials are configured."""
     if _env("FIRECRAWL_API_KEY") or _env("FIRECRAWL_API_URL"):
         return False
-    from tools.tool_backend_helpers import PORTAL_MANAGED_PROVIDER, read_selection
     from plugins.web.keyless_mcp import use_keyless
-    for probe in (lambda: read_selection("web") == PORTAL_MANAGED_PROVIDER, lambda: _is_tool_gateway_ready() and not _is_explicit_firecrawl_selection()):
-        try:
-            if probe():
-                return False
-        except Exception:  # noqa: BLE001
-            pass
     return use_keyless("firecrawl", "")
 
 
@@ -113,23 +104,8 @@ class _KeylessFirecrawlClient:
     scrape = lambda self, *, url, formats: self._post("/v2/scrape", {"url": url, "formats": formats})  # noqa: E731
 
 
-def _get_firecrawl_gateway_url() -> str:
-    return _gateway.build_vendor_gateway_url("firecrawl")
-
-
-def _is_tool_gateway_ready() -> bool:
-    """True when gateway URL + Portal Subscriber token are available."""
-    return _gateway.resolve_managed_tool_gateway("firecrawl", token_reader=_gateway.peek_portal_access_token) is not None
-
-
 def check_firecrawl_api_key() -> bool:
-    """True when the route selected via ``arkos tools`` (or, on a never-configured
-    install, either route) is usable."""
-    from tools.tool_backend_helpers import PORTAL_MANAGED_PROVIDER, read_selection
-    selected = read_selection("web")
-    if selected == PORTAL_MANAGED_PROVIDER:
-        return _is_tool_gateway_ready()
-    return _get_direct_firecrawl_config() is not None or (selected is None and _is_tool_gateway_ready())
+    return _get_direct_firecrawl_config() is not None
 
 
 def _firecrawl_backend_help_suffix() -> str:
@@ -137,46 +113,16 @@ def _firecrawl_backend_help_suffix() -> str:
 
 
 def _get_firecrawl_client() -> Any:
-    """Get or create the cached Firecrawl client. Strict selection semantics on the stored ``web`` selection:
-    ``"portal"`` → managed Tool Gateway ONLY; any other stored backend → direct Firecrawl ONLY (never a silent
-    managed fallback billed to Portal); never-configured → direct when present, else managed. Raises ValueError
-    when the resolved path is unusable."""
+    """Get the direct or explicitly selected keyless Firecrawl client."""
     wt = _wt()
-    from tools.tool_backend_helpers import PORTAL_MANAGED_PROVIDER, read_selection, selection_error, selection_exists
-    selected = read_selection("web")
-    direct_config = _get_direct_firecrawl_config()
-
-    def _managed():
-        gw = _gateway.resolve_managed_tool_gateway("firecrawl", token_reader=_gateway.read_portal_access_token)
-        if gw is None:
-            return None
-        return "sdk", {"api_key": gw.portal_user_token, "api_url": gw.gateway_origin}, ("tool-gateway", gw.gateway_origin, gw.portal_user_token)
-
-    def _unconfigured_message() -> str:
-        message = "Web tools are not configured. Set FIRECRAWL_API_KEY for cloud Firecrawl or set FIRECRAWL_API_URL for a self-hosted Firecrawl instance."
-        if _backend_helpers.managed_portal_tools_enabled():
-            return message + " With your Portal subscription you can also use the Tool Gateway. run `arkos tools` and select Portal Subscription as the web provider."
-        return message + " " + _backend_helpers.portal_tool_gateway_unavailable_message("managed Firecrawl web tools")
-
-    if selected == PORTAL_MANAGED_PROVIDER:
-        resolved, log, message = _managed(), "the Portal Subscription web selection is stored but the tool gateway is unavailable.", lambda: selection_error(
-            "web", PORTAL_MANAGED_PROVIDER, "the Portal Tool Gateway is not available (not entitled or unreachable)")
-    elif selected is not None or selection_exists("web"):
-        resolved, log, message = direct_config, "direct Firecrawl selected but FIRECRAWL_API_KEY/FIRECRAWL_API_URL is not set.", lambda: selection_error(
-            "web", selected or "firecrawl", "neither FIRECRAWL_API_KEY nor FIRECRAWL_API_URL is set")
-    elif direct_config is not None:
-        resolved = direct_config
-    else:
-        resolved, log, message = _managed(), "missing direct config and tool-gateway auth.", _unconfigured_message
+    resolved = _get_direct_firecrawl_config()
     if resolved is None:
-        logger.error("Firecrawl client initialization failed: %s", log)
-        raise ValueError(message())
-    client_mode, kwargs, client_config = resolved
-    cached = getattr(wt, "_firecrawl_client", None)
-    if cached is not None and getattr(wt, "_firecrawl_client_config", None) == client_config:
-        return cached
-    wt._firecrawl_client = _KeylessFirecrawlClient(api_url=kwargs["api_url"]) if client_mode == "keyless" else Firecrawl(**kwargs)
-    wt._firecrawl_client_config = client_config
+        raise ValueError("Configure FIRECRAWL_API_KEY or FIRECRAWL_API_URL, or explicitly select keyless Firecrawl")
+    mode, kwargs, cache_key = resolved
+    if wt._firecrawl_client is not None and wt._firecrawl_client_config == cache_key:
+        return wt._firecrawl_client
+    wt._firecrawl_client = _KeylessFirecrawlClient(api_url=kwargs["api_url"]) if mode == "keyless" else Firecrawl(**kwargs)
+    wt._firecrawl_client_config = cache_key
     return wt._firecrawl_client
 
 
@@ -311,7 +257,7 @@ class FirecrawlWebSearchProvider(BaseWebSearchProvider):
     def get_setup_schema(self) -> Dict[str, Any]:
         return setup_schema(
             "Firecrawl", "keyless/paid · optional gateway",
-            "Full search + extract; supports keyless cloud, direct API, and Portal tool-gateway routing.",
+            "Full search + extract; supports keyless cloud and direct API.",
             "FIRECRAWL_API_KEY", "Firecrawl API key (optional; blank = keyless cloud or self-hosted)", "https://docs.firecrawl.dev/introduction",
         )
 

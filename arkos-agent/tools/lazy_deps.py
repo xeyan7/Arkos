@@ -418,7 +418,7 @@ def _uv_binary() -> Optional[str]:
 def _venv_pip_install(specs: tuple[str, ...], *, timeout: int = 300) -> _InstallResult:
     """Install ``specs`` via the uv -> pip -> ensurepip ladder, venv-scoped or into the durable
     ``--target`` (constrained to core versions) when :data:`_LAZY_TARGET_ENV` is set. Independent of
-    ``arkos_cli.tools_config._pip_install`` (no CLI dependency)."""
+    ``arkos_cli.tool_configuration._pip_install`` (no CLI dependency)."""
     if not specs:
         return _InstallResult(True, "", "")
     target = _lazy_install_target()
@@ -482,22 +482,12 @@ def feature_missing(feature: str) -> tuple[str, ...]:
     return tuple(s for s in LAZY_DEPS[feature] if not _is_satisfied(s))
 
 
-def _prompt_toolkit_active() -> bool:
-    """A bare input() deadlocks while a prompt_toolkit app owns the terminal, so ensure() skips the
-    confirmation under the TUI — reaching it is already gated by security.allow_lazy_installs."""
-    if "prompt_toolkit.application.current" not in sys.modules:
-        return False
-    try:
-        from prompt_toolkit.application.current import get_app_or_none
-        return bool(getattr(get_app_or_none(), "is_running", False))
-    except Exception:
-        return False
 
 
-def ensure(feature: str, *, prompt: bool = True) -> None:
+def ensure(feature: str, *, prompt: bool = False) -> None:
     """Make every package for ``feature`` importable, installing if needed; raises
-    :class:`FeatureUnavailable` when installs are disabled or fail. ``prompt``: confirm on a TTY first
-    (non-interactive callers pass False and rely on the config gate)."""
+    :class:`FeatureUnavailable` when installs are disabled or fail. ``prompt=True`` requires host consent and fails without installation;
+    approved callers pass False and still obey security.allow_lazy_installs."""
     if feature not in LAZY_DEPS:
         raise FeatureUnavailable(feature, (), f"feature {feature!r} not in LAZY_DEPS allowlist")
     missing = feature_missing(feature)
@@ -521,13 +511,8 @@ def ensure(feature: str, *, prompt: bool = True) -> None:
             raise FeatureUnavailable(feature, missing, f"refusing to install unsafe spec {spec!r}")
     if not _allow_lazy_installs():
         raise FeatureUnavailable(feature, missing, "lazy installs disabled (security.allow_lazy_installs=false)")
-    if prompt and not _prompt_toolkit_active() and sys.stdin.isatty() and sys.stdout.isatty():
-        try:
-            answer = input(f"\nFeature {feature!r} requires: {', '.join(missing)}\nInstall into the active venv now? [Y/n] ").strip().lower()
-        except (EOFError, KeyboardInterrupt):
-            answer = "n"
-        if answer and answer not in {"y", "yes"}:
-            raise FeatureUnavailable(feature, missing, "user declined install at prompt")
+    if prompt:
+        raise FeatureUnavailable(feature, missing, "host consent required; call ensure(..., prompt=False) after approval")
     logger.info("Lazy-installing %s for feature %r", " ".join(missing), feature)
     result = _venv_pip_install(missing)
     if not result.success:

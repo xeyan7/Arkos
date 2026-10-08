@@ -255,46 +255,15 @@ def _is_org_mirror(skill_path: Path) -> bool:
     return is_org_mirror_path(skill_path, _smt._skills_dir())
 
 
-def _maybe_auto_propose_org_edit(name: str, skill_path: Path) -> Optional[str]:
-    """Submit an org-skill edit upstream when `sync.org_auto_propose` is on. Returns a note for
-    the tool result or None; never raises (the edit is saved locally and can be proposed later)."""
-    try:
-        from tools import skills_sync_client as ssc
-        if not _is_org_mirror(skill_path):
-            return None
-        if not ssc.sync_org_auto_propose():
-            return (
-                f"This skill is shared by your organisation. Your edit is "
-                f"saved locally and will not be overwritten by org updates. "
-                f"Run `arkos sync propose {name}` to share it back.")
-        from tools.skills_sync_client_org import propose_skill
-        result = propose_skill(name)
-        if result.get("proposal_pending"):
-            return (
-                f"Auto-proposed to your organisation as proposal "
-                f"#{result.get('proposal_id')} (pending admin review).")
-        return "Auto-proposed to your organisation (merged into the shared set)."
-    except Exception as e:
-        logger.debug("auto-propose skipped for %s: %s", name, e)
-        return (
-            f"Edit saved locally. Could not submit it to your organisation "
-            f"right now — run `arkos sync propose {name}` to retry.")
-
-
 def _org_mirror_write_guard(name: str, skill_path: Path, action: str) -> Optional[Dict[str, Any]]:
-    """Org-shared skills are EDITABLE IN PLACE — this only blocks deletion. Edits land in the
-    mirror, survive the next org pull (baseline sidecar in skills_sync_client) and reach the org
-    via `arkos sync propose`. Deletion stays refused: the mirror is a view of org HEAD, so a
-    local delete just comes back, and removing for everyone is an admin action."""
+    """Protect shared skill mirrors from local deletion. Local edits are allowed."""
     if action not in {"delete", "remove_file"}:
         return None
     try:
         if _is_org_mirror(skill_path):
             return _refusal(
                 f"Cannot {action} '{name}' locally: it is shared by your organisation, so a local "
-                f"delete would just come back on the next sync. Ask an org admin to remove it for "
-                f"everyone. (Editing it IS allowed — your changes are kept and can be proposed "
-                f"back with `arkos sync propose {name}`.)")
+                f"delete would damage its local mirror. Editing it in place is allowed.")
     except Exception:
         logger.debug("org mirror guard lookup failed for %s", name, exc_info=True)
     return None

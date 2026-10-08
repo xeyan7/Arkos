@@ -882,7 +882,7 @@ class SessionMessagesMixin:
 
     def get_conversation_root(self, session_id: str) -> str:
         """ROOT id of the lineage: the stable conversation id across compression segments and delegate
-        subagents (Arkos Portal usage tagging). Unchanged when there is no recorded parent."""
+        subagents (session-lineage tracking). Unchanged when there is no recorded parent."""
         chain = self._session_lineage_root_to_tip(session_id)
         return chain[0] if chain and chain[0] else session_id
 

@@ -123,55 +123,13 @@ def _invalidate_cached_sudo_on_auth_failure(command: str | None, output: str) ->
     return True
 
 
-def _release_tty(tty_fd, old_attrs) -> None:
-    """Restore echo and close the /dev/tty fd opened by the password reader (best effort)."""
-    if tty_fd is None:
-        return
-    if old_attrs is not None:
-        try:
-            import termios as _termios
-            _termios.tcsetattr(tty_fd, _termios.TCSAFLUSH, old_attrs)
-        except Exception as e:
-            logger.debug("Failed to restore terminal attributes: %s", e)
-    try:
-        os.close(tty_fd)
-    except Exception as e:
-        logger.debug("Failed to close tty fd: %s", e)
 
 
-def _read_hidden_password(result: dict) -> None:
-    """Read one line with echo disabled into ``result``. Uses msvcrt on Windows, /dev/tty on Unix."""
-    tty_fd = old_attrs = None
-    try:
-        chars = []
-        if platform.system() == "Windows":
-            import msvcrt
-            while (c := msvcrt.getwch()) not in {"\r", "\n"}:
-                if c == "\x03":
-                    raise KeyboardInterrupt
-                chars.append(c)
-            result["password"] = "".join(chars)
-        else:
-            import termios
-            tty_fd = os.open("/dev/tty", os.O_RDONLY)
-            old_attrs = termios.tcgetattr(tty_fd)
-            new_attrs = termios.tcgetattr(tty_fd)
-            new_attrs[3] = new_attrs[3] & ~termios.ECHO
-            termios.tcsetattr(tty_fd, termios.TCSAFLUSH, new_attrs)
-            while (b := os.read(tty_fd, 1)) and b not in {b"\n", b"\r"}:
-                chars.append(b)
-            result["password"] = b"".join(chars).decode("utf-8", errors="replace")
-    except (KeyboardInterrupt, Exception):
-        result["password"] = ""
-    finally:
-        _release_tty(tty_fd, old_attrs)
-        result["done"] = True
 
 
 def _prompt_for_sudo_password(timeout_seconds: int = 45) -> str:
     """Prompt for a sudo password; "" on skip (empty Enter), timeout, or error. Prefers the
-    CLI-registered callback (prompt_toolkit-integrated); otherwise reads /dev/tty (msvcrt on
-    Windows) with echo disabled. Human wait time is excluded from tool deadlines (``human_wait_window``)."""
+    host-registered callback; without one, skip password collection. Human wait time is excluded from tool deadlines (``human_wait_window``)."""
     from tools.terminal_tool import _get_sudo_password_callback
     _sudo_cb = _get_sudo_password_callback()
     if _sudo_cb is not None:
@@ -182,48 +140,7 @@ def _prompt_for_sudo_password(timeout_seconds: int = 45) -> str:
         except Exception:
             return ""
 
-    result = {"password": None, "done": False}
-    try:
-        os.environ["ARKOS_SPINNER_PAUSE"] = "1"
-        time.sleep(0.2)
-        print("\n".join((
-            "",
-            "┌" + "─" * 58 + "┐",
-            "│  🔐 SUDO PASSWORD REQUIRED" + " " * 30 + "│",
-            "├" + "─" * 58 + "┤",
-            "│  Enter password below (input is hidden), or:            │",
-            "│    • Press Enter to skip (command fails gracefully)     │",
-            f"│    • Wait {timeout_seconds}s to auto-skip" + " " * 27 + "│",
-            "└" + "─" * 58 + "┘",
-            "",
-        )))
-        print("  Password (hidden): ", end="", flush=True)
-        password_thread = threading.Thread(target=_read_hidden_password, args=(result,), daemon=True)
-        password_thread.start()
-        from tools.approval_human_wait import human_wait_window
-        with human_wait_window():
-            password_thread.join(timeout=timeout_seconds)
-        if not result["done"]:
-            print("\n  ⏱ Timeout - continuing without sudo\n    (Press Enter to dismiss)\n")
-            sys.stdout.flush()
-            return ""
-        password = result["password"] or ""
-        if password:
-            print("\n  ✓ Password received (cached for this session)\n")
-        else:
-            print("\n  ⏭ Skipped - continuing without sudo\n")
-        sys.stdout.flush()
-        return password
-    except (EOFError, KeyboardInterrupt):
-        print("\n  ⏭ Cancelled - continuing without sudo\n")
-        sys.stdout.flush()
-        return ""
-    except Exception as e:
-        print(f"\n  [sudo prompt error: {e}] - continuing without sudo\n")
-        sys.stdout.flush()
-        return ""
-    finally:
-        os.environ.pop("ARKOS_SPINNER_PAUSE", None)
+    return ""  # A host callback is required for password collection.
 
 
 def _looks_like_env_assignment(token: str) -> bool:

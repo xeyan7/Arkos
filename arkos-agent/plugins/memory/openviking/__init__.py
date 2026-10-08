@@ -4,7 +4,7 @@ OpenViking (Volcengine/ByteDance) organizes agent knowledge into a viking:// hie
 with tiered context (L0 abstract / L1 overview / L2 full), automatic memory extraction
 on session commit, and semantic search. Config comes from env vars (OPENVIKING_ENDPOINT
 / _API_KEY / _ACCOUNT / _USER / _AGENT) or a linked OpenViking CLI config (ovcli.conf).
-The interactive setup wizard lives in ``_setup.py``.
+Connection settings are supplied by the engine configuration.
 """
 
 from __future__ import annotations
@@ -995,7 +995,6 @@ def _classify_runtime_openviking_health(client: _VikingClient, endpoint: str) ->
     return "unreachable", ""
 
 
-from . import _setup  # noqa: E402  (needs the helpers above at call time)
 
 
 
@@ -1238,9 +1237,6 @@ class OpenVikingMemoryProvider(MemoryProvider):
             display["env_overrides"] = ", ".join(env_overrides)
         return display
 
-    def post_setup(self, arkos_home: str, config: dict) -> None:
-        """Interactive setup that can reuse OpenViking's shared CLI config (see ``_setup``)."""
-        _setup.run_setup(arkos_home, config)
 
 
     def _start_runtime_openviking_waiter(self, *, endpoint: str, status_callback=None, warning_callback=None) -> None:

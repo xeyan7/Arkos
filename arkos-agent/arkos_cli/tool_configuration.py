@@ -1,68 +1,33 @@
-"""Unified tool configuration for Arkos."""
+"""Headless tool configuration, provider metadata, and toolset policy for engine clients."""
 
-import json as _json
+
 import logging
+
+
 import os
-from pathlib import Path
+
+
 from typing import Dict, List, Optional, Set
 
-try:
-    from arkos_cli.cli_output import print_info as _print_info
-except ImportError:
-    def _print_info(text: str) -> None: pass
-
-try:
-    from arkos_cli.colors import Colors, color
-except ImportError:
-    class Colors:
-        RESET = BOLD = DIM = RED = GREEN = YELLOW = BLUE = MAGENTA = CYAN = ""
-    def color(text: str, *codes) -> str: return text
 
 from arkos_cli.config import cfg_get, load_config, save_config, get_env_value
 
-try:
-    from arkos_cli.portal_subscription import (
-        PortalSubscriptionFeatures, apply_portal_managed_defaults, get_portal_subscription_features)
-except ImportError:
-    class PortalSubscriptionFeatures:
-        def __init__(self, **kw):
-            self.portal_auth_present = False
-            self.features = {}
-    def apply_portal_managed_defaults(cfg): pass
-    def get_portal_subscription_features(*a, **kw): return PortalSubscriptionFeatures()
 
 from arkos_cli.platforms import PLATFORMS as _PLATFORMS_REGISTRY
+
+
 from arkos_cli.toolset_scope import (
     _TOOLSET_PLATFORM_RESTRICTIONS, toolset_allowed_for_platform as _toolset_allowed_for_platform)
-from arkos_cli.tools_config_cua import (  # noqa: F401
-    _post_setup_no_window_flags, _cua_driver_cmd, _cua_version_summary, _resolved_cua_driver_cmd, _cua_driver_env,
-    _cua_driver_contract_status, _cua_driver_install_ready, _pip_install, _cua_install_target_writable,
-    install_cua_driver, _CUA_INSTALLER_TIMEOUT, _CUA_INSTALLER_DRAIN_GRACE, _CUA_LOCK_STALE_AFTER,
-    _clear_stale_windows_cua_install_lock, _clear_stale_cua_install_lock, _cua_install_lock_held,
-    _cua_release_endpoint_reachable, _repair_cua_driver_autostart_windows, _run_cua_driver_installer)
-from arkos_cli.tools_config_post_setup import (  # noqa: F401
-    _ensure_browser_use_cli, _run_post_setup, valid_post_setup_keys, run_post_setup_command, _POST_SETUP_INSTALLED,
-    _post_setup_already_installed, _module_installed, active_restorable_python_tool_dependencies,
-    restorable_python_tool_dependency, _POST_SETUP_READY)
-from arkos_cli.tools_config_providers import (  # noqa: F401
-    _plugin_image_gen_providers, _plugin_video_gen_providers, _plugin_web_search_providers, _plugin_browser_providers,
-    _plugin_tts_providers, web_provider_capabilities, _visible_providers, provider_readiness_status,
-    _toolset_needs_configuration_prompt, _configure_tool_category, _web_tier_matches, _is_provider_active,
-    _detect_active_provider_index, IMAGEGEN_BACKENDS, _plugin_image_gen_catalog, _plugin_video_gen_catalog,
-    _configure_imagegen_model, _configure_imagegen_model_for_plugin, _configure_videogen_model_for_plugin,
-    _select_plugin_image_gen_provider, _select_plugin_video_gen_provider, STT_MODEL_CATALOG, _configure_stt_model,
-    _write_provider_config, apply_provider_selection, _configure_provider, _reconfigure_provider,
-    _configure_vision_backend, _configure_vision_provider_model, _configure_simple_requirements)
-from arkos_cli.tools_config_mcp import (  # noqa: F401
-    _configure_mcp_tools_interactive, _apply_toolset_change, _apply_mcp_change, tools_disable_enable_command)
+
 
 logger = logging.getLogger(__name__)
 
+
 _warned_invalid_platform_toolsets: Set[str] = set()
 
-PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 PLATFORMS = {k: {"label": info.label, "default_toolset": info.default_toolset} for k, info in _PLATFORMS_REGISTRY.items()}
+
 
 CONFIGURABLE_TOOLSETS = [
     ("web",             "🔍 Web Search & Scraping",    "web_search, web_extract"),
@@ -106,8 +71,6 @@ def gui_toolset_label(label: str) -> str:
 
 _DEFAULT_OFF_TOOLSETS = {"homeassistant", "spotify", "discord", "discord_admin", "video", "video_gen", "x_search", "a2a"}
 
-_CONFIG_ONLY_TOOLSETS = {"stt"}
-
 
 def _xai_credentials_present() -> bool:
     """Cheap offline check for xAI credentials (auth store + env only); the runtime ``check_fn`` still gates
@@ -140,13 +103,6 @@ def _homeassistant_credentials_present() -> bool:
         return False
 
 
-def _toolset_configuration_platform(ts_key: str, default: str = "cli") -> str:
-    """Platform a platform-less configuration UI should target: a toolset restricted away from ``default``
-    must be configured on a supported platform, else the save helper drops it and the UI reports a no-op."""
-    allowed = _TOOLSET_PLATFORM_RESTRICTIONS.get(ts_key)
-    return default if not allowed or default in allowed else sorted(allowed)[0]
-
-
 def _get_effective_configurable_toolsets():
     """CONFIGURABLE_TOOLSETS + plugin toolsets (appended after built-ins; a plugin key already built-in is skipped)."""
     result = list(CONFIGURABLE_TOOLSETS)
@@ -172,14 +128,6 @@ def _get_plugin_toolset_keys() -> set:
         return set()
 
 
-def _checklist_toolset_keys(platform: str) -> Set[str]:
-    """Toolset keys the ``arkos tools`` checklist offers for ``platform`` (mirrors ``_prompt_toolset_checklist``);
-    read-time-resolved toolsets (``kanban``, recovered composites, MCP names) are NOT here."""
-    return {
-        ts_key for ts_key, _, _ in _get_effective_configurable_toolsets()
-        if _toolset_allowed_for_platform(ts_key, platform) and ts_key not in _CONFIG_ONLY_TOOLSETS}
-
-
 def _platform_default_toolset(platform: str) -> str:
     """Composite toolset a platform falls back to (plugin platforms derive ``arkos-<platform>``)."""
     return PLATFORMS[platform]["default_toolset"] if platform in PLATFORMS else f"arkos-{platform}"
@@ -194,23 +142,13 @@ def _cfg_section(config: dict, key: str) -> dict:
     return section
 
 
-def _is_configurable(ts_key: str) -> bool:
-    """True when the toolset has provider options or simple env-var requirements to prompt for."""
-    return bool(TOOL_CATEGORIES.get(ts_key) or TOOLSET_ENV_REQUIREMENTS.get(ts_key))
-
-
-def _toolset_label(ts_key: str) -> str:
-    """Display label for a toolset key (built-in or plugin), falling back to the key itself."""
-    return next((l for k, l, _ in _get_effective_configurable_toolsets() if k == ts_key), ts_key)
-
-
 def _key(key: str, prompt: str, url: str = "", **extra) -> dict:
     """One ``env_vars`` entry for a provider row (key order matters for the GUI JSON)."""
     return {"key": key, "prompt": prompt, **extra, **({"url": url} if url else {})}
 
 
 def _row(name: str, badge: str = "", tag: str = "", env_vars: list = (), **markers) -> dict:
-    """One TOOL_CATEGORIES provider row; ``markers`` are the ``*_provider`` / ``post_setup`` / Portal keys."""
+    """One TOOL_CATEGORIES provider row; ``markers`` are the ``*_provider`` / ``post_setup`` keys."""
     row = {"name": name}
     if badge:
         row["badge"] = badge
@@ -221,20 +159,27 @@ def _row(name: str, badge: str = "", tag: str = "", env_vars: list = (), **marke
     return row
 
 
-_PORTAL = {"requires_portal_auth": True}
 _OPENAI_VOICE_KEY = _key("VOICE_TOOLS_OPENAI_KEY", "OpenAI API key", "https://platform.openai.com/api-keys")
+
+
 _ELEVENLABS_KEY = _key("ELEVENLABS_API_KEY", "ElevenLabs API key", "https://elevenlabs.io/app/settings/api-keys")
+
+
 _DEEPINFRA_KEY = _key("DEEPINFRA_API_KEY", "DeepInfra API key", "https://deepinfra.com/dash/api_keys")
+
+
 _LANGFUSE_PUBLIC = ("ARKOS_LANGFUSE_PUBLIC_KEY", "Langfuse public key (pk-lf-...)")
+
+
 _LANGFUSE_SECRET = ("ARKOS_LANGFUSE_SECRET_KEY", "Langfuse secret key (sk-lf-...)")
+
 
 TOOL_CATEGORIES = {
     "tts": {
         "name": "Text-to-Speech", "icon": "🔊",
         "providers": [
             _row("Microsoft Edge TTS", "★ recommended · free", "Good quality, no API key needed", tts_provider="edge"),
-            _row("Portal Subscription", "subscription", "Managed OpenAI TTS billed to your subscription", tts_provider="openai",
-                 **_PORTAL, managed_portal_feature="tts", override_env_vars=["VOICE_TOOLS_OPENAI_KEY", "OPENAI_API_KEY"]),
+
             _row("OpenAI TTS", "paid", "High quality voices", [_OPENAI_VOICE_KEY], tts_provider="openai"),
             _row("xAI TTS", tag="Grok voices — uses xAI Grok OAuth or XAI_API_KEY", tts_provider="xai", post_setup="xai_grok"),
             _row("ElevenLabs", "paid", "Most natural voices", [_ELEVENLABS_KEY], tts_provider="elevenlabs"),
@@ -255,9 +200,7 @@ TOOL_CATEGORIES = {
         "providers": [
             _row("Local Whisper", "★ recommended · free", "faster-whisper on-device, no API key", stt_provider="local",
                  post_setup="faster_whisper"),
-            _row("Portal Subscription", "subscription", "Managed OpenAI transcription billed to your subscription",
-                 stt_provider="openai", **_PORTAL, managed_portal_feature="stt",
-                 override_env_vars=["VOICE_TOOLS_OPENAI_KEY", "OPENAI_API_KEY"]),
+
             _row("OpenAI", "paid", "whisper-1, gpt-4o-transcribe, gpt-transcribe", [_OPENAI_VOICE_KEY], stt_provider="openai"),
             _row("Groq", "free tier", "Whisper large-v3 family — very fast",
                  [_key("GROQ_API_KEY", "Groq API key", "https://console.groq.com/keys")], stt_provider="groq"),
@@ -272,9 +215,7 @@ TOOL_CATEGORIES = {
         "setup_note": "A free DuckDuckGo search skill is also included — skip this if you don't need a premium provider.",
         "icon": "🔍",
         "providers": [
-            {"name": "Portal Subscription", "badge": "subscription", "tag": "Managed Firecrawl billed to your subscription",
-             "web_backend": "firecrawl", "env_vars": [], **_PORTAL, "managed_portal_feature": "web",
-             "override_env_vars": ["FIRECRAWL_API_KEY", "FIRECRAWL_API_URL"]},
+
             {"name": "Firecrawl Self-Hosted", "badge": "free · self-hosted", "tag": "Run your own Firecrawl instance (Docker)",
              "web_backend": "firecrawl",
              "env_vars": [_key("FIRECRAWL_API_URL", "Your Firecrawl instance URL (e.g., http://localhost:3002)")]},
@@ -283,15 +224,13 @@ TOOL_CATEGORIES = {
     "image_gen": {
         "name": "Image Generation", "icon": "🎨",
         "providers": [
-            _row("Portal Subscription", "subscription", "Managed FAL image generation billed to your subscription", **_PORTAL,
-                 managed_portal_feature="image_gen", override_env_vars=["FAL_KEY"], imagegen_backend="fal"),
+
         ],
     },
     "video_gen": {
         "name": "Video Generation", "icon": "🎬",
         "providers": [
-            _row("Portal Subscription", "subscription", "Managed FAL video generation billed to your subscription", **_PORTAL,
-                 managed_portal_feature="video_gen", override_env_vars=["FAL_KEY"], video_gen_plugin_name="fal"),
+
         ],
     },
     "x_search": {
@@ -317,9 +256,7 @@ TOOL_CATEGORIES = {
                  browser_engine="auto", post_setup="agent_browser"),
             _row("Lightpanda", "free · local · no Chromium", "Zig headless browser spawned by Arkos, text-only (no screenshots)",
                  browser_provider="local", browser_engine="lightpanda", post_setup="lightpanda"),
-            _row("Portal Subscription (Browser Use cloud)", "subscription", "Managed Browser Use billed to your subscription",
-                 browser_provider="browser-use", **_PORTAL, managed_portal_feature="browser",
-                 override_env_vars=["BROWSER_USE_API_KEY"], post_setup="browserbase"),
+
             _row("Camofox", "free · local", "Anti-detection browser (Firefox/Camoufox)",
                  [_key("CAMOFOX_URL", "Camofox server URL", "https://github.com/jo-inc/camofox-browser", default="http://localhost:9377")],
                  browser_provider="camofox", post_setup="camofox"),
@@ -360,23 +297,8 @@ TOOL_CATEGORIES = {
     },
 }
 
+
 TOOLSET_ENV_REQUIREMENTS = {"vision": [("OPENROUTER_API_KEY", "https://openrouter.ai/keys")]}
-
-_PLATFORM_ENABLE_ENV_VARS = (
-    ("telegram", "TELEGRAM_BOT_TOKEN"), ("discord", "DISCORD_BOT_TOKEN"), ("slack", "SLACK_BOT_TOKEN"),
-    ("whatsapp", "WHATSAPP_ENABLED"), ("qqbot", "QQ_APP_ID"))
-
-
-def _get_enabled_platforms() -> List[str]:
-    """Return platform keys that are configured (have tokens or are CLI)."""
-    return ["cli"] + [platform for platform, env_var in _PLATFORM_ENABLE_ENV_VARS if get_env_value(env_var)]
-
-
-def _platform_toolset_summary(config: dict, platforms: Optional[List[str]] = None) -> Dict[str, Set[str]]:
-    """Enabled toolsets per platform (``platforms`` defaults to ``_get_enabled_platforms()``)."""
-    if platforms is None:
-        platforms = _get_enabled_platforms()
-    return {pkey: _get_platform_tools(config, pkey) for pkey in platforms}
 
 
 def _parse_enabled_flag(value, default: bool = True) -> bool:
@@ -652,371 +574,21 @@ def _provider_env_ready(provider: dict) -> bool:
     return all(get_env_value(e["key"]) for e in provider.get("env_vars", []))
 
 
-def _toolset_has_keys(
-    ts_key: str, config: dict = None, *, force_fresh: bool = False, features: Optional[PortalSubscriptionFeatures] = None,
-) -> bool:
-    """Check if a toolset's required API keys are configured."""
-    if config is None:
-        config = load_config()
+def _toolset_has_keys(ts_key: str, config: dict = None, *, force_fresh: bool = False, features=None) -> bool:
+    """Check direct vendor prerequisites for a toolset."""
+    config = load_config() if config is None else config
     if ts_key == "vision":
         try:
             from agent.auxiliary_client import resolve_vision_provider_client
             return resolve_vision_provider_client()[1] is not None
         except Exception:
             return False
-    if ts_key in {"web", "image_gen", "video_gen", "tts", "stt", "browser"}:
-        if features is None:
-            features = get_portal_subscription_features(config, force_fresh=force_fresh)
-        feature = features.features.get(ts_key)
-        if feature and (feature.available or feature.managed_by_portal):
-            return True
     cat = TOOL_CATEGORIES.get(ts_key)
     if cat:
-        return any(_provider_env_ready(p) for p in _visible_providers(cat, config, force_fresh=force_fresh, features=features))
+        return any(_provider_env_ready(p) for p in _visible_providers(cat, config, force_fresh=force_fresh))
     return all(get_env_value(var) for var, _ in TOOLSET_ENV_REQUIREMENTS.get(ts_key, []))
 
 
-def _prompt_choice(question: str, choices: list, default: int = 0) -> int:
-    """Single-select menu (arrow keys). Delegates to curses_radiolist."""
-    from arkos_cli.curses_ui import curses_radiolist
-    return curses_radiolist(question, choices, selected=default, cancel_returns=default)
+logger = logging.getLogger(__name__)
 
-
-_tool_token_cache: Optional[Dict[tuple[str, int], Dict[str, int]]] = None
-
-
-def _estimate_tool_tokens() -> Dict[str, int]:
-    """tiktoken (cl100k_base) tokens per tool name from the serialised OpenAI schema; cached per process and
-    registry generation, {} if tiktoken/registry unavailable."""
-    global _tool_token_cache
-    from arkos_constants import arkos_home_key
-
-    scope = arkos_home_key()
-    _tool_token_cache = _tool_token_cache or {}
-    try:
-        import model_tools  # noqa: F401 — triggers full tool discovery
-        from tools.registry import registry
-        cache_key = (scope, registry._generation)
-    except Exception:
-        logger.debug("Tool registry unavailable; skipping token estimation")
-        return _tool_token_cache.setdefault((scope, -1), {})
-    if cache_key in _tool_token_cache:
-        return _tool_token_cache[cache_key]
-    try:
-        import tiktoken
-        enc = tiktoken.get_encoding("cl100k_base")
-    except Exception:
-        logger.debug("tiktoken unavailable; skipping tool token estimation")
-        return _tool_token_cache.setdefault(cache_key, {})
-    counts = {
-        name: len(enc.encode(_json.dumps({"type": "function", "function": schema})))
-        for name in registry.get_all_tool_names() if (schema := registry.get_schema(name))}
-    _tool_token_cache[cache_key] = counts
-    return counts
-
-
-def _prompt_toolset_checklist(platform_label: str, enabled: Set[str], platform: str = "cli", *, force_fresh: bool = True) -> Set[str]:
-    """Multi-select checklist of toolsets. Returns set of selected toolset keys."""
-    from arkos_cli.curses_ui import curses_checklist
-    from toolsets import resolve_toolset
-
-    tool_tokens = _estimate_tool_tokens()
-    effective = [
-        (k, l, d) for (k, l, d) in _get_effective_configurable_toolsets()
-        if _toolset_allowed_for_platform(k, platform) and k not in _CONFIG_ONLY_TOOLSETS]
-    labels = [
-        f"{ts_label}  ({ts_desc})"
-        + ("  [no API key]" if not _toolset_has_keys(ts_key, force_fresh=force_fresh) and _is_configurable(ts_key) else "")
-        for ts_key, ts_label, ts_desc in effective]
-    pre_selected = {i for i, (ts_key, _, _) in enumerate(effective) if ts_key in enabled}
-
-    status_fn = None
-    if tool_tokens:
-        ts_keys = [ts_key for ts_key, _, _ in effective]
-
-        def status_fn(chosen: set) -> str:
-            """Deduplicated token cost of the selected toolsets."""
-            all_tools: set = set()
-            for idx in chosen:
-                all_tools.update(resolve_toolset(ts_keys[idx]))
-            total = sum(tool_tokens.get(name, 0) for name in all_tools)
-            return f"Est. tool context: ~{total / 1000:.1f}k tokens" if total >= 1000 else f"Est. tool context: ~{total} tokens"
-
-    chosen = curses_checklist(
-        f"Tools for {platform_label}", labels, pre_selected, cancel_returns=pre_selected, status_fn=status_fn,
-    )
-    return {effective[i][0] for i in chosen}
-
-
-def _configure_toolset(ts_key: str, config: dict, *, force_fresh: bool = True, reconfigure: bool = False):
-    """Configure a toolset: provider selection + API keys (TOOL_CATEGORIES), else simple env-var prompts."""
-    cat = TOOL_CATEGORIES.get(ts_key)
-    if cat:
-        _configure_tool_category(ts_key, cat, config, force_fresh=force_fresh, reconfigure=reconfigure)
-    else:
-        _configure_simple_requirements(ts_key, reconfigure=reconfigure)
-
-
-def _reconfigure_tool(config: dict, *, force_fresh: bool = True):
-    """Let user reconfigure an existing tool's provider or API key."""
-    configurable = [
-        (ts_key, ts_label)
-        for ts_key, ts_label, _ in _get_effective_configurable_toolsets()
-        if _is_configurable(ts_key) and (
-            _toolset_has_keys(ts_key, config, force_fresh=force_fresh)
-            or _toolset_enabled_for_reconfigure(ts_key, config))]
-    if not configurable:
-        _print_info("No configured tools to reconfigure.")
-        return
-    choices = [label for _, label in configurable] + ["Cancel"]
-    idx = _prompt_choice("  Which tool would you like to reconfigure?", choices, len(choices) - 1)
-    if idx >= len(configurable):
-        return
-    _configure_toolset(configurable[idx][0], config, force_fresh=force_fresh, reconfigure=True)
-    save_config(config)
-
-
-def _toolset_enabled_for_reconfigure(ts_key: str, config: dict) -> bool:
-    """True if the toolset is enabled on any platform, so reconfigure covers enabled-but-unconfigured ones."""
-    for platform in filter(lambda p: _toolset_allowed_for_platform(ts_key, p), PLATFORMS):
-        try:
-            if ts_key in _current_platform_tools(config, platform):
-                return True
-        except Exception:
-            continue
-    return False
-
-
-def _shared_metrics_state(config: dict) -> tuple[bool, bool]:
-    """Return (collection_enabled, send_enabled) from a config dict."""
-    telemetry = config.get("telemetry")
-    shared = telemetry.get("shared_metrics") if isinstance(telemetry, dict) else None
-    shared = shared if isinstance(shared, dict) else {}
-    return shared.get("enabled") is True, shared.get("send") is True
-
-
-def _shared_metrics_menu_label(config: dict) -> str:
-    """Menu row for shared metrics, showing both consent states."""
-    enabled, send = _shared_metrics_state(config)
-    state = "off" if not enabled else ("collecting + sending to Portal" if send else "collecting locally")
-    return f"Configure shared metrics  ({state})"
-
-
-def _configure_shared_metrics_interactive(config: dict) -> None:
-    """Toggle shared-metrics collection/sending via the setup wizard prompt (single home for the consent rules)."""
-    from arkos_cli.setup import setup_telemetry
-
-    before = _shared_metrics_state(config)
-    setup_telemetry(config)
-    if _shared_metrics_state(config) != before:
-        save_config(config)
-
-
-def _print_toolset_diff(added: Set[str], removed: Set[str], *, indent: str = "  ") -> None:
-    """Print ``+ label`` / ``- label`` lines for a checklist change."""
-    for ts in sorted(added):
-        print(color(f"{indent}+ {_toolset_label(ts)}", Colors.GREEN))
-    for ts in sorted(removed):
-        print(color(f"{indent}- {_toolset_label(ts)}", Colors.RED))
-
-
-def _toolsets_needing_setup(new_enabled: Set[str], config: dict) -> List[str]:
-    """Selected toolsets still missing provider/API-key setup, sorted (opened even when the selection is unchanged)."""
-    return [
-        ts_key for ts_key in sorted(new_enabled)
-        if _is_configurable(ts_key) and _toolset_needs_configuration_prompt(ts_key, config, force_fresh=True)
-    ]
-
-
-def _configure_newly_added(added: Set[str], already: Set[str], config: dict) -> None:
-    """Configure newly enabled toolsets that need keys, skipping those already handled."""
-    for ts_key in _toolsets_needing_setup(added - already, config):
-        _configure_toolset(ts_key, config)
-
-
-def _platform_menu_label(config: dict, pkey: str) -> str:
-    count = len(_current_platform_tools(config, pkey))
-    total = len(_get_effective_configurable_toolsets())
-    return f"Configure {PLATFORMS[pkey]['label']}  ({count}/{total} enabled)"
-
-
-def _print_tools_summary(config: dict, enabled_platforms: List[str]) -> None:
-    """``arkos tools --summary``: enabled toolsets per platform, non-interactive."""
-    total = len(_get_effective_configurable_toolsets())
-    print(color("⚕ Tool Summary", Colors.CYAN, Colors.BOLD))
-    print()
-    for pkey, enabled in _platform_toolset_summary(config, enabled_platforms).items():
-        print(color(f"  {PLATFORMS[pkey]['label']}", Colors.BOLD) + color(f"  ({len(enabled)}/{total})", Colors.DIM))
-        for ts_key in sorted(enabled):
-            print(color(f"    ✓ {_toolset_label(ts_key)}", Colors.GREEN))
-        if not enabled:
-            print(color("    (none enabled)", Colors.DIM))
-    print()
-
-
-def _configure_list(to_configure: List[str], config: dict, *, selected: bool = True) -> None:
-    """Announce then configure each toolset in ``to_configure``."""
-    if not to_configure:
-        return
-    print()
-    what = "selected tool(s)" if selected else "tool(s)"
-    print(color(f"  Configuring {len(to_configure)} {what}:", Colors.YELLOW))
-    for ts_key in to_configure:
-        print(color(f"    • {_toolset_label(ts_key)}", Colors.DIM))
-    print(color("  You can skip any tool you don't need right now.", Colors.DIM))
-    print()
-    for ts_key in to_configure:
-        _configure_toolset(ts_key, config)
-
-
-def _checklist_diff(new_enabled: Set[str], prev: Set[str], platform: str) -> tuple[Set[str], Set[str]]:
-    """``(added, removed)`` scoped to the checklist universe, so read-time toolsets (``kanban``) the user never
-    saw a checkbox for don't print as spurious removals."""
-    universe = _checklist_toolset_keys(platform)
-    return (new_enabled - prev) & universe, (prev - new_enabled) & universe
-
-
-def _first_install_flow(config: dict, enabled_platforms: List[str]) -> None:
-    """Fresh install: one checklist per platform, no menu, keys prompted for every enabled tool."""
-    for pkey in enabled_platforms:
-        pinfo = PLATFORMS[pkey]
-        current_enabled = _current_platform_tools(config, pkey)
-        new_enabled = _prompt_toolset_checklist(pinfo["label"], current_enabled - _DEFAULT_OFF_TOOLSETS, pkey)
-        _print_toolset_diff(*_checklist_diff(new_enabled, current_enabled, pkey))
-        auto_configured = apply_portal_managed_defaults(config, enabled_toolsets=new_enabled, force_fresh=True)
-        for ts_key in sorted(auto_configured):
-            label = next((l for k, l, _ in CONFIGURABLE_TOOLSETS if k == ts_key), ts_key)
-            print(color(f"  ✓ {label}: using your Portal subscription defaults", Colors.GREEN))
-        _configure_list(
-            [ts for ts in sorted(new_enabled) if _is_configurable(ts) and ts not in auto_configured],
-            config, selected=False)
-        _save_platform_tools(config, pkey, new_enabled)
-        save_config(config)
-        print(color(f"  ✓ Saved {pinfo['label']} tool configuration", Colors.GREEN))
-        print()
-
-
-def _current_platform_tools(config: dict, pkey: str) -> Set[str]:
-    return _get_platform_tools(config, pkey, include_default_mcp_servers=False)
-
-
-def _apply_platform_checklist(config: dict, pkey: str, new_enabled: Set[str], prev: Set[str], already: Set[str],
-                              *, indent: str = "  ", header: bool = False) -> None:
-    """Print the diff, configure newly added toolsets not in ``already``, and write the platform list.
-    Keys for newly enabled tools not already handled by the selected-tool pass, so a tool enabled globally
-    but lacking provider config doesn't drop the user back to the main menu."""
-    added, removed = _checklist_diff(new_enabled, prev, pkey)
-    if header and (added or removed):
-        print(color(f"  {PLATFORMS[pkey]['label']}:", Colors.DIM))
-    _print_toolset_diff(added, removed, indent=indent)
-    _configure_newly_added(added, already, config)
-    _save_platform_tools(config, pkey, new_enabled)
-
-
-def _configure_platforms(config: dict, platform_keys: List[str], *, all_platforms: bool = False) -> bool:
-    """Checklist + key setup + save for one platform, or for every platform at once (the 'Configure all
-    platforms (global)' menu entry). Returns True when config was saved."""
-    label = "All platforms" if all_platforms else PLATFORMS[platform_keys[0]]["label"]
-    current = {pk: _current_platform_tools(config, pk) for pk in platform_keys}
-    all_current = set().union(*current.values())
-    new_enabled = _prompt_toolset_checklist(label, all_current, force_fresh=True)
-    selected_to_configure = _toolsets_needing_setup(new_enabled, config)
-    _configure_list(selected_to_configure, config)
-    if new_enabled == all_current and not selected_to_configure:
-        print(color("  No changes" if all_platforms else f"  No changes to {label}", Colors.DIM))
-        return False
-    for pk in platform_keys:
-        prev = _current_platform_tools(config, pk) if all_platforms else current[pk]
-        _apply_platform_checklist(config, pk, new_enabled, prev, set(selected_to_configure),
-                                  indent="    " if all_platforms else "  ", header=all_platforms)
-    save_config(config)
-    print(color("  ✓ Saved configuration for all platforms" if all_platforms else f"  ✓ Saved {label} configuration",
-                Colors.GREEN))
-    return True
-
-
-def tools_command(args=None, first_install: bool = False, config: dict = None):
-    """Entry point for `arkos tools` / `arkos setup tools`. ``first_install`` skips the menu (checklist + key
-    prompts); a wizard-passed ``config`` receives platform_toolsets so its final save_config() keeps them."""
-    if config is None:
-        config = load_config()
-    enabled_platforms = _get_enabled_platforms()
-
-    print()
-    if getattr(args, "summary", False):
-        _print_tools_summary(config, enabled_platforms)
-        return
-    print(color("⚕ Arkos Tool Configuration", Colors.CYAN, Colors.BOLD))
-    print(color("  Enable or disable tools per platform.", Colors.DIM))
-    print(color("  Tools that need API keys will be configured when enabled.", Colors.DIM))
-    print()
-    if first_install:
-        _first_install_flow(config, enabled_platforms)
-        return
-
-    platform_keys = list(enabled_platforms)
-    platform_choices = [_platform_menu_label(config, pkey) for pkey in platform_keys]
-
-    def _add_row(label: str, present: bool = True) -> int:
-        if not present:
-            return -1
-        platform_choices.append(label)
-        return len(platform_choices) - 1
-
-    global_idx = _add_row("Configure all platforms (global)", len(platform_keys) > 1)
-    reconfig_idx = _add_row("Reconfigure an existing tool's provider or API key")
-    metrics_idx = _add_row(_shared_metrics_menu_label(config))
-    mcp_idx = _add_row("Configure MCP server tools", bool(config.get("mcp_servers")))
-    done_idx = _add_row("Done")
-
-    while True:
-        idx = _prompt_choice("Select an option:", platform_choices, default=0)
-        if idx == done_idx:
-            break
-        if idx == reconfig_idx:
-            _reconfigure_tool(config, force_fresh=True)
-        elif idx == metrics_idx:
-            _configure_shared_metrics_interactive(config)
-            platform_choices[metrics_idx] = _shared_metrics_menu_label(config)
-        elif idx == mcp_idx:
-            _configure_mcp_tools_interactive(config)
-        elif idx == global_idx:
-            if _configure_platforms(config, platform_keys, all_platforms=True):
-                for ci, pk in enumerate(platform_keys):
-                    platform_choices[ci] = _platform_menu_label(config, pk)
-        else:
-            _configure_platforms(config, [platform_keys[idx]])
-            platform_choices[idx] = _platform_menu_label(config, platform_keys[idx])
-        print()
-
-    print()
-    from arkos_constants import display_arkos_home
-    print(color(f"  Tool configuration saved to {display_arkos_home()}/config.yaml", Colors.DIM))
-    print(color("  Changes take effect on next 'arkos' or gateway restart.", Colors.DIM))
-    print()
-
-
-import shutil  # noqa: F401,E402
-import subprocess  # noqa: F401,E402
-import sys  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'MANAGED_FEATURE_COVERAGE_CATEGORY': ('arkos_cli.portal_subscription', 'MANAGED_FEATURE_COVERAGE_CATEGORY'),
-    'PORTAL_MANAGED_PROVIDER': ('tools.tool_backend_helpers', 'PORTAL_MANAGED_PROVIDER'),
-    'base_url_hostname': ('utils', 'base_url_hostname'),
-    'fal_key_is_configured': ('tools.tool_backend_helpers', 'fal_key_is_configured'),
-    'format_portal_entitlement_message': ('arkos_cli.portal_account', 'format_portal_entitlement_message'),
-    'is_truthy_value': ('utils', 'is_truthy_value'),
-    'save_env_value': ('arkos_cli.config', 'save_env_value'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])
+from arkos_cli.tool_providers import _visible_providers

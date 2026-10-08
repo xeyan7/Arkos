@@ -332,33 +332,6 @@ class SupermemoryMemoryProvider(MemoryProvider):
         from arkos_constants import get_arkos_home
         return {"summary": _format_connection_summary(_probe_supermemory_connection(get_secret("SUPERMEMORY_API_KEY", "") or "", str(get_arkos_home())))}
 
-    def post_setup(self, arkos_home: str, config: dict) -> None:
-        from arkos_cli.config import save_config
-        try:
-            from arkos_cli.memory_setup import _prompt, _write_env_vars
-        except ImportError:
-            def _prompt(prompt_text, secret=False):
-                import getpass
-                return (getpass.getpass if secret else input)(prompt_text + ": ").strip()
-            def _write_env_vars(env_dict, arkos_home=None):
-                pass
-        print(f"\n  Configuring supermemory:\n\n  Get your API key at {_API_KEY_URL}\n")
-        existing = os.environ.get("SUPERMEMORY_API_KEY", "")
-        masked = f"...{existing[-4:]}" if len(existing) > 4 else "set"
-        val = _prompt(f"Supermemory API key (current: {masked}, blank to keep)" if existing else "Supermemory API key", secret=True)
-        memory = config["memory"] = config["memory"] if isinstance(config.get("memory"), dict) else {}
-        memory["provider"] = self.name
-        save_config(config)
-        if val:
-            _write_env_vars({"SUPERMEMORY_API_KEY": val}, arkos_home=arkos_home)
-        api_key = val or existing
-        if api_key and not is_multiplex_active() and os.environ.get("SUPERMEMORY_API_KEY") != api_key:
-            os.environ["SUPERMEMORY_API_KEY"] = api_key
-        status = _probe_supermemory_connection(api_key, arkos_home)
-        print(f"\n  {_format_connection_summary(status)}\n\n  Memory provider: supermemory\n  Activation saved to config.yaml")
-        if val:
-            print("  API keys saved to .env")
-        print("\n  Start a new session to activate.\n")
 
     def initialize(self, session_id: str, **kwargs) -> None:
         from arkos_constants import get_arkos_home

@@ -385,8 +385,7 @@ def _org_provenance_header(skill_dir: Path, active_skills_dir: Path):
         + "). It was reviewed and approved for the whole\n"
         "> team — treat it as third-party instructions rather than your own notes.\n"
         "> You MAY improve it in place like any other skill. Your edits are kept locally\n"
-        "> and are never overwritten by org updates; share them back with\n"
-        "> `arkos sync propose` (or automatically, if your org enables it).\n\n")
+        "> and remain local to this installation.\n\n")
     return {"org_id": prov_org, "shared_by": author or None, "as_of": ts or None}, header
 
 

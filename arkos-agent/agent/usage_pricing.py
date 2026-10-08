@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 _ZERO = Decimal("0")
 _ONE_MILLION = Decimal("1000000")
-_PORTAL_DEFAULT_BASE_URL = ""
 
 _SUBCENT_THRESHOLD = Decimal("0.01")
 
@@ -296,8 +295,6 @@ def resolve_billing_route(
         return BillingRoute(provider="openai-codex", model=model, base_url=url, billing_mode="subscription_included")
     if provider_name == "openrouter" or host("openrouter.ai"):
         return BillingRoute(provider="openrouter", model=model, base_url=url, billing_mode="official_models_api")
-    if provider_name == "portal":
-        return BillingRoute(provider="portal", model=model, base_url=base_url or _PORTAL_DEFAULT_BASE_URL, billing_mode="official_models_api")
     snapshot_provider = _SNAPSHOT_PROVIDER_ALIASES.get(provider_name)
     if snapshot_provider is None:
         if (
@@ -562,7 +559,6 @@ def format_token_count_compact(value: int) -> str:
     if "." in text:
         text = text.rstrip("0").rstrip(".")
     return f"{sign}{text}{suffix}"
-
 
 
 DEFAULT_PRICING = {"input": 0.0, "output": 0.0}

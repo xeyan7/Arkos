@@ -48,7 +48,7 @@ def _build_inspection_agent(platform: str) -> Any:
     """
     from run_agent import AIAgent
     from arkos_cli.config import load_config
-    from arkos_cli.tools_config import _get_platform_tools
+    from arkos_cli.tool_configuration import _get_platform_tools
     from agent.skill_utils import parse_config_string_list
 
     cfg = load_config()

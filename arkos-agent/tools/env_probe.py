@@ -26,7 +26,7 @@ _PROBE_WAIT_TIMEOUT = 10.0
 _WAIT_ALREADY_TIMED_OUT = False
 
 _REMOTE_BACKENDS = frozenset({
-    "docker", "singularity", "modal", "daytona", "ssh", "managed_modal",
+    "docker", "singularity", "modal", "daytona", "ssh",
     "vercel_sandbox",
 })
 

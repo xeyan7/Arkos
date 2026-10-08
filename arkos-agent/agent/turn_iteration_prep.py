@@ -16,7 +16,6 @@ from contextlib import suppress
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from agent.display import KawaiiSpinner
 from agent.turn_context import reanchor_current_turn_user_idx
 
 logger = logging.getLogger("agent.conversation_loop")
@@ -97,9 +96,7 @@ def prepare_iteration(agent: Any,*, messages: Any, api_call_count: Any) -> Itera
         _INTERRUPT_SCAFFOLD_MARKER, _maybe_inject_run_budget_wrapup
     )
 
-    if getattr(agent, "_portal_wire_pending", None):
-        from agent.arkos_wire import apply_pending_wire_switch
-        apply_pending_wire_switch(agent)
+    pass
 
     if agent.step_callback is not None:
         try:
@@ -110,10 +107,7 @@ def prepare_iteration(agent: Any,*, messages: Any, api_call_count: Any) -> Itera
     if agent._skill_nudge_interval > 0 and "skill_manage" in agent.valid_tool_names:
         agent._iters_since_skill += 1
 
-    try:
-        agent._adopt_portal_key_before_expiry()
-    except Exception:
-        logger.debug("Portal key pre-expiry adoption failed", exc_info=True)
+    pass
 
     _pre_api_steer = agent._drain_pending_steer()
     if _pre_api_steer:
@@ -231,21 +225,14 @@ def announce_api_call(
     agent: Any, *, messages: Any, api_messages: Any, api_call_count: Any, approx_tokens: Any,
     total_chars: Any,
 ) -> ApiCallAnnouncement:
-    """Print the request summary (verbose) or start the quiet-mode thinking indicator."""
+    """Report request activity through diagnostics and the host callback."""
     thinking_spinner = None
     if not agent.quiet_mode:
         agent._vprint(f"\n{agent.log_prefix}🔄 Making API call #{api_call_count}/{agent.max_iterations}...")
         agent._vprint(f"{agent.log_prefix}   📊 Request size: {len(api_messages)} messages, ~{approx_tokens:,} tokens (~{total_chars:,} chars)")
         agent._vprint(f"{agent.log_prefix}   🔧 Available tools: {len(agent.tools) if agent.tools else 0}")
-    else:
-        face = random.choice(KawaiiSpinner.get_thinking_faces())
-        verb = random.choice(KawaiiSpinner.get_thinking_verbs())
-        if agent.thinking_callback:
-            agent.thinking_callback(f"{face} {verb}...")
-        elif not agent._has_stream_consumers() and agent._should_start_quiet_spinner():
-            spinner_type = random.choice(['brain', 'sparkle', 'pulse', 'moon', 'star'])
-            thinking_spinner = KawaiiSpinner(f"{face} {verb}...", spinner_type=spinner_type, print_fn=agent._print_fn)
-            thinking_spinner.start()
+    elif agent.thinking_callback:
+        agent.thinking_callback("Thinking...")
 
     if agent.verbose_logging:
         logging.debug(f"API Request - Model: {agent.model}, Messages: {len(messages)}, Tools: {len(agent.tools) if agent.tools else 0}")

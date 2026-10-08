@@ -171,10 +171,6 @@ def record_response_usage(
         prompt_tokens, completion_tokens, total_tokens,
         api_duration, _cache_pct, _ident,
     )
-    if agent.session_api_calls == 1 and (agent.provider or "") == "portal":
-        with suppress(Exception):
-            from agent.arkos_wire import maybe_switch_wire_after_first_response
-            maybe_switch_wire_after_first_response(agent, response, agent.session_api_calls)
 
     _agg_cost_model, _agg_cost_provider, _agg_cost_base_url = agent.model, agent.provider, agent.base_url
     _agg_slot = getattr(_moa_client, "last_aggregator_slot", None) if _moa_client is not None else None

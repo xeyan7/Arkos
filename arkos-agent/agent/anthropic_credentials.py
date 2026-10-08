@@ -488,9 +488,10 @@ def _generate_pkce() -> tuple:
     return verifier, challenge
 
 
-def run_arkos_oauth_login_pure() -> Optional[Dict[str, Any]]:
-    """Run Arkos-native OAuth PKCE flow and return credential state."""
-    import webbrowser
+def run_arkos_oauth_login_pure(*, authorization_callback=None) -> Optional[Dict[str, Any]]:
+    """Exchange a host-collected authorization code using PKCE and CSRF state validation."""
+    if authorization_callback is None:
+        raise ValueError("An authorization_callback(auth_url) is required for OAuth login.")
     from urllib.parse import urlencode
     verifier, challenge = _generate_pkce()
     oauth_state = secrets.token_urlsafe(32)
@@ -499,29 +500,8 @@ def run_arkos_oauth_login_pure() -> Optional[Dict[str, Any]]:
         "scope": _OAUTH_SCOPES, "code_challenge": challenge, "code_challenge_method": "S256", "state": oauth_state,
     }
     auth_url = f"https://claude.ai/oauth/authorize?{urlencode(params)}"
-    print("\n".join([
-        "", "Authorize Arkos with your Claude Pro/Max subscription.", "",
-        "╭─ Claude Pro/Max Authorization ────────────────────╮",
-        "│                                                   │",
-        "│  Open this link in your browser:                  │",
-        "╰───────────────────────────────────────────────────╯",
-        "", f"  {auth_url}", "",
-    ]))
-    try:
-        from arkos_cli.auth import _can_open_graphical_browser as _can_open_gui
-    except Exception:
-        _can_open_gui = lambda: True  # noqa: E731 — degrade to prior behavior
-    if _can_open_gui():
-        with contextlib.suppress(Exception):
-            webbrowser.open(auth_url)
-            print("  (Browser opened automatically)")
-    print("\nAfter authorizing, you'll see a code. Paste it below.\n")
-    try:
-        auth_code = input("Authorization code: ").strip()
-    except (KeyboardInterrupt, EOFError):
-        return None
+    auth_code = (authorization_callback(auth_url) or "").strip()
     if not auth_code:
-        print("No code entered.")
         return None
     splits = auth_code.split("#")
     code, received_state = splits[0], (splits[1] if len(splits) > 1 else "")

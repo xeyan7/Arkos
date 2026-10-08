@@ -1,15 +1,11 @@
 """Human prompt surfaces for :mod:`tools.approval`.
 
-The interactive CLI prompt (callback panel or ``input()`` fallback) and the
-operator-selected plugin approval transport. Detection, allowed scopes,
+The embedding host callback and operator-selected plugin approval transport. Detection, allowed scopes,
 persistence, timeout policy and the final authorization stay host-owned in
 ``tools.approval``; this module only asks and reports the answer.
 """
 
 import logging
-import os
-import sys
-import threading
 from tools import approval_context as _ctx, approval_gateway_wait as _gw
 from tools.approval_human_wait import activity_heartbeat, human_wait_window
 from tools.interrupt import is_interrupted
@@ -20,7 +16,7 @@ logger = logging.getLogger("tools.approval")
 def prompt_dangerous_approval(command: str, description: str, timeout_seconds: int | None = None,
                               allow_permanent: bool = True, approval_callback=None,
                               *, allow_session: bool = True, smart_denied: bool = False) -> str:
-    """Prompt the user to approve a dangerous command (CLI only).
+    """Request approval through the embedding host callback.
 
     allow_permanent=False hides [a]lways (tirith warnings present: broad permanent
     allowlisting is wrong for content-level findings). allow_session=False hides
@@ -28,7 +24,7 @@ def prompt_dangerous_approval(command: str, description: str, timeout_seconds: i
     protected agent-instruction gate in ``tools/file_tools.py``); offering a scope
     the caller discards makes every later write re-prompt and reads as broken.
     smart_denied: owner override of a Smart DENY, offer only once/deny.
-    approval_callback: CLI prompt_toolkit callback ``(command, description, *,
+    approval_callback: host callback ``(command, description, *,
     allow_permanent=True, allow_session=True, smart_denied=False) -> str``; legacy
     signatures keep working while both keywords hold their defaults.
 
@@ -43,42 +39,11 @@ def prompt_dangerous_approval(command: str, description: str, timeout_seconds: i
                           approval_callback, allow_session, smart_denied)
 
 
-_CLI_CHOICE_ALIASES = {
-    "o": "once", "once": "once",
-    "s": "session", "session": "session",
-    "a": "always", "always": "always",
-}
-
-_CLI_CHOICE_I18N = {
-    "once": "approval.allowed_once",
-    "session": "approval.allowed_session",
-    "always": "approval.allowed_always",
-    "deny": "approval.denied",
-}
-
-
-def _read_choice(prompt: str, timeout_seconds: int) -> str | None:
-    """Read one answer on a daemon thread; None when the user never answered."""
-    result = {"choice": ""}
-
-    def get_input():
-        try:
-            result["choice"] = input(prompt).strip().lower()
-        except (EOFError, OSError):
-            result["choice"] = ""
-
-    thread = threading.Thread(target=get_input, daemon=True)
-    thread.start()
-    thread.join(timeout=timeout_seconds)
-    return None if thread.is_alive() else result["choice"]
-
-
 def _ask_human(command: str, description: str, timeout_seconds: int, allow_permanent: bool,
                approval_callback, allow_session: bool, smart_denied: bool) -> str:
     from agent.redact import redact_sensitive_text
     display_command = redact_sensitive_text(command)
     display_description = redact_sensitive_text(description)
-    once_only = smart_denied or not allow_session
 
     if approval_callback is not None:
         try:
@@ -90,45 +55,8 @@ def _ask_human(command: str, description: str, timeout_seconds: int, allow_perma
             logger.error("Approval callback failed: %s", e, exc_info=True)
             return "deny"
 
-    try:
-        from prompt_toolkit.application.current import get_app_or_none
-        if get_app_or_none() is not None:
-            logger.warning("Dangerous-command approval requested on a thread with no "
-                           "approval callback while prompt_toolkit is active; denying "
-                           "to avoid stdin deadlock. command=%r description=%r", command, description)
-            return "deny"
-    except Exception:
-        pass
-
-    os.environ["ARKOS_SPINNER_PAUSE"] = "1"
-    try:
-        from agent.i18n import t
-        shape = "smart_deny" if once_only else "long" if allow_permanent else "short"
-        prompt_key, menu_key = f"approval.prompt_{shape}", f"approval.choose_{shape}"
-        print(f"\n  {t('approval.dangerous_header', description=display_description)}"
-              f"\n      {display_command}\n\n{t(menu_key)}\n")
-        sys.stdout.flush()
-        choice = _read_choice(t(prompt_key), timeout_seconds)
-        if choice is None:
-            print("\n" + t("approval.timeout"))
-            return "timeout"
-        if once_only:
-            decision = {**dict.fromkeys(t("approval.smart_deny_once_inputs").split(","), "once"),
-                        **dict.fromkeys(t("approval.smart_deny_deny_inputs").split(","), "deny"),
-                        }.get(choice, "deny")
-        else:
-            decision = _CLI_CHOICE_ALIASES.get(choice, "deny")
-            if decision == "always" and not allow_permanent:
-                decision = "session"
-        print(t(_CLI_CHOICE_I18N[decision]))
-        return decision
-    except (EOFError, KeyboardInterrupt):
-        print("\n" + t("approval.cancelled"))
-        return "deny"
-    finally:
-        os.environ.pop("ARKOS_SPINNER_PAUSE", None)
-        print()
-        sys.stdout.flush()
+    logger.warning("Approval requires a host callback; denying operation.")
+    return "deny"
 
 
 def get_plugin_manager():

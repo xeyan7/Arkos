@@ -369,11 +369,7 @@ def _resize_image_for_vision(image_path: Path, mime_type: Optional[str] = None,
     return candidate
 
 
-_TOOL_RESULT_MEDIA_PROVIDERS = frozenset({
-    "openrouter", "portal", "vertex", "bedrock", "anthropic-vertex", "google-vertex",
-    "anthropic", "claude", "anthropic-direct",
-    "openai", "openai-chat", "openai-codex", "azure-openai",
-})
+_TOOL_RESULT_MEDIA_PROVIDERS = frozenset({'openrouter', 'vertex', 'bedrock', 'anthropic-vertex', 'google-vertex', 'anthropic', 'claude', 'anthropic-direct', 'openai', 'openai-chat', 'openai-codex', 'azure-openai'})
 _GEMINI_PROVIDERS = frozenset({"google", "gemini", "google-gemini", "google-vertex-gemini"})
 
 
@@ -751,7 +747,7 @@ def check_vision_requirements() -> bool:
     """True when ``call_llm(task="vision")`` could resolve a client.
 
     Mirrors its fallback chain: explicit ``auxiliary.vision.provider``, then auto (main
-    provider → openrouter → portal) — without the auto step the tool would vanish whenever
+    provider → openrouter) — without the auto step the tool would vanish whenever
     the explicit name was unresolvable. Probe mode skips real SDK client construction..
     """
     try:

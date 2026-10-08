@@ -124,8 +124,6 @@ def _resolve_cloud_provider_uncached() -> Optional[CloudBrowserProvider]:
                 _bt._cached_cloud_provider = None
                 _bt._cloud_provider_resolved = True
                 return None
-            if provider_key == "portal":
-                provider_key = "browser-use"
         if provider_key:
             resolved = _instantiate_explicit_cloud_provider(provider_key)
             if resolved is None:

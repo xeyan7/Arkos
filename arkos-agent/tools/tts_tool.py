@@ -46,7 +46,6 @@ def _resolve_provider_key(env_var: str, provider_id: str) -> str:
 from tools.tts_command_provider import (
     BUILTIN_TTS_PROVIDERS, _configured_command_tts_output_path, _generate_command_tts,
     _get_command_tts_output_format, _is_command_tts_voice_compatible, _resolve_command_provider_config)
-from tools.tool_backend_helpers import PORTAL_MANAGED_PROVIDER
 from tools.tts_tool_delivery import (
     _resolve_max_text_length, _build_audio_delivery_files, _convert_to_opus, _remove_quietly,
     _repair_ogg_container, _resolve_audio_delivery_profile, _split_text_for_tts)
@@ -148,9 +147,9 @@ def _load_tts_config() -> Dict[str, Any]:
 
 def _get_provider(tts_config: Dict[str, Any]) -> str:
     """Configured provider or the free default (inference credentials never imply consent to paid
-    speech); ``portal`` is serviced by the OpenAI path through the managed openai-audio gateway."""
+    speech)."""
     provider = (tts_config.get("provider") or DEFAULT_PROVIDER).lower().strip()
-    return "openai" if provider == PORTAL_MANAGED_PROVIDER else provider
+    return provider
 
 
 OPUS_VOICE_PLATFORMS = frozenset({"telegram", "matrix", "feishu", "whatsapp", "signal"})
@@ -624,18 +623,16 @@ _PLUGIN_COMPAT_LAZY = {
     'ELEVENLABS_MODEL_MAX_TEXT_LENGTH': ('tools.tts_tool_delivery', 'ELEVENLABS_MODEL_MAX_TEXT_LENGTH'),
     'FALLBACK_MAX_TEXT_LENGTH': ('tools.tts_tool_delivery', 'FALLBACK_MAX_TEXT_LENGTH'),
     'GEMINI_AUDIO_TAG_REWRITE_TASK': ('tools.tts_tool_providers', 'GEMINI_AUDIO_TAG_REWRITE_TASK'),
-    'MANAGED_OPENAI_TTS_MODELS': ('tools.tts_tool_openai', 'MANAGED_OPENAI_TTS_MODELS'),
     'PROVIDER_MAX_TEXT_LENGTH': ('tools.tts_tool_delivery', 'PROVIDER_MAX_TEXT_LENGTH'),
     'TTS_RESPONSE_BODY_CHUNK_BYTES': ('tools.tts_tool_providers', 'TTS_RESPONSE_BODY_CHUNK_BYTES'),
     'TTS_RESPONSE_BODY_LIMIT_BYTES': ('tools.tts_tool_providers', 'TTS_RESPONSE_BODY_LIMIT_BYTES'),
     'acquire_tts_lease': ('tools.tts_tool_lifecycle', 'acquire_tts_lease'),
     'arkos_xai_user_agent': ('tools.xai_http', 'arkos_xai_user_agent'),
-    'managed_portal_tools_enabled': ('tools.tool_backend_helpers', 'managed_portal_tools_enabled'),
-    'portal_tool_gateway_unavailable_message': ('tools.tool_backend_helpers', 'portal_tool_gateway_unavailable_message'),
+
+
     'read_selection': ('tools.tool_backend_helpers', 'read_selection'),
     'release_tts_lease': ('tools.tts_tool_lifecycle', 'release_tts_lease'),
     'release_tts_provider': ('tools.tts_tool_lifecycle', 'release_tts_provider'),
-    'resolve_managed_tool_gateway': ('tools.managed_tool_gateway', 'resolve_managed_tool_gateway'),
     'resolve_openai_audio_api_key': ('tools.tool_backend_helpers', 'resolve_openai_audio_api_key'),
     'selection_error': ('tools.tool_backend_helpers', 'selection_error'),
     'stream_tts_to_speaker': ('tools.tts_tool_speaker', 'stream_tts_to_speaker'),

@@ -827,7 +827,7 @@ _DRAINABLE_GATEWAY_STATES = frozenset({"running"})
 
 
 def derive_gateway_busy(*, gateway_running: bool, gateway_state: Any, active_agents: Any) -> bool:
-    """Busy iff live, ``running``, and ``active_agents > 0`` -- the contract Portal gates on. Liveness
+    """Busy iff live, ``running``, and ``active_agents > 0``. Liveness
     keys off ``gateway_running``, NEVER ``updated_at`` (an idle gateway never advances it)."""
     if not derive_gateway_drainable(gateway_running=gateway_running, gateway_state=gateway_state):
         return False
@@ -1445,7 +1445,6 @@ def get_running_pid_cached(
     with _gateway_running_pid_cache_lock:
         _gateway_running_pid_cache[key] = (time.monotonic(), refreshed_signature, pid)
     return pid
-
 
 
 def clear_planned_stop_marker() -> None:

@@ -66,7 +66,7 @@ plus `coding`/`safe`/`debugging` composites and `arkos-*` platform bundles (`ark
 `arkos-cron`, `arkos-telegram`, `arkos-slack`, ...). Removed in engine build: `discord`,
 `discord_admin`, `feishu_doc`, `feishu_drive`, `homeassistant`, `kanban`, `messaging`, `moa`,
 `rl`, `yuanbao`, `desktop_ui`, `project` (don't assert the list in tests). Per-platform enable/disable via
-`arkos tools` (curses) or `tools.<platform>.enabled/disabled` in config.yaml. `browser_exec`
+`arkos_cli.tool_configuration` APIs or `tools.<platform>.enabled/disabled` in config.yaml. `browser_exec`
 replaces the other browser tools when `browser.backend` is `browser-use`.
 
 ## Backends and providers inside tools/

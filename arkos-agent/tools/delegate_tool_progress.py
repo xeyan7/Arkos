@@ -224,14 +224,10 @@ def _emit_parent_console(parent_agent, line: str) -> None:
             return
     print(line)
 
-def _print_completion_line(parent_agent: Any, spinner_ref: Any, line: str, console_line: Optional[str] = None) -> None:
-    """Above-spinner line when a spinner exists (console fallback if it raises), else console
-    (``console_line`` when given, else the line indented two spaces)."""
-    if spinner_ref:
-        with _quiet(None):
-            spinner_ref.print_above(line)
-            return
+def _print_completion_line(parent_agent: Any, line: str, console_line: Optional[str] = None) -> None:
+    """Report completion through the host diagnostic writer."""
     _emit_parent_console(parent_agent, f"  {line}" if console_line is None else console_line)
+
 
 def _short(text: str, n: int) -> str:
     return (text[:n] + "...") if len(text) > n else text
@@ -246,11 +242,11 @@ class _ChildProgressRelay:
     _BATCH_SIZE = 5
 
     def __init__(
-        self, task_index: int, goal: str, spinner: Any, parent_cb: Any, task_count: int,
+        self, task_index: int, goal: str, parent_cb: Any, task_count: int,
         subagent_id, parent_id, depth, model, toolsets, session_ref,
     ) -> None:
         self.task_index, self.task_count, self.goal_label = task_index, task_count, (goal or "").strip()
-        self.spinner, self.parent_cb, self.session_ref = spinner, parent_cb, session_ref if session_ref is not None else {}
+        self.parent_cb, self.session_ref = parent_cb, session_ref if session_ref is not None else {}
         self.subagent_id, self.parent_id, self.depth, self.model, self.toolsets = (
             subagent_id, parent_id, depth, model, toolsets
         )
@@ -279,11 +275,6 @@ class _ChildProgressRelay:
             with _quiet("Parent callback failed: %s"):
                 self.parent_cb(event_type, tool_name, preview, args, **{**self._identity_kwargs(), **kwargs})
 
-    def _tree_line(self, text: str) -> None:
-        """Print one tree-view line above the CLI spinner (no-op without a spinner)."""
-        if self.spinner:
-            with _quiet("Spinner print_above failed: %s"):
-                self.spinner.print_above(f" {self._prefix()}├─ {text}")
 
     def _flush(self) -> None:
         """Flush remaining batched tool names to the gateway."""
@@ -292,16 +283,9 @@ class _ChildProgressRelay:
             self.batch.clear()
 
     def _on_start(self, tool_name, preview, args, kwargs):
-        if self.goal_label:
-            self._tree_line(f"🔀 {_short(self.goal_label, 55)}")
         self._relay("subagent.start", preview=preview or self.goal_label or "", **kwargs)
 
     def _on_complete(self, tool_name, preview, args, kwargs):
-        if kwargs.get("status") in SUBAGENT_FAILURE_STATUSES:
-            self._tree_line(format_subagent_failure_line(
-                self.goal_label, kwargs.get("status"), error=kwargs.get("summary") or preview,
-                duration_seconds=kwargs.get("duration_seconds"),
-            ))
         self._relay("subagent.complete", preview=preview, **kwargs)
 
     def _on_text(self, tool_name, preview, args, kwargs):
@@ -309,13 +293,10 @@ class _ChildProgressRelay:
 
     def _on_thinking(self, tool_name, preview, args, kwargs):
         text = preview or tool_name or ""
-        self._tree_line(f'💭 "{_short(text, 55)}"')
         self._relay("subagent.thinking", preview=text)
 
     def _on_progress(self, tool_name, preview, args, kwargs):
         summary_text = tool_name or preview or ""
-        if summary_text:
-            self._tree_line(f"🔀 {summary_text}")
         if self.parent_cb:
             with _quiet("Parent callback relay failed: %s"):
                 self.parent_cb("subagent_progress", f"{self._prefix()}{summary_text}")
@@ -328,11 +309,6 @@ class _ChildProgressRelay:
                 if rec is not None:
                     rec["tool_count"] = self.tool_count
                     rec["last_tool"] = tool_name or ""
-        if self.spinner:
-            from agent.display import get_tool_emoji
-            line = f"{get_tool_emoji(tool_name or '')} {tool_name}"
-            short = _short(preview, 35) if preview else ""
-            self._tree_line(f'{line}  "{short}"' if short else line)
         if self.parent_cb:
             self._relay("subagent.tool", tool_name, preview, args)
             self.batch.append(tool_name or "")
@@ -352,12 +328,11 @@ def _build_child_progress_callback(
 ) -> Optional[callable]:
     """Relay for one child's events (see ``_ChildProgressRelay``), or None when the parent has neither a spinner nor a
     progress callback — the child then runs with no progress callback at all (zero behavior change)."""
-    spinner = getattr(parent_agent, "_delegate_spinner", None)
     parent_cb = getattr(parent_agent, "tool_progress_callback", None)
-    if not spinner and not parent_cb:
+    if not parent_cb:
         return None
     if session_ref is not None:
         session_ref["_parent_scope"] = parent_agent
     return _ChildProgressRelay(
-        task_index, goal, spinner, parent_cb, task_count, subagent_id, parent_id, depth, model, toolsets, session_ref,
+        task_index, goal, parent_cb, task_count, subagent_id, parent_id, depth, model, toolsets, session_ref,
     )

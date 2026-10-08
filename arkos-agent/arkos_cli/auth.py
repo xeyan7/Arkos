@@ -6,7 +6,7 @@
   only I/O primitives (cross-process flock, atomic 0o600 writes).
 - ``resolve_provider()`` picks the active provider via the documented priority chain.
 - ``OAUTH_PROVIDER_FLOWS`` maps each OAuth provider to its resolver/status builder; the flows live in
-  ``auth_portal``/``auth_codex``/``auth_xai``/``auth_qwen``/``auth_minimax``/``auth_spotify`` and are
+  ``auth_codex``/``auth_xai``/``auth_qwen``/``auth_minimax``/``auth_spotify`` and are
   re-imported here so ``arkos_cli.auth.<name>`` stays the public/patchable surface."""
 
 from __future__ import annotations
@@ -38,73 +38,11 @@ from utils import atomic_replace, atomic_yaml_write, env_float, is_truthy_value 
 from arkos_cli.auth_zai_kimi import (  # noqa: F401  re-exported
     KIMI_CODE_BASE_URL, ZAI_ENDPOINTS, _normalize_lmstudio_runtime_base_url, _resolve_kimi_base_url,
     _resolve_zai_base_url, detect_zai_endpoint)
-from arkos_cli.auth_model_picker import (  # noqa: F401  re-exported
-    _prompt_model_selection, _save_model_choice)
-from arkos_cli.auth_device_flow import (  # noqa: F401  re-exported
-    _can_open_graphical_browser, _default_verify, _is_remote_session,
-    _portal_device_auth_timeout_message, _offer_existing_oauth_credentials,
-    _poll_device_token_generic, _poll_for_token, _print_device_code_instructions,
-    _print_login_success, _print_loopback_ssh_hint, _prompt_yes_no, _request_device_code,
-    _resolve_verify, _ssh_user_at_host)
+from arkos_cli.auth_device_flow import _can_open_graphical_browser, _default_verify, _is_remote_session, reuse_existing_oauth_credentials, _poll_device_token_generic, _print_device_code_instructions, _print_login_success, _print_loopback_ssh_hint, _resolve_verify, _ssh_user_at_host
 from arkos_cli.auth_oauth_grants import (  # noqa: F401  re-exported
     SINGLE_USE_REFRESH_POOL_PROVIDERS, _oauth_heal_clean_marks, _oauth_heal_notices,
     consume_oauth_heal_notices, heal_forked_single_use_oauth_grants,
     strip_cloned_single_use_oauth_grants)
-try:
-    from arkos_cli.auth_portal import (  # noqa: F401  re-exported
-        PORTAL_SESSION_TERMINAL, PORTAL_SESSION_UNKNOWN, PORTAL_SESSION_VALID, _ALLOWED_PORTAL_INFERENCE_HOSTS,
-        _agent_key_is_usable, _apply_portal_refreshed_tokens, _assert_portal_inference_jwt_usable,
-        _compute_portal_auth_status, _format_portal_entitlement_auth_error, _healed_portal_inference_url,
-        _login_portal, _merge_shared_portal_oauth_state, _migrate_stale_portal_url,
-        _portal_device_code_login, _portal_inference_env_override, _portal_invoke_jwt_is_usable,
-        _portal_invoke_jwt_status, _portal_env_override, _portal_shared_store_lock,
-        _portal_shared_store_path, _pool_first_oauth_status, _quarantine_portal_oauth_state,
-        _quarantine_portal_pool_entries, _read_shared_portal_state, _refresh_access_token,
-        _refresh_portal_or_quarantine, _select_portal_invoke_jwt, _sync_portal_pool_from_auth_store,
-        _token_fingerprint, _try_import_shared_portal_state, _validate_portal_inference_url_from_network,
-        _write_shared_portal_state, fetch_portal_models, get_portal_auth_status_local,
-        get_portal_session_validity, persist_portal_credentials, refresh_portal_oauth_from_state,
-        resolve_portal_runtime_credentials, step_up_portal_billing_scope)
-except ImportError:
-    PORTAL_SESSION_TERMINAL = "terminal"
-    PORTAL_SESSION_UNKNOWN = "unknown"
-    PORTAL_SESSION_VALID = "valid"
-    _ALLOWED_PORTAL_INFERENCE_HOSTS = ()
-    def _agent_key_is_usable(*a, **kw): return False
-    def _apply_portal_refreshed_tokens(*a, **kw): pass
-    def _assert_portal_inference_jwt_usable(*a, **kw): pass
-    def _compute_portal_auth_status(*a, **kw): return "logged_out"
-    def _format_portal_entitlement_auth_error(*a, **kw): return ""
-    def _healed_portal_inference_url(*a, **kw): return ""
-    def _login_portal(*a, **kw): pass
-    def _merge_shared_portal_oauth_state(*a, **kw): pass
-    def _migrate_stale_portal_url(*a, **kw): pass
-    def _portal_device_code_login(*a, **kw): pass
-    def _portal_inference_env_override(*a, **kw): return None
-    def _portal_invoke_jwt_is_usable(*a, **kw): return False
-    def _portal_invoke_jwt_status(*a, **kw): return "logged_out"
-    def _portal_env_override(*a, **kw): return None
-    def _portal_shared_store_lock(*a, **kw): pass
-    def _portal_shared_store_path(*a, **kw): return None
-    def _pool_first_oauth_status(*a, **kw): return "logged_out"
-    def _quarantine_portal_oauth_state(*a, **kw): pass
-    def _quarantine_portal_pool_entries(*a, **kw): pass
-    def _read_shared_portal_state(*a, **kw): return {}
-    def _refresh_access_token(*a, **kw): return None
-    def _refresh_portal_or_quarantine(*a, **kw): return None
-    def _select_portal_invoke_jwt(*a, **kw): return None
-    def _sync_portal_pool_from_auth_store(*a, **kw): pass
-    def _token_fingerprint(*a, **kw): return ""
-    def _try_import_shared_portal_state(*a, **kw): pass
-    def _validate_portal_inference_url_from_network(*a, **kw): pass
-    def _write_shared_portal_state(*a, **kw): pass
-    def fetch_portal_models(*a, **kw): return []
-    def get_portal_auth_status_local(*a, **kw): return "logged_out"
-    def get_portal_session_validity(*a, **kw): return "unknown"
-    def persist_portal_credentials(*a, **kw): pass
-    def refresh_portal_oauth_from_state(*a, **kw): return None
-    def resolve_portal_runtime_credentials(*a, **kw): return {}
-    def step_up_portal_billing_scope(*a, **kw): pass
 from arkos_cli.auth_minimax import (  # noqa: F401  re-exported
     _MINIMAX_OAUTH_ERROR_BODY_LIMIT, _login_minimax_oauth, _minimax_oauth_login, _minimax_pkce_pair,
     _minimax_poll_token, _minimax_post_form, _minimax_request_user_code,
@@ -130,22 +68,7 @@ from arkos_cli.auth_qwen import (  # noqa: F401  re-exported
     _qwen_access_token_is_expiring, _qwen_cli_auth_path, _read_qwen_cli_tokens,
     _refresh_qwen_cli_tokens, _save_qwen_cli_tokens, get_qwen_auth_status,
     resolve_qwen_runtime_credentials)
-from arkos_cli.auth_constants import (  # noqa: F401  re-exported
-    _decode_jwt_claims, AUTH_STORE_VERSION, AUTH_LOCK_TIMEOUT_SECONDS, DEFAULT_PORTAL_URL,
-    DEFAULT_PORTAL_INFERENCE_URL, DEFAULT_PORTAL_CLIENT_ID, PORTAL_BILLING_MANAGE_SCOPE,
-    DEFAULT_PORTAL_SCOPE, PORTAL_DEVICE_CODE_SOURCE, PORTAL_AUTH_PATH_INVOKE_JWT,
-    ACCESS_TOKEN_REFRESH_SKEW_SECONDS, PORTAL_INVOKE_JWT_MIN_TTL_SECONDS, DEFAULT_CODEX_BASE_URL,
-    DEFAULT_XAI_OAUTH_BASE_URL, MINIMAX_OAUTH_CLIENT_ID, MINIMAX_OAUTH_SCOPE,
-    MINIMAX_OAUTH_GLOBAL_BASE, MINIMAX_OAUTH_CN_BASE, MINIMAX_OAUTH_GLOBAL_INFERENCE,
-    MINIMAX_OAUTH_CN_INFERENCE, MINIMAX_OAUTH_REFRESH_SKEW_SECONDS, DEFAULT_QWEN_BASE_URL,
-    DEFAULT_GITHUB_MODELS_BASE_URL, DEFAULT_COPILOT_ACP_BASE_URL, DEFAULT_OLLAMA_CLOUD_BASE_URL,
-    DEFAULT_ACTUAL_BASE_URL, DEFAULT_ACTUAL_LOCAL_BASE_URL, STEPFUN_STEP_PLAN_INTL_BASE_URL,
-    STEPFUN_STEP_PLAN_CN_BASE_URL, CODEX_OAUTH_CLIENT_ID, CODEX_OAUTH_TOKEN_URL,
-    CODEX_ACCESS_TOKEN_REFRESH_SKEW_SECONDS, XAI_OAUTH_CLIENT_ID, XAI_OAUTH_SCOPE,
-    XAI_ACCESS_TOKEN_REFRESH_SKEW_SECONDS, QWEN_ACCESS_TOKEN_REFRESH_SKEW_SECONDS,
-    DEFAULT_SPOTIFY_ACCOUNTS_BASE_URL, DEFAULT_SPOTIFY_API_BASE_URL, SPOTIFY_DOCS_URL,
-    DEFAULT_SPOTIFY_SCOPE, SERVICE_PROVIDER_NAMES, LMSTUDIO_NOAUTH_PLACEHOLDER,
-    ACTUAL_LOCAL_NOAUTH_PLACEHOLDER, CODEX_RATE_LIMITED_CODE, AuthError, _portal_err, httpx)
+from arkos_cli.auth_constants import _decode_jwt_claims, AUTH_STORE_VERSION, AUTH_LOCK_TIMEOUT_SECONDS, ACCESS_TOKEN_REFRESH_SKEW_SECONDS, DEFAULT_CODEX_BASE_URL, DEFAULT_XAI_OAUTH_BASE_URL, MINIMAX_OAUTH_CLIENT_ID, MINIMAX_OAUTH_SCOPE, MINIMAX_OAUTH_GLOBAL_BASE, MINIMAX_OAUTH_CN_BASE, MINIMAX_OAUTH_GLOBAL_INFERENCE, MINIMAX_OAUTH_CN_INFERENCE, MINIMAX_OAUTH_REFRESH_SKEW_SECONDS, DEFAULT_QWEN_BASE_URL, DEFAULT_GITHUB_MODELS_BASE_URL, DEFAULT_COPILOT_ACP_BASE_URL, DEFAULT_OLLAMA_CLOUD_BASE_URL, DEFAULT_ACTUAL_BASE_URL, DEFAULT_ACTUAL_LOCAL_BASE_URL, STEPFUN_STEP_PLAN_INTL_BASE_URL, STEPFUN_STEP_PLAN_CN_BASE_URL, CODEX_OAUTH_CLIENT_ID, CODEX_OAUTH_TOKEN_URL, CODEX_ACCESS_TOKEN_REFRESH_SKEW_SECONDS, XAI_OAUTH_CLIENT_ID, XAI_OAUTH_SCOPE, XAI_ACCESS_TOKEN_REFRESH_SKEW_SECONDS, QWEN_ACCESS_TOKEN_REFRESH_SKEW_SECONDS, DEFAULT_SPOTIFY_ACCOUNTS_BASE_URL, DEFAULT_SPOTIFY_API_BASE_URL, SPOTIFY_DOCS_URL, DEFAULT_SPOTIFY_SCOPE, SERVICE_PROVIDER_NAMES, LMSTUDIO_NOAUTH_PLACEHOLDER, ACTUAL_LOCAL_NOAUTH_PLACEHOLDER, CODEX_RATE_LIMITED_CODE, AuthError, httpx
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +107,6 @@ def normalize_actual_base_url(base_url: str) -> str:
     return url
 
 
-
 @dataclass
 class ProviderConfig:
     """Describes a known inference provider."""
@@ -210,10 +132,6 @@ def _api_key_provider(
 
 
 _REGISTRY_ROWS: Tuple[Any, ...] = (
-    ProviderConfig(
-        "portal", "Arkos Portal", "oauth_device_code", portal_base_url=DEFAULT_PORTAL_URL,
-        inference_base_url=DEFAULT_PORTAL_INFERENCE_URL, client_id=DEFAULT_PORTAL_CLIENT_ID,
-        scope=DEFAULT_PORTAL_SCOPE),
     ProviderConfig("openai-codex", "OpenAI Codex", "oauth_external", inference_base_url=DEFAULT_CODEX_BASE_URL),
     ("openai-api", "OpenAI API", "https://api.openai.com/v1", ("OPENAI_API_KEY",), "OPENAI_BASE_URL"),
     ProviderConfig(
@@ -324,7 +242,6 @@ def get_anthropic_key() -> str:
     return next((v for v in (get_env_value_prefer_dotenv(var) or "" for var in env_vars) if v), "")
 
 
-
 _PLACEHOLDER_SECRET_VALUES = {
     "*", "**", "***", "changeme", "your_api_key", "your_api_key_here", "your-api-key",
     "placeholder", "example", "dummy", "null", "none"}
@@ -405,7 +322,6 @@ def _resolve_api_key_provider_secret(provider_id: str, pconfig: ProviderConfig) 
     return "", ""
 
 
-
 def is_rate_limited_auth_error(error: Exception) -> bool:
     """True when an :class:`AuthError` is upstream rate-limiting / quota: transient, and
     re-authenticating cannot fix it, so callers should say "retry later", not ``arkos auth``."""
@@ -427,8 +343,6 @@ def format_auth_error(error: Exception) -> str:
     if error.relogin_required:
         return f"{error} Run `arkos model` to re-authenticate."
     if error.code in _ENTITLEMENT_ERROR_CODES:
-        if error.provider == "portal":
-            return _format_portal_entitlement_auth_error(error)
         generic = _GENERIC_ENTITLEMENT_MESSAGES.get(error.code)
         if generic:
             return generic
@@ -439,7 +353,6 @@ def format_auth_error(error: Exception) -> str:
 
 def _nonempty_str(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
-
 
 
 def _auth_file_path() -> Path:
@@ -554,7 +467,7 @@ def _file_lock(
 
     Falls back to a depth-only guard when neither ``fcntl`` nor ``msvcrt`` is available. Callers
     supply their own ``threading.local`` so independent locks (profile store vs global root vs the
-    shared Portal store) track reentrancy separately."""
+    external auth store) track reentrancy separately."""
     if getattr(holder, "depth", 0) > 0:
         holder.depth += 1
         try:
@@ -602,7 +515,7 @@ def _auth_store_lock(
 
     ``target_path`` is required for profile-to-global write-throughs: each path has its own
     reentrancy tracker and kernel lock. Lock ordering invariant: ``_auth_store_lock`` FIRST (outer),
-    ``_portal_shared_store_lock`` SECOND (inner), else deadlock against a concurrent shared import."""
+    any external-store lock SECOND (inner), else deadlock against a concurrent shared import."""
     auth_path = target_path if target_path is not None else _auth_file_path()
     with _file_lock(
         auth_path.with_suffix(".lock"), _auth_lock_holder_for(auth_path), timeout_seconds,
@@ -645,16 +558,8 @@ def _load_auth_store(auth_file: Optional[Path] = None) -> Dict[str, Any]:
     if isinstance(raw, dict) and (
         isinstance(raw.get("providers"), dict) or isinstance(raw.get("credential_pool"), dict)):
         raw.setdefault("providers", {})
-        if isinstance(raw.get("providers"), dict):
-            _migrate_stale_portal_url(raw["providers"])
         return raw
 
-    if isinstance(raw, dict) and isinstance(raw.get("systems"), dict):
-        systems = raw["systems"]
-        portal_cred = systems.get("arkos_portal") or systems.get("portal")
-        providers = {"portal": portal_cred} if portal_cred else {}
-        return {**_empty_auth_store(), "providers": providers,
-                "active_provider": "portal" if providers else None}
     return _empty_auth_store()
 
 
@@ -1006,24 +911,6 @@ def get_provider_auth_state(provider_id: str) -> Optional[Dict[str, Any]]:
     return _load_provider_state(_load_auth_store(), provider_id)
 
 
-def portal_token_has_billing_scope() -> bool:
-    """Return True if the currently-held Portal token carries ``billing:manage``.
-
-    Reads the persisted ``scope`` string saved at login (``_save_provider_state``
-    stores ``token_data.get("scope") or scope``). A space-delimited match. Used by
-    the lazy step-up: if False, the first billing call will 403 ``insufficient_scope``
-    anyway, but checking up front lets a surface skip a doomed round-trip.
-    """
-    try:
-        state = get_provider_auth_state("portal") or {}
-    except Exception:
-        return False
-    scope = state.get("scope")
-    if not isinstance(scope, str):
-        return False
-    return PORTAL_BILLING_MANAGE_SCOPE in scope.split()
-
-
 def get_active_provider() -> Optional[str]:
     """Return the currently active provider ID from auth store."""
     return _load_auth_store().get("active_provider")
@@ -1178,8 +1065,6 @@ def deactivate_provider() -> None:
         auth_store = _load_auth_store()
         auth_store["active_provider"] = None
         _save_auth_store(auth_store)
-
-
 
 
 def _get_config_hint_for_unknown_provider(provider_name: str) -> str:
@@ -1419,7 +1304,6 @@ def resolve_provider(
         code="no_provider_configured")
 
 
-
 def _utc_now_z() -> str:
     """Current UTC time as an ISO-8601 string with a ``Z`` suffix (last_refresh format)."""
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -1465,7 +1349,7 @@ _FLAT_OAUTH_TOKEN_KEYS = ("access_token", "refresh_token", "expires_at", "expire
 
 def _quarantine_flat_oauth_state(state: Dict[str, Any], provider: str, exc: "AuthError") -> None:
     """Strip dead tokens from a flat OAuth state after a terminal runtime refresh failure so
-    subsequent calls fail fast without a network retry (mirrors the Portal / xAI / Codex pattern)."""
+    subsequent calls fail fast without a network retry (mirrors the xAI / Codex pattern)."""
     for _k in _FLAT_OAUTH_TOKEN_KEYS:
         state.pop(_k, None)
     state["last_auth_error"] = _last_auth_error_marker(
@@ -1484,98 +1368,10 @@ def _optional_base_url(value: Any) -> Optional[str]:
     return cleaned or None
 
 
-_PORTAL_ALLOWED_HOSTS: FrozenSet[str] = frozenset({
-    "localhost", "127.0.0.1"})
-
 _RESOLVE_TOKEN_CACHE_LOCK = threading.Lock()
 _RESOLVE_TOKEN_CACHE: "tuple[float, str] | None" = None
 _RESOLVE_TOKEN_CACHE_TTL_S = 5.0
 
-
-def _portal_base_url(state: Dict[str, Any]) -> str:
-    """ARKOS_PORTAL_BASE_URL / PORTAL_BASE_URL is the trusted operator override and wins
-    OUTRIGHT, bypassing the host allowlist (which exists to reject an untrusted network-provided
-    value, not one the operator configured). Otherwise the stored/default value, allowlist-gated."""
-    env_portal_override = _portal_env_override()
-    if env_portal_override:
-        return env_portal_override.rstrip("/")
-    portal_base_url = _optional_base_url(state.get("portal_base_url")) or DEFAULT_PORTAL_URL
-    portal_base_url = portal_base_url.rstrip("/")
-    host = urlparse(portal_base_url).hostname
-    if host and host not in _PORTAL_ALLOWED_HOSTS:
-        logger.warning(
-            "auth: ignoring invalid portal_base_url %r (host %r not in allowlist), using default",
-            portal_base_url, host)
-        return DEFAULT_PORTAL_URL
-    return portal_base_url
-
-
-def resolve_portal_access_token(
-    *,
-    timeout_seconds: float = 15.0,
-    insecure: Optional[bool] = None,
-    ca_bundle: Optional[str] = None,
-    refresh_skew_seconds: int = ACCESS_TOKEN_REFRESH_SKEW_SECONDS) -> str:
-    """Resolve a refresh-aware Arkos Portal access token for managed tool gateways."""
-    global _RESOLVE_TOKEN_CACHE
-    memoable = not insecure and ca_bundle is None
-    if memoable:
-        with _RESOLVE_TOKEN_CACHE_LOCK:
-            cached = _RESOLVE_TOKEN_CACHE
-        if cached is not None and (time.monotonic() - cached[0]) < _RESOLVE_TOKEN_CACHE_TTL_S:
-            return cached[1]
-
-    def _memo(token: str) -> str:
-        global _RESOLVE_TOKEN_CACHE
-        if memoable:
-            with _RESOLVE_TOKEN_CACHE_LOCK:
-                _RESOLVE_TOKEN_CACHE = (time.monotonic(), token)
-        return token
-
-    with _provider_state_transaction("portal") as (auth_store, state, state_source_path):
-        if not state:
-            raise _portal_err("Arkos is not logged into Arkos Portal.", relogin=True)
-        portal_base_url = _portal_base_url(state)
-        client_id = str(state.get("client_id") or DEFAULT_PORTAL_CLIENT_ID)
-        verify = _resolve_verify(insecure=insecure, ca_bundle=ca_bundle, auth_state=state)
-        persist = lambda: _save_provider_state_to_source(  # noqa: E731
-            auth_store, "portal", state, state_source_path)
-
-        lock_timeout = max(timeout_seconds + 5.0, AUTH_LOCK_TIMEOUT_SECONDS)
-        with _portal_shared_store_lock(timeout_seconds=lock_timeout):
-            merged_shared = _merge_shared_portal_oauth_state(state)
-            access_token = state.get("access_token")
-            refresh_token = state.get("refresh_token")
-            if not isinstance(access_token, str) or not access_token:
-                raise _portal_err("No access token found for Arkos Portal login.", relogin=True)
-
-            if not _is_expiring(state.get("expires_at"), refresh_skew_seconds):
-                if merged_shared:
-                    persist()
-                return _memo(access_token)
-
-            if not isinstance(refresh_token, str) or not refresh_token:
-                raise _portal_err("Session expired and no refresh token is available.", relogin=True)
-
-            with httpx.Client(timeout=httpx.Timeout(timeout_seconds or 15.0),
-                              headers={"Accept": "application/json"}, verify=verify) as client:
-                refreshed = _refresh_portal_or_quarantine(
-                    client=client, auth_store=auth_store, state=state, portal_base_url=portal_base_url,
-                    client_id=client_id, refresh_token=refresh_token,
-                    reason="managed_access_token_refresh_failure", persist=persist)
-
-            _apply_portal_refreshed_tokens(state, refreshed, refresh_token)
-            state["portal_base_url"] = portal_base_url
-            state["client_id"] = client_id
-            state["tls"] = _tls_state_from_verify(verify)
-            persist()
-            _write_shared_portal_state(state)
-            return _memo(state["access_token"])
-
-
-
-_PORTAL_AUTH_STATUS_CACHE_TTL = 15.0
-_portal_auth_status_cache: Optional[Tuple[float, str, Optional[float], Dict[str, Any]]] = None
 
 _global_auth_store_cache: Optional[Tuple[str, int, Dict[str, Any]]] = None
 
@@ -1586,30 +1382,6 @@ def _auth_file_cache_key() -> Tuple[str, Optional[float]]:
         return _resolved_key(auth_file), auth_file.stat().st_mtime
     except Exception:
         return _resolved_key(auth_file), None
-
-
-def invalidate_portal_auth_status_cache() -> None:
-    """Clear the get_portal_auth_status() memo (for code paths that mutate Portal auth state without
-    touching auth.json, e.g. tests; login/logout invalidate via the mtime check automatically)."""
-    global _portal_auth_status_cache
-    _portal_auth_status_cache = None
-
-
-def get_portal_auth_status() -> Dict[str, Any]:
-    """Status snapshot for Portal auth, memoised ~15s keyed on the auth.json mtime.
-
-    Prefers the auth-store provider state (the live source of truth for refresh) and validates it by
-    resolving runtime credentials so revoked refresh sessions do not show up as a healthy login."""
-    global _portal_auth_status_cache
-    now = time.monotonic()
-    auth_file_key, mtime = _auth_file_cache_key()
-    cached = _portal_auth_status_cache
-    if (cached is not None and cached[1:3] == (auth_file_key, mtime)
-            and (now - cached[0]) < _PORTAL_AUTH_STATUS_CACHE_TTL):
-        return dict(cached[3])
-    status = _compute_portal_auth_status()
-    _portal_auth_status_cache = (now, auth_file_key, mtime, dict(status))
-    return status
 
 
 @dataclass(frozen=True)
@@ -1639,9 +1411,7 @@ class OAuthProviderFlow:
 _OAUTH_GRANT_DEAD_CODES = frozenset({"invalid_grant", "invalid_token", "refresh_token_reused"})
 
 OAUTH_PROVIDER_FLOWS: Dict[str, OAuthProviderFlow] = {
-    "portal": OAuthProviderFlow(
-        "portal", "resolve_portal_runtime_credentials", "get_portal_auth_status",
-        terminal_refresh_codes=_OAUTH_GRANT_DEAD_CODES, logout_from_config=True),
+
     "openai-codex": OAuthProviderFlow(
         "openai-codex", "resolve_codex_runtime_credentials", "get_codex_auth_status",
         terminal_refresh_codes=_OAUTH_GRANT_DEAD_CODES | {"codex_refresh_failed", "codex_auth_missing_refresh_token"},
@@ -1662,7 +1432,6 @@ def _is_terminal_refresh_error(exc: Exception, provider: str) -> bool:
     return OAUTH_PROVIDER_FLOWS[provider].is_terminal_refresh_error(exc)
 
 
-_is_terminal_portal_refresh_error = partial(_is_terminal_refresh_error, provider="portal")
 _is_terminal_xai_oauth_refresh_error = partial(_is_terminal_refresh_error, provider="xai-oauth")
 _is_terminal_codex_oauth_refresh_error = partial(
     _is_terminal_refresh_error, provider="openai-codex")
@@ -1680,6 +1449,37 @@ def _codex_pool_rate_limited_status() -> Optional[Dict[str, Any]]:
         "error": (rate_limit.get("message")
                   or "Codex provider quota exhausted; retry after the usage limit resets."),
         "reset_at": rate_limit.get("reset_at")}
+
+
+def _pool_first_oauth_status(provider: str, *, is_expiring, auth_mode: str, resolve, on_pool_miss=None) -> Dict[str, Any]:
+    """Inspect the provider pool first; resolve expired tokens using that provider's own refresh flow."""
+    status = {"logged_in": False, "provider": provider, "auth_mode": auth_mode,
+              "auth_store": str(_auth_file_path())}
+    try:
+        from agent.credential_pool import load_pool
+        pool = load_pool(provider)
+        entry = pool.peek() if pool is not None and pool.has_credentials() else None
+        if entry is not None and entry.runtime_api_key:
+            token = entry.runtime_api_key
+            status["source"] = f"pool:{entry.label or entry.id}"
+        else:
+            if on_pool_miss is not None:
+                blocked = on_pool_miss()
+                if blocked:
+                    return blocked
+            state = get_provider_auth_state(provider) or {}
+            tokens = state.get("tokens") or state
+            token = tokens.get("access_token") if isinstance(tokens, dict) else None
+        if token:
+            if is_expiring(token, 0):
+                resolved = resolve()
+                token = resolved.get("api_key")
+                status["source"] = resolved.get("source", status.get("source"))
+            status["logged_in"] = bool(token)
+        return status
+    except Exception as exc:
+        status.update(logged_in=False, error=str(exc))
+        return status
 
 
 def get_codex_auth_status() -> Dict[str, Any]:
@@ -1975,7 +1775,6 @@ def resolve_external_process_provider_credentials(provider_id: str) -> Dict[str,
         "source": "process"}
 
 
-
 def _update_config_for_provider(
     provider_id: str, inference_base_url: str, default_model: Optional[str] = None) -> Path:
     """Update config.yaml and auth.json to reflect the active provider.
@@ -2059,11 +1858,6 @@ def _reset_config_provider() -> Path:
     return config_path
 
 
-def login_command(args) -> None:
-    """Deprecated: use 'arkos model' or 'arkos setup' instead."""
-    print("The 'arkos login' command has been removed.\nUse 'arkos auth' to manage credentials,\n"
-          "'arkos model' to select a provider, or 'arkos setup' for full setup.")
-    raise SystemExit(0)
 
 
 def get_minimax_oauth_auth_status() -> Dict[str, Any]:
@@ -2080,30 +1874,6 @@ def get_minimax_oauth_auth_status() -> Dict[str, Any]:
         "region": state.get("region", "global"), "expires_at": state.get("expires_at")}
 
 
-def logout_command(args) -> None:
-    """Clear auth state for a provider."""
-    provider_id = getattr(args, "provider", None)
-    if provider_id and not is_known_auth_provider(provider_id):
-        print(f"Unknown provider: {provider_id}")
-        raise SystemExit(1)
-    target = provider_id or get_active_provider() or _logout_default_provider_from_config()
-    if not target:
-        print("No provider is currently logged in.")
-        return
-    should_reset_config = _should_reset_config_provider_on_logout(target)
-    provider_name = get_auth_provider_display_name(target)
-    if not (clear_provider_auth(target) or should_reset_config):
-        print(f"No auth state found for {provider_name}.")
-        return
-    if should_reset_config:
-        _reset_config_provider()
-    print(f"Logged out of {provider_name}.")
-    if not should_reset_config:
-        print("Model provider configuration was unchanged.")
-    elif os.getenv("OPENROUTER_API_KEY"):
-        print("Arkos will use OpenRouter for inference.")
-    else:
-        print("Run `arkos model` or configure an API key to use Arkos.")
 
 
 from http.server import BaseHTTPRequestHandler  # noqa: F401,E402
@@ -2124,8 +1894,8 @@ _PLUGIN_COMPAT_LAZY = {
     'DEFAULT_SPOTIFY_REDIRECT_URI': ('arkos_cli.auth_constants', 'DEFAULT_SPOTIFY_REDIRECT_URI'),
     'DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS': ('arkos_cli.auth_constants', 'DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS'),
     'MINIMAX_OAUTH_GRANT_TYPE': ('arkos_cli.auth_constants', 'MINIMAX_OAUTH_GRANT_TYPE'),
-    'PORTAL_INFERENCE_INVOKE_SCOPE': ('arkos_cli.auth_constants', 'PORTAL_INFERENCE_INVOKE_SCOPE'),
-    'PORTAL_SHARED_STORE_FILENAME': ('arkos_cli.auth_portal', 'PORTAL_SHARED_STORE_FILENAME'),
+
+
     'OAUTH_OVER_SSH_DOCS_URL': ('arkos_cli.auth_constants', 'OAUTH_OVER_SSH_DOCS_URL'),
     'QWEN_OAUTH_CLIENT_ID': ('arkos_cli.auth_constants', 'QWEN_OAUTH_CLIENT_ID'),
     'QWEN_OAUTH_TOKEN_URL': ('arkos_cli.auth_constants', 'QWEN_OAUTH_TOKEN_URL'),
@@ -2135,7 +1905,7 @@ _PLUGIN_COMPAT_LAZY = {
     'XAI_OAUTH_DEVICE_CODE_URL': ('arkos_cli.auth_constants', 'XAI_OAUTH_DEVICE_CODE_URL'),
     'XAI_OAUTH_DISCOVERY_URL': ('arkos_cli.auth_constants', 'XAI_OAUTH_DISCOVERY_URL'),
     'XAI_OAUTH_ISSUER': ('arkos_cli.auth_constants', 'XAI_OAUTH_ISSUER'),
-    'refresh_portal_oauth_pure': ('arkos_cli.auth_portal', 'refresh_portal_oauth_pure'),
+
 }
 
 

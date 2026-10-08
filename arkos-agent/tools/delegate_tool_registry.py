@@ -102,15 +102,7 @@ def interrupt_subagent(subagent_id: str) -> bool:
         return False
 
 def _subagent_transport_matches(record, transport) -> bool:
-    try:
-        from tui_gateway.transport import FanoutTransport
-    except ImportError:
-        # Engine-only build: tui_gateway frontend removed; fall back to identity.
-        bound = record.get("owner_transport")
-        return bound is transport
-
-    bound = record.get("owner_transport")
-    return bound is transport or (isinstance(bound, FanoutTransport) and bound.contains(transport))
+    return record.get("owner_transport") is transport
 
 
 def steer_subagent(
@@ -148,16 +140,6 @@ def steer_subagent(
             logger.debug("steer_subagent(%s) failed: %s", subagent_id, exc)
             return False
 
-def _capture_gateway_steer_authority(owner_session_id: Optional[str]) -> tuple[Any, Any]:
-    """Exact request transport + live session generation, if any — an in-process
-    bridge, not a serializable capability. Non-gateway hosts get ``(None, None)``."""
-    if not owner_session_id:
-        return None, None
-    try:
-        from tui_gateway.server import _current_session_steer_authority
-        return _current_session_steer_authority(owner_session_id)
-    except Exception:
-        return None, None
 
 _PRIVATE_RECORD_KEYS = frozenset({"agent", "owner_session_id", "owner_transport", "owner_session_record", "accepting_steer"})
 
