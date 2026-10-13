@@ -5,7 +5,7 @@ export const ARKOS_DESKTOP_SCHEME = "arkos";
 export const ARKOS_DESKTOP_ORIGIN = `${ARKOS_DESKTOP_SCHEME}://app`;
 export const ARKOS_DESKTOP_ENTRY_URL = `${ARKOS_DESKTOP_ORIGIN}/index.html`;
 export const ARKOS_DESKTOP_UPDATE_CHANNEL = "arkos";
-export const ARKOS_PRODUCTION_BUNDLE_ID = "com.emanueledipietro.arkos";
+export const ARKOS_PRODUCTION_BUNDLE_ID = "com.xeyan7.arkos";
 export const ARKOS_DEVELOPMENT_BUNDLE_ID = `${ARKOS_PRODUCTION_BUNDLE_ID}.dev`;
 export const ARKOS_CANARY_BUNDLE_ID = `${ARKOS_PRODUCTION_BUNDLE_ID}.canary`;
 /** Display/setup identity of the GUI host; this value does not confer native authority. */

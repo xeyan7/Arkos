@@ -6,7 +6,7 @@ import { join } from "node:path";
 
 import { verifyMacAppSignature } from "./lib/mac-update-zip-finalize.ts";
 
-const CUA_BUNDLE_ID = "com.emanueledipietro.arkos.cua";
+const CUA_BUNDLE_ID = "com.xeyan7.arkos.cua";
 
 function withTemporaryMacApp(
   test: (appPath: string) => void,
@@ -78,7 +78,7 @@ describe.skipIf(process.platform !== "darwin")("macOS packaged app identity", ()
     withTemporaryMacApp((appPath) => {
       signFixture(appPath);
       assert.throws(() => verifyMacAppSignature(appPath, false, CUA_BUNDLE_ID));
-    }, "com.emanueledipietro.arkos");
+    }, "com.xeyan7.arkos");
   });
 
   it("rejects resources changed after signing", () => {

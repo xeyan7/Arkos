@@ -25,8 +25,8 @@ import {
 
 describe("desktopIdentity", () => {
   it("uses the exact canonical production and development bundle IDs", () => {
-    expect(ARKOS_PRODUCTION_BUNDLE_ID).toBe("com.emanueledipietro.arkos");
-    expect(ARKOS_DEVELOPMENT_BUNDLE_ID).toBe("com.emanueledipietro.arkos.dev");
+    expect(ARKOS_PRODUCTION_BUNDLE_ID).toBe("com.xeyan7.arkos");
+    expect(ARKOS_DEVELOPMENT_BUNDLE_ID).toBe("com.xeyan7.arkos.dev");
     expect(arkosDesktopIdentity("production").bundleId).toBe(ARKOS_PRODUCTION_BUNDLE_ID);
     expect(arkosDesktopIdentity("development").bundleId).toBe(ARKOS_DEVELOPMENT_BUNDLE_ID);
   });
@@ -48,7 +48,7 @@ describe("desktopIdentity", () => {
   });
 
   it("gives Canary a fully separate desktop identity and storage profile", () => {
-    expect(ARKOS_CANARY_BUNDLE_ID).toBe("com.emanueledipietro.arkos.canary");
+    expect(ARKOS_CANARY_BUNDLE_ID).toBe("com.xeyan7.arkos.canary");
     expect(ARKOS_CANARY_DESKTOP_ORIGIN).toBe("arkos-canary://app");
     expect(ARKOS_CANARY_DESKTOP_ENTRY_URL).toBe("arkos-canary://app/index.html");
     expect(arkosDesktopIdentity("canary")).toEqual({
@@ -65,7 +65,7 @@ describe("desktopIdentity", () => {
   });
 
   it("gives Cua a fully separate desktop identity and storage profile", () => {
-    expect(ARKOS_CUA_BUNDLE_ID).toBe("com.emanueledipietro.arkos.cua");
+    expect(ARKOS_CUA_BUNDLE_ID).toBe("com.xeyan7.arkos.cua");
     expect(ARKOS_CUA_DESKTOP_ORIGIN).toBe("arkos-cua://app");
     expect(ARKOS_CUA_DESKTOP_ENTRY_URL).toBe("arkos-cua://app/index.html");
     expect(arkosDesktopIdentity("cua")).toEqual({
@@ -82,7 +82,7 @@ describe("desktopIdentity", () => {
   });
 
   it("gives Beta a fully separate desktop identity and storage profile", () => {
-    expect(ARKOS_BETA_BUNDLE_ID).toBe("com.emanueledipietro.arkos.beta");
+    expect(ARKOS_BETA_BUNDLE_ID).toBe("com.xeyan7.arkos.beta");
     expect(ARKOS_BETA_DESKTOP_ORIGIN).toBe("arkos-beta://app");
     expect(ARKOS_BETA_DESKTOP_ENTRY_URL).toBe("arkos-beta://app/index.html");
     expect(arkosDesktopIdentity("beta")).toEqual({

@@ -17,18 +17,18 @@ export const ARKOS_BETA_WINDOWS_INSTALLER_GUID = "a8e63b48-d4f3-4db5-9e12-368107
 
 /** Public release listing; the newest `v*-beta.N` prerelease is the current beta build. */
 export const ARKOS_BETA_RELEASES_URL =
-  "https://github.com/Emanuele-web04/arkos/releases?q=prerelease%3Atrue";
+  "https://github.com/xeyan7/Arkos/releases?q=prerelease%3Atrue";
 
 /** Latest stable release, offered from beta when stable Arkos is not installed. */
 export const ARKOS_STABLE_RELEASES_URL =
-  "https://github.com/Emanuele-web04/arkos/releases/latest";
+  "https://github.com/xeyan7/Arkos/releases/latest";
 
 /** electron-builder NSIS `guid` for stable (production) builds. */
 export const ARKOS_STABLE_WINDOWS_INSTALLER_GUID = "368107a8-afe6-5db5-ab3b-d4f331684868";
 
 /** GitHub API releases endpoint probed for the newest `v*-beta.N` tag. */
 export const ARKOS_BETA_RELEASES_API_URL =
-  "https://api.github.com/repos/Emanuele-web04/arkos/releases?per_page=30";
+  "https://api.github.com/repos/xeyan7/Arkos/releases?per_page=30";
 
 /**
  * Environment overrides for the beta install flow. `ARKOS_BETA_HOME` moves the

@@ -17,7 +17,7 @@ describe("desktop artifact identity", () => {
         arkosDesktopFlavor: "production",
       });
       expect(result.buildConfig).toEqual({
-        appId: "com.emanueledipietro.arkos",
+        appId: "com.xeyan7.arkos",
         productName: "Arkos",
         artifactName: "Arkos-${version}-${arch}.${ext}",
       });

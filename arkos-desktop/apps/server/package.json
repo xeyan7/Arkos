@@ -4,7 +4,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Emanuele-web04/Arkos.git",
+    "url": "git+https://github.com/xeyan7/Arkos.git",
     "directory": "apps/server"
   },
   "bin": {

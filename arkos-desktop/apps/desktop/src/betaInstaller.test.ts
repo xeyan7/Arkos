@@ -158,7 +158,7 @@ describe("resolveBetaFeedLocation", () => {
   });
 });
 
-function fakeApp(dir: string, bundleId = "com.emanueledipietro.arkos.beta"): string {
+function fakeApp(dir: string, bundleId = "com.xeyan7.arkos.beta"): string {
   const appPath = join(dir, "Arkos Beta.app", "Contents");
   mkdirSync(appPath, { recursive: true });
   writeFileSync(
@@ -178,7 +178,7 @@ describe("verifyBetaAppBundle", () => {
 
   it("rejects a non-beta bundle id", () => {
     const root = makeRoot();
-    expect(() => verifyBetaAppBundle(fakeApp(root, "com.emanueledipietro.arkos"))).toThrow(
+    expect(() => verifyBetaAppBundle(fakeApp(root, "com.xeyan7.arkos"))).toThrow(
       /not Arkos Beta/,
     );
   });
@@ -253,7 +253,7 @@ describe("installBetaFromFeed", () => {
       ...deps,
       run: (command: string, args: readonly string[]) => {
         if (command === "ditto") {
-          fakeApp(args[args.length - 1]!, "com.emanueledipietro.arkos");
+          fakeApp(args[args.length - 1]!, "com.xeyan7.arkos");
           return;
         }
         if (command === "mv") return;

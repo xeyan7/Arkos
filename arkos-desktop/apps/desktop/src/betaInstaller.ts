@@ -5,7 +5,7 @@
 //
 // Feed resolution: `ARKOS_BETA_FEED_URL` points at a base URL that serves
 // `beta-mac.yml` plus the files it lists. Without it, the newest GitHub
-// `v*-beta.N` release on Emanuele-web04/arkos provides the manifest.
+// `v*-beta.N` release on xeyan7/Arkos provides the manifest.
 
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";

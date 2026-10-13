@@ -82,7 +82,7 @@ describe("ComputerAvailability permission-required", () => {
   });
 
   it("preserves the responsible app in live permission status across the wire", () => {
-    const state = { ...PERMISSION_REQUIRED, bundleId: "com.emanueledipietro.arkos.dev" };
+    const state = { ...PERMISSION_REQUIRED, bundleId: "com.xeyan7.arkos.dev" };
     const decoded = Schema.decodeUnknownSync(ComputerAvailability)(state);
     expect(Schema.encodeUnknownSync(ComputerAvailability)(decoded)).toEqual(state);
     expect(decodes({ ...state, bundleId: "" })).toBe(false);
@@ -109,7 +109,7 @@ describe("ComputerSetupRequiredPayload", () => {
       toolName: "computer_list_windows",
       missing: ["accessibility"],
       buildSignature: "adhoc",
-      bundleId: "com.emanueledipietro.arkos.dev",
+      bundleId: "com.xeyan7.arkos.dev",
     } as const;
     const decoded = Schema.decodeUnknownSync(ComputerSetupRequiredPayload)(payload);
     expect(decoded).toEqual(payload);

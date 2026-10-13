@@ -44,7 +44,7 @@ The rest of this file is the detailed reference.
 ## Identity
 
 - App name: `Arkos Beta`
-- Bundle ID: `com.emanueledipietro.arkos.beta`
+- Bundle ID: `com.xeyan7.arkos.beta`
 - Desktop origin: `arkos-beta://app`
 - Arkos data: `~/.arkos-beta`
 - Electron profile: `arkos-beta`
@@ -165,7 +165,7 @@ The stable app offers a one-click handoff under **Settings → General → Arkos
 - **Install Arkos Beta** (macOS) downloads the newest `v*-beta.N` release's
   `beta-mac.yml`, picks the zip for the current architecture, verifies its
   sha512, unpacks it with `ditto`, checks the bundle id is
-  `com.emanueledipietro.arkos.beta`, and verifies the code signature is valid
+  `com.xeyan7.arkos.beta`, and verifies the code signature is valid
   and signed by the same team id as the running app (`codesign --verify
 --deep --strict` plus a `TeamIdentifier` match; skipped when the running
   build is itself unsigned). Only then is `Arkos Beta.app` moved into

@@ -1326,7 +1326,7 @@ const buildDesktopArtifact = Effect.fn("buildDesktopArtifact")(function* (
     arkosWindowsPublisherSubject: resolvedBuildConfig.windowsPublisherSubject,
     private: true,
     description: "Arkos desktop build",
-    author: "Emanuele Di Pietro",
+    author: "Arkos",
     main: "apps/desktop/dist-electron/main.js",
     build: resolvedBuildConfig.buildConfig,
     dependencies: {

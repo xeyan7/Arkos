@@ -4,15 +4,15 @@
   <p><strong>A focused workspace for coding agents.</strong><br>
   Projects, provider sessions, execution surfaces, and review tools in one local-first desktop application.</p>
   <p>
-    <a href="https://github.com/Emanuele-web04/arkos/releases/latest">Download</a>
+    <a href="https://github.com/xeyan7/Arkos/releases/latest">Download</a>
     &nbsp;·&nbsp;
-    <a href="https://www.tryarkos.com/">Website</a>
+    <a href="https://github.com/xeyan7/Arkos">Website</a>
     &nbsp;·&nbsp;
-    <a href="https://www.tryarkos.com/docs">Documentation</a>
+    <a href="https://github.com/xeyan7/Arkos">Documentation</a>
     &nbsp;·&nbsp;
     <a href="./docs/external-mcp.md">MCP integration</a>
     &nbsp;·&nbsp;
-    <a href="https://github.com/Emanuele-web04/arkos/issues/new/choose">Report an issue</a>
+    <a href="https://github.com/xeyan7/Arkos/issues/new/choose">Report an issue</a>
   </p>
 </div>
 
@@ -117,7 +117,7 @@ Configure the shell to match the way you work with light and dark themes, typogr
 
 ### Desktop application
 
-Download the latest build from [GitHub Releases](https://github.com/Emanuele-web04/arkos/releases) or visit [tryarkos.com](https://www.tryarkos.com/).
+Download the latest build from [GitHub Releases](https://github.com/xeyan7/Arkos/releases) or visit [tryarkos.com](https://www.tryarkos.com/).
 
 Current native release targets are Windows x64, macOS Intel, macOS Apple Silicon, and Linux x64.
 
@@ -132,7 +132,7 @@ Arkos uses the provider installations and subscriptions already configured on th
 The development checkout uses [Bun 1.4.2](https://bun.sh/) and [Node.js 24.13.1](https://nodejs.org/).
 
 ```console
-git clone https://github.com/Emanuele-web04/arkos.git
+git clone https://github.com/xeyan7/Arkos.git
 cd arkos
 bun install
 bun run dev
@@ -156,7 +156,7 @@ the root `typecheck` command also ensures that patch is applied before checking.
 
 Bug fixes, reliability improvements, performance work, documentation, and maintenance changes are welcome.
 
-Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. For a reproducible problem, [open an issue](https://github.com/Emanuele-web04/arkos/issues/new/choose) with the Arkos version, operating system, runtime, and relevant logs.
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. For a reproducible problem, [open an issue](https://github.com/xeyan7/Arkos/issues/new/choose) with the Arkos version, operating system, runtime, and relevant logs.
 
 ## License
 

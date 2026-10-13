@@ -208,7 +208,7 @@ describe("brand identity guard", () => {
 
   it("requires user-facing raster assets to match a visually approved digest", () => {
     const approvedContents = new TextEncoder().encode("approved Arkos screenshot");
-    const approvedDigest = "a553296ca5a2d3ad7b64a6bc1b36c2834da750eae6611642177482b99ba85bd8";
+    const approvedDigest = "6a5b678afcada2039d473a0a88285b3ae5a6fc5db6e013a720b60c52ce811883";
     const approvedDigests = new Map([["screenshot.jpeg", approvedDigest]]);
 
     expect(

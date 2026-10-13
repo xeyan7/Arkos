@@ -2318,7 +2318,7 @@ function configureAppIdentity(): void {
     applicationName: APP_DISPLAY_NAME,
     applicationVersion: app.getVersion(),
     version: commitHash ?? "unknown",
-    copyright: `© ${new Date().getFullYear()} Emanuele Di Pietro`,
+    copyright: `© ${new Date().getFullYear()} Arkos`,
   });
 
   if (process.platform === "win32") {
