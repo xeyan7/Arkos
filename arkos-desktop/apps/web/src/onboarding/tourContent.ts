@@ -1,6 +1,6 @@
 // FILE: tourContent.ts
 // Purpose: Copy and links for the "what Arkos can do" tour. Wording mirrors the public
-//          docs (tryarkos.com/docs) and changelog so onboarding and docs stay consistent.
+//          docs (see the Arkos repository) and changelog so onboarding and docs stay consistent.
 // Layer: Web content (no React)
 
 import type { LucideIcon } from "~/lib/icons";
@@ -14,7 +14,7 @@ import {
   TerminalIcon,
 } from "~/lib/icons";
 
-export const ARKOS_DOCS_URL = "https://tryarkos.com/docs";
+export const ARKOS_DOCS_URL = "https://github.com/xeyan7/Arkos";
 
 export interface TourCard {
   readonly id: string;

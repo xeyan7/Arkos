@@ -17,7 +17,7 @@
 </div>
 
 <p align="center">
-  <img src="./assets/prod/readme-workspace-light.png" width="1200" alt="Arkos workspace with an agent conversation and pull request review side by side">
+  <img src="./assets/prod/readme-workspace-light.png" width="1200" alt="Arkos workspace on first launch">
 </p>
 
 <details open>
@@ -61,7 +61,7 @@ The tools surrounding an agent session remain available from the same task surfa
 Keep an active conversation alongside the surface it is changing. Split views, browser previews, and device previews make the result part of the working context.
 
 <p align="center">
-  <img src="./assets/prod/readme-split-view-dark.png" width="900" alt="Arkos split view with an agent thread and iOS simulator preview">
+  <img src="./assets/prod/readme-split-view-dark.png" width="900" alt="Arkos workspace in dark mode">
 </p>
 
 ### 4. Provider-native integrations
@@ -117,7 +117,7 @@ Configure the shell to match the way you work with light and dark themes, typogr
 
 ### Desktop application
 
-Download the latest build from [GitHub Releases](https://github.com/xeyan7/Arkos/releases) or visit [tryarkos.com](https://www.tryarkos.com/).
+Download the latest build from [GitHub Releases](https://github.com/xeyan7/Arkos/releases) or visit the [Arkos repository](https://github.com/xeyan7/Arkos/).
 
 Current native release targets are Windows x64, macOS Intel, macOS Apple Silicon, and Linux x64.
 

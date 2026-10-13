@@ -24,7 +24,7 @@ afterEach(() => {
 it("opens the sponsor page externally without dismissing the banner", async () => {
   await render(<SponsorLandingBanner />);
   await page.getByRole("button", { name: /Support Arkos/ }).click();
-  expect(openExternal).toHaveBeenCalledExactlyOnceWith("https://www.tryarkos.com/sponsor");
+  expect(openExternal).toHaveBeenCalledExactlyOnceWith("https://github.com/xeyan7/Arkos");
   await expect.element(page.getByTestId("sponsor-landing-banner")).toBeVisible();
 });
 

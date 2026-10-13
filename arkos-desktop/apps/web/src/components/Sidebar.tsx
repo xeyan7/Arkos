@@ -916,7 +916,7 @@ function ProjectSortMenu({
   );
 }
 
-const ARKOS_DOCS_URL = "https://tryarkos.com/docs";
+const ARKOS_DOCS_URL = "https://github.com/xeyan7/Arkos";
 
 // Latest curated releases surfaced directly in the help menu. Static data, so
 // computed once at module scope rather than per render.

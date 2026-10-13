@@ -10,9 +10,9 @@ import { readNativeApi } from "~/nativeApi";
 
 export { downloadBlob } from "~/lib/browserDownload";
 
-const SHARE_BRAND_HANDLE = "@tryArkos";
+const SHARE_BRAND_HANDLE = "Arkos";
 export const SHARE_TWEET_TEXT = `Just checking my ${SHARE_BRAND_HANDLE} dev stats. Absolute masterpiece of an IDE.`;
-const SHARE_URL = "https://tryarkos.com";
+const SHARE_URL = "https://github.com/xeyan7/Arkos";
 
 export type ShareTarget = "x" | "linkedin" | "reddit";
 

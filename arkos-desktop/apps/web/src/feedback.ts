@@ -1,7 +1,7 @@
 // FILE: feedback.ts
 // Purpose: Owns feedback categories, privacy-safe diagnostics, and delivery.
 // Layer: Web feature logic
-// Depends on: The public tryarkos feedback endpoint.
+// Depends on: An optional feedback endpoint configured via VITE_FEEDBACK_ENDPOINT.
 
 import { APP_VERSION } from "./branding";
 
@@ -55,7 +55,7 @@ export interface FeedbackSubmission {
   diagnostics: FeedbackDiagnostics;
 }
 
-const DEFAULT_FEEDBACK_ENDPOINT = "https://www.tryarkos.com/api/feedback";
+const DEFAULT_FEEDBACK_ENDPOINT = "";
 const FEEDBACK_REQUEST_TIMEOUT_MS = 20_000;
 
 function formatStateFlags(diagnostics: FeedbackThreadContext): string {
@@ -154,10 +154,14 @@ export async function submitFeedback(
   submission: FeedbackSubmission,
   fetchImplementation: typeof fetch = fetch,
 ): Promise<void> {
+  const endpoint = feedbackEndpoint();
+  if (!endpoint) {
+    throw new Error("Feedback delivery is not configured in this build.");
+  }
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), FEEDBACK_REQUEST_TIMEOUT_MS);
   try {
-    const response = await fetchImplementation(feedbackEndpoint(), {
+    const response = await fetchImplementation(endpoint, {
       method: "POST",
       headers: {
         "content-type": "application/json",

@@ -18,7 +18,7 @@ export function SponsorLandingBanner(props: { className?: string }) {
         type="button"
         data-testid={"sponsor-landing-banner"}
         className="flex w-full cursor-pointer items-center gap-4 rounded-2xl px-4 py-3 text-left transition-colors duration-150 ease-out hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 motion-reduce:transition-none"
-        onClick={() => openExternalLink("https://www.tryarkos.com/sponsor")}
+        onClick={() => openExternalLink("https://github.com/xeyan7/Arkos")}
       >
         <span
           aria-hidden="true"
