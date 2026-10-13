@@ -1,0 +1,53 @@
+node_modules
+.bun
+.turbo
+.DS_Store
+*.log
+*.tsbuildinfo
+apps/*/dist
+.astro
+packages/*/dist
+.env
+.env.local
+build/
+.logs/
+release/
+.arkos
+/.arkos/electron-dev
+/.arkos/backups
+/.arkos-*/
+/apps/server/.arkos-*/
+/.arkos/
+/.arkos-*/
+.idea/
+apps/web/.playwright
+apps/web/playwright-report
+apps/web/test-results
+.playwright-cli/
+output/playwright/
+apps/web/src/components/__screenshots__
+.vitest-*
+__screenshots__/
+.tanstack
+/.pi/
+/.tmp/
+/~/
+/bootstrap.js
+/preload.js
+/browser-sidebar-comment-preload.js
+/main-*.js
+/main-*.js.map
+/browser-sidebar-comment-preload.js.map
+/preload.js.map
+/bootstrap.js.map
+
+# Generated ASAR smoke fixture (bundled from scripts/betterwright-smoke.ts)
+.smoke/
+
+# Unlazy pipeline state (machine-local ledgers, dispatch, approvals log)
+.unlazy/
+# Claude Code worktrees are local scratch checkouts, not part of the repo.
+.claude/worktrees/
+
+# Local implementation plans.
+/plans/

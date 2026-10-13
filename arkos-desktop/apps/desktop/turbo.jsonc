@@ -1,0 +1,25 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/apps/server/src/persistence/Migrations.ts"],
+      "outputs": ["dist-electron/**"],
+    },
+    "dev": {
+      "dependsOn": ["@arkos/cli#build"],
+      "persistent": true,
+    },
+    "start": {
+      "dependsOn": ["build", "@arkos/web#build", "@arkos/cli#build"],
+      "cache": false,
+      "persistent": true,
+    },
+    "smoke-test": {
+      "dependsOn": ["build", "@arkos/web#build", "@arkos/cli#build"],
+      "cache": false,
+      "outputs": [],
+    },
+  },
+}
