@@ -2481,7 +2481,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
         description:
           "The app now uses one identity everywhere, from its desktop installation and command line to packages, settings, diagnostics, and release artifacts.",
         details:
-          "The desktop bundle is now com.emanueledipietro.arkos, the CLI is @arkos/cli with the arkos command, and every first-party runtime identifier uses the Arkos namespace. The 0.4.2 bridge preserves renderer state during the origin change.",
+          "The desktop bundle is now com.xeyan7.arkos, the CLI is @arkos/cli with the arkos command, and every first-party runtime identifier uses the Arkos namespace. The 0.4.2 bridge preserves renderer state during the origin change.",
       },
       {
         id: "claude-context-and-resume",

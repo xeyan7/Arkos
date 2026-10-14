@@ -2451,7 +2451,7 @@ describe("deriveWorkLogEntries", () => {
                   type: "read",
                   command: "sed -n '1,220p' README.md",
                   name: "README.md",
-                  path: "/Users/emanueledipietro/Developer/Testing/arkos/README.md",
+                  path: "/Users/tester/Developer/Testing/arkos/README.md",
                 },
               ],
             },
@@ -4987,7 +4987,7 @@ describe("deriveWorkLogEntries Codex find regression", () => {
               id: "call_UmQKQmLCCrj9PF82rupLIFDO",
               command:
                 "/bin/zsh -lc \"find apps packages -maxdepth 2 -name package.json -print -exec sed -n '1,120p' {} \\\\;\"",
-              cwd: "/Users/emanueledipietro/Developer/Testing/arkos",
+              cwd: "/Users/tester/Developer/Testing/arkos",
               processId: "38005",
               source: "unifiedExecStartup",
               status: "inProgress",
@@ -5025,7 +5025,7 @@ describe("deriveWorkLogEntries Codex find regression", () => {
               id: "call_UmQKQmLCCrj9PF82rupLIFDO",
               command:
                 "/bin/zsh -lc \"find apps packages -maxdepth 2 -name package.json -print -exec sed -n '1,120p' {} \\\\;\"",
-              cwd: "/Users/emanueledipietro/Developer/Testing/arkos",
+              cwd: "/Users/tester/Developer/Testing/arkos",
               processId: "38005",
               source: "unifiedExecStartup",
               status: "completed",

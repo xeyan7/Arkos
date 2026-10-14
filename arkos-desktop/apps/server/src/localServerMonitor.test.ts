@@ -111,7 +111,7 @@ describe("localServerMonitor", () => {
     expect(
       detectDevServerKindFromText({
         command: "node",
-        args: "node /Users/emanueledipietro/Developer/arkos/apps/web/node_modules/.bin/vite",
+        args: "node /Users/tester/Developer/arkos/apps/web/node_modules/.bin/vite",
         ports: [5733],
       }),
     ).toBe("Vite");
@@ -232,7 +232,7 @@ describe("localServerMonitor", () => {
         {
           ppid: 12064,
           commandLine:
-            "node /Users/emanueledipietro/Developer/arkos-website/node_modules/.bin/next dev",
+            "node /Users/tester/Developer/arkos-website/node_modules/.bin/next dev",
         },
       ],
       [

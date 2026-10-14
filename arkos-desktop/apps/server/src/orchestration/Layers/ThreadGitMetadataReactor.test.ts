@@ -43,7 +43,7 @@ interface MutableThreadShell {
 const pullRequest: OrchestrationThreadPullRequest = {
   number: 574,
   title: "Cache provider usage",
-  url: "https://github.com/Emanuele-web04/arkos/pull/574",
+  url: "https://github.com/xeyan7/Arkos/pull/574",
   baseBranch: "main",
   headBranch: "feat/provider-usage-snapshot-cache",
   state: "open",

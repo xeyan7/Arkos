@@ -1437,7 +1437,7 @@ layer("GitHubCliLive", (it) => {
                 committedDate: "2026-09-08T13:18:37Z",
                 // `gh` emits empty-string logins for local-git authors with no
                 // GitHub account. This must not fail the whole detail payload.
-                authors: [{ id: "", login, name: "Emanuele Di Pietro" }],
+                authors: [{ id: "", login, name: "Test Author" }],
               },
             ],
           }),
@@ -1469,7 +1469,7 @@ layer("GitHubCliLive", (it) => {
               },
               { login: null, name: "Local co-author", avatarUrl: null, url: null },
             ],
-            [{ login: null, name: "Emanuele Di Pietro", avatarUrl: null, url: null }],
+            [{ login: null, name: "Test Author", avatarUrl: null, url: null }],
           ],
         );
       }),

@@ -49,7 +49,7 @@ const q = query({
   options: {
     cwd,
     permissionMode: "bypassPermissions",
-    pathToClaudeCodeExecutable: "/Users/emanueledipietro/.local/bin/claude",
+    pathToClaudeCodeExecutable: "/Users/tester/.local/bin/claude",
     allowedTools: ["Bash"],
     maxTurns: 30,
   },
