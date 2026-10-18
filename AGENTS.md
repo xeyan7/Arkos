@@ -28,3 +28,19 @@ bun run dev:electron
 ```
 
 Use the frontend's actual port if it differs. Check existing development processes before starting duplicates. Verify that the Electron window and its backend start successfully before reporting completion.
+
+## Reporting back to the user
+
+Accuracy first: never claim something works, is fixed, or is verified when you have not actually
+checked it. Say what you verified and what you did not.
+
+Then make the summary easy to read:
+
+- Lead with what changed and what it means for the user. Put the specifics after — file paths,
+  counts, commands, exact names.
+- Use simple, direct words. Short sentences. Everyday vocabulary instead of internal jargon,
+  or shorthand the user never used themselves.
+- When you must use a technical term, explain it in the same sentence, or describe the effect
+  instead of the mechanism.
+- State clearly what is finished, what is still open, and what needs a decision from the user.
+- Keep it short. If the summary takes longer to read than the change took to make, cut it down.

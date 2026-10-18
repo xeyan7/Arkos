@@ -1084,10 +1084,10 @@ async function main(): Promise<number> {
 
     // ── Phase 5: masked-shield protocol readiness (the native shield is
     // unbuilt — cert records whether the protocol carries everything its
-    // placement math needs per display; see masked-activation-findings.md).
+    // placement math needs per display).
     report.maskedShield = {
       status: "not-implemented",
-      reference: "docs/computer-use-cua/masked-activation-findings.md",
+      reference: "masked activation findings are recorded out of tree",
       protocolReadiness: displays.map((display) => ({
         index: display.index,
         uuid: display.uuid,

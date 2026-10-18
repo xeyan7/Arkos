@@ -2,6 +2,7 @@
   "name": "@arkos/desktop",
   "version": "1.0.1",
   "private": true,
+  "license": "UNLICENSED",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "bun run scripts/dev.mjs",

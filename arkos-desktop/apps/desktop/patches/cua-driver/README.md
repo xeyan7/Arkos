@@ -2,8 +2,8 @@
 
 `0001-arkos-native.patch` applies to the exact upstream commit in
 `packages/shared/src/cuaDriverRelease.json`. That manifest pins the patch checksum,
-Rust version and native protocol revision. Preserve the upstream Cua license notice
-alongside the patch; the original Cua implementation remains intact. This is a local
+Rust version and native protocol revision. The upstream Cua implementation remains intact
+and its license notice is preserved at `licenses/cua-MIT.txt`. This is a local
 macOS patch, not an upstream release or a claim of support on other platforms.
 
 The patch closes native input admission irreversibly for one driver process.
@@ -397,8 +397,8 @@ true` and `profile.mode=isolated_new` passes the classification gate and
   executable with `--remote-debugging-port=0`; bind, navigate, snapshot and
   the explicit `dom_event` text route then work over that endpoint. The
   user's browser process and profile are never touched.
-- Live-verified (`.unlazy/arkos-cu-codex-parity/L13-notebook.md`,
-  `evidence/l13-helium/`): with the user's Helium running,
+- Live-verified on the development host during revision review: with the
+  user's Helium running,
   `browser_prepare` on its pid returned `launched_isolated_browser` with the
   spawned Helium hidden and its window proven offscreen at (-32000,-32000)
   through CDP; bind minted an exact `driver_owned` target, navigate reached a
@@ -442,8 +442,8 @@ the hide/offscreen machinery it needed.
   or conceal windows of their own; a visible launch states in its result
   that it creates the app's window and Dock entry and is an explicitly
   requested visible action.
-- Live-verified (`.unlazy/arkos-cu-codex-parity/L21-notebook.md`,
-  `evidence/l21-headless/`): a driver-owned isolated headless launch (pid-free
+- Live-verified on the development host during revision review:
+  a driver-owned isolated headless launch (pid-free
   system Chrome and a Helium-backed launch) registers only a
   `BackgroundOnly` LaunchServices entry — no Dock tile, no menu bar — keeps
   the prior frontmost app unchanged, and exposes no on-screen window:
@@ -488,8 +488,8 @@ alive across transient session death.
   `-32602` frame-id churn ("Frame with the given frameId is not found") are
   retried internally twice with a short backoff instead of surfacing as a
   `browser_route_unavailable` refusal.
-- Live-verified (`.unlazy/arkos-cu-codex-parity/L22-notebook.md`,
-  `evidence/l22-snapshot/`): a deterministic local product-list fixture in a
+- Live-verified on the development host during revision review:
+  a deterministic local product-list fixture in a
   driver-owned headless browser yields names and prices in one snapshot, an
   inline outline ref clicks successfully, and a binding whose session
   namespace was dropped reinstates without a `get_browser_state` round-trip.
@@ -545,14 +545,11 @@ continuous typing, Spaces and display painting still require native qualificatio
 Both patches are regenerated against the pinned source; the Linux follow-on
 patch changes only revision context, preserving its existing browser-only scope.
 
-The report follow-up and remaining native qualification work are recorded in
-`live-report-followup-2026-09-20.md`.
+The report follow-up and remaining native qualification work are recorded out of tree.
 
-Current integration verification and limits are recorded in
-`integration-refresh.md`.
-`qualification.md` records
-the historical revision 1 GUI qualification. Revision 2 compilation, pure tests
-and control-plane checks do not establish a fresh GUI or RAM qualification.
+Current integration verification and limits are recorded out of tree.
+Historical revision 1 GUI qualification is likewise recorded out of tree. Revision 2 compilation,
+pure tests and control-plane checks do not establish a fresh GUI or RAM qualification.
 
 ### Revision 35: background delivery and report recovery
 

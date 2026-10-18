@@ -92,7 +92,7 @@ export const DEVELOPMENT_ICON_OVERRIDES: ReadonlyArray<IconOverride> = [
   },
 ];
 
-export const PUBLISH_ICON_OVERRIDES: ReadonlyArray<IconOverride> = [
+export const DISTRIBUTION_ICON_OVERRIDES: ReadonlyArray<IconOverride> = [
   {
     sourceRelativePath: BRAND_ASSET_PATHS.productionWebFaviconIco,
     targetRelativePath: "dist/client/favicon.ico",
@@ -111,7 +111,7 @@ export const PUBLISH_ICON_OVERRIDES: ReadonlyArray<IconOverride> = [
   },
 ];
 
-const BETA_PUBLISH_ICON_OVERRIDES: ReadonlyArray<IconOverride> = [
+const BETA_DISTRIBUTION_ICON_OVERRIDES: ReadonlyArray<IconOverride> = [
   {
     sourceRelativePath: BETA_ASSET_PATHS.betaWebFaviconIco,
     targetRelativePath: "dist/client/favicon.ico",
@@ -131,6 +131,8 @@ const BETA_PUBLISH_ICON_OVERRIDES: ReadonlyArray<IconOverride> = [
 ];
 
 /** Favicon overrides for a packaged build; beta ships its own vivid-blue set. */
-export function publishIconOverrides(flavor: DesktopBuildFlavor): ReadonlyArray<IconOverride> {
-  return flavor === "beta" ? BETA_PUBLISH_ICON_OVERRIDES : PUBLISH_ICON_OVERRIDES;
+export function distributionIconOverrides(
+  flavor: DesktopBuildFlavor,
+): ReadonlyArray<IconOverride> {
+  return flavor === "beta" ? BETA_DISTRIBUTION_ICON_OVERRIDES : DISTRIBUTION_ICON_OVERRIDES;
 }

@@ -12,9 +12,10 @@ the relevant rights. They do not revoke, replace, or restrict rights granted
 under the licenses of inherited or third-party material. Those portions
 remain subject to their respective license terms and notices.
 
-The existing MIT notice for inherited material is preserved verbatim in
-licenses/inherited-MIT.txt. Other applicable notices are recorded in
-THIRD_PARTY_NOTICES.md and alongside their components.
+The MIT notice for inherited material is preserved verbatim in
+licenses/inherited-MIT.txt. THIRD_PARTY_NOTICES.md is the single index of
+third-party and inherited notices for this distribution; notices that must stay
+beside a component are kept there and listed in that index.
 
 No general permission to distribute this private checkout is granted.
 Any later release must include the applicable third-party notices and

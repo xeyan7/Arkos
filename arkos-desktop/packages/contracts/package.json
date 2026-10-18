@@ -2,6 +2,7 @@
   "name": "@arkos/contracts",
   "version": "1.0.1",
   "private": true,
+  "license": "UNLICENSED",
   "files": [
     "dist"
   ],

@@ -9,9 +9,9 @@ Owner for every entry: `web/transcript`.
 
 Removal criterion: remove an entry after the underlying estimator, font, or
 layout behavior is corrected and the untagged test passes in three consecutive
-blocking Ubuntu CI runs.
+blocking Linux runs.
 
-The original Linux failure evidence is commit `7c80c0dee`, whose CI run reported
+The original Linux failure evidence is commit `7c80c0dee`, which reported
 12+ ChatView geometry failures after browser tests first moved to hosted Ubuntu.
 The current quarantine is intentionally narrower and contains only assertions
 whose result depends directly on pixel/font/layout measurements.

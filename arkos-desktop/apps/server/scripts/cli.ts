@@ -8,7 +8,7 @@ import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
 import {
   DEVELOPMENT_ICON_OVERRIDES,
-  PUBLISH_ICON_OVERRIDES,
+  DISTRIBUTION_ICON_OVERRIDES,
 } from "../../../scripts/lib/brand-assets.ts";
 import { resolveCatalogDependencies } from "../../../scripts/lib/resolve-catalog.ts";
 import rootPackageJson from "../../../package.json" with { type: "json" };
@@ -20,7 +20,7 @@ class CliError extends Data.TaggedError("CliError")<{
 }> {}
 
 // Some desktop builds do not expose workspace metadata in the root package.json.
-// Publish prep only needs the catalog map when it exists.
+// Distribution staging only needs the catalog map when it exists.
 function resolveRootWorkspaceCatalog(): Record<string, unknown> {
   const rootWorkspaces =
     typeof rootPackageJson === "object" &&
@@ -59,32 +59,32 @@ const runCommand = Effect.fn("runCommand")(function* (command: ChildProcess.Comm
   }
 });
 
-const applyPublishIconOverrides = Effect.fn("applyPublishIconOverrides")(function* (
+const applyDistributionIconOverrides = Effect.fn("applyDistributionIconOverrides")(function* (
   repoRoot: string,
   stagedPackageDir: string,
 ) {
   const path = yield* Path.Path;
   const fs = yield* FileSystem.FileSystem;
 
-  for (const override of PUBLISH_ICON_OVERRIDES) {
+  for (const override of DISTRIBUTION_ICON_OVERRIDES) {
     const sourcePath = path.join(repoRoot, override.sourceRelativePath);
     const targetPath = path.join(stagedPackageDir, override.targetRelativePath);
 
     if (!(yield* fs.exists(sourcePath))) {
       return yield* new CliError({
-        message: `Missing publish icon source: ${sourcePath}`,
+        message: `Missing distribution icon source: ${sourcePath}`,
       });
     }
     if (!(yield* fs.exists(targetPath))) {
       return yield* new CliError({
-        message: `Missing publish icon target: ${targetPath}. Run the build subcommand first.`,
+        message: `Missing distribution icon target: ${targetPath}. Run the build subcommand first.`,
       });
     }
 
     yield* fs.copyFile(sourcePath, targetPath);
   }
 
-  yield* Effect.log("[cli] Applied publish icon overrides inside the isolated package stage");
+  yield* Effect.log("[cli] Applied distribution icon overrides inside the package stage");
 });
 
 const applyDevelopmentIconOverrides = Effect.fn("applyDevelopmentIconOverrides")(function* (
@@ -166,7 +166,7 @@ const buildCmd = Command.make(
 ).pipe(Command.withDescription("Build the server package (tsdown + bundle web client)."));
 
 // ---------------------------------------------------------------------------
-// distribution staging (shared by publish and pack)
+// distribution staging (used by pack)
 // ---------------------------------------------------------------------------
 
 const stageDistributionPackage = Effect.fn("stageDistributionPackage")(function* (
@@ -195,12 +195,10 @@ const stageDistributionPackage = Effect.fn("stageDistributionPackage")(function*
   const pkg = {
     name: serverPackageJson.name,
     license: serverPackageJson.license,
-    repository: serverPackageJson.repository,
     bin: serverPackageJson.bin,
     type: serverPackageJson.type,
     version,
     engines: serverPackageJson.engines,
-    files: serverPackageJson.files,
     dependencies: resolveCatalogDependencies(
       serverPackageJson.dependencies as Record<string, unknown>,
       resolveRootWorkspaceCatalog(),
@@ -209,7 +207,7 @@ const stageDistributionPackage = Effect.fn("stageDistributionPackage")(function*
   };
 
   const stagedPackageDir = yield* fs.makeTempDirectoryScoped({
-    prefix: "arkos-cli-publish-",
+    prefix: "arkos-cli-staging-",
   });
   yield* fs.copy(path.join(serverDir, "dist"), path.join(stagedPackageDir, "dist"));
   for (const binTarget of Object.values(pkg.bin)) {
@@ -230,7 +228,7 @@ const stageDistributionPackage = Effect.fn("stageDistributionPackage")(function*
     }
     yield* fs.chmod(stagedBinPath, 0o755);
   }
-  yield* applyPublishIconOverrides(repoRoot, stagedPackageDir);
+  yield* applyDistributionIconOverrides(repoRoot, stagedPackageDir);
   yield* fs.writeFileString(
     path.join(stagedPackageDir, "package.json"),
     `${JSON.stringify(pkg, null, 2)}\n`,
@@ -242,47 +240,12 @@ const stageDistributionPackage = Effect.fn("stageDistributionPackage")(function*
     stagedRootEntries[1] !== "package.json"
   ) {
     return yield* new CliError({
-      message: `Unexpected CLI publish-stage entries: ${stagedRootEntries.join(", ")}`,
+      message: `Unexpected CLI distribution-stage entries: ${stagedRootEntries.join(", ")}`,
     });
   }
 
   return { stagedPackageDir, version };
 });
-
-// ---------------------------------------------------------------------------
-// publish subcommand
-// ---------------------------------------------------------------------------
-
-const publishCmd = Command.make(
-  "publish",
-  {
-    tag: Flag.string("tag").pipe(Flag.withDefault("latest")),
-    access: Flag.string("access").pipe(Flag.withDefault("restricted")),
-    appVersion: Flag.string("app-version").pipe(Flag.optional),
-    provenance: Flag.boolean("provenance").pipe(Flag.withDefault(false)),
-    dryRun: Flag.boolean("dry-run").pipe(Flag.withDefault(false)),
-    verbose: Flag.boolean("verbose").pipe(Flag.withDefault(false)),
-  },
-  (config) =>
-    Effect.gen(function* () {
-      const { stagedPackageDir } = yield* stageDistributionPackage(config.appVersion);
-
-      const args = ["publish", "--access", config.access, "--tag", config.tag];
-      if (config.provenance) args.push("--provenance");
-      if (config.dryRun) args.push("--dry-run");
-
-      yield* Effect.log(`[cli] Running from isolated stage: npm ${args.join(" ")}`);
-      yield* runCommand(
-        ChildProcess.make("npm", [...args], {
-          cwd: stagedPackageDir,
-          stdout: config.verbose ? "inherit" : "ignore",
-          stderr: "inherit",
-          // Windows needs shell mode to resolve .cmd shims.
-          shell: process.platform === "win32",
-        }),
-      );
-    }),
-).pipe(Command.withDescription("Publish the server package to npm."));
 
 // ---------------------------------------------------------------------------
 // pack subcommand
@@ -328,8 +291,8 @@ const packCmd = Command.make(
 // ---------------------------------------------------------------------------
 
 const cli = Command.make("cli").pipe(
-  Command.withDescription("Arkos server build & publish CLI."),
-  Command.withSubcommands([buildCmd, publishCmd, packCmd]),
+  Command.withDescription("Arkos server build CLI."),
+  Command.withSubcommands([buildCmd, packCmd]),
 );
 
 Command.run(cli, { version: "0.0.0" }).pipe(

@@ -226,7 +226,7 @@ function main(): void {
   if (tags.length === 0) {
     console.warn(
       "Migration lineage check skipped: no release tag is reachable from this checkout. " +
-        "Fetch tags (actions/checkout with fetch-depth: 0) to enable it.",
+        "Fetch tags (for example: git fetch --tags) to enable it.",
     );
     return;
   }

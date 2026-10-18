@@ -1900,8 +1900,7 @@ def _merge_managed_overlay(expanded: Dict[str, Any]) -> Tuple[Dict[str, Any], An
     """Apply the managed-scope overlay; returns ``(merged, managed_config_or_falsy)``.
     Managed wins at the leaf and is applied AFTER user expansion so a user ``${VAR}`` cannot shadow
     a managed literal: managed values expand only against the process environment. This
-    deliberately inverts the usual env-over-config precedence for the keys the managed layer pins
-    (docs/design/managed-scope.md §4.1)."""
+    deliberately inverts the usual env-over-config precedence for the keys the managed layer pins."""
     managed_config = managed_scope.load_managed_config()
     if not managed_config:
         return expanded, managed_config

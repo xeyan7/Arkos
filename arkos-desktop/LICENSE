@@ -12,9 +12,12 @@ relevant rights. They do not revoke, replace, or restrict rights granted under
 the licenses of inherited or third-party material. Those portions remain
 subject to their respective license terms and notices.
 
-The existing MIT notice for inherited material is preserved verbatim in
-licenses/inherited-MIT.txt. Other applicable notices are recorded alongside
-their components.
+Preserved notices ship under `licenses/`:
+
+- `licenses/inherited-MIT.txt` — the MIT notice for inherited material.
+- `licenses/cua-MIT.txt` — the MIT notice for the bundled Cua driver revision.
+
+Notices that must stay beside their component are recorded alongside it.
 
 No general permission to distribute this private checkout is granted.
 Any later release must include the applicable third-party notices and

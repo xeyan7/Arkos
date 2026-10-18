@@ -95,13 +95,15 @@ Configure the shell to match the way you work with light and dark themes, typogr
 | **Orchestration** | Provider handoffs, automations, and scoped external MCP.        |
 | **Development**   | Desktop shell plus focused server and web modes.                |
 
-## Installation
+## Running locally
 
 ### Desktop application
 
-Run the Electron app directly from source for development; no desktop installer is required. See the developer launch commands below.
+Run the Electron app directly from source for development; no desktop installer is required. See
+the development commands below.
 
-The source includes build targets for Windows x64, macOS Intel, macOS Apple Silicon, and Linux x64. This does not imply published installers are available.
+This checkout does not produce or distribute installers. Windows x64, macOS Intel, macOS Apple
+Silicon, and Linux x64 are the supported development hosts.
 
 Workspace Git features require [Git 2.29 or newer](https://github.com/git/git/blob/v2.29.0/Documentation/RelNotes/2.29.0.txt). Background refreshes preserve the FETCH_HEAD used by explicit fetch workflows. Ahead/behind counts use local refs and can update on the next status poll, up to 60 seconds after a successful background refresh; status reads do not wait for the remote.
 
@@ -109,7 +111,7 @@ Workspace Git features require [Git 2.29 or newer](https://github.com/git/git/bl
 
 Arkos uses the provider installations and subscriptions already configured on the local machine. Install and authenticate the runtime you intend to use before starting a session. For Codex sessions, follow the [Codex CLI setup](https://github.com/openai/codex).
 
-### Run from source
+### Development commands
 
 The development checkout uses [Bun 1.4.2](https://bun.sh/) and [Node.js 24.13.1](https://nodejs.org/).
 
@@ -128,12 +130,13 @@ bun run electron:dev -- -- --env-mode=loose
 ```
 
 `bun run typecheck` checks the configured workspaces with TypeScript 7 and the native
-Effect checker. CI and each workspace's `typecheck` script use the same compiler.
+Effect checker. Every workspace's `typecheck` script uses the same compiler.
 `bun run typecheck:native` remains an alias for the default check.
 
 The native Effect checker does not enforce every legacy rule: in particular,
 `importFromBarrel` errors are currently missed. `bun run typecheck:legacy` keeps
-the TypeScript 5 check available for explicit comparisons; it is not run by CI.
+the TypeScript 5 check available for explicit comparisons; it is not part of the
+default check.
 The existing compiler also remains installed for build and declaration tools
 that require its JavaScript API. Native and legacy checks use separate caches.
 
@@ -143,6 +146,5 @@ the root `typecheck` command also ensures that patch is applied before checking.
 
 ## License
 
-Arkos Desktop is distributed under private terms; see [LICENSE](./LICENSE). The
-MIT notice for inherited material is preserved in
-[licenses/inherited-MIT.txt](./licenses/inherited-MIT.txt).
+Arkos Desktop is distributed under private terms; see [LICENSE](./LICENSE). Preserved
+third-party MIT notices are in [licenses/](./licenses).

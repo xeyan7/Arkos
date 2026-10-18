@@ -2,6 +2,7 @@
   "name": "@arkos/web",
   "version": "1.0.1",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "dev": "vite",

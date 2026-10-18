@@ -1,14 +1,12 @@
 {
   "name": "@arkos/cli",
   "version": "1.0.1",
+  "private": true,
   "license": "UNLICENSED",
   "bin": {
     "arkos": "dist/index.mjs",
     "arkos-restore-migration-backup": "dist/restoreMigrationBackup.mjs"
   },
-  "files": [
-    "dist"
-  ],
   "type": "module",
   "scripts": {
     "dev": "bun run src/index.ts",

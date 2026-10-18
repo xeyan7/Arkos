@@ -1,45 +1,29 @@
 # Arkos Beta
 
-This document describes the source build configuration. No Arkos releases are currently published in the configured repository; these packaging instructions do not imply that installers or a hosted diagnostics dashboard exist.
+Arkos Beta is a packaged prerelease flavor of the desktop app. It is a separate application
+that installs and updates side-by-side with stable Arkos, and it never shares stable's data
+directory or update feed.
 
-Arkos Beta is a packaged prerelease flavor of the desktop app. It is a separate
-application that installs and updates side-by-side with stable Arkos, and it never
-shares stable's data directory or update feed.
+This document describes the flavor's behavior in a source checkout. No installers, update feed,
+or hosted diagnostics service are published from this checkout; nothing here implies otherwise.
 
 ## The short version
 
-- **One branch.** Every PR merges into `main` as usual. There is no Beta branch.
-  The release tag decides which app gets built from `main`:
-  - `vX.Y.Z` builds **Arkos** (Stable).
-  - `vX.Y.Z-beta.N` builds **Arkos Beta**.
-- **Beta is named after the next Stable.** After `v0.9.2` ships, the next Beta is
-  `v0.9.3-beta.1`, then `v0.9.3-beta.2`, and so on until `v0.9.3` ships. Never tag
+- **Beta is named after the next Stable.** After `v0.9.2` ships, the next Beta version is
+  `v0.9.3-beta.1`, then `v0.9.3-beta.2`, and so on until `v0.9.3` ships. Never version
   `v0.9.2-beta.1` after `v0.9.2`: it sorts older than the Stable it follows.
-- **Two separate apps.** Arkos and Arkos Beta install side by side, with separate
-  data (`~/.arkos` and `~/.arkos-beta`) and separate update feeds. A Beta update is
-  never offered to Stable, and the other way round.
-- **Data only copies Stable → Beta.** Settings > Try Beta copies the user's Stable
-  data into Beta. Nothing is ever copied back: "Switch back to Arkos" reopens
-  Stable with the data it already had.
-- **Beta-only features** stay out of Stable through one list,
-  `BETA_ONLY_FEATURES` in `packages/shared/src/betaFeatures.ts`. The code ships in
-  both apps; Stable just switches listed features off. Remove the entry to promote
-  a feature to Stable. See [Beta-only features](#beta-only-features).
-- **Diagnostics are local by default.** Beta keeps diagnostic events locally. Uploads require an explicitly configured endpoint; Stable does not construct the diagnostics sender.
-
-### Release order
-
-1. Merge the PRs for the release into `main`.
-2. If Windows is shipping unsigned, set the repo variable
-   `ARKOS_ALLOW_UNSIGNED_WINDOWS_RELEASE` to the Stable version (for example
-   `0.9.2`), then tag and publish `v0.9.2`.
-3. Set the variable to the Beta version (`0.9.3-beta.1`), then tag and publish
-   `v0.9.3-beta.1` from the same commit. With `ARKOS_AUTO_BETA=1` this tag is
-   created automatically after the Stable publish.
-4. More Betas (`beta.2`, `beta.3`, …) can follow from newer `main` commits at any
-   time. Stable only moves when a `vX.Y.Z` tag is cut.
-
-The rest of this file is the detailed reference.
+- **Two separate apps.** Arkos and Arkos Beta install side by side, with separate data
+  (`~/.arkos` and `~/.arkos-beta`) and separate update feeds. A Beta update is never offered to
+  Stable, and the other way round.
+- **Data only copies Stable → Beta.** Settings > Try Beta copies the user's Stable data into
+  Beta. Nothing is ever copied back: "Switch back to Arkos" reopens Stable with the data it
+  already had.
+- **Beta-only features** stay out of Stable through one list, `BETA_ONLY_FEATURES` in
+  `packages/shared/src/betaFeatures.ts`. The code ships in both apps; Stable just switches
+  listed features off. Remove the entry to promote a feature to Stable. See
+  [Beta-only features](#beta-only-features).
+- **Diagnostics are local by default.** Beta keeps diagnostic events locally. Uploads require an
+  explicitly configured endpoint; Stable does not construct the diagnostics sender.
 
 ## Identity
 
@@ -68,30 +52,29 @@ Beta preference remains inactive without being erased.
 
 ## How it differs from Canary
 
-Canary is a local source build managed by `bun run canary:*` scripts and updates only
-through those scripts. Beta is a packaged release artifact: it is built, signed, and
-published by the same release workflow as stable, and it updates through
-`electron-updater` like the production app.
+Canary is a local source-build flavor used for local-only testing; it never updates through the
+packaged updater. Beta is a packaged flavor: it is built and signed the same way as stable, and
+it updates through `electron-updater` like the production app.
 
 ## Update channel isolation
 
-- Stable builds follow the `arkos` updater channel with `allowPrerelease=false` and
-  only ever read the repository's GitHub Latest release.
+- Stable builds follow the `arkos` updater channel with `allowPrerelease=false` and only ever
+  read the configured update repository's Latest release.
 - Beta builds follow the `beta` updater channel with `allowPrerelease=true`.
-  electron-updater's GitHub provider reads the releases atom feed and takes the
+  `electron-updater`'s GitHub provider reads the releases atom feed and takes the
   newest release that is not tagged for a custom channel — so if a stable
   release is newer than the latest beta tag, beta installs see "no update"
   until the next beta release is cut. Always cut a new beta right after each
   stable release.
 - Beta releases carry `beta-mac.yml`, `beta.yml`, and `beta-linux.yml`
-  manifests. The `latest-*.yml` files are uploaded on beta releases too, but
+  manifests. The `latest-*.yml` files may be present on beta releases too, but
   they are inert there: stable installs only read them from the Latest
   release, which beta tags never become. A beta release can never be offered
   to a stable install, and a stable release never carries beta manifests.
 - The desktop additionally gate-checks every candidate's version against its
   lane (`isUpdateVersionAllowedForFlavor`): beta installs accept only
   `*-beta.*` versions and production installs accept only stable versions.
-  This matters because electron-updater's GitHub provider falls back to
+  This matters because `electron-updater`'s GitHub provider falls back to
   `latest-mac.yml` when the channel manifest is absent — without the gate, a
   beta install could be offered a stable build, and installing it would
   silently swap the app to the other flavor and home directory. Crossing lanes
@@ -102,61 +85,19 @@ published by the same release workflow as stable, and it updates through
   on macOS), so a downloaded beta update never collides with stable's pending
   update state.
 
-## Cutting a beta release
+## Signing
 
-Beta releases ride the same `release.yml` workflow. The lane is selected entirely by
-the tag shape: a version whose first prerelease identifier is `beta` resolves to the
-beta channel and the beta desktop flavor; every other suffix keeps today's behavior.
+Beta builds use the same signing and notarization setup as stable. A Windows build must be
+signed before it is distributed; an unsigned build is a local artifact only, never something to
+hand to another machine.
 
-1. Ensure `main` is green and run the build-only validation for the release candidate:
-   - `gh workflow run release.yml --ref BRANCH -f version=X.Y.Z-beta.1 -f publish_release=false`
-2. Commit the version on top of the target commit (normally current `main`),
-   and push only the tag. Release preflight
-   (`scripts/verify-release-source-provenance.ts`) requires the four release
-   `package.json` versions to equal the tag version, but beta version commits
-   never land on `main`, so `main` keeps the stable version:
-   - `git switch --detach upstream/main`
-   - `node scripts/update-release-package-versions.ts X.Y.Z-beta.N`, then commit
-   - `git tag vX.Y.Z-beta.N` and `git push upstream vX.Y.Z-beta.N`
-   - The base `X.Y.Z` should sit at or ahead of the latest stable version so beta
-     builds sort semantically as prereleases of the next stable.
-   - `N` starts at `1` and increments per beta cut on the same base version.
-3. The workflow publishes a GitHub **prerelease** named `Arkos vX.Y.Z-beta.N` with
-   beta installers, `beta-*.yml` manifests, and blockmaps. It is never marked Latest,
-   never bumps package versions on `main`, and never publishes the npm `latest`
-   dist-tag.
-4. To re-run publication by hand, dispatch the workflow on the existing tag
-   (`gh workflow run release.yml --ref vX.Y.Z-beta.N -f version=X.Y.Z-beta.N -f publish_release=true`).
-   Publishing from a branch ref is refused by preflight.
-5. Always cut a new beta right after each stable release. The GitHub provider
-   picks the newest non-custom-channel release in the feed, so a newer stable
-   tag shadows every older beta until a fresh beta prerelease out-sorts it.
-   With the repository variable `ARKOS_AUTO_BETA=1`, the release workflow does
-   this automatically after each stable publish: it tags a version commit made
-   on top of the stable commit as `vX.Y.(Z+1)-beta.1` (skipped when any beta
-   for that base already exists, or when the release just published is not the
-   highest stable tag — a re-release of an old line does not cut a beta).
-   Later betas on the same base stay manual.
+## Flavor selection
 
-### Signing
-
-Beta builds use the same signing setup as stable. Publishing requires the macOS
-signing/notarization secrets, and Windows uses Azure Trusted Signing or the same
-version-scoped unsigned exception (`ARKOS_ALLOW_UNSIGNED_WINDOWS_RELEASE` set to the
-exact `X.Y.Z-beta.N` version without the `v`). The exception matches one exact
-version, so the automatic post-stable beta needs Azure signing or the variable
-set to that beta version, otherwise its Windows build blocks publication.
-
-## Building a beta artifact locally
-
-```bash
-bun run dist:desktop:artifact -- --platform mac --target dmg --arch arm64 --flavor beta
-```
-
-`--flavor` accepts `production` (default), `canary`, `cua`, or `beta`, and the
-`ARKOS_DESKTOP_FLAVOR` env var is equivalent. The packaged `package.json` embeds the
-resolved flavor (`arkosDesktopFlavor`), so a packaged build cannot silently lose its
-identity at runtime; on packaged builds the embedded value wins over the env var.
+The packaged flavor is `production` (default), `canary`, `cua`, or `beta`. The
+`ARKOS_DESKTOP_FLAVOR` environment variable selects it for a local build, and the packaged
+`package.json` embeds the resolved flavor (`arkosDesktopFlavor`), so a packaged build cannot
+silently lose its identity at runtime: on packaged builds the embedded value wins over the
+environment variable.
 
 ## Joining beta from stable
 
@@ -229,8 +170,8 @@ environment variables, so a demo never touches a real `~/.arkos`,
   beta (only honored on the beta and cua flavors and source builds).
 - `ARKOS_HOME` / `HOME` — stable's data dir (beta ignores `ARKOS_HOME`, so a
   globally exported value can never point beta at stable's data) and the
-  `userData` base, respectively; overriding `HOME` isolates the Electron profile exactly like
-  `scripts/verify-packaged-desktop-startup.ts` does.
+  `userData` base, respectively; overriding `HOME` isolates the Electron profile
+  from a real user profile.
 
 The import copies settings, provider secrets, and a database snapshot. It never
 copies logs, diagnostics queues, runtime files, other import markers, database
@@ -324,7 +265,9 @@ visible trail no longer subscribes. First use can request macOS audio access.
 
 ## Diagnostics
 
-Beta diagnostics remain local by default. Set `ARKOS_BETA_DIAGNOSTICS_URL` only to an ingestion service you control to enable event and crash uploads. No hosted Arkos diagnostics service is configured in this checkout.
+Beta diagnostics remain local by default. Set `ARKOS_BETA_DIAGNOSTICS_URL` only to an ingestion
+service you control to enable event and crash uploads. No hosted Arkos diagnostics service is
+configured in this checkout.
 
 ## Data
 

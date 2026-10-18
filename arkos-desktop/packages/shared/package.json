@@ -2,6 +2,7 @@
   "name": "@arkos/shared",
   "version": "0.0.0-alpha.1",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     "./diagnosticIssue": {

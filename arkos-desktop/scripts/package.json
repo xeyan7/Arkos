@@ -1,6 +1,7 @@
 {
   "name": "@arkos/scripts",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "prepare": "effect-language-service patch",

@@ -113,8 +113,7 @@ def get_secret(name: str, default: Optional[str] = None) -> Optional[str]:
             f"while multiplexing is on. This credential read must run inside a "
             f"set_secret_scope(...) block (the per-turn / per-adapter profile "
             f"scope). Reading os.environ here would risk leaking another "
-            f"profile's value. See docs/design/multiplexing-gateway.md "
-            f"(Workstream A)."
+            f"profile's value while multiplexing."
         )
     return _environ_or(name, default)
 
