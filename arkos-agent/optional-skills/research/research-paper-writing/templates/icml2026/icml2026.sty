@@ -3,18 +3,18 @@
 % This file contains the LaTeX formatting parameters for a two-column
 % conference proceedings that is 8.5 inches wide by 11 inches high.
 %
-% Modified by Hanze Dong, Alberto Bietti, and Felix Berkenkamp, 2025
+% Modified 2025
 % - Revert to times for better compatibility
 % - Updated years, volume, location
 % - Added preprint version
-% - Based on the suggestion from Johan Larsson:
+% - Additional package robustness improvements:
 %   1. Added an end-of-document safety check to ensure the affiliations or notice footnote is printed:
 %      (1) Introduces a flag \newif\ificml@noticeprinted and sets it false by default.
 %      (2) At end of document, emits a package warning if \printAffiliationsAndNotice{...} was never called.
 %   2. \printAffiliationsAndNotice now sets the flag when called: Begins with \global\icml@noticeprintedtrue.
 % - Migrated to more recent version of fancyhdr for running title in header
 %
-% Modified by Johan Larsson, 2025
+% Modified 2025
 % - Use newtx instead of times, aligning serif, sans-serif, typerwriter,
 %   and math fonts.
 % - Use caption package to setup captions instead of manually defining themanually defining them.
@@ -24,61 +24,61 @@
 %   designed to work together with the caption package (which is now required).
 % - Remove unused label in example
 %
-% Modified by Tegan Maharaj and Felix Berkenkamp 2025: changed years, volume, location
+% Modified 2025: changed years, volume, location
 %
-% Modified by Jonathan Scarlett 2024: changed years, volume, location
+% Modified 2024: changed years, volume, location
 %
-% Modified by Sivan Sabato 2023: changed years and volume number.
-% Modified by Jonathan Scarlett 2023: added page numbers to every page
+% Modified 2023: changed years and volume number.
+% Modified 2023: added page numbers to every page
 %
-% Modified by Csaba Szepesvari 2022: changed years, PMLR ref. Turned off checking marginparwidth
+% Modified 2022: changed years, PMLR ref. Turned off checking marginparwidth
 %     as marginparwidth only controls the space available for margin notes and margin notes
 %     will NEVER be used anyways in submitted versions, so there is no reason one should
 %     check whether marginparwidth has been tampered with.
 %     Also removed pdfview=FitH from hypersetup as it did not do its job; the default choice is a bit better
 %     but of course the double-column format is not supported by this hyperlink preview functionality
 %     in a completely satisfactory fashion.
-% Modified by Gang Niu 2022: Changed color to xcolor
+% Modified 2022: Changed color to xcolor
 %
-% Modified by Iain Murray 2018: changed years, location. Remove affiliation notes when anonymous.
+% Modified 2018: changed years, location. Remove affiliation notes when anonymous.
 %     Move times dependency from .tex to .sty so fewer people delete it.
 %
-% Modified by Daniel Roy 2017: changed byline to use footnotes for affiliations, and removed emails
+% Modified 2017: changed byline to use footnotes for affiliations, and removed emails
 %
-% Modified by Percy Liang 12/2/2013: changed the year, location from the previous template for ICML 2014
+% Modified 12/2/2013: changed the year, location from the previous template for ICML 2014
 
-% Modified by Fei Sha 9/2/2013: changed the year, location form the previous template for ICML 2013
+% Modified 9/2/2013: changed the year, location form the previous template for ICML 2013
 %
-% Modified by Fei Sha 4/24/2013: (1) remove the extra whitespace after the
+% Modified 4/24/2013: (1) remove the extra whitespace after the
 %     first author's email address (in %the camera-ready version) (2) change the
 %     Proceeding ... of ICML 2010 to 2014 so PDF's metadata will show up %
 %     correctly
 %
-% Modified by Sanjoy Dasgupta, 2013: changed years, location
+% Modified 2013: changed years, location
 %
-% Modified by Francesco Figari, 2012: changed years, location
+% Modified 2012: changed years, location
 %
-% Modified by Christoph Sawade and Tobias Scheffer, 2011: added line
+% Modified 2011: added line
 % numbers, changed years
 %
-% Modified by Hal Daume III, 2010: changed years, added hyperlinks
+% Modified 2010: changed years, added hyperlinks
 %
-% Modified by Kiri Wagstaff, 2009: changed years
+% Modified 2009: changed years
 %
-% Modified by Sam Roweis, 2008: changed years
+% Modified 2008: changed years
 %
-% Modified by Ricardo Silva, 2007: update of the ifpdf verification
+% Modified 2007: update of the ifpdf verification
 %
-% Modified by Prasad Tadepalli and Andrew Moore, merely changing years.
+% Modified (merely changing years).
 %
-% Modified by Kristian Kersting, 2005, based on Jennifer Dy's 2004 version
+% Modified 2005, based on the 2004 version
 % - running title. If the original title is to long or is breaking a line,
 %   use \icmltitlerunning{...} in the preamble to supply a shorter form.
 %   Added fancyhdr package to get a running head.
 % - Updated to store the page size because pdflatex does compile the
 %   page size into the pdf.
 %
-% Hacked by Terran Lane, 2003:
+% Revised 2003:
 % - Updated to use LaTeX2e style file conventions (ProvidesPackage,
 %   etc.)
 % - Added an ``appearing in'' block at the base of the first column
@@ -90,7 +90,7 @@
 %   and will appear).
 %
 %   Originally created as:  ml2k.sty (LaTeX style file for ICML-2000)
-%   by P. Langley (12/23/99)
+%   (1999)
 
 %%%%%%%%%%%%%%%%%%%%
 %% This version of the style file supports both a ``review'' version
@@ -215,12 +215,12 @@ International Conference on Machine Learning (ICML)\@.  Do not distribute.}
 % \pdfpageheight. As Latex does not know this directives, we first
 % check whether pdflatex or latex is used.
 %
-% Kristian Kersting 2005
+% 2005
 %
 % in order to account for the more recent use of pdfetex as the default
 % compiler, I have changed the pdf verification.
 %
-% Ricardo Silva 2007
+% 2007
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \paperwidth=8.5in
@@ -307,11 +307,11 @@ the offending package(s), or layout-changing commands and try again.
 %% a longer block of text for the copyright notice string.  Fiddle with
 %% them if necessary to get the block to fit/look right.
 %%
-%% -- Terran Lane, 2003
+%% 2003
 %%
 %% The following comments are included verbatim from acmconf.sty:
 %%
-%%% This section (written by KBT) handles the 1" box in the lower left
+%%% This section handles the 1" box in the lower left
 %%% corner of the left column of the first page by creating a picture,
 %%% and inserting the predefined string at the bottom (with a negative
 %%% displacement to offset the space allocated for a non-existent
@@ -705,7 +705,7 @@ the offending package(s), or layout-changing commands and try again.
 % To comment out multiple lines of text.
 \long\def\comment#1{}
 
-%% Line counter (not in final version). Adapted from NIPS style file by Christoph Sawade
+%% Line counter (not in final version). Adapted from the NIPS style file
 
 % Vertical Ruler
 % This code is, largely, from the CVPR 2010 conference style file

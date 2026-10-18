@@ -614,24 +614,3 @@ import re  # noqa: F401,E402
 import threading  # noqa: F401,E402
 from urllib.parse import urlsplit  # noqa: F401,E402
 from urllib.parse import urlunsplit  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'DEFAULT_CHILD_TIMEOUT': ('tools.delegate_tool_config', 'DEFAULT_CHILD_TIMEOUT'),
-    'DEFAULT_MAX_SUMMARY_CHARS': ('tools.delegate_tool_results', 'DEFAULT_MAX_SUMMARY_CHARS'),
-    'DEFAULT_TOOLSETS': ('tools.delegate_tool_toolsets', 'DEFAULT_TOOLSETS'),
-    'MAX_DEPTH': ('tools.delegate_tool_config', 'MAX_DEPTH'),
-    'TOOLSETS': ('toolsets', 'TOOLSETS'),
-    'base_url_hostname': ('utils', 'base_url_hostname'),
-    'request_hard_interrupt': ('agent.interrupt_compat', 'request_hard_interrupt'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

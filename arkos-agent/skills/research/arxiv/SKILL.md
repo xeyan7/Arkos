@@ -3,7 +3,6 @@ name: arxiv
 description: "Search arXiv papers by keyword, author, category, or ID."
 version: 1.0.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

@@ -4258,20 +4258,3 @@ def reference_handoff_would_drive_next_model_call(messages: Optional[List[Dict[s
 def is_user_originated_turn(message: Any) -> bool:
     """True for human-authored user turns (not compaction scaffolding); dispatchers must use this, not a bare role check."""
     return user_originated_turn_view(message) is not None
-
-
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'tool_result_id_variants': ('agent.message_sanitization', 'tool_result_id_variants'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

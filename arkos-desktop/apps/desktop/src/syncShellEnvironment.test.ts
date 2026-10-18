@@ -179,8 +179,8 @@ describe("syncShellEnvironment", () => {
       PATH: "C:\\Windows\\system32",
     };
     const readWindowsEnvironment = vi.fn(() => ({
-      PATH: "C:\\Windows\\system32;C:\\Users\\ramar\\.local\\bin",
-      CLAUDE_CONFIG_DIR: "C:\\Users\\ramar\\.config\\claude",
+      PATH: "C:\\Windows\\system32;C:\\Users\\test\\.local\\bin",
+      CLAUDE_CONFIG_DIR: "C:\\Users\\test\\.config\\claude",
     }));
 
     syncShellEnvironment(env, {
@@ -189,8 +189,8 @@ describe("syncShellEnvironment", () => {
     });
 
     expect(readWindowsEnvironment).toHaveBeenCalledTimes(1);
-    expect(env.PATH).toBe("C:\\Windows\\system32;C:\\Users\\ramar\\.local\\bin");
-    expect(env.CLAUDE_CONFIG_DIR).toBe("C:\\Users\\ramar\\.config\\claude");
+    expect(env.PATH).toBe("C:\\Windows\\system32;C:\\Users\\test\\.local\\bin");
+    expect(env.CLAUDE_CONFIG_DIR).toBe("C:\\Users\\test\\.config\\claude");
   });
 
   it("merges Windows PATH but preserves variables already in the environment", () => {
@@ -199,8 +199,8 @@ describe("syncShellEnvironment", () => {
       CLAUDE_CONFIG_DIR: "C:\\already\\set",
     };
     const readWindowsEnvironment = vi.fn(() => ({
-      PATH: "C:\\Users\\ramar\\.local\\bin",
-      CLAUDE_CONFIG_DIR: "C:\\Users\\ramar\\.config\\claude",
+      PATH: "C:\\Users\\test\\.local\\bin",
+      CLAUDE_CONFIG_DIR: "C:\\Users\\test\\.config\\claude",
       GEMINI_API_KEY: "from-registry",
     }));
 
@@ -209,7 +209,7 @@ describe("syncShellEnvironment", () => {
       readWindowsEnvironment,
     });
 
-    expect(env.PATH).toBe("C:\\Users\\ramar\\.local\\bin;C:\\Windows\\system32");
+    expect(env.PATH).toBe("C:\\Users\\test\\.local\\bin;C:\\Windows\\system32");
     expect(env.CLAUDE_CONFIG_DIR).toBe("C:\\already\\set");
     expect(env.GEMINI_API_KEY).toBe("from-registry");
   });
@@ -297,7 +297,7 @@ describe("syncShellEnvironment", () => {
         { PATH: "C:\\Windows\\system32" },
         {
           platform: "win32",
-          readWindowsEnvironment: () => ({ PATH: "C:\\Users\\ramar\\.local\\bin" }),
+          readWindowsEnvironment: () => ({ PATH: "C:\\Users\\test\\.local\\bin" }),
         },
       ),
     ).toEqual({ pathHydrated: true });

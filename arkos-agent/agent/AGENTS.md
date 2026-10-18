@@ -75,14 +75,13 @@ configurable; per-model overrides; failure cooldown after provider-proven overfl
 prunes old tool results first (no LLM call), then picks boundaries, then generates a structured
 summary with the `auxiliary` compression model. In-place compaction keeps a single stable session
 id; native Responses/Codex compaction paths are provider-specific. Compression is the sanctioned
-cache break — keep it the only one. Full detail:
-*(docs site — not shipped slim)*.
+cache break — keep it the only one.
 
 ## Model and provider resolution
 
-- Runtime provider/model resolution and its precedence: *(docs site — not shipped slim)*.
-  Provider profiles are plugins (`plugins/model-providers/<name>/`, see `plugins/AGENTS.md`);
-  `agent/model_metadata.py` holds context lengths and capabilities.
+- Runtime provider/model resolution and its precedence follow the provider-profile plugins
+  (`plugins/model-providers/<name>/`, see `plugins/AGENTS.md`); `agent/model_metadata.py` holds
+  context lengths and capabilities.
 - **Auxiliary (side-LLM) work** — curator, vision, embedding, title generation, session_search,
   compression — resolves through `agent/auxiliary_client.py::_resolve_auto_route`; each task can pin
   its own `provider/model/base_url/reasoning_effort` under `auxiliary:` in config.yaml.
@@ -93,8 +92,8 @@ cache break — keep it the only one. Full detail:
 
 `agent/memory_provider.py` (ABC) + `agent/memory_manager.py` (orchestrator) drive memory-provider
 plugins; `agent/context_engine.py` drives context-engine plugins; `agent/image_gen_provider.py`
-image-gen plugins (all in `plugins/AGENTS.md`). `agent/curator.py` + `curator_backup.py` implement
-the skill curator (`skills/AGENTS.md`). Cron sessions pass `skip_memory=True` by default — memory
+image-gen plugins (all in `plugins/AGENTS.md`). (Engine build: the `agent/curator*.py` modules that
+implement the skill curator are not shipped.) Cron sessions pass `skip_memory=True` by default — memory
 providers intentionally do not run during cron.
 
 ## Tests
@@ -103,9 +102,5 @@ Loop/phase tests go in `tests/agent/`; patch the binding the phase actually read
 `from run_agent import X` inside the function — root "patch where production reads"). Assert
 message-shape invariants (alternation, byte-stable system prompt) rather than snapshotting prompt
 text.
-
-Long-form: *(docs site — not shipped slim)*, `prompt-assembly.md`,
-`context-compression-and-caching.md`, `provider-runtime.md`, `session-storage.md`,
-`subagent-lifecycle-api.md`.
 
 *Part of Arkos, an AI agent engine.*

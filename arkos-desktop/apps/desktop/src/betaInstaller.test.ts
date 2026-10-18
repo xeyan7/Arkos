@@ -128,6 +128,7 @@ describe("resolveBetaFeedLocation", () => {
 
   it("picks the newest beta release with a manifest asset", async () => {
     const location = await resolveBetaFeedLocation({
+      releasesApiUrl: "https://api.example-org.test/releases",
       fetchText: async () =>
         JSON.stringify([
           { tag_name: "v0.9.4", assets: [{ name: "latest-mac.yml" }] },
@@ -152,13 +153,23 @@ describe("resolveBetaFeedLocation", () => {
   it("throws when no beta release carries the manifest", async () => {
     await expect(
       resolveBetaFeedLocation({
+        releasesApiUrl: "https://api.example-org.test/releases",
         fetchText: async () => JSON.stringify([{ tag_name: "v1.0.0", assets: [] }]),
       }),
     ).rejects.toThrow(/No beta release/);
   });
+
+  it("throws when no feed is configured", async () => {
+    vi.stubEnv("ARKOS_BETA_RELEASES_API_URL", "");
+    try {
+      await expect(resolveBetaFeedLocation({})).rejects.toThrow(/No beta release feed is configured/);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
 });
 
-function fakeApp(dir: string, bundleId = "com.xeyan7.arkos.beta"): string {
+function fakeApp(dir: string, bundleId = "com.arkos.desktop.beta"): string {
   const appPath = join(dir, "Arkos Beta.app", "Contents");
   mkdirSync(appPath, { recursive: true });
   writeFileSync(
@@ -178,7 +189,7 @@ describe("verifyBetaAppBundle", () => {
 
   it("rejects a non-beta bundle id", () => {
     const root = makeRoot();
-    expect(() => verifyBetaAppBundle(fakeApp(root, "com.xeyan7.arkos"))).toThrow(
+    expect(() => verifyBetaAppBundle(fakeApp(root, "com.arkos.desktop"))).toThrow(
       /not Arkos Beta/,
     );
   });
@@ -253,7 +264,7 @@ describe("installBetaFromFeed", () => {
       ...deps,
       run: (command: string, args: readonly string[]) => {
         if (command === "ditto") {
-          fakeApp(args[args.length - 1]!, "com.xeyan7.arkos");
+          fakeApp(args[args.length - 1]!, "com.arkos.desktop");
           return;
         }
         if (command === "mv") return;
@@ -491,7 +502,7 @@ describe("installBetaFromFeed", () => {
     await expect(
       installBetaFromFeed({ ...deps, expectedTeamId: "unavailable", readCommand }, () => {}),
     ).rejects.toThrow(
-      "Couldn't check the beta download's signature. Try the download page instead.",
+      "Couldn't check the beta download's signature. Try the release page instead.",
     );
     expect(calls).toHaveLength(0);
     expect(existsSync(join(installDir, "Arkos Beta.app"))).toBe(false);

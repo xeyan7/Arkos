@@ -804,7 +804,7 @@ export function BetaChannelSettingsPanel({ active }: { readonly active: boolean 
                     disabled={actionPending !== null}
                     onClick={() => void openDownloadPage()}
                   >
-                    Download page
+                    Release page
                   </Button>
                 </>
               ) : (

@@ -26,12 +26,12 @@ import {
   ARKOS_BETA_HOME_DIR_NAME,
   ARKOS_BETA_HOME_ENV,
   ARKOS_BETA_INSTALL_DIR_ENV,
-  ARKOS_BETA_RELEASES_URL,
+  ARKOS_BETA_RELEASES_URL_ENV,
   ARKOS_BETA_USER_DATA_ENV,
   ARKOS_BETA_WINDOWS_INSTALLER_GUID,
   ARKOS_STABLE_EXECUTABLE_ENV,
   ARKOS_STABLE_HOME_ENV,
-  ARKOS_STABLE_RELEASES_URL,
+  ARKOS_STABLE_RELEASES_URL_ENV,
   ARKOS_STABLE_WINDOWS_INSTALLER_GUID,
   type BetaImportResult,
 } from "@arkos/shared/betaChannel";
@@ -55,6 +55,12 @@ const BETA_LINUX_DESKTOP_FILE = "arkos-beta.desktop";
 const STABLE_MAC_APP_NAME = "Arkos.app";
 const STABLE_MAC_EXECUTABLE_NAME = "Arkos";
 const STABLE_WINDOWS_EXE_NAME = "Arkos.exe";
+
+/** Configured public release page for a scope; empty when unset (no built-in default). */
+function configuredReleaseUrl(env: NodeJS.ProcessEnv | undefined, key: string): string {
+  const scope = env ?? process.env;
+  return (scope[key] ?? "").trim();
+}
 
 export interface BetaInstallDetection {
   readonly installed: boolean;
@@ -423,7 +429,7 @@ export class DesktopBetaChannel {
 
   constructor(private readonly deps: BetaChannelDeps) {}
 
-  /** macOS can install beta in place; other platforms keep the download page. */
+  /** macOS can install beta in place; other platforms keep the release page. */
   private get canInstall(): boolean {
     return this.deps.platform === "darwin";
   }
@@ -475,14 +481,14 @@ export class DesktopBetaChannel {
       flavor: this.deps.flavor,
       stableInstalled: stableExecutable !== null,
       canMoveBetaToTrash: this.deps.flavor === "beta" && this.deps.canTrashOwnBundle === true,
-      stableDownloadUrl: ARKOS_STABLE_RELEASES_URL,
+      stableDownloadUrl: configuredReleaseUrl(this.deps.env, ARKOS_STABLE_RELEASES_URL_ENV),
       installed: detection.installed,
       version: detection.version,
       canInstall: this.canInstall,
       running,
       lastImportAt: result && result.ok ? result.completedAt : null,
       lastImportError: result && !result.ok ? (result.error ?? "import failed") : null,
-      downloadUrl: ARKOS_BETA_RELEASES_URL,
+      downloadUrl: configuredReleaseUrl(this.deps.env, ARKOS_BETA_RELEASES_URL_ENV),
       install: this.installProgress,
     };
   }

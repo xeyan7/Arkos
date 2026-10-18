@@ -273,7 +273,7 @@ const ServerConfigLive = (input: CliInput) =>
       if (configuredPublicUrl && publicUrl === undefined) {
         return yield* new StartupError({
           message:
-            "ARKOS_PUBLIC_URL/--public-url must be an HTTPS root origin without credentials, path, query, or fragment (for example https://arkos.example.com).",
+            "ARKOS_PUBLIC_URL/--public-url must be an HTTPS root origin without credentials, path, query, or fragment (for example https://<your-host>).",
         });
       }
       const allowInsecureRemote = resolveBooleanConfig(

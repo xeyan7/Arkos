@@ -1,7 +1,7 @@
 %%% Modification of BibTeX style file acl_natbib_nourl.bst
 %%% ... by urlbst, version 0.9.1 (marked with "% urlbst")
 %%% See <https://purl.org/nxg/dist/urlbst> and repository <https://heptapod.host/nxg/urlbst>
-%%% Modifications Copyright 2002–23, Norman Gray,
+%%% Modifications Copyright 2002–23,
 %%% and distributed under the terms of the LPPL; see README for discussion.
 %%%
 %%% Added webpage entry type, and url and lastchecked fields.
@@ -21,7 +21,7 @@
 %% ----------------------------------------
 %% *** Intended for ACL conferences ***
 %% 
-%% Copyright 1994-2011 Patrick W Daly
+%% Copyright 1994-2011
  % ===============================================================
  % IMPORTANT NOTICE:
  % This bibliographic style (bst) file has been generated from one or
@@ -39,7 +39,7 @@
  % This bibliography style file is intended for texts in ENGLISH
  % This is an author-year citation style bibliography. As such, it is
  % non-standard LaTeX, and requires a special package file to function properly.
- % Such a package is    natbib.sty   by Patrick W. Daly
+ % Such a package is    natbib.sty
  % The form of the \bibitem entries is
  %   \bibitem[Jones et al.(1990)]{key}...
  %   \bibitem[Jones et al.(1990)Jones, Baker, and Smith]{key}...
@@ -205,7 +205,7 @@ FUNCTION {parse.doi}
 % previously set makeinlinelink true, and the two ...end.inlinelink functions
 % will only do their stuff if start.inlinelink has previously set
 % closeinlinelink to be non-empty.
-% (thanks to 'ijvm' for suggested code here)
+% (suggested code, used here)
 FUNCTION {uand}
 { 'skip$ { pop$ #0 } if$ } % 'and' (which isn't defined at this point in the file)
 FUNCTION {possibly.setup.inlinelink}
@@ -1228,9 +1228,9 @@ FUNCTION {output.web.refs}
   inlinelinks
     'skip$ % links were inline -- don't repeat them
     { % If the generated DOI will be the same as the URL,
-      % then don't print the URL (thanks to Joseph Wright
-      % for (the original version of) this code,
-      % at http://tex.stackexchange.com/questions/5660)
+      % then don't print the URL (this code is based on the original
+      % version described at
+      % http://tex.stackexchange.com/questions/5660)
       adddoi
           doi empty$ { "X" } { doi parse.doi pop$ } if$ % DOI URL to be generated
           url empty$ { "Y" } { url } if$          % the URL, or "Y" if empty
@@ -1285,12 +1285,6 @@ FUNCTION {fin.entry}
 % Webpage entry type.
 % Title and url fields required;
 % author, note, year, month, and lastchecked fields optional
-% See references
-%   ISO 690-2 http://www.nlc-bnc.ca/iso/tc46sc9/standard/690-2e.htm
-%   http://www.classroom.net/classroom/CitingNetResources.html
-%   http://neal.ctstateu.edu/history/cite.html
-%   http://www.cas.usf.edu/english/walker/mla.html
-% for citation formats for web pages.
 FUNCTION {webpage}
 { output.bibitem
   author empty$

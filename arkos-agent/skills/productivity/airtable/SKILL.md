@@ -3,7 +3,6 @@ name: airtable
 description: Airtable REST API via curl. Records CRUD, filters, upserts.
 version: 1.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 prerequisites:
   env_vars: [AIRTABLE_API_KEY]
@@ -201,7 +200,7 @@ while :; do
 done
 ```
 
-## Typical the agent Workflow
+## Typical workflow
 
 1. **Confirm auth.** `curl -s -o /dev/null -w "%{http_code}\n" https://api.airtable.com/v0/meta/bases -H "Authorization: Bearer $AIRTABLE_API_KEY"` — expect `200`.
 2. **Find the base.** List bases (step above) OR ask the user for the `app...` ID directly if the token lacks `schema.bases:read`.

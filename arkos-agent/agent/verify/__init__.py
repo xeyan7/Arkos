@@ -1,7 +1,6 @@
 """Project verification subsystem.
 
-Scoped port of superagent-ai/grok-cli's verify subsystem (``src/verify/recipes.ts``,
-``src/verify/environment.ts``): static run-recipe detection, a persisted
+Scoped port of an external verify subsystem (static run-recipe detection, a persisted
 environment manifest, and a smoke-test runner used by ``arkos verify``.
 """
 

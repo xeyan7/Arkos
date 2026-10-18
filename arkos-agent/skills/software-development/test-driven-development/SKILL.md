@@ -3,7 +3,6 @@ name: test-driven-development
 description: "TDD: enforce RED-GREEN-REFACTOR, tests before code."
 version: 1.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

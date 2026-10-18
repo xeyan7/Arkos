@@ -9,7 +9,7 @@ past that); see the **routing table** at the end and read the area file before e
 
 **Never give up on the right solution.**
 
-## What the agent Is
+## What the agent is
 
 The agent is an autonomous AI agent engine that runs an extensible agent core. It
 learns across sessions (memory + skills), delegates to subagents, runs scheduled jobs, and
@@ -229,11 +229,9 @@ families: `arkos_state.py` (21), `tools/mcp_tool.py` (15),
   function so `monkeypatch.setattr(facade, "name", ...)` is the seam; a patch on the defining
   module passes silently. Check the call site's binding before writing a patch target
   (blind repointing to defining modules broke 130+ tests).
-- **Compat pointers are OFF LIMITS in-tree.** Old import paths kept alive for external plugins
-  (`PLUGIN-COMPAT` blocks, `COMPAT_MANIFEST.md`, `compat_manifest.json`) must not be used by
-  in-tree code or tests; `scripts/check_compat_pointers.py` runs in CI, and
-  `-W error::arkos_cli.plugin_compat.ArkosPluginCompatWarning` catches them in the suite.
-  They are removed 2026-09-14 by reverting one commit. Import from the defining module.
+- **Import from the defining module.** The Sep-2026 decomposition compat layer was removed after
+  its window closed (no `PLUGIN-COMPAT` blocks, no `compat_manifest.json`, no re-export shims).
+  Internal paths are not API.
 - **Don't recreate god files.** A file passing ~2,000 lines or a function passing ~300 lines /
   cyclomatic complexity 30 is the signal to split along `<stem>_<topic>` FIRST, in its own
   commit. New behaviour goes in a new or topical sibling — never appended to a facade.
@@ -256,8 +254,8 @@ families: `arkos_state.py` (21), `tools/mcp_tool.py` (15),
   (`_holder_value_flags()`), never hand-written; match FULL cmdlines and truncate only for
   display. Details: `arkos_cli/AGENTS.md`.
 - **Never hardcode `~/.arkos`.** `get_arkos_home()` for code paths, `display_arkos_home()`
-  for user-facing text (both from `arkos_constants`). Hardcoding breaks profiles (5 bugs in
-). Module-level constants are fine — they cache after `_apply_profile_override`
+  for user-facing text (both from `arkos_constants`). Hardcoding breaks profiles. Module-level
+  constants are fine — they cache after `_apply_profile_override`
   sets `ARKOS_HOME`. Profile operations themselves are HOME-anchored
   (`_get_profiles_root()` = `Path.home()/.arkos/profiles`) so `arkos -p x profile list`
   sees all profiles — intentional, not a bug.
@@ -301,7 +299,7 @@ changing `pyproject.toml`.
 
 ## Testing (applies everywhere)
 
-The `tests/` suite and `scripts/run_tests.sh` are not shipped in this slim CLI distribution — restore them from git history for a full checkout. The conventions below describe that full suite (hermetic env, per-file isolation, OS lanes).
+The `tests/` suite and `scripts/run_tests.sh` are not included in this engine build — restore them from git history for a full checkout. The conventions below describe that full suite (hermetic env, per-file isolation, OS lanes).
 
 - **Flake policy:** a failing FILE is retried once in a fresh subprocess (`--file-retries`;
   `ARKOS_TEST_FILE_RETRIES=0` disables). Pass-on-retry is green but printed under `⚠ FLAKY`
@@ -389,14 +387,13 @@ extract, not to regex around it.
 | `run_agent.py`, `agent/` | `agent/AGENTS.md` | AIAgent + mixins, turn phases, caching integrity, message-flow invariants, compression, model/aux resolution |
 | `arkos_cli/` (library only) | `arkos_cli/AGENTS.md` | config system + loaders, profiles / multiplex |
 | `tools/`, `toolsets.py`, `model_tools.py` | `tools/AGENTS.md` | Adding tools, registry, toolsets, delegation, cross-tool references, backends |
-| `plugins/`, `arkos_cli/plugins*.py` | `plugins/AGENTS.md` | Plugin kinds, native compat contract, in-tree policy, Sep-2026 compat window |
+| `plugins/`, `arkos_cli/plugins*.py` | `plugins/AGENTS.md` | Plugin kinds, native compat contract, in-tree policy |
 | `skills/`, `optional-skills/`, `agent/curator*.py` | `skills/AGENTS.md` | Frontmatter, HARDLINE authoring standards, curator |
 | `cron/` | `cron/AGENTS.md` | Scheduler invariants, job fields (kanban subsystem removed in engine build) |
 | `gateway/` engine plumbing | `gateway/AGENTS.md` | Session context, config, delivery (platform adapters removed in engine build) |
 
-Long-form background lives in *(docs site — not shipped slim)* (agent-loop, prompt-assembly,
-context-compression-and-caching, gateway-internals, tools-runtime, plugins/, cron-internals,
-session-storage, ...). Workflow rules (PR/issue/review/salvage process) live in the
-`arkos-dev` skill, not here.
+Long-form background covering the agent loop, prompt assembly, context compression and caching,
+gateway internals, the tools runtime, plugins, cron internals, and session storage is not included
+in this checkout. Workflow rules (PR/issue/review/salvage process) are not maintained here.
 
 *Part of Arkos, an AI agent engine.*

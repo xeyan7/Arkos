@@ -10,7 +10,7 @@ export interface FeatureTourSlide {
   feature?: string;
 }
 
-// Curated from v0.9.2..HEAD. Keep this tour about changes, not the full feature inventory.
+// Curated from recent changes. Keep this tour about changes, not the full feature inventory.
 export const FEATURE_TOUR_SLIDES: readonly FeatureTourSlide[] = [
   {
     id: "workspace",

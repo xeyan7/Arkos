@@ -26,8 +26,8 @@ import type { ComputerBackendActionResult } from "./ComputerBackend.ts";
  * This module is also where the computer path's other env flags live (the
  * workstream-C speed flags). The ones still gated default to the previous
  * behavior so a live run can isolate a single optimization at a time; the
- * graduated ones default on with an explicit-off kill switch; see
- * docs/computer-use-cua/speed-flags.md for the full list.
+ * graduated ones default on with an explicit-off kill switch; see the
+ * computer-use speed-flag notes for the full list.
  */
 
 function envFlagEnabled(value: string | undefined): boolean {

@@ -103,7 +103,7 @@ function verifyCanonicalIdentity(): void {
       "Expected the CLI to expose only the Arkos entry point and migration recovery binary.",
     );
   }
-  if (ARKOS_PRODUCTION_BUNDLE_ID !== "com.xeyan7.arkos") {
+  if (ARKOS_PRODUCTION_BUNDLE_ID !== "com.arkos.desktop") {
     throw new Error(`Unexpected production bundle ID: ${ARKOS_PRODUCTION_BUNDLE_ID}.`);
   }
   if (ARKOS_DESKTOP_UPDATE_CHANNEL !== "arkos") {

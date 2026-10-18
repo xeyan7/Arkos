@@ -3,7 +3,6 @@ name: node-inspect-debugger
 description: "Debug Node.js via --inspect + Chrome DevTools Protocol CLI."
 version: 1.0.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:
@@ -174,7 +173,7 @@ mkdir -p /tmp/cdp-tools && cd /tmp/cdp-tools && npm i chrome-remote-interface
 NODE_PATH=/tmp/cdp-tools/node_modules node /tmp/cdp-debug.js
 ```
 
-## Debugging the agent ui-tui
+## Debugging the ui-tui
 
 The TUI is built Ink + tsx. Two common scenarios:
 

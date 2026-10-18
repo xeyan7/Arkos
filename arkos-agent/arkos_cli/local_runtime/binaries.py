@@ -290,20 +290,3 @@ def ensure_runtime_installed(tag: str, backend: str,
                                          "verified_version": version}, indent=2), encoding="utf-8")
     logger.info("installed llama.cpp %s (%s): %s", tag, backend, version)
     return install_dir
-
-
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'get_arkos_home': ('arkos_constants', 'get_arkos_home'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

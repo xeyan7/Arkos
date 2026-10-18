@@ -472,24 +472,3 @@ import asyncio  # noqa: F401,E402
 import httpx  # noqa: F401,E402
 import re  # noqa: F401,E402
 import sys  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'DEFAULT_EXTRACT_CHAR_LIMIT': ('tools.web_tools_truncate', 'DEFAULT_EXTRACT_CHAR_LIMIT'),
-    'Firecrawl': ('plugins.web.firecrawl.provider', 'Firecrawl'),
-    'MAX_STORED_TEXT_CHARS': ('tools.web_tools_truncate', 'MAX_STORED_TEXT_CHARS'),
-
-    'normalize_url_for_request': ('tools.url_safety', 'normalize_url_for_request'),
-
-    'sensitive_query_param_name': ('tools.url_safety', 'sensitive_query_param_name'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

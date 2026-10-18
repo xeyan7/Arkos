@@ -1,10 +1,8 @@
 % ALGORITHMIC STYLE -- Released 8 APRIL 1996
 %    for LaTeX version 2e
-% Copyright -- 1994 Peter Williams
-% E-mail PeterWilliams@dsto.defence.gov.au
+% Copyright -- 1994
 %
-% Modified by Alex Smola (08/2000)
-% E-mail Alex.Smola@anu.edu.au
+% Modified (08/2000)
 %
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{algorithmic}
@@ -43,7 +41,7 @@
 \newcommand{\algorithmicrepeat}{\textbf{repeat}}
 \newcommand{\algorithmicuntil}{\textbf{until}}
 
-%changed by alex smola
+%changed
 \newcommand{\algorithmicinput}{\textbf{input}}
 \newcommand{\algorithmicoutput}{\textbf{output}}
 \newcommand{\algorithmicset}{\textbf{set}}
@@ -55,7 +53,7 @@
 \newcommand{\algorithmicendfunction}{\algorithmicend\ \algorithmicfunction}
 \newcommand{\algorithmicmain}{\textbf{main}}
 \newcommand{\algorithmicendmain}{\algorithmicend\ \algorithmicmain}
-%end changed by alex smola
+%end changed
 
 \def\ALC@item[#1]{%
 \if@noparitem \@donoparitem
@@ -110,7 +108,7 @@
   \newcommand{\ENSURE}{\item[\algorithmicensure]}
   \newcommand{\STATE}{\ALC@it}
   \newcommand{\COMMENT}[1]{\algorithmiccomment{##1}}
-%changes by alex smola
+%changes
   \newcommand{\INPUT}{\item[\algorithmicinput]}
   \newcommand{\OUTPUT}{\item[\algorithmicoutput]}
   \newcommand{\SET}{\item[\algorithmicset]}
@@ -120,7 +118,7 @@
   \newcommand{\OR}{\algorithmicor}
   \newenvironment{ALC@func}{\begin{ALC@g}}{\end{ALC@g}}
   \newenvironment{ALC@main}{\begin{ALC@g}}{\end{ALC@g}}
-%end changes by alex smola
+%end changes
   \newenvironment{ALC@if}{\begin{ALC@g}}{\end{ALC@g}}
   \newenvironment{ALC@for}{\begin{ALC@g}}{\end{ALC@g}}
   \newenvironment{ALC@whl}{\begin{ALC@g}}{\end{ALC@g}}
@@ -148,12 +146,12 @@
 \ALC@com{##1}\begin{ALC@whl}}
   \newcommand{\LOOP}[1][default]{\ALC@it\algorithmicloop%
 \ALC@com{##1}\begin{ALC@loop}}
-%changed by alex smola
+%changed
   \newcommand{\FUNCTION}[2][default]{\ALC@it\algorithmicfunction\ ##2\ %
     \ALC@com{##1}\begin{ALC@func}}
   \newcommand{\MAIN}[2][default]{\ALC@it\algorithmicmain\ ##2\ %
     \ALC@com{##1}\begin{ALC@main}}
-%end changed by alex smola
+%end changed
   \newcommand{\REPEAT}[1][default]{\ALC@it\algorithmicrepeat%
     \ALC@com{##1}\begin{ALC@rpt}}
     \newcommand{\UNTIL}[1]{\end{ALC@rpt}\ALC@it\algorithmicuntil\ ##1}

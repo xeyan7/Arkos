@@ -3,11 +3,6 @@
   <h1>Arkos</h1>
   <p><strong>A focused workspace for coding agents.</strong><br>
   Projects, provider sessions, execution surfaces, and review tools in one local-first desktop application.</p>
-  <p>
-    <a href="https://github.com/xeyan7/Arkos">Repository</a>
-    &nbsp;·&nbsp;
-    <a href="https://github.com/xeyan7/Arkos/issues/new/choose">Report an issue</a>
-  </p>
 </div>
 
 | Workspace layer      | Responsibility                                                |
@@ -119,8 +114,7 @@ Arkos uses the provider installations and subscriptions already configured on th
 The development checkout uses [Bun 1.4.2](https://bun.sh/) and [Node.js 24.13.1](https://nodejs.org/).
 
 ```console
-git clone https://github.com/xeyan7/Arkos.git
-cd Arkos/arkos-desktop
+cd arkos-desktop
 bun install
 bun run dev
 ```
@@ -147,12 +141,8 @@ Use these named scripts rather than a bare `tsc`, whose version depends on the
 current directory. Normal installation patches the native compiler for Effect;
 the root `typecheck` command also ensures that patch is applied before checking.
 
-## Contributing
-
-Bug fixes, reliability improvements, performance work, documentation, and maintenance changes are welcome.
-
-Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. For a reproducible problem, [open an issue](https://github.com/xeyan7/Arkos/issues/new/choose) with the Arkos version, operating system, runtime, and relevant logs.
-
 ## License
 
-Arkos is licensed under the [MIT License](./LICENSE).
+Arkos Desktop is distributed under private terms; see [LICENSE](./LICENSE). The
+MIT notice for inherited material is preserved in
+[licenses/inherited-MIT.txt](./licenses/inherited-MIT.txt).

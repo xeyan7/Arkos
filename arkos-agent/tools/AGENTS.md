@@ -1,8 +1,7 @@
 # tools/ + toolsets.py + model_tools.py — model tools
 
 Applies on top of the root `AGENTS.md`: settle the **Footprint Ladder** before adding anything here.
-Most capabilities should NOT be core tools. Long-form: *(docs site — not shipped slim)*,
-`tools-runtime.md`.
+Most capabilities should NOT be core tools.
 
 ## Registry and discovery
 
@@ -75,10 +74,9 @@ Several tools front pluggable backends: terminal environments in `tools/environm
 docker, ssh, modal, daytona, singularity; `terminal_tool_backends.py`, `tool_backend_helpers.py`),
 browser (`browser_tool_*.py`: cdp, cloud, install, lifecycle, session, real_profile, vision), MCP
 client (`mcp_tool_*.py`: config, discovery, transport, registration, content, errors), TTS
-(`tts_tool_providers.py`, `tts_command_provider.py`), skills hub sources (`skills_hub_official.py`
-`OptionalSkillSource`). Adding a backend = a new sibling or provider entry in the existing table,
-never an `elif` on a backend name (root shape rules). Remote-backend file visibility problems are
-fixed at the mount, not by adding a tool.
+(`tts_tool_providers.py`, `tts_command_provider.py`). Adding a backend = a new sibling or provider
+entry in the existing table, never an `elif` on a backend name (root shape rules). Remote-backend
+file visibility problems are fixed at the mount, not by adding a tool.
 
 ## Delegation (`tools/delegate_tool.py`)
 
@@ -101,7 +99,7 @@ processes are killed at its teardown and their notices are suppressed in the par
 (`process_registry.transfer_ownership`) so the completion routes and reaps by the new owner; un-handed leftovers land on
 the result as `orphaned_processes`, exited-but-never-read notify processes as `unread_completions` (`_ChildRun.account_background_processes`, before `cleanup` kills them). **Durability:** background
 delegation is process-local; work that must survive restart uses `cronjob` or
-`terminal(background=True, notify_on_complete=True)`. API: *(docs site — not shipped slim)*.
+`terminal(background=True, notify_on_complete=True)`.
 
 ## Tests
 

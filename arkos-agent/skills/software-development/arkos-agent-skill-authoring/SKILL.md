@@ -3,7 +3,6 @@ name: arkos-agent-skill-authoring
 description: "Author in-repo SKILL.md files: frontmatter and structure."
 version: 2.0.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:
@@ -59,7 +58,6 @@ name: my-skill-name               # lowercase, hyphens, ≤64 chars (MAX_NAME_LE
 description: Concise capability statement, under sixty chars.
 version: 0.1.0                    # semver; new skills start at 0.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]   # audit, don't guess — see Platform Gating
 metadata:
   arkos:
@@ -96,7 +94,7 @@ Bad: `Use when a user asks to monitor named competitors or companies for product
 
 | Skill uses only… | `platforms:` |
 |---|---|
-| the agent tools + stdlib Python + cross-platform CLIs | `[linux, macos, windows]` |
+| agent tools + stdlib Python + cross-platform CLIs | `[linux, macos, windows]` |
 | bash pipelines, `grep`/`awk`/`sed` chains, heredocs | `[linux, macos]` |
 | `osascript`, `defaults`, `pmset` | `[macos]` |
 | `apt`/`systemctl`/`/proc` | `[linux]` |
@@ -199,7 +197,7 @@ A skill exists to make the agent's process more predictable — the agent reliab
 - [ ] Tier decided deliberately (bundled bar: 5+ sessions/month; else `optional-skills/`)
 - [ ] File at `skills/<category>/<name>/SKILL.md` or `optional-skills/<category>/<name>/SKILL.md`
 - [ ] Frontmatter starts at byte 0 with `---`, closes with `\n---\n`
-- [ ] `name`, `description`, `version`, `author`, `license`, `platforms`, `metadata.arkos.{tags, related_skills}` all present
+- [ ] `name`, `description`, `version`, `author`, `platforms`, `metadata.arkos.{tags, related_skills}` all present
 - [ ] Description ≤ 60 chars, one sentence, ends with a period, no marketing words
 - [ ] `author` identifies the Arkos distribution; required source and license notices are preserved
 - [ ] `platforms:` audited against actual prose/scripts, not copied from a sibling

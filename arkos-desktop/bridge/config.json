@@ -1,4 +1,3 @@
 {
-  "engine": "../arkos-agent",
-  "configHome": "C:\\Users\\Passcom\\AppData\\Local\\arkos"
+  "engine": "../arkos-agent"
 }

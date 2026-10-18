@@ -1886,37 +1886,3 @@ import ssl  # noqa: F401,E402
 import subprocess  # noqa: F401,E402
 import sys  # noqa: F401,E402
 from urllib.parse import urlencode  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'CODEX_OAUTH_USER_AGENT': ('arkos_cli.auth_constants', 'CODEX_OAUTH_USER_AGENT'),
-    'CODEX_QUOTA_PROBE_MIN_INTERVAL_SECONDS': ('arkos_cli.auth_codex', 'CODEX_QUOTA_PROBE_MIN_INTERVAL_SECONDS'),
-    'DEFAULT_SPOTIFY_REDIRECT_URI': ('arkos_cli.auth_constants', 'DEFAULT_SPOTIFY_REDIRECT_URI'),
-    'DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS': ('arkos_cli.auth_constants', 'DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS'),
-    'MINIMAX_OAUTH_GRANT_TYPE': ('arkos_cli.auth_constants', 'MINIMAX_OAUTH_GRANT_TYPE'),
-
-
-    'OAUTH_OVER_SSH_DOCS_URL': ('arkos_cli.auth_constants', 'OAUTH_OVER_SSH_DOCS_URL'),
-    'QWEN_OAUTH_CLIENT_ID': ('arkos_cli.auth_constants', 'QWEN_OAUTH_CLIENT_ID'),
-    'QWEN_OAUTH_TOKEN_URL': ('arkos_cli.auth_constants', 'QWEN_OAUTH_TOKEN_URL'),
-    'SINGLE_USE_OAUTH_SINGLETON_FILES': ('arkos_cli.auth_oauth_grants', 'SINGLE_USE_OAUTH_SINGLETON_FILES'),
-    'SPOTIFY_ACCESS_TOKEN_REFRESH_SKEW_SECONDS': ('arkos_cli.auth_constants', 'SPOTIFY_ACCESS_TOKEN_REFRESH_SKEW_SECONDS'),
-    'SPOTIFY_DASHBOARD_URL': ('arkos_cli.auth_constants', 'SPOTIFY_DASHBOARD_URL'),
-    'XAI_OAUTH_DEVICE_CODE_URL': ('arkos_cli.auth_constants', 'XAI_OAUTH_DEVICE_CODE_URL'),
-    'XAI_OAUTH_DISCOVERY_URL': ('arkos_cli.auth_constants', 'XAI_OAUTH_DISCOVERY_URL'),
-    'XAI_OAUTH_ISSUER': ('arkos_cli.auth_constants', 'XAI_OAUTH_ISSUER'),
-
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    try:
-        return getattr(importlib.import_module(target[0]), target[1])
-    except (ImportError, AttributeError):
-        return None

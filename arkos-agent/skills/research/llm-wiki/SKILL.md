@@ -1,9 +1,8 @@
 ---
 name: llm-wiki
-description: "Karpathy's LLM Wiki: build/query interlinked markdown KB."
+description: "Build and query an interlinked markdown knowledge base."
 version: 2.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:
@@ -12,11 +11,11 @@ metadata:
     related_skills: [obsidian, arxiv]
 ---
 
-# Karpathy's LLM Wiki
+# LLM Wiki
 
 Build and maintain a persistent, compounding knowledge base as interlinked markdown files.
 
-- **Origin**: Based on **Andrej Karpathy's LLM Wiki pattern**. An externalized brain for an LLM that is built, maintained, and continually updated through conversation.
+- **Origin**: Based on the LLM wiki pattern. An externalized brain for an LLM that is built, maintained, and continually updated through conversation.
 - **Philosophy**: Raw text files (Markdown), readable by humans and models, linked with `[[wikilinks]]`, organized around entities, concepts, and logs.
 - **Mental Model**: You are a digital archivist and research synthesizer. Everything you learn from the user or from external sources gets integrated into this growing knowledge base. No isolated snippets; everything connects.
 
@@ -498,7 +497,7 @@ vault in Obsidian on your laptop/phone — changes appear within seconds.
 ## Related Tools
 
 **llm-wiki-compiler** is a Node.js CLI that
-compiles sources into a concept wiki with the same Karpathy inspiration. It's Obsidian-compatible,
+compiles sources into a concept wiki with the same LLM-wiki inspiration. It's Obsidian-compatible,
 so users who want a scheduled/CLI-driven compile pipeline can point it at the same vault this
 skill maintains. Trade-offs: it owns page generation (replaces the agent's judgment on page
 creation) and is tuned for small corpora. Use this skill when you want agent-in-the-loop curation;

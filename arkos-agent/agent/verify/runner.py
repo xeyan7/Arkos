@@ -1,5 +1,5 @@
 """Verification runner: bootstrap -> build -> test -> start in background ->
-readiness loop -> teardown (scoped port of grok-cli's verify flow).
+readiness loop -> teardown (scoped verification flow).
 
 Commands come from the project's own recipe and run with ``shell=True`` on
 purpose: a developer tool running the project's own build commands in its own

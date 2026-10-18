@@ -1,7 +1,6 @@
 # Configuration, Toolsets & Voice
 
 Edit with `arkos config edit` or `arkos config set section.key value`.
-Full reference:
 
 ### Config Sections (most-used keys)
 

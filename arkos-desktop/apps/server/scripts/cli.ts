@@ -257,7 +257,7 @@ const publishCmd = Command.make(
   "publish",
   {
     tag: Flag.string("tag").pipe(Flag.withDefault("latest")),
-    access: Flag.string("access").pipe(Flag.withDefault("public")),
+    access: Flag.string("access").pipe(Flag.withDefault("restricted")),
     appVersion: Flag.string("app-version").pipe(Flag.optional),
     provenance: Flag.boolean("provenance").pipe(Flag.withDefault(false)),
     dryRun: Flag.boolean("dry-run").pipe(Flag.withDefault(false)),

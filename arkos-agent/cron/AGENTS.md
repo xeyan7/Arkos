@@ -1,6 +1,6 @@
 # cron/ — scheduled jobs
 
-Applies on top of the root `AGENTS.md`. Long-form: *(docs site — not shipped slim)*;
+Applies on top of the root `AGENTS.md`.
 
 ## Cron
 

@@ -51,3 +51,6 @@ __screenshots__/
 
 # Local implementation plans.
 /plans/
+
+# Machine-local bridge overrides (developer paths, local runtimes).
+bridge/config.local.json

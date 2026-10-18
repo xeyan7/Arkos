@@ -658,7 +658,7 @@ it.layer(GitManagerTestLayer)("GitManager", (it) => {
         yield* runGit(repoDir, [
           "config",
           "remote.fork-seed.url",
-          "git@github.com:jasonLaster/sample-repo.git",
+          "git@github.com:example-org/sample-repo.git",
         ]);
 
         const { manager, ghCalls } = yield* makeManager({
@@ -697,7 +697,7 @@ it.layer(GitManagerTestLayer)("GitManager", (it) => {
           changedFiles: null,
         });
         expect(ghCalls).toContain(
-          "pr list --head jasonLaster:statemachine --state all --limit 20 --json number,title,url,baseRefName,headRefName,state,mergedAt,isDraft,mergeable,additions,deletions,changedFiles,isCrossRepository,headRepository,headRepositoryOwner,updatedAt",
+          "pr list --head example-org:statemachine --state all --limit 20 --json number,title,url,baseRefName,headRefName,state,mergedAt,isDraft,mergeable,additions,deletions,changedFiles,isCrossRepository,headRepository,headRepositoryOwner,updatedAt",
         );
       }),
     30_000,

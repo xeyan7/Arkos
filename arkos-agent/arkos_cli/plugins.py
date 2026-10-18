@@ -1146,20 +1146,6 @@ class PluginManager(PluginLoaderMixin, PluginDispatchMixin, PluginLedgerMixin):
         if manifests:
             logger.info("Plugin discovery complete: %d found, %d enabled", len(self._plugins),
                         sum(1 for p in self._plugins.values() if p.enabled))
-        self._refresh_plugin_compat_report(list(to_load.values()))
-
-    def _refresh_plugin_compat_report(self, manifests: List[PluginManifest]) -> None:
-        """Refresh ARKOS_HOME/.plugin-compat-report.json from this discovery pass (arkos_cli.plugin_compat).
-
-        The Desktop boot modal has no Python runtime of its own and reads that file after the ``serve``
-        backend is up, so the scan must run wherever plugins are discovered — not only under the CLI
-        banner / doctor / update, which never run inside the Desktop's backend. Fail-open: never raises.
-        """
-        try:
-            from arkos_cli.plugin_compat import compat_report
-            compat_report(manifests, force=True)
-        except Exception as exc:
-            logger.debug("plugin compat report refresh skipped: %s", exc)
 
     def _gate_manifest(
         self, manifest: PluginManifest, disabled: Set[str], enabled: Optional[Set[str]],
@@ -1903,28 +1889,3 @@ def unload_plugins(
     """
     _join_background_discovery()
     return get_plugin_manager().unload(plugin)
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'CAPABILITY_REGISTRY': ('arkos_cli.plugin_capabilities', 'CAPABILITY_REGISTRY'),
-    'ENTRY_POINT_CAPABILITIES_GROUP': ('arkos_cli.plugins_discovery', 'ENTRY_POINT_CAPABILITIES_GROUP'),
-    'LEGACY_RELAY_PLUGIN_KEYS': ('arkos_cli.relay_plugin_cutover', 'LEGACY_RELAY_PLUGIN_KEYS'),
-    'MAX_SYSTEM_PROMPT_SECTIONS': ('arkos_cli.plugins_dispatch', 'MAX_SYSTEM_PROMPT_SECTIONS'),
-    'OBSERVER_SCHEMA_VERSION': ('arkos_cli.middleware', 'OBSERVER_SCHEMA_VERSION'),
-    'VALID_CAPABILITY_IDS': ('arkos_cli.plugin_capabilities', 'VALID_CAPABILITY_IDS'),
-    'cfg_get': ('arkos_cli.config', 'cfg_get'),
-    'fast_safe_load': ('utils', 'fast_safe_load'),
-    'format_system_prompt_section': ('arkos_cli.plugins_dispatch', 'format_system_prompt_section'),
-    'reset_arkos_home_override': ('arkos_constants', 'reset_arkos_home_override'),
-    'set_arkos_home_override': ('arkos_constants', 'set_arkos_home_override'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

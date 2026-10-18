@@ -44,7 +44,7 @@ The rest of this file is the detailed reference.
 ## Identity
 
 - App name: `Arkos Beta`
-- Bundle ID: `com.xeyan7.arkos.beta`
+- Bundle ID: `com.arkos.desktop.beta`
 - Desktop origin: `arkos-beta://app`
 - Arkos data: `~/.arkos-beta`
 - Electron profile: `arkos-beta`
@@ -165,12 +165,12 @@ The stable app offers a one-click handoff under **Settings → General → Arkos
 - **Install Arkos Beta** (macOS) downloads the newest `v*-beta.N` release's
   `beta-mac.yml`, picks the zip for the current architecture, verifies its
   sha512, unpacks it with `ditto`, checks the bundle id is
-  `com.xeyan7.arkos.beta`, and verifies the code signature is valid
+  `com.arkos.desktop.beta`, and verifies the code signature is valid
   and signed by the same team id as the running app (`codesign --verify
 --deep --strict` plus a `TeamIdentifier` match; skipped when the running
   build is itself unsigned). Only then is `Arkos Beta.app` moved into
-  `/Applications` — then opened. On other platforms the card opens the public
-  download page instead.
+  `/Applications` — then opened. On other platforms the card opens the
+  configured release page when one is set.
 - **Copy my data and open** installs first when needed, then writes a marker at
   `~/.arkos-beta/import-requested.json` and launches the beta app. On its next
   startup the beta server consumes the marker, snapshots stable's database,
@@ -253,8 +253,8 @@ the chats and settings it had before.
 - Stable is found through `ARKOS_STABLE_EXECUTABLE`, which stable sets on the
   beta it launches (with `ARKOS_STABLE_HOME` for its data dir), then through
   `/Applications/Arkos.app`, `~/Applications/Arkos.app`, or the stable NSIS
-  uninstall key on Windows. When none is found the card offers the stable
-  download page instead.
+  uninstall key on Windows. When none is found the card offers the
+  configured stable release page when one is set.
 - Stable is spawned with beta's per-process overrides stripped
   (`ARKOS_DESKTOP_SMOKE_USER_DATA`, server auth variables) and `ARKOS_HOME`
   restored from `ARKOS_STABLE_HOME` when stable handed one over. An already

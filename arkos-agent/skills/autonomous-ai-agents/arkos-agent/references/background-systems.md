@@ -1,8 +1,7 @@
 # Durable & Background Systems
 
 Four systems run alongside the main conversation loop. Quick reference
-here; full developer notes live in `AGENTS.md`, user-facing docs under
-*(docs site — not shipped slim)*.
+here; full developer notes live in `AGENTS.md`.
 
 ### Delegation (`delegate_task`)
 
@@ -42,8 +41,6 @@ the `cronjob` tool, the `arkos cron` CLI (`list`, `add`, `edit`,
   header/footer instead of being mirrored into the target gateway
   session (keeps role alternation intact).
 
-User docs:
-
 ### Curator (skill lifecycle)
 
 Background maintenance for agent-created skills. Tracks usage, marks
@@ -70,7 +67,6 @@ so nothing is lost.
 
 Config: `curator.*` (`enabled`, `interval_hours`, `min_idle_hours`,
 `stale_after_days`, `archive_after_days`, `backup.*`).
-User docs:
 
 ### Kanban (multi-agent work queue) [REMOVED in engine build]
 
@@ -101,7 +97,5 @@ sessions still have zero `kanban_*` schema footprint unless configured.
 - **Isolation:** board is the hard boundary (workers get
   `ARKOS_KANBAN_BOARD` pinned in env); tenant is a soft namespace
   within a board for workspace-path + memory-key isolation.
-
-User docs:
 
 *Part of Arkos, an AI agent engine.*

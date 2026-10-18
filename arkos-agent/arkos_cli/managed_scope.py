@@ -2,8 +2,8 @@
 
 DISTINCT from ``arkos_cli.config.is_managed()`` / ``ARKOS_MANAGED`` (a coarse package-manager
 write-lock that blocks all mutation); this layer injects specific immutable values. The two are
-independent and may coexist. v1 enforcement is filesystem permissions only (see
-``docs/design/managed-scope.md`` §7); ``get_managed_dir()`` is the single seam for adding
+independent and may coexist. v1 enforcement is filesystem permissions only;
+``get_managed_dir()`` is the single seam for adding
 macOS / Windows native locations later.
 """
 from __future__ import annotations

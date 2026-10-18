@@ -1035,34 +1035,3 @@ def prepare_session_start() -> None:
     """Register the subscriber before any producer opens the session scope."""
     if enabled():
         _get_runtime(retry_failed=True)
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'CLIENT_ACTIVE_MARK': ('arkos_cli.observability.shared_metrics_contract', 'CLIENT_ACTIVE_MARK'),
-    'MODEL_CALL_PROFILE_MODEL': ('arkos_cli.observability.shared_metrics_contract', 'MODEL_CALL_PROFILE_MODEL'),
-    'SCHEMA_KEY': ('arkos_cli.observability.shared_metrics_contract', 'SCHEMA_KEY'),
-    'SCHEMA_VERSION': ('arkos_cli.observability.shared_metrics_contract', 'SCHEMA_VERSION'),
-    'SKILL_LIFECYCLE_MARK': ('arkos_cli.observability.shared_metrics_contract', 'SKILL_LIFECYCLE_MARK'),
-    'SKILL_LOAD_MARK': ('arkos_cli.observability.shared_metrics_contract', 'SKILL_LOAD_MARK'),
-    'TOOL_APPROVAL_MARK': ('arkos_cli.observability.shared_metrics_contract', 'TOOL_APPROVAL_MARK'),
-    'TOOL_CALL_SCOPE': ('arkos_cli.observability.shared_metrics_contract', 'TOOL_CALL_SCOPE'),
-    'model_call_fields': ('arkos_cli.observability.shared_metrics_contract', 'model_call_fields'),
-    'skill_lifecycle_fields': ('arkos_cli.observability.shared_metrics_contract', 'skill_lifecycle_fields'),
-    'skill_load_fields': ('arkos_cli.observability.shared_metrics_contract', 'skill_load_fields'),
-    'task_start_fields': ('arkos_cli.observability.shared_metrics_contract', 'task_start_fields'),
-    'task_terminal_fields': ('arkos_cli.observability.shared_metrics_contract', 'task_terminal_fields'),
-    'task_terminal_state': ('arkos_cli.observability.shared_metrics_contract', 'task_terminal_state'),
-    'tool_approval_outcome': ('arkos_cli.observability.shared_metrics_contract', 'tool_approval_outcome'),
-    'tool_category': ('arkos_cli.observability.shared_metrics_contract', 'tool_category'),
-    'tool_terminal_fields': ('arkos_cli.observability.shared_metrics_contract', 'tool_terminal_fields'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

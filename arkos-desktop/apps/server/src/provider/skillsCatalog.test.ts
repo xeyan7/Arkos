@@ -96,14 +96,14 @@ metadata:
   env:
     - name: API_KEY
       description: Service key
-license: MIT
+license: Proprietary
 ---
 `),
     ).toEqual({
       name: "check-code",
       description: "Review recent code changes before they are merged.\nUse it after every edit.",
       summary: "First line\n  indented line",
-      license: "MIT",
+      license: "Proprietary",
     });
   });
 

@@ -3,7 +3,6 @@ name: email-inbox-triage
 description: "Triage an inbox: prioritize threads, draft replies safely."
 version: 0.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

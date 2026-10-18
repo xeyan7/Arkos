@@ -1,6 +1,6 @@
 """Static run-recipe detection for project verification.
 
-Ported nearly 1:1 from superagent-ai/grok-cli ``src/verify/recipes.ts`` (same
+Ported nearly 1:1 from an external implementation (same
 detection order and command choices). Layer ownership: ``detect_project_facts``
 in :mod:`agent.coding_context` owns the cheap, byte-stable prompt-time facts —
 never push runtime detection into it. This module owns the deep runtime recipe
@@ -25,7 +25,7 @@ def _as_strings(value: Any) -> list[str]:
 
 @dataclass
 class Recipe:
-    """A runnable verification recipe (grok-cli's ``VerifyRecipe``): ``name`` is the
+    """A runnable verification recipe: ``name`` is the
     human label (``appLabel``), ``kind`` the detector id (``appKind``); command
     lists are shell strings executed in the project root."""
 
@@ -276,7 +276,7 @@ def _detect_compose_recipe(root: Path) -> Recipe | None:
 
 
 def detect_recipe(root: Path) -> Recipe | None:
-    """Detect a recipe for ``root`` (grok-cli's ``inferFallbackRecipe`` order): package.json
+    """Detect a recipe for ``root`` (fallback inference order): package.json
     wins, then Python, Go, Rust, Java, then Makefile / docker-compose; ``None`` if nothing matches."""
     root = Path(root)
     pkg = _read_package_json(root)

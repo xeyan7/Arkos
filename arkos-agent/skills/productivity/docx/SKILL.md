@@ -3,7 +3,6 @@ name: docx
 description: Create, read, edit, template, and review Word .docx files.
 version: 1.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

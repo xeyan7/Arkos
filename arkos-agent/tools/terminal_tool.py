@@ -1260,26 +1260,3 @@ import shutil  # noqa: F401,E402
 import stat  # noqa: F401,E402
 import subprocess  # noqa: F401,E402
 import sys  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'cleanup_vm': ('tools.terminal_tool_lifecycle', 'cleanup_vm'),
-    'env_var_enabled': ('utils', 'env_var_enabled'),
-    'get_active_env': ('tools.terminal_tool_lifecycle', 'get_active_env'),
-    'has_direct_modal_credentials': ('tools.tool_backend_helpers', 'has_direct_modal_credentials'),
-    'is_interrupted': ('tools.interrupt', 'is_interrupted'),
-    'is_persistent_env': ('tools.terminal_tool_lifecycle', 'is_persistent_env'),
-
-    'resolve_modal_backend_state': ('tools.tool_backend_helpers', 'resolve_modal_backend_state'),
-    'strip_inert_heredoc_bodies': ('tools.shell_heredoc', 'strip_inert_heredoc_bodies'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

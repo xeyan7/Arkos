@@ -1233,36 +1233,3 @@ import signal  # noqa: F401,E402
 from datetime import timezone  # noqa: F401,E402
 
 SNAPSHOT_SUMMARIZE_THRESHOLD = DEFAULT_SNAPSHOT_THRESHOLD
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'BrowserUseProvider': ('plugins.browser.browser_use.provider', 'BrowserUseBrowserProvider'),
-    'BrowserbaseProvider': ('plugins.browser.browserbase.provider', 'BrowserbaseBrowserProvider'),
-    'CloudBrowserProvider': ('agent.browser_provider', 'BrowserProvider'),
-    'FirecrawlProvider': ('plugins.browser.firecrawl.provider', 'FirecrawlBrowserProvider'),
-    'agent_browser_runnable': ('arkos_constants', 'agent_browser_runnable'),
-    'check_browser_requirements': ('tools.browser_tool_install', 'check_browser_requirements'),
-    'check_browser_vision_requirements': ('tools.browser_tool_install', 'check_browser_vision_requirements'),
-    'cleanup_all_browsers': ('tools.browser_tool_lifecycle', 'cleanup_all_browsers'),
-    'cleanup_browser': ('tools.browser_tool_lifecycle', 'cleanup_browser'),
-    'get_arkos_home_override': ('arkos_constants', 'get_arkos_home_override'),
-    'arkos_home_key': ('arkos_constants', 'arkos_home_key'),
-    'is_truthy_value': ('utils', 'is_truthy_value'),
-    'lightpanda_engine_status': ('tools.browser_tool_lightpanda_fallback', 'lightpanda_engine_status'),
-    'node_tool_runnable': ('arkos_constants', 'node_tool_runnable'),
-    'normalize_browser_cloud_provider': ('tools.tool_backend_helpers', 'normalize_browser_cloud_provider'),
-    'reset_arkos_home_override': ('arkos_constants', 'reset_arkos_home_override'),
-    'set_arkos_home_override': ('arkos_constants', 'set_arkos_home_override'),
-    'warm_agent_browser_npx_cache': ('tools.browser_tool_install', 'warm_agent_browser_npx_cache'),
-    'windows_hide_flags': ('arkos_cli._subprocess_compat', 'windows_hide_flags'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

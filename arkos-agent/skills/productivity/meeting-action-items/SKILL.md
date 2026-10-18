@@ -3,7 +3,6 @@ name: meeting-action-items
 description: "Turn meeting notes into cited decisions, owners, tickets."
 version: 0.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

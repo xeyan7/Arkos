@@ -3,7 +3,6 @@ name: python-debugpy
 description: "Debug Python: pdb REPL + debugpy remote (DAP)."
 version: 1.0.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos]
 metadata:
   arkos:

@@ -8,7 +8,7 @@ tiers of normalization:
   2. fuzzy          — sorted-token (word-bag) match
   3. token_overlap  — >=60% Jaccard overlap on >=4-char tokens, >=2 shared
 
-Adapted from ShinMegamiBoson/OpenPlanter (MIT) but generalized: no Boston-
+Adapted from an MIT-licensed implementation but generalized: no Boston-
 specific record types, no contribution-code filters, no fixed schemas.
 
 Output CSV columns:

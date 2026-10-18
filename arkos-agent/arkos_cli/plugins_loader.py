@@ -257,13 +257,6 @@ class PluginLoaderMixin:
         if manifest.portable:
             self._load_portable_plugin(manifest, loaded)
             return
-        from arkos_cli.plugin_compat import disable_reason
-        reason = disable_reason(manifest)
-        if reason:
-            loaded.error = reason
-            logger.warning("Plugin '%s' not loaded: %s", manifest.name, reason)
-            self._plugins[plugin_key] = loaded
-            return
         registration_start = len(self._registration_order)
         module_name = self._policy_module_name(manifest)
         self._track_tool_override_policy(manifest, module_name)

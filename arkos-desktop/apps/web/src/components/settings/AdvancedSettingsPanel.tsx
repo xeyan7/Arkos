@@ -248,7 +248,7 @@ export function AdvancedSettingsPanel(props: {
           }
         />
         <SettingsRow
-          title="What’s new since 0.9.2"
+          title="What's new"
           description="Explore the redesigned workspace, provider accounts, and Code review."
           control={
             <Button

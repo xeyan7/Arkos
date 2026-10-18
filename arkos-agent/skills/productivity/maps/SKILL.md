@@ -3,7 +3,6 @@ name: maps
 description: "Geocode, POIs, routes, timezones via OpenStreetMap/OSRM."
 version: 1.2.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

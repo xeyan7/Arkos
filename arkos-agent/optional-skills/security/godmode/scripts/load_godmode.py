@@ -1,5 +1,5 @@
 """
-Loader for G0DM0D3 scripts. Handles the exec-scoping issues.
+Loader for the godmode scripts. Handles the exec-scoping issues.
 
 Usage in execute_code:
     exec(open(os.path.expanduser(

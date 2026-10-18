@@ -89,11 +89,11 @@ describe("ComputerSetupRequiredCard", () => {
       <ComputerSetupRequiredCard
         missing={["accessibility"]}
         buildSignature="adhoc"
-        bundleId="com.xeyan7.arkos.dev"
+        bundleId="com.arkos.desktop.dev"
         onSetUp={() => undefined}
       />,
     );
-    expect(known).toContain("tccutil reset Accessibility com.xeyan7.arkos.dev");
+    expect(known).toContain("tccutil reset Accessibility com.arkos.desktop.dev");
 
     // A server with no desktop shell behind it has no responsible app, and the
     // card must say nothing rather than guess.

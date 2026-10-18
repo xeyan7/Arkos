@@ -7,7 +7,7 @@ context-local secret scope: ``set_secret_scope(mapping)`` installs the active
 profile's secrets for the current task (a contextvar, so it propagates into the
 agent's worker thread via ``copy_context()``); ``get_secret(name)`` reads from
 it and, when multiplexing is active with no scope set, RAISES rather than
-falling back to ``os.environ``. Design: ``docs/design/multiplexing-gateway.md``.
+falling back to ``os.environ``.
 """
 from __future__ import annotations
 

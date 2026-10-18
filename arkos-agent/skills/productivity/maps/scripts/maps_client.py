@@ -25,7 +25,7 @@ import urllib.parse
 import urllib.request
 
 
-USER_AGENT = "ArkosAgent/1.0 (contact: arkos@agent.ai)"
+USER_AGENT = "ArkosAgent/1.0"
 DATA_SOURCE = "OpenStreetMap/Nominatim"
 
 NOMINATIM_SEARCH  = "https://nominatim.openstreetmap.org/search"

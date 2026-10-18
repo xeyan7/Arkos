@@ -50,18 +50,3 @@ def get_active_provider() -> Optional[ImageGenProvider]:
 from typing import Dict  # noqa: F401,E402
 from typing import List  # noqa: F401,E402
 import threading  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'arkos_home_key': ('arkos_constants', 'arkos_home_key'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

@@ -4,7 +4,7 @@ Takes any image (typically pre-processed with pixel_art()) and overlays
 animated pixel effects (stars, rain, fireflies, etc.), then encodes to MP4
 (and optionally GIF) via ffmpeg.
 
-Scene animations ported from pixel-art-studio (MIT) — see ATTRIBUTION.md.
+Scene animations adapted from an MIT-licensed animation library.
 The generative/Pollinations code is intentionally dropped — Arkos uses
 `image_generate` + `pixel_art()` for base frames instead.
 

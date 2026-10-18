@@ -491,7 +491,7 @@ export interface DesktopBetaChannelState {
   /** Timestamp of the last completed data import reported by the beta app. */
   readonly lastImportAt: string | null;
   readonly lastImportError: string | null;
-  /** Public download page handed to the user when beta is not installed. */
+  /** Release page URL handed to the user when beta is not installed. */
   readonly downloadUrl: string;
   /** Live download/install progress; an `error` phase stays until the next attempt. */
   readonly install: DesktopBetaInstallProgress | null;
@@ -499,7 +499,7 @@ export interface DesktopBetaChannelState {
   readonly stableInstalled: boolean;
   /** Beta only: leaving can also move the beta app to the Trash (macOS). */
   readonly canMoveBetaToTrash: boolean;
-  /** Stable download page offered from beta when stable is not installed. */
+  /** Stable release page offered from beta when stable is not installed. */
   readonly stableDownloadUrl: string;
 }
 

@@ -3,7 +3,6 @@ name: himalaya
 description: "Himalaya CLI: IMAP/SMTP email from terminal."
 version: 1.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:
@@ -17,7 +16,7 @@ prerequisites:
 
 Himalaya is a CLI email client that lets you manage emails from the terminal using IMAP, SMTP, Notmuch, or Sendmail backends.
 
-This skill is separate from the agent Email gateway adapter. The gateway
+This skill is separate from the Email gateway adapter. The gateway
 adapter lets people email the agent and uses the agent's built-in IMAP/SMTP
 adapter; this skill lets the agent operate a mailbox from terminal tools and
 requires the external `himalaya` CLI.

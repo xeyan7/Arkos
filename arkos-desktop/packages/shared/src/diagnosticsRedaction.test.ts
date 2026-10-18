@@ -5,16 +5,16 @@ import { describe, expect, it } from "vitest";
 
 import { redactDiagnosticText } from "./diagnosticsRedaction";
 
-const OPTS = { homeDir: "/Users/kartik", maxLength: 16 * 1024 };
+const OPTS = { homeDir: "/Users/you", maxLength: 16 * 1024 };
 const redact = (text: string) => redactDiagnosticText(text, OPTS);
 
 describe("redactDiagnosticText", () => {
   it.each([
     [
       "home directory collapses to ~ then basename",
-      "crash at /Users/kartik/.arkos-beta/logs/x.log",
+      "crash at /Users/you/.arkos-beta/logs/x.log",
       "~/…/x.log",
-      "/Users/kartik",
+      "/Users/you",
     ],
     ["macOS user path", "open /Users/alice/project failed", "~/…/project", "alice"],
     ["linux user path", "open /home/bob/project failed", "~/…/project", "bob"],
@@ -27,7 +27,7 @@ describe("redactDiagnosticText", () => {
     ],
     [
       "path collapses to basename, folders dropped",
-      "crash in /Users/kartik/code/secret-repo/main.ts",
+      "crash in /Users/you/code/secret-repo/main.ts",
       "~/…/main.ts",
       "secret-repo",
     ],
@@ -39,7 +39,7 @@ describe("redactDiagnosticText", () => {
     ],
     [
       "POSIX directory names with spaces are dropped",
-      "at load (/Users/kartik/Private Project/work tree/main.ts:12:3)",
+      "at load (/Users/you/Private Project/work tree/main.ts:12:3)",
       "~/…/main.ts:12:3",
       "work tree",
     ],

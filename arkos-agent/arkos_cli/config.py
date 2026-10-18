@@ -318,8 +318,8 @@ def is_nix_install_method(method: str) -> bool:
 
 
 _UPDATE_COMMAND_BY_METHOD = {
-    "docker": "docker pull arkos-agent:latest",
-    "apt": "pkg upgrade arkos-agent",
+    "docker": "rebuild the container from your checkout and restart it",
+    "apt": "upgrade Arkos with your system package manager",
 }
 
 
@@ -341,27 +341,19 @@ def recommended_update_command() -> str:
 _DOCKER_UPDATE_MESSAGE = """\
 ✗ ``arkos update`` doesn't apply inside the Docker container.
 
-Arkos runs as a published image (arkos-agent), not a
-git checkout — the container has no working tree to pull into.  Update by
-pulling a fresh image and restarting your container instead:
+Arkos runs from an install tree inside the container, not a git
+checkout — there is no working tree for ``arkos update`` to pull into.
+Rebuild the image from your checkout and restart the container instead:
 
-  docker pull arkos-agent:latest
-  # then restart whatever started the container, e.g.:
-  docker compose up -d --force-recreate arkos-agent
-  # or, for ad-hoc runs, exit the current container and `docker run` again
-
-Verify the new version after restart:
-  docker run --rm arkos-agent:latest --version
+  # rebuild the image from your checkout, then:
+  docker compose up -d --force-recreate
 
 Notes:
-  • If you pinned a specific tag (e.g. ``:v0.14.0``) the ``:latest`` tag
-    won't move your container — pull the newer tag you actually want, or
-    switch to ``:latest`` / ``:main`` for rolling updates.  Pull the desired tag directly.
+  • Verify the new version after restart:
+      docker run --rm <your-image> --version
   • Your config and session history live under ``$ARKOS_HOME`` (``/opt/data``
     in the container, typically bind-mounted from the host) and persist
-    across image upgrades — re-pulling doesn't lose any state.
-  • Running a fork?  Build your own image with this repo's ``Dockerfile``
-    and replace the ``docker pull`` step with your build/push pipeline."""
+    across image rebuilds — replacing the image doesn't lose any state."""
 
 
 def format_docker_update_message() -> str:
@@ -3103,8 +3095,8 @@ _inject_platform_plugin_env_vars()
 def _install_method_project_root(project_root: Optional[Path] = None) -> Path:
     """Resolve the directory that holds the *running code* (the install tree).
 
-    This is the parent of ``arkos_cli/`` — i.e. the git checkout for source
-    installs, ``/opt/arkos`` inside the published image. It is a property of
+    This is the parent of ``arkos_cli/`` — i.e. the git checkout (or the
+    container install tree). It is a property of
     the running interpreter, NOT of ``$ARKOS_HOME``, which is why a
     code-scoped stamp here is immune to two installs sharing one data
     directory.
@@ -3121,10 +3113,9 @@ def stamp_install_method(method: str, project_root: Optional[Path] = None) -> No
     do not overwrite each other's marker. See ``detect_install_method`` for
     the full rationale.
 
-    Best-effort: if the install tree is read-only (e.g. the immutable
-    ``/opt/arkos`` in the published image, which instead bakes the stamp at
-    build time) the write silently no-ops and detection falls back to its
-    other signals.
+    Best-effort: if the install tree is read-only (e.g. an immutable image
+    layer that bakes the stamp at build time) the write silently no-ops and
+    detection falls back to its other signals.
     """
     root = _install_method_project_root(project_root)
     try:
@@ -3132,18 +3123,3 @@ def stamp_install_method(method: str, project_root: Optional[Path] = None) -> No
         (root / ".install_method").write_text(method + "\n", encoding="utf-8")
     except OSError:
         pass
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'normalize_route_base_url': ('arkos_cli.route_identity', 'normalize_route_base_url'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

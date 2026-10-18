@@ -2,8 +2,7 @@
 name: claude-code
 description: "Delegate coding to Claude Code CLI (features, PRs)."
 version: 2.2.1
-author: Arkos Maintainers
-license: MIT
+author: Arkos distribution
 platforms: [linux, macos, windows]
 metadata:
   arkos:
@@ -11,7 +10,7 @@ metadata:
     related_skills: [codex, arkos-agent, opencode]
 ---
 
-# Claude Code — the agent Orchestration Guide
+# Claude Code — Orchestration Guide
 
 Delegate coding tasks to [Claude Code](https://code.claude.com/docs/en/cli-reference) (Anthropic's autonomous coding agent CLI) via the agent terminal. Claude Code v2.x can read files, write code, run shell commands, spawn subagents, and manage git workflows autonomously.
 

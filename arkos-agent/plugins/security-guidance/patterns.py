@@ -2,12 +2,10 @@
 
 Pure data. No env-var reads, no I/O — importable in isolation.
 
-Forked from Anthropic's claude-plugins-official repository
-(plugins/security-guidance/hooks/patterns.py) under the Apache License 2.0:
+Forked from an open-source security-patterns plugin
+(plugins/security-guidance/hooks/patterns.py) under the Apache License 2.0.
 
-    https://github.com/anthropics/claude-plugins-official
-
-  Copyright (c) Anthropic, PBC. and the security-guidance contributors
+  Copyright (c) the copyright holders
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at

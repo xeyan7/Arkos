@@ -2,10 +2,9 @@
 
 `0001-arkos-native.patch` applies to the exact upstream commit in
 `packages/shared/src/cuaDriverRelease.json`. That manifest pins the patch checksum,
-Rust version and native protocol revision. Preserve the upstream license in
-`docs/computer-use-cua/CUA-LICENSE.txt`; the original Cua implementation and its
-contributor attribution remain intact. This is a local macOS patch, not an
-upstream release or a claim of support on other platforms.
+Rust version and native protocol revision. Preserve the upstream Cua license notice
+alongside the patch; the original Cua implementation remains intact. This is a local
+macOS patch, not an upstream release or a claim of support on other platforms.
 
 The patch closes native input admission irreversibly for one driver process.
 Keyboard and mouse guards prepare their matching releases before sending a down
@@ -179,7 +178,7 @@ read-back as the only confirmation path. Registration spans the platform-macos
 tool registry, `ACTION_RESULT_TOOLS`, the legacy action-record normalization
 lists, authorization/capture-scope/session-manifest tool inventories, the SDK
 adapter's stable-Space-membership and input-lease lists, and the cursor
-classifier. `docs/computer-use-cua/native-select-text.md` records the design.
+classifier.
 
 Revision 20 rebases the patch onto upstream `7fe7c33f` (nightly
 `v0.28.3-20260918`) without a protocol bump — the upstream delta inherits the

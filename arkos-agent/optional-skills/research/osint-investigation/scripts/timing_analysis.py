@@ -7,7 +7,7 @@ N times within the observation window and compute the same statistic. The
 one-tailed p-value is the fraction of permutations whose mean is <= the
 observed mean (smaller distance = tighter clustering).
 
-Adapted from ShinMegamiBoson/OpenPlanter (MIT). Differences:
+Adapted from an MIT-licensed implementation. Differences:
   - Pure stdlib (no pandas / numpy)
   - Domain-agnostic (no snow-vendor / CRITICAL-politician filter)
   - Configurable column names via flags

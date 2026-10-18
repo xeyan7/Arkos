@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ULTRAPLINIAN Multi-Model Racing Engine
-Ported from G0DM0D3 (elder-plinius/G0DM0D3).
+Ported from an external implementation.
 
 Queries multiple models in parallel via OpenRouter, scores responses
 on quality/filteredness/speed, returns the best unfiltered answer.

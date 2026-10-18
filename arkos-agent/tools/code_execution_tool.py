@@ -853,18 +853,3 @@ import sys  # noqa: F401,E402
 DEFAULT_KERNEL_MODE = "session"
 
 KERNEL_MODES = ("per-call", "session")
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'thread_scoped_silence': ('agent.thread_scoped_output', 'thread_scoped_silence'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

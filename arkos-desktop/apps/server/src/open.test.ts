@@ -86,14 +86,14 @@ it.layer(NodeServices.layer)("resolveEditorLaunch", (it) => {
   it.effect("falls back to the VS Code URL handler on Windows when the CLI is absent", () =>
     Effect.gen(function* () {
       const launch = yield* resolveEditorLaunch(
-        { cwd: "C:\\Users\\Chris\\Project Folder\\src\\open.ts:71:5", editor: "vscode" },
+        { cwd: "C:\\Users\\you\\Project Folder\\src\\open.ts:71:5", editor: "vscode" },
         "win32",
         { PATH: "", PATHEXT: ".COM;.EXE;.BAT;.CMD", SystemRoot: "C:\\Windows" },
       );
 
       assert.deepEqual(launch, {
         command: "C:\\Windows\\explorer.exe",
-        args: ["vscode://file/C:/Users/Chris/Project%20Folder/src/open.ts:71:5"],
+        args: ["vscode://file/C:/Users/you/Project%20Folder/src/open.ts:71:5"],
       });
     }),
   );

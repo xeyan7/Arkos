@@ -3,7 +3,6 @@ name: opencode
 description: "Delegate coding to OpenCode CLI (features, PR review)."
 version: 1.2.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

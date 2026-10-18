@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Parseltongue v4 — Input Obfuscation Engine
-Ported from G0DM0D3 (elder-plinius/G0DM0D3) JavaScript to Python.
+Ported from an external JavaScript implementation to Python.
 
 33 text obfuscation techniques across 3 tiers for bypassing
 LLM input-side safety classifiers.

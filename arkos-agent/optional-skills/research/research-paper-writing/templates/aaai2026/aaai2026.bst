@@ -26,7 +26,7 @@
  % This bibliography style file is intended for texts in ENGLISH
  % This is an author-year citation style bibliography. As such, it is
  % non-standard LaTeX, and requires a special package file to function properly.
- % Such a package is    natbib.sty   by Patrick W. Daly
+ % Such a package is    natbib.sty
  % The form of the \bibitem entries is
  %   \bibitem[Jones et al.(1990)]{key}...
  %   \bibitem[Jones et al.(1990)Jones, Baker, and Smith]{key}...

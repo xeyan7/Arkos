@@ -124,7 +124,7 @@ export async function recoverDesktopMigrationIfRequired(input: {
   for (;;) {
     const decision = await input.choose({ previousFailure });
     if (decision === "open-release-page") {
-      input.log("migration recovery: opening the release download page");
+      input.log("migration recovery: opening the release page");
       input.openReleasePage();
       continue;
     }

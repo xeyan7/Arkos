@@ -2,8 +2,7 @@
 name: youtube-content
 description: "YouTube transcripts to summaries, threads, blogs."
 version: 1.0.0
-author: Arkos Maintainers
-license: MIT
+author: Arkos distribution
 platforms: [linux, macos, windows]
 metadata:
   arkos:
@@ -21,7 +20,7 @@ Extract transcripts from YouTube videos and convert them into useful formats.
 
 ## Setup
 
-Use `uv` so the dependency is installed into the same the agent-managed environment
+Use `uv` so the dependency is installed into the same agent-managed environment
 that runs the helper script:
 
 ```bash

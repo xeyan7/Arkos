@@ -2,8 +2,7 @@
 name: arkos-agent
 description: "Use, configure, theme, extend, and orchestrate Arkos."
 version: 3.2.0
-author: Arkos Maintainers
-license: MIT
+author: Arkos distribution
 platforms: [linux, macos, windows]
 metadata:
   arkos:
@@ -67,8 +66,8 @@ arkos proxy                   # OpenAI-compatible local proxy backed by your OAu
 ~/.arkos/.env              API keys and secrets ONLY (under $ARKOS_HOME if set)
 $ARKOS_HOME/skills/        Installed skills
 ~/.arkos/skins/            Custom themes (see references/themes.md)
-~/.arkos/desktop-plugins/  Desktop app UI plugins (see references/desktop-plugins.md)
-~/.arkos/tui-widgets/      TUI widget apps (see references/tui-widgets.md)
+~/.arkos/desktop-plugins/  Desktop app UI plugins
+~/.arkos/tui-widgets/      TUI widget apps
 ~/.arkos/pets/             Installed pet mascots (see references/petdex.md)
 ~/.arkos/state.db          Canonical session store (SQLite + FTS5)
 ~/.arkos/sessions/         Gateway routing index, request dumps, *.jsonl transcripts
@@ -84,7 +83,6 @@ Profiles use `~/.arkos/profiles/<name>/` with the same layout. When a profile is
 | User wants... | Load |
 |---|---|
 | **Anything not listed below — "can Arkos do X?", "how do I set up X?"** | Load the closest reference below, then verify against the live source tree |
-| Bots that chat, run routines, or message each other; the Bots tab | docs: `/user-guide/bot-mode` |
 | CLI commands, subcommands, flags, "how do I run X" | `references/cli-reference.md` |
 | In-session slash commands | `references/slash-commands.md` |
 | Provider setup, API keys, OAuth | `references/providers-and-models.md` |
@@ -95,18 +93,14 @@ Profiles use `~/.arkos/profiles/<name>/` with the same layout. When a profile is
 | MCP servers (add, catalog, `arkos mcp`) | `references/native-mcp.md` |
 | Webhook routes and event-driven runs | `references/webhooks.md` |
 | A custom theme/skin ("synthwave theme", "change the gold ●") | `references/themes.md` + `templates/skin.yaml` |
-| A desktop app UI element (pane, widget, ⌘K command, page) | `references/desktop-plugins.md` + `templates/plugin.js` |
-| A live TUI panel or modal widget (ticker, clock, dashboard) | `references/tui-widgets.md` + `templates/clock.mjs` |
 | Pet mascots — install, select, scale, diagnose | `references/petdex.md` |
 | Windows-specific issues (keybinds, WinError 10106, BOM) | `references/windows-quirks.md` |
 | Debugging: voice, tools missing, gateway, aux models | `references/troubleshooting.md` |
 | Internal development: adding tools and tests | Root `AGENTS.md` and the relevant area guide |
 | delegate_task "capped at N" reports | `references/delegate-task-concurrency-diagnosis.md` |
-| Connecting a messaging platform (Telegram, Discord, Slack, WhatsApp, …) | docs: `/user-guide/messaging` |
 
 The reference list above is not the feature list — it is the set of topics that
-need more than their docs page. For everything else the agent ships, fetch
-`llms.txt` and it maps the question to the page that answers it.
+need more than their docs page.
 
 Two theming rules that hold even without loading the reference: **you apply skins yourself** (`arkos config set display.skin <name>` — every surface repaints live within ~a second; don't tell the user to run `/skin`), and **to tweak one color, edit the ACTIVE skin** (`arkos skin set <key> <hex>`) — never fork `default`, which drops the palette and resets the background.
 
@@ -192,9 +186,9 @@ terminal(command="tmux new-session -d -s resumed 'arkos --resume 20260225_143052
 
 ## Surfaces (quick orientation)
 
-- **Desktop app** (`arkos desktop` / `arkos gui`) — native Electron app for macOS/Linux/Windows: streaming chat, session list, Cmd+K palette, drag-and-drop files, native notifications, per-profile remote-gateway login. Extend it with UI plugins — `references/desktop-plugins.md`.
+- **Desktop app** (`arkos desktop` / `arkos gui`) — native Electron app for macOS/Linux/Windows: streaming chat, session list, Cmd+K palette, drag-and-drop files, native notifications, per-profile remote-gateway login. Extend it with UI plugins.
 - **Web dashboard** (`arkos dashboard`) — full admin panel: messaging channels, MCP catalog, webhooks, memory, profile builder, plus an embedded `arkos --tui` chat. Secured behind an OAuth/token gate.
-- **Ink TUI** (`arkos --tui` or `display.interface: tui`) — terminal UI with docked widget apps — `references/tui-widgets.md`.
+- **Ink TUI** (`arkos --tui` or `display.interface: tui`) — terminal UI with docked widget apps.
 - **OpenAI-compatible proxy** (`arkos proxy`) — a local OpenAI API backed by whichever OAuth provider you're signed into. Point Codex CLI, Aider, Cline, or any script at it — no API key.
 
 ## Hard Invariants (never violate, regardless of what you loaded)

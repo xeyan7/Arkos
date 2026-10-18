@@ -66,7 +66,7 @@ describe("brand identity guard", () => {
   });
 
   it("rejects invented project websites and malformed repository documentation links", () => {
-    const repository = "https://github.com/xeyan7/Arkos";
+    const repository = "https://github.com/example-org/Arkos";
     for (const contents of [
       `https://${"arkos.com"}`,
       `https://${"www.try"}${"arkos.app/docs"}`,
@@ -76,20 +76,22 @@ describe("brand identity guard", () => {
     }
     expect(
       findBrandIdentityViolations([
-        { path: "source.ts", contents: "https://github.com/xeyan7/Arkos" },
+        { path: "source.ts", contents: "https://github.com/example-org/Arkos" },
         { path: "source.ts", contents: "https://arkos.example.test" },
       ]),
     ).toEqual([]);
   });
 
-  it("allows the exact legal attribution once in LICENSE", () => {
-    expect(findBrandIdentityViolations([{ path: "LICENSE", contents: legalNotice }])).toEqual([]);
+  it("allows the exact legal attribution once in the preserved notice", () => {
+    expect(
+      findBrandIdentityViolations([{ path: "licenses/inherited-MIT.txt", contents: legalNotice }]),
+    ).toEqual([]);
     expect(
       findBrandIdentityViolations([{ path: "docs/license-copy.md", contents: legalNotice }]),
     ).toHaveLength(1);
     expect(
       findBrandIdentityViolations([
-        { path: "LICENSE", contents: `${legalNotice}\n${legalNotice}` },
+        { path: "licenses/inherited-MIT.txt", contents: `${legalNotice}\n${legalNotice}` },
       ]),
     ).toHaveLength(1);
   });

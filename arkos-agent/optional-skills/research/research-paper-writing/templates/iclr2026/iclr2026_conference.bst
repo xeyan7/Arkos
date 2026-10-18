@@ -1,16 +1,15 @@
 %% File: `iclr2024.bst'
 %% A copy of iclm2010.bst, which is a modification of `plainnl.bst' for use with natbib package 
 %%
-%% Copyright 2010 Hal Daum\'e III
-%% Modified by J. Fürnkranz
+%% Copyright 2010
+%% Modified:
 %% - Changed labels from (X and Y, 2000) to (X & Y, 2000)
 %%
-%% Copyright 1993-2007 Patrick W Daly
+%% Copyright 1993-2007
 %% Max-Planck-Institut f\"ur Sonnensystemforschung
 %% Max-Planck-Str. 2
 %% D-37191 Katlenburg-Lindau
 %% Germany
-%% E-mail: daly@mps.mpg.de
 %%
 %% This program can be redistributed and/or modified under the terms
 %% of the LaTeX Project Public License Distributed from CTAN

@@ -82,25 +82,25 @@ describe("server status CLI probe", () => {
     );
 
     await fetchArkosServerStatus({
-      url: "https://arkos.example.com/some/path?ignored=1#hash",
+      url: "https://example.com/some/path?ignored=1#hash",
       fetch,
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      "https://arkos.example.com/health",
+      "https://example.com/health",
       expect.objectContaining({ headers: { Accept: "application/json" } }),
     );
   });
 
   it("rejects credentials and never reports URL secrets", async () => {
     const result = await fetchArkosServerStatus({
-      url: "https://user:password@arkos.example.com/path?token=secret#fragment",
+      url: "https://user:password@example.com/path?token=secret#fragment",
     });
 
     expect(result).toEqual({
       reachable: false,
       ready: false,
-      url: "https://arkos.example.com",
+      url: "https://example.com",
       error: "Server URL must not contain credentials.",
     });
     expect(JSON.stringify(result)).not.toContain("password");

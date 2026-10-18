@@ -154,9 +154,9 @@ const makeCheckpointStore = Effect.gen(function* () {
               ...process.env,
               GIT_INDEX_FILE: tempIndexPath,
               GIT_AUTHOR_NAME: "Arkos",
-              GIT_AUTHOR_EMAIL: "arkos@users.noreply.github.com",
+              GIT_AUTHOR_EMAIL: "arkos@arkos.local",
               GIT_COMMITTER_NAME: "Arkos",
-              GIT_COMMITTER_EMAIL: "arkos@users.noreply.github.com",
+              GIT_COMMITTER_EMAIL: "arkos@arkos.local",
             };
 
             const workingIndexInfo = yield* seedCheckpointIndex(input.cwd, tempIndexPath);

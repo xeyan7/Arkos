@@ -54,14 +54,14 @@ describe("computer permission copy", () => {
     const advice = computerStaleGrantAdvice(
       ["accessibility", "screenRecording"],
       "adhoc",
-      "com.xeyan7.arkos.dev",
+      "com.arkos.desktop.dev",
     );
     expect(advice).toContain("add the current build again");
     expect(advice).not.toContain("Arkos has cleared");
-    expect(advice).toContain("tccutil reset Accessibility com.xeyan7.arkos.dev");
+    expect(advice).toContain("tccutil reset Accessibility com.arkos.desktop.dev");
     // `ScreenCapture`, not "Screen Recording": the label is not the service name,
     // and a user who types the label gets an error instead of a reset.
-    expect(advice).toContain("tccutil reset ScreenCapture com.xeyan7.arkos.dev");
+    expect(advice).toContain("tccutil reset ScreenCapture com.arkos.desktop.dev");
   });
 
   it("names the responsible app rather than assuming the released one", () => {
@@ -73,7 +73,7 @@ describe("computer permission copy", () => {
       "com.example.arkos.canary",
     );
     expect(advice).toContain("tccutil reset Accessibility com.example.arkos.canary");
-    expect(advice).not.toContain("com.xeyan7.arkos");
+    expect(advice).not.toContain("com.arkos.desktop");
   });
 
   it("withholds the tccutil sentence when no responsible bundle id is known", () => {
@@ -100,10 +100,10 @@ describe("computer permission copy", () => {
     const message = computerPermissionSetupMessage(
       ["accessibility"],
       "adhoc",
-      "com.xeyan7.arkos",
+      "com.arkos.desktop",
     );
     expect(message).toContain("System Settings");
-    expect(message).toContain("tccutil reset Accessibility com.xeyan7.arkos");
+    expect(message).toContain("tccutil reset Accessibility com.arkos.desktop");
   });
 });
 

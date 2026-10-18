@@ -494,39 +494,3 @@ import re  # noqa: F401,E402
 import shutil  # noqa: F401,E402
 from urllib.parse import urlparse  # noqa: F401,E402
 
-
-_PLUGIN_COMPAT_LAZY = {
-    'InvalidMcpUrlError': ('tools.mcp_tool_errors', 'InvalidMcpUrlError'),
-    'MCP_TOOL_NAME_PREFIX': ('tools.mcp_tool_schema', 'MCP_TOOL_NAME_PREFIX'),
-    'NonMcpEndpointError': ('tools.mcp_tool_errors', 'NonMcpEndpointError'),
-    'discover_mcp_tools': ('tools.mcp_tool_discovery', 'discover_mcp_tools'),
-    'get_mcp_status': ('tools.mcp_tool_discovery', 'get_mcp_status'),
-    'get_registered_mcp_server_names': ('tools.mcp_tool_discovery', 'get_registered_mcp_server_names'),
-    'has_registered_mcp_tools': ('tools.mcp_tool_discovery', 'has_registered_mcp_tools'),
-    'is_mcp_tool_parallel_safe': ('tools.mcp_tool_discovery', 'is_mcp_tool_parallel_safe'),
-    'matches_name_filter': ('tools.mcp_tool_schema', 'matches_name_filter'),
-    'mcp_prefixed_tool_name': ('tools.mcp_tool_schema', 'mcp_prefixed_tool_name'),
-    'persist_agent_tool_names': ('tools.mcp_tool_agent', 'persist_agent_tool_names'),
-    'probe_mcp_server_tools': ('tools.mcp_tool_discovery', 'probe_mcp_server_tools'),
-    'reconnect_mcp_server': ('tools.mcp_tool_loop', 'reconnect_mcp_server'),
-    'refresh_agent_mcp_tools': ('tools.mcp_tool_agent', 'refresh_agent_mcp_tools'),
-    'register_mcp_servers': ('tools.mcp_tool_discovery', 'register_mcp_servers'),
-    'reprobe_tool_availability': ('tools.mcp_tool_agent', 'reprobe_tool_availability'),
-    'restore_agent_tool_prefix': ('tools.mcp_tool_agent', 'restore_agent_tool_prefix'),
-    'sanitize_mcp_name_component': ('tools.mcp_tool_schema', 'sanitize_mcp_name_component'),
-    'shutdown_mcp_servers': ('tools.mcp_tool_lifecycle', 'shutdown_mcp_servers'),
-    'strip_unicode_tags': ('tools.ansi_strip', 'strip_unicode_tags'),
-    'tool_error': ('tools.registry', 'tool_error'),
-}
-
-_plugin_compat_prev_getattr = __getattr__
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        return _plugin_compat_prev_getattr(name)
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

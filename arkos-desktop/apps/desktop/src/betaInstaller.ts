@@ -4,8 +4,9 @@
 // Layer: Desktop platform adapter (no Electron imports; I/O is injectable for tests).
 //
 // Feed resolution: `ARKOS_BETA_FEED_URL` points at a base URL that serves
-// `beta-mac.yml` plus the files it lists. Without it, the newest GitHub
-// `v*-beta.N` release on xeyan7/Arkos provides the manifest.
+// `beta-mac.yml` plus the files it lists. Without it, `ARKOS_BETA_RELEASES_API_URL`
+// (a GitHub-compatible releases API) supplies the newest `v*-beta.N` release; with
+// neither configured there is no remote beta feed.
 
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -23,7 +24,10 @@ import { get as httpsGet, type RequestOptions } from "node:https";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 
-import { BETA_RELEASE_TAG_PATTERN, ARKOS_BETA_RELEASES_API_URL } from "@arkos/shared/betaChannel";
+import {
+  BETA_RELEASE_TAG_PATTERN,
+  ARKOS_BETA_RELEASES_API_URL_ENV,
+} from "@arkos/shared/betaChannel";
 import { ARKOS_BETA_BUNDLE_ID } from "@arkos/shared/desktopIdentity";
 
 export const BETA_MAC_MANIFEST_NAME = "beta-mac.yml";
@@ -215,11 +219,14 @@ const fetchTextWithRedirects = (url: string, redirects: number): Promise<string>
 
 /**
  * Resolves where the beta update manifest lives. `feedUrlOverride` is a base
- * URL serving `beta-mac.yml` and the listed files; otherwise the newest GitHub
- * `v*-beta.N` release supplies it through its `beta-mac.yml` asset.
+ * URL serving `beta-mac.yml` and the listed files; otherwise
+ * `releasesApiUrl` (default `ARKOS_BETA_RELEASES_API_URL`) supplies the newest
+ * `v*-beta.N` release through its `beta-mac.yml` asset. With neither
+ * configured, beta installs are unavailable.
  */
 export async function resolveBetaFeedLocation(input: {
   readonly feedUrlOverride?: string | undefined;
+  readonly releasesApiUrl?: string | undefined;
   readonly fetchText?: FetchText;
 }): Promise<BetaFeedLocation> {
   const override = input.feedUrlOverride?.trim();
@@ -227,8 +234,15 @@ export async function resolveBetaFeedLocation(input: {
     const base = override.endsWith("/") ? override : `${override}/`;
     return { manifestUrl: `${base}${BETA_MAC_MANIFEST_NAME}`, baseUrl: base };
   }
+  const apiUrl = (input.releasesApiUrl ?? process.env[ARKOS_BETA_RELEASES_API_URL_ENV] ?? "").trim();
+  if (!apiUrl) {
+    throw new Error(
+      "No beta release feed is configured. Set ARKOS_BETA_FEED_URL (preferred) " +
+        "or ARKOS_BETA_RELEASES_API_URL.",
+    );
+  }
   const fetchText = input.fetchText ?? httpsFetchText;
-  const releases = JSON.parse(await fetchText(ARKOS_BETA_RELEASES_API_URL)) as unknown;
+  const releases = JSON.parse(await fetchText(apiUrl)) as unknown;
   if (!Array.isArray(releases)) {
     throw new Error("Unexpected GitHub releases response.");
   }
@@ -341,7 +355,7 @@ const readCommandDefault: ReadCommand = (command, args) => {
 const TEAM_ID_LINE_PATTERN = /^TeamIdentifier=(\S+)$/m;
 const UNSIGNED_BETA_MESSAGE = "The beta download isn't signed by Arkos. It wasn't installed.";
 const TEAM_ID_LOOKUP_FAILED_MESSAGE =
-  "Couldn't check the beta download's signature. Try the download page instead.";
+  "Couldn't check the beta download's signature. Try the release page instead.";
 
 /**
  * Team id the downloaded bundle must be signed by. `null` skips the check

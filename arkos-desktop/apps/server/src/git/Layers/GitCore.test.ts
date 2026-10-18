@@ -3114,12 +3114,12 @@ it.layer(TestLayer)("git integration", (it) => {
           yield* git(fork, ["init", "--bare"]);
 
           const { initialBranch } = yield* initRepoWithCommit(tmp);
-          yield* git(tmp, ["remote", "add", "jasonLaster", fork]);
+          yield* git(tmp, ["remote", "add", "fork", fork]);
           yield* git(tmp, ["checkout", "-b", "statemachine"]);
           yield* writeTextFile(path.join(tmp, "fork.txt"), "fork branch\n");
           yield* git(tmp, ["add", "fork.txt"]);
           yield* git(tmp, ["commit", "-m", "fork branch"]);
-          yield* git(tmp, ["push", "-u", "jasonLaster", "statemachine"]);
+          yield* git(tmp, ["push", "-u", "fork", "statemachine"]);
           yield* git(tmp, ["checkout", initialBranch]);
           yield* git(tmp, ["branch", "-D", "statemachine"]);
           yield* git(tmp, [
@@ -3127,7 +3127,7 @@ it.layer(TestLayer)("git integration", (it) => {
             "-b",
             "arkos/pr-488/statemachine",
             "--track",
-            "jasonLaster/statemachine",
+            "fork/statemachine",
           ]);
           yield* git(tmp, ["config", "push.default", "current"]);
           yield* writeTextFile(path.join(tmp, "fork.txt"), "updated fork branch\n");
@@ -3139,15 +3139,15 @@ it.layer(TestLayer)("git integration", (it) => {
 
           expect(pushed.status).toBe("pushed");
           expect(pushed.setUpstream).toBe(false);
-          expect(pushed.upstreamBranch).toBe("jasonLaster/statemachine");
+          expect(pushed.upstreamBranch).toBe("fork/statemachine");
           expect(yield* git(tmp, ["rev-parse", "--abbrev-ref", "@{upstream}"])).toBe(
-            "jasonLaster/statemachine",
+            "fork/statemachine",
           );
           expect(
-            yield* git(tmp, ["ls-remote", "--heads", "jasonLaster", "statemachine"]),
+            yield* git(tmp, ["ls-remote", "--heads", "fork", "statemachine"]),
           ).toContain("statemachine");
           expect(
-            yield* git(tmp, ["ls-remote", "--heads", "jasonLaster", "arkos/pr-488/statemachine"]),
+            yield* git(tmp, ["ls-remote", "--heads", "fork", "arkos/pr-488/statemachine"]),
           ).toBe("");
         }),
     );

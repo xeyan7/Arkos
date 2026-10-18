@@ -728,7 +728,6 @@ DEFAULT_CONFIG = {
     "platform_hints": {},
     "plugins": {
         "hook_callback_timeout": 30,
-        "allow_deprecated_imports": False,
     },
     "hooks": {},
     "hooks_auto_accept": False,

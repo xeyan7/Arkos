@@ -2,7 +2,6 @@
 
 Set via `arkos model` (picker) or `arkos setup`. 35+ provider profiles ship as
 plugins under `plugins/model-providers/`; user plugins of the same name override.
-Full docs:
 
 ### Providers
 

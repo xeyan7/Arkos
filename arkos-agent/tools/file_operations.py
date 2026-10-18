@@ -1307,28 +1307,3 @@ MAX_LINE_LENGTH = 2000
 WRITE_DENIED_PATHS = build_write_denied_paths(_HOME)
 
 WRITE_DENIED_PREFIXES = build_write_denied_prefixes(_HOME)
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'DEFAULT_READ_LIMIT': ('tools.file_operations_common', 'DEFAULT_READ_LIMIT'),
-    'DEFAULT_READ_OFFSET': ('tools.file_operations_common', 'DEFAULT_READ_OFFSET'),
-    'DEFAULT_SEARCH_LIMIT': ('tools.file_operations_common', 'DEFAULT_SEARCH_LIMIT'),
-    'DEFAULT_SEARCH_OFFSET': ('tools.file_operations_common', 'DEFAULT_SEARCH_OFFSET'),
-    'LINTERS': ('tools.file_operations_lint', 'LINTERS'),
-    'LintResult': ('tools.file_operations_common', 'LintResult'),
-    'MAX_FILE_SIZE': ('tools.transcription_common', 'MAX_FILE_SIZE'),
-    'SEARCH_PRUNE_DIR_NAMES': ('agent.search_policy', 'SEARCH_PRUNE_DIR_NAMES'),
-    'SearchMatch': ('tools.file_operations_common', 'SearchMatch'),
-    'build_write_denied_paths': ('agent.file_safety', 'build_write_denied_paths'),
-    'build_write_denied_prefixes': ('agent.file_safety', 'build_write_denied_prefixes'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

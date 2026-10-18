@@ -616,7 +616,7 @@ export const SETTINGS_SEARCH_ENTRIES: readonly SettingsSearchEntry[] = [
   {
     id: "advanced:feature-tour",
     section: "advanced",
-    title: "What’s new since 0.9.2",
+    title: "What’s new",
     keywords:
       "Replay feature tour redesigned workspace provider accounts Code review slider updates",
   },

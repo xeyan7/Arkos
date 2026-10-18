@@ -1,8 +1,6 @@
 # plugins/ — plugin kinds, compat contract, in-tree policy
 
-Applies on top of the root `AGENTS.md`. Authoring guide + canonical compat contract:
-*(docs site — not shipped slim)*. Per-kind guides: `memory-provider-plugin.md`,
-`model-provider-plugin.md`, `context-engine-plugin.md`, `image-gen-provider-plugin.md`, ...
+Applies on top of the root `AGENTS.md`.
 
 ## Plugins never touch core
 
@@ -26,8 +24,7 @@ command. A hook with no concrete consumer is speculative infrastructure and is r
   own. `observability/`, `kanban/`, `disk-cleanup/` are precedent, not an invitation. Closing such a
   PR is a coupling decision, not a quality judgment.
 - Reference/docs-companion plugins (`example-dashboard`, `strike-freedom-cockpit`,
-  `plugin-llm-example`, `plugin-llm-async-example`) live in
-  `arkos-example-plugins`, not here.
+  `plugin-llm-example`, `plugin-llm-async-example`) live in separate repos, not here.
 
 ## Plugin kinds and their discovery systems
 
@@ -64,19 +61,12 @@ native `api:` match, or version literals on unrelated payloads. Documented surfa
 - Compat tests load **frozen plugins through the real discovery path** and assert outcomes — never
   exact registry/catalog counts, source-reading tests, or "a global version literal changed".
 
-## Sep 2026 decomposition compat window (ends 2026-09-14)
+## Sep 2026 decomposition compat window (closed)
 
-prior patch moved internals into `<stem>_<topic>` siblings. Old import paths resolve through
-`PLUGIN-COMPAT` `__getattr__` blocks (listed in `COMPAT_MANIFEST.md` / `compat_manifest.json`)
-until `arkos_cli.plugin_compat.COMPAT_REMOVAL_DATE`, when the commit that added them is reverted.
-`arkos_cli/plugin_compat.py` is the single source: `scan_plugin` (AST scan), `compat_report`
-(hits across enabled external plugins, cached to `ARKOS_HOME/.plugin-compat-report.json`,
-refreshed by discovery), `removal_in_effect`, `warn_once`. Surfaces: CLI banner notice,
-`arkos plugins compat` (shows affected user plugins), `arkos doctor`, post-update notices, the
-TUI/Desktop `plugins.compat_report` RPC. After the date `PluginManager` skips a hitting plugin
-unless `plugins.allow_deprecated_imports: true`. **In-tree code and tests never use compat paths**
-(`scripts/check_compat_pointers.py` in CI; `-W error::arkos_cli.plugin_compat.ArkosPluginCompatWarning`).
-External-plugin compat is handled ONCE here — never add per-PR re-export shims.
+The layer that resolved pre-decomposition import paths (`PLUGIN-COMPAT` blocks,
+`compat_manifest.json`, `arkos_cli/plugin_compat.py`) was removed once its window closed.
+External plugins must import from the defining modules; in-tree code never used the old paths.
+External-plugin compat is handled by plugin authors, never by per-PR re-export shims.
 
 ## Tests
 

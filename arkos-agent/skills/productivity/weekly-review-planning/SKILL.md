@@ -3,7 +3,6 @@ name: weekly-review-planning
 description: "Weekly reset: commitments, stalled work, next-week plan."
 version: 0.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

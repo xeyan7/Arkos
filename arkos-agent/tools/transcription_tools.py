@@ -507,36 +507,3 @@ import shlex  # noqa: F401,E402
 import subprocess  # noqa: F401,E402
 import tempfile  # noqa: F401,E402
 from urllib.parse import urljoin  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'COMMAND_STT_OUTPUT_FORMATS': ('tools.transcription_command', 'COMMAND_STT_OUTPUT_FORMATS'),
-    'COMMON_LOCAL_BIN_DIRS': ('tools.transcription_common', 'COMMON_LOCAL_BIN_DIRS'),
-    'DEFAULT_COMMAND_STT_LANGUAGE': ('tools.transcription_command', 'DEFAULT_COMMAND_STT_LANGUAGE'),
-    'DEFAULT_COMMAND_STT_OUTPUT_FORMAT': ('tools.transcription_command', 'DEFAULT_COMMAND_STT_OUTPUT_FORMAT'),
-    'DEFAULT_COMMAND_STT_TIMEOUT_SECONDS': ('tools.transcription_command', 'DEFAULT_COMMAND_STT_TIMEOUT_SECONDS'),
-    'DEFAULT_LOCAL_STT_LANGUAGE': ('tools.transcription_common', 'DEFAULT_LOCAL_STT_LANGUAGE'),
-    'ELEVENLABS_STT_BASE_URL': ('tools.transcription_common', 'ELEVENLABS_STT_BASE_URL'),
-    'GROQ_BASE_URL': ('tools.transcription_common', 'GROQ_BASE_URL'),
-    'GROQ_MODELS': ('tools.transcription_common', 'GROQ_MODELS'),
-    'LOCAL_NATIVE_AUDIO_FORMATS': ('tools.transcription_common', 'LOCAL_NATIVE_AUDIO_FORMATS'),
-    'MAX_FILE_SIZE': ('tools.transcription_common', 'MAX_FILE_SIZE'),
-    'OPENAI_BASE_URL': ('tools.transcription_common', 'OPENAI_BASE_URL'),
-    'OPENAI_MODELS': ('tools.transcription_common', 'OPENAI_MODELS'),
-    'SUPPORTED_FORMATS': ('tools.transcription_common', 'SUPPORTED_FORMATS'),
-    'XAI_STT_BASE_URL': ('tools.transcription_common', 'XAI_STT_BASE_URL'),
-
-
-    'resolve_openai_audio_api_key': ('tools.tool_backend_helpers', 'resolve_openai_audio_api_key'),
-    'windows_hide_flags': ('arkos_cli._subprocess_compat', 'windows_hide_flags'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

@@ -10,7 +10,7 @@ without replacing their terms.
 
 ## Spike workflow license notice
 
-Adapted from the GSD (Get Shit Done) project's `/gsd-spike` workflow — MIT © 2025 Lex Christopherson (**gsd-build/get-shit-done**).
+Adapted from an external spike workflow released under the MIT license.
 
 Applies to `skills/software-development/spike/SKILL.md`.
 

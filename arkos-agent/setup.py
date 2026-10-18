@@ -3,7 +3,7 @@ setup.py — wheel/sdist build guard.
 
 pip/PyPI and Homebrew are no longer supported distribution methods for
 Arkos (see README.md). The wheel would ship without bundled assets (locales, skills, optional-mcps,
-web_dist, tui_dist, plugin manifests) since those are resolved at runtime
+plugin manifests) since those are resolved at runtime
 via env-var overrides set by the nix wrapper or the source-checkout layout.
 
 This file overrides the ``bdist_wheel`` and ``sdist`` setuptools commands
@@ -34,7 +34,8 @@ _IN_NIX_BUILD = os.environ.get("ARKOS_NIX_BUILD") == "1"
 
 _BLOCK_MESSAGE = (
     "Building wheels or sdists for arkos-agent is not supported.\n"
-    "Arkos is distributed via the shell installer, Docker image, or Nix.\n"
+    "Arkos is not distributed as a wheel or sdist — use a source checkout\n"
+    "(or the Nix build, the only supported wheel path).\n"
     "See: README.md\n"
     "\n"
     "If you are developing, use an editable install instead:\n"

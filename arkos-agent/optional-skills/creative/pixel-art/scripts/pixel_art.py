@@ -1,7 +1,7 @@
 """Pixel art converter — Floyd-Steinberg dithering with preset or named palette.
 
-Named hardware palettes (NES, GameBoy, PICO-8, C64, etc.) ported from
-pixel-art-studio (MIT) — see ATTRIBUTION.md.
+Named hardware palettes (NES, GameBoy, PICO-8, C64, etc.) adapted from an
+MIT-licensed palette library.
 
 Usage (import):
     from pixel_art import pixel_art

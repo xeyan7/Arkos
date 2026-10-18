@@ -32,7 +32,13 @@ export async function startPythonBridge(options: {
     if (parent === root) throw new Error("Cannot locate bridge/arkos_bridge.py");
     root = parent;
   }
-  const config: EngineConfig = JSON.parse(readFileSync(join(root, "bridge", "config.json"), "utf8"));
+  // Machine-local overrides stay in an untracked config.local.json; the
+  // tracked config.json carries only portable defaults.
+  const bridgeDir = join(root, "bridge");
+  const localConfig = join(bridgeDir, "config.local.json");
+  const config: EngineConfig = JSON.parse(
+    readFileSync(existsSync(localConfig) ? localConfig : join(bridgeDir, "config.json"), "utf8"),
+  );
   const engine = resolve(root, config.engine);
   const candidates = [
     config.python && resolve(root, config.python),
@@ -42,7 +48,7 @@ export async function startPythonBridge(options: {
   ];
   const python = candidates.find((candidate): candidate is string => Boolean(candidate && existsSync(candidate)))
     ?? "python";
-  if (!python) throw new Error("No Arkos Python runtime found; set python in bridge/config.json");
+  if (!python) throw new Error("No Arkos Python runtime found; set python in bridge/config.json (or bridge/config.local.json)");
   const token = randomUUID();
   const sessions = new Map<string, EngineSession>();
   let closing = false;

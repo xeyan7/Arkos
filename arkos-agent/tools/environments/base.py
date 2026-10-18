@@ -546,19 +546,3 @@ from collections import deque  # noqa: F401,E402
 import re  # noqa: F401,E402
 import select  # noqa: F401,E402
 import subprocess  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'sanitize_task_id_for_path': ('tools.environments.path_utils', 'sanitize_task_id_for_path'),
-    'windows_hide_flags': ('arkos_cli._subprocess_compat', 'windows_hide_flags'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

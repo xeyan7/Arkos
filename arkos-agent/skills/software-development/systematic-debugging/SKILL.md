@@ -3,7 +3,6 @@ name: systematic-debugging
 description: "4-phase root cause debugging: understand bugs before fixing."
 version: 1.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:
@@ -363,7 +362,7 @@ If you catch yourself thinking:
 
 ### Investigation Tools
 
-Use these the agent tools during Phase 1:
+Use these tools during Phase 1:
 
 - **`search_files`** — Find error strings, trace function calls, locate patterns
 - **`read_file`** — Read source code with line numbers for precise analysis

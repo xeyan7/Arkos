@@ -83,20 +83,3 @@ class KeenableWebSearchProvider(BaseWebSearchProvider):
             free_tag="Independent web index for AI apps — fast search + page fetch on Keenable's anonymous free tier.",
             paid_tag="Independent web index for AI apps. Keyed access with higher limits and guaranteed service.",
         )
-
-
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'WebSearchProvider': ('agent.web_search_provider', 'WebSearchProvider'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

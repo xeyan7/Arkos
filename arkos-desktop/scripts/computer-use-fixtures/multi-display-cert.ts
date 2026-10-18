@@ -1,7 +1,7 @@
 /**
  * multi-display-cert: second-display certification harness for Computer use.
  *
- * Runs the display matrix described in docs/computer-use-cua/multi-display-cert.md
+ * Runs the documented display certification matrix
  * against the real backend path (CuaComputerBackend over a CuaDriverHost socket)
  * on a Mac with two or more displays. On a single-display machine it refuses
  * gracefully — prints exactly what the matrix needs and exits 3 — so the script

@@ -23,16 +23,14 @@ _SILENT_BACKGROUND_HINT = (
 
 _HOMEBREW_CI_POLLER_HINT = (
     'This looks like a homebrewed CI poller built from `gh pr view --json statusCheckRollup` '
-    'and/or `gh pr checks | jq`. That shape has burned us repeatedly in arkos-agent dev work '
-    '(prior patch, , , ,) — stdout buffering kills '
-    'output capture, jq null-key edge cases silently exit the loop, conclusion-vs-status field '
+    'and/or `gh pr checks | jq`. That shape burns time in this project dev work — stdout buffering '
+    'kills output capture, jq null-key edge cases silently exit the loop, conclusion-vs-status field '
     'confusion exits early with bogus all-green verdicts, TTY-only summary banners never '
-    'appear when piped. Use the canonical snippets in the green-ci-policy skill instead: the '
+    'appear when piped. Use the canonical snippets instead: the '
     'exit-code-driven `gh pr checks $PR >/dev/null` (rc 0 = green, 8 = pending, else fail) for '
     'exit-on-first-fail behavior, or the column-2 awk-on-tabs poller (`awk -F"\\t" '
-    '"$2==\\"pending\\""`) for sharded matrices. Load '
-    "skill_view(name='github/arkos-agent-dev', file_path='references/green-ci-policy.md') for "
-    'the verbatim snippets. If you must roll a custom loop with rich structured output, write '
+    '"$2==\\"pending\\""`) for sharded matrices. If you must roll a custom loop with rich '
+    'structured output, write '
     "each tick to a known file (`tee -a /tmp/ci.log`) and rely on `process(action='log')` to "
     'read THAT file — do not rely on background-process stdout capture for line-buffered shell '
     'loops.'

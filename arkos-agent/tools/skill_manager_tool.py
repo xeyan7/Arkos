@@ -799,18 +799,3 @@ registry.register(
     name="skill_manage", toolset="skills", schema=SKILL_MANAGE_SCHEMA, emoji="📝",
     handler=lambda args, **kw: _skill_manage_from(
         args, task_id=kw.get("task_id"), session_id=kw.get("session_id")))
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'mark_background_review_skill_read': ('tools.skill_manager_guards', 'mark_background_review_skill_read'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

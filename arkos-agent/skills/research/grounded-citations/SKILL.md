@@ -2,8 +2,7 @@
 name: grounded-citations
 description: "Ground answers and documents in cited, verifiable sources."
 version: 1.2.0
-author: Arkos Maintainers
-license: MIT
+author: Arkos distribution
 platforms: [linux, macos, windows]
 metadata:
   arkos:

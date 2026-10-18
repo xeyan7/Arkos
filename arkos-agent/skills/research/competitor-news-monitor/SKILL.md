@@ -3,7 +3,6 @@ name: competitor-news-monitor
 description: "Watch named companies for material news; cited digests."
 version: 0.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

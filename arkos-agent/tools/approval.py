@@ -1060,35 +1060,3 @@ import tempfile  # noqa: F401,E402
 import time  # noqa: F401,E402
 import unicodedata  # noqa: F401,E402
 import uuid  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'DANGEROUS_PATTERNS': ('tools.approval_detection', 'DANGEROUS_PATTERNS'),
-    'DANGEROUS_PATTERNS_COMPILED': ('tools.approval_detection', 'DANGEROUS_PATTERNS_COMPILED'),
-    'HARDLINE_PATTERNS': ('tools.approval_detection', 'HARDLINE_PATTERNS'),
-    'HARDLINE_PATTERNS_COMPILED': ('tools.approval_detection', 'HARDLINE_PATTERNS_COMPILED'),
-    'HUMAN_WAIT_MARGIN_S': ('tools.approval_human_wait', 'HUMAN_WAIT_MARGIN_S'),
-    'cfg_get': ('arkos_cli.config', 'cfg_get'),
-    'get_plugin_manager': ('tools.approval_prompt', 'get_plugin_manager'),
-    'human_wait_ceiling': ('tools.approval_human_wait', 'human_wait_ceiling'),
-    'human_wait_seconds': ('tools.approval_human_wait', 'human_wait_seconds'),
-    'human_wait_window': ('tools.approval_human_wait', 'human_wait_window'),
-    'is_interrupted': ('tools.interrupt', 'is_interrupted'),
-    'request_elicitation_consent': ('tools.approval_prompt', 'request_elicitation_consent'),
-    'reset_current_observability_context': ('tools.approval_context', 'reset_current_observability_context'),
-    'reset_current_session_key': ('tools.approval_context', 'reset_current_session_key'),
-    'reset_arkos_interactive_context': ('tools.approval_context', 'reset_arkos_interactive_context'),
-    'set_current_observability_context': ('tools.approval_context', 'set_current_observability_context'),
-    'set_current_session_key': ('tools.approval_context', 'set_current_session_key'),
-    'set_arkos_interactive_context': ('tools.approval_context', 'set_arkos_interactive_context'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

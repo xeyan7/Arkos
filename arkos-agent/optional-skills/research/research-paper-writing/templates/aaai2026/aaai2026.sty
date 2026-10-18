@@ -40,16 +40,16 @@
 \thispagestyle{empty} \pagestyle{empty}
 \flushbottom \twocolumn \sloppy
 % We're never going to need a table of contents, so just flush it to
-% save space --- suggested by drstrip@sandia-2
+% save space
 \def\addcontentsline#1#2#3{}
-% gf: PRINT COPYRIGHT NOTICE
+% Print copyright notice
 \def\copyright@year{\number\year}
 \def\copyright@text{Copyright \copyright\space \copyright@year,
 Association for the Advancement of Artificial Intelligence (www.aaai.org).
 All rights reserved.}
 \def\copyrighttext#1{\gdef\copyright@on{T}\gdef\copyright@text{#1}}
 \def\copyrightyear#1{\gdef\copyright@on{T}\gdef\copyright@year{#1}}
-% gf: End changes for copyright notice (used in \maketitle, below)
+% End changes for copyright notice (used in \maketitle, below)
 % Title stuff, taken from deproc.
 %
 \def\maketitle{%

@@ -15,19 +15,21 @@ export const BETA_IMPORT_RESULT_FILE_NAME = "import-result.json";
  */
 export const ARKOS_BETA_WINDOWS_INSTALLER_GUID = "a8e63b48-d4f3-4db5-9e12-368107afe65d";
 
-/** Public release listing; the newest `v*-beta.N` prerelease is the current beta build. */
-export const ARKOS_BETA_RELEASES_URL =
-  "https://github.com/xeyan7/Arkos/releases?q=prerelease%3Atrue";
-
-/** Repository release listing; no latest-release target is assumed. */
-export const ARKOS_STABLE_RELEASES_URL = "https://github.com/xeyan7/Arkos/releases";
+/**
+ * Optional release page URLs surfaced in settings. Leave unset to hide the
+ * download links; there is no built-in repository default.
+ */
+export const ARKOS_BETA_RELEASES_URL_ENV = "ARKOS_BETA_RELEASES_URL";
+export const ARKOS_STABLE_RELEASES_URL_ENV = "ARKOS_STABLE_RELEASES_URL";
 
 /** electron-builder NSIS `guid` for stable (production) builds. */
 export const ARKOS_STABLE_WINDOWS_INSTALLER_GUID = "368107a8-afe6-5db5-ab3b-d4f331684868";
 
-/** GitHub API releases endpoint probed for the newest `v*-beta.N` tag. */
-export const ARKOS_BETA_RELEASES_API_URL =
-  "https://api.github.com/repos/xeyan7/Arkos/releases?per_page=30";
+/**
+ * Optional GitHub-compatible releases API probed for the newest `v*-beta.N`
+ * tag when `ARKOS_BETA_FEED_URL` is not set.
+ */
+export const ARKOS_BETA_RELEASES_API_URL_ENV = "ARKOS_BETA_RELEASES_API_URL";
 
 /**
  * Environment overrides for the beta install flow. `ARKOS_BETA_HOME` moves the

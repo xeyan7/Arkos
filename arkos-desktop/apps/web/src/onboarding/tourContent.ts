@@ -1,6 +1,6 @@
 // FILE: tourContent.ts
-// Purpose: Copy and links for the "what Arkos can do" tour. Wording mirrors the public
-//          docs (see the Arkos repository) and changelog so onboarding and docs stay consistent.
+// Purpose: Copy and links for the "what Arkos can do" tour. Wording mirrors the
+//          product surfaces and changelog so onboarding and the app stay consistent.
 // Layer: Web content (no React)
 
 import type { LucideIcon } from "~/lib/icons";

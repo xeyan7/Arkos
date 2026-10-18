@@ -208,7 +208,7 @@ def _crop_image_region(
     gets the full resolution budget. Coordinates clamp to the image bounds; a zero-area/inverted
     region is rejected with an error naming the real dimensions. Returns ``(cropped_temp_path,
     mime, None)`` — caller owns cleanup — or ``(None, None, error)``.
-    Ported from QwenLM/qwen-code zoom-image.ts (Apache-2.0)."""
+    Ported from an Apache-2.0-licensed implementation."""
     try:
         from PIL import Image
     except ImportError:

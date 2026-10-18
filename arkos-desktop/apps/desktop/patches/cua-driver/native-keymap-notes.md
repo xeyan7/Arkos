@@ -1,7 +1,7 @@
 # native-keymap.diff — driver keymap extension notes (LANDED native rev 19)
 
 Companion to the Arkos-side `cuaKey` expansion. **Applied 2026-09-23**: the
-keyboard.rs and press_key.rs hunks were applied to `/Users/devin/repos/cua-src`
+keyboard.rs and press_key.rs hunks were applied to a local `cua-src` checkout
 on top of the staged rev-18 tree and `serve.rs` was bumped to
 `arkos_native_revision` 19 by hand (the rev-18 stream had already landed the
 17→18 bump, exactly the concurrency case predicted below). The folded patch
@@ -11,7 +11,7 @@ on top of the staged rev-18 tree and `serve.rs` was bumped to
 authored record of the change; the diff itself is retained beside it.
 
 Original apply-time notes: verified `git apply --check`-clean against the
-rev-17 checkout at `/Users/devin/repos/cua-src` when authored. The serve.rs
+rev-17 checkout when authored. The serve.rs
 hunk required the "bump to current+1" treatment documented here.
 
 ## What it does

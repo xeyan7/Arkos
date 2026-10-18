@@ -21,8 +21,8 @@ The **profiles themselves** live as plugins under
 `plugins/model-providers/<name>/` (bundled in this repo) and
 `$ARKOS_HOME/plugins/model-providers/<name>/` (per-user overrides). The
 registry in `providers/__init__.py` lazily discovers them the first time any
-consumer calls `get_provider_profile()` or `list_providers()`. See
-`plugins/model-providers/README.md` for the plugin contract and examples.
+consumer calls `get_provider_profile()` or `list_providers()`. See the
+model-provider row in `plugins/AGENTS.md` for the plugin contract.
 
 ---
 
@@ -36,8 +36,6 @@ layer reads from it:
   `zai`, `openrouter`, `custom` — those need bespoke token resolution).
 - `arkos_cli/models.py` extends `CANONICAL_PROVIDERS` and calls
   `profile.fetch_models()` inside `provider_model_ids()`.
-- `arkos_cli/doctor.py` adds a `/models` health check for each
-  `auth_type="api_key"` profile.
 - `arkos_cli/config.py` injects every `env_var` into
   `OPTIONAL_ENV_VARS` so the setup wizard knows about it.
 - `arkos_cli/runtime_provider.py` reads `profile.api_mode` as a fallback
@@ -56,8 +54,8 @@ layer reads from it:
 
 ## Adding a provider
 
-See `plugins/model-providers/README.md` — drop a new directory there (or
-under `$ARKOS_HOME/plugins/model-providers/` for a private plugin).
+See the model-provider row in `plugins/AGENTS.md` — drop a new directory there
+(or under `$ARKOS_HOME/plugins/model-providers/` for a private plugin).
 
 ---
 

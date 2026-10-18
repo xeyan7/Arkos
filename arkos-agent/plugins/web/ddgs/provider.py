@@ -203,20 +203,3 @@ class DDGSWebSearchProvider(BaseWebSearchProvider):
             "DuckDuckGo (ddgs)", "free · no key · search only",
             "Search via the ddgs Python package — no API key (pair with any extract provider)", post_setup="ddgs",
         )
-
-
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'WebSearchProvider': ('agent.web_search_provider', 'WebSearchProvider'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

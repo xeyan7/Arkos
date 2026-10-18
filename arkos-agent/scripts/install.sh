@@ -43,8 +43,10 @@ NC='\033[0m' # No Color
 BOLD='\033[1m'
 
 # Configuration
-REPO_URL_SSH="${ARKOS_REPO_URL_SSH:-git@github.com:xeyan7/Arkos.git}"
-REPO_URL_HTTPS="${ARKOS_REPO_URL_HTTPS:-https://github.com/xeyan7/Arkos.git}"
+# No default repository URL: fresh git installs require an explicit source.
+# Set ARKOS_REPO_URL_SSH (optional, tried first) and/or ARKOS_REPO_URL_HTTPS.
+REPO_URL_SSH="${ARKOS_REPO_URL_SSH:-}"
+REPO_URL_HTTPS="${ARKOS_REPO_URL_HTTPS:-}"
 ARKOS_HOME="${ARKOS_HOME:-$HOME/.arkos}"
 # INSTALL_DIR is resolved AFTER arg parsing and OS detection so we can pick an
 # FHS-style layout for root installs.  Track whether the user gave us an
@@ -1589,16 +1591,34 @@ EOF
             exit 1
         fi
     else
-        # Try SSH first (for private repo access), fall back to HTTPS
+        if [ -z "$REPO_URL_HTTPS" ] && [ -z "$REPO_URL_SSH" ]; then
+            log_error "No repository URL configured."
+            log_info "Set ARKOS_REPO_URL_HTTPS (and optionally ARKOS_REPO_URL_SSH) to the source repository and re-run."
+            exit 1
+        fi
+
+        local clone_ok=false
+        # Try SSH first (for private repo access), fall back to HTTPS.
         # GIT_SSH_COMMAND disables interactive prompts and sets a short timeout
         # so SSH fails fast instead of hanging when no key is configured.
-        log_info "Trying SSH clone..."
-        if GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=5" \
-           git clone --depth 1 --branch "$BRANCH" "$REPO_URL_SSH" "$INSTALL_DIR" 2>/dev/null; then
-            log_success "Cloned via SSH"
-        else
-            rm -rf "$INSTALL_DIR" 2>/dev/null  # Clean up partial SSH clone
-            log_info "SSH failed, trying HTTPS..."
+        if [ -n "$REPO_URL_SSH" ]; then
+            log_info "Trying SSH clone..."
+            if GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=5" \
+               git clone --depth 1 --branch "$BRANCH" "$REPO_URL_SSH" "$INSTALL_DIR" 2>/dev/null; then
+                clone_ok=true
+                log_success "Cloned via SSH"
+            else
+                rm -rf "$INSTALL_DIR" 2>/dev/null  # Clean up partial SSH clone
+            fi
+        fi
+
+        if [ "$clone_ok" != true ]; then
+            if [ -z "$REPO_URL_HTTPS" ]; then
+                log_error "SSH clone failed and no HTTPS repository URL is configured."
+                log_info "Set ARKOS_REPO_URL_HTTPS to the source repository and re-run."
+                exit 1
+            fi
+            log_info "Trying HTTPS clone..."
             # GitHub throttles packfile generation for large repos (this one:
             # ~9.6k files at HEAD plus thousands of auto-generated branches)
             # with repo-scoped HTTP 429s that are NOT client IP rate limits —
@@ -1610,7 +1630,6 @@ EOF
             # (many small packs instead of one big one — what gets past the
             # throttle). Fully materialize the tree afterwards so the rest of
             # the installer sees the normal files.
-            local clone_ok=false
             local attempt=0
             local max_attempts=4
             for attempt in $(seq 1 "$max_attempts"); do
@@ -3434,8 +3453,8 @@ _restore_electron_dist_with_fallback() {
 install_desktop_voice_deps() {
     # Desktop ships with working voice out of the box: eagerly install the
     # wake-word + local-STT stacks ([wake] + [voice] extras) instead of
-    # leaving them to lazy first-use install. Policy change (Maintainers, July
-    # 2026,  testing): the first ear-click used to trigger a
+    # leaving them to lazy first-use install. Policy change (July 2026): the
+    # first ear-click used to trigger a
     # multi-minute onnxruntime pip install that froze the UI and blew RPC
     # timeouts. Lazy install remains the fallback for CLI-only installs and
     # for anything this best-effort step fails to fetch.

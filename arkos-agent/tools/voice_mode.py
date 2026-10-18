@@ -1433,22 +1433,3 @@ WHISPER_HALLUCINATIONS = {
     "www.mooji.org",
     "ご視聴ありがとうございました",
 }
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'DEFAULT_TTS_ECHO_SIMILARITY_THRESHOLD': ('tools.voice_mode_transcript', 'DEFAULT_TTS_ECHO_SIMILARITY_THRESHOLD'),
-    'DEFAULT_VOICE_STOP_PHRASES': ('tools.voice_mode_transcript', 'DEFAULT_VOICE_STOP_PHRASES'),
-    'MIN_FRAGMENT_LENGTH_FOR_ECHO': ('tools.voice_mode_transcript', 'MIN_FRAGMENT_LENGTH_FOR_ECHO'),
-    'is_tts_echo': ('tools.voice_mode_transcript', 'is_tts_echo'),
-    'voice_stop_hint': ('tools.voice_mode_transcript', 'voice_stop_hint'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

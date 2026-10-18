@@ -3,7 +3,6 @@ name: xlsx
 description: Create, read, edit Excel .xlsx workbooks and CSVs.
 version: 1.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

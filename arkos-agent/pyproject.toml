@@ -13,7 +13,6 @@ readme = "README.md"
 # <3.14 makes uv refuse 3.14 with a clear error instead of attempting that
 # build. Raise the ceiling once our Rust transitives ship cp314 wheels.
 requires-python = ">=3.11,<3.14"
-authors = [{ name = "Arkos" }]
 license = "LicenseRef-Arkos-Proprietary"
 classifiers = ["Private :: Do Not Upload"]
 license-files = [
@@ -77,8 +76,8 @@ dependencies = [
   "snowballstemmer==3.1.1",
   # ``packaging`` is imported directly on three production paths but was never
   # declared, so it only reached users transitively (pip/uv pull it for other
-  # tools). The slim official Docker image ships without it, where the
-  # try/except-ImportError fallbacks silently degrade: Hindsight's
+  # tools). Lean installs that omit it exercise the try/except-ImportError
+  # fallbacks, which silently degrade: Hindsight's
   # ``_meets_minimum_version`` disables update_mode='append',
   # tools/lazy_deps.py treats every version constraint as satisfied, and
   # arkos_cli/main.py drops to naive requirement parsing. Pure-Python
@@ -551,13 +550,7 @@ youtube-transcript-api = false
 include = ["agent", "agent.*", "tools", "tools.*", "arkos_cli", "arkos_cli.*", "gateway", "gateway.*", "cron", "cron.*", "plugins", "plugins.*", "providers", "providers.*"]
 
 [tool.setuptools.package-data]
-arkos_cli = ["observability/schemas/*.json", "data/*.json", "local_runtime/*.json"]
-# gateway/assets/ ships status_phrases.yaml and the Telegram BotFather
-# screenshot. Without this, sealed venvs (uv2nix) silently lose both —
-# status phrases fall back to the tiny hardcoded set and the Telegram
-# topic-setup image disappears. Loaded via Path(__file__).parent / "assets"
-# in gateway/status_phrases.py and gateway/run.py.
-gateway = ["assets/**/*"]
+arkos_cli = ["observability/schemas/*.json", "local_runtime/*.json"]
 # Bundled plugin discovery reads these manifests at runtime. Keep them in
 # sealed wheels with the plugin Python modules; without this declaration the
 # wheel contains adapters but discovery finds zero bundled plugins.

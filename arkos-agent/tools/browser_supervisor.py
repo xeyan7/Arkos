@@ -6,7 +6,6 @@ session (top page + auto-attached OOPIF / worker targets), pending dialogs + fra
 tree exposed via a thread-safe snapshot. Not in the tool schema — output reaches the
 agent via ``browser_snapshot`` / ``browser_dialog``. Dialog capture and frame tracking
 are mixins (``browser_supervisor_dialogs`` / ``browser_supervisor_frames``).
-Design spec: ``website/docs/developer-guide/browser-supervisor.md``.
 """
 
 from __future__ import annotations
@@ -460,24 +459,3 @@ class ConsoleEvent:
     level: str
     text: str
     url: Optional[str] = None
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'DIALOG_BRIDGE_HOST': ('tools.browser_supervisor_dialogs', 'DIALOG_BRIDGE_HOST'),
-    'DIALOG_BRIDGE_URL_PATTERN': ('tools.browser_supervisor_dialogs', 'DIALOG_BRIDGE_URL_PATTERN'),
-    'DIALOG_POLICY_AUTO_ACCEPT': ('tools.browser_supervisor_dialogs', 'DIALOG_POLICY_AUTO_ACCEPT'),
-    'DIALOG_POLICY_AUTO_DISMISS': ('tools.browser_supervisor_dialogs', 'DIALOG_POLICY_AUTO_DISMISS'),
-    'DIALOG_POLICY_MUST_RESPOND': ('tools.browser_supervisor_dialogs', 'DIALOG_POLICY_MUST_RESPOND'),
-    'FRAME_TREE_MAX_ENTRIES': ('tools.browser_supervisor_frames', 'FRAME_TREE_MAX_ENTRIES'),
-    'FRAME_TREE_MAX_OOPIF_DEPTH': ('tools.browser_supervisor_frames', 'FRAME_TREE_MAX_OOPIF_DEPTH'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

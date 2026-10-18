@@ -5,7 +5,7 @@ triggers a rebuild) so the upstream prefix cache stays warm.  Three tiers are
 joined with ``\\n\\n``: ``stable`` (identity, guidance, env hints, coding brief,
 platform hints), ``context`` (workspace snapshot, caller ``system_message``,
 context files) and ``volatile`` (skills index, memory, USER.md, external memory
-provider, timestamp line).  See ``references/system-prompt-invariant.md``.
+provider, timestamp line).
 """
 
 from __future__ import annotations
@@ -679,20 +679,3 @@ def format_tools_for_system_message(agent: Any) -> str:
 
 __all__ = ["build_system_prompt_parts", "build_system_prompt", "invalidate_system_prompt",
            "restore_plugin_prompt_sections", "format_tools_for_system_message"]
-
-
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'OPENAI_MODEL_EXECUTION_GUIDANCE': ('agent.prompt_builder', 'OPENAI_MODEL_EXECUTION_GUIDANCE'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

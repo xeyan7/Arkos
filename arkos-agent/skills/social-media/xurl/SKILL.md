@@ -3,7 +3,6 @@ name: xurl
 description: "X/Twitter via xurl CLI: raw post search, posting, DM, media."
 version: 1.1.3
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos]
 prerequisites:
   commands: [xurl]
@@ -11,7 +10,6 @@ metadata:
   arkos:
     tags: [twitter, x, social-media, xurl, official-api]
     homepage: xdevplatform/xurl
-    upstream_skill: upstream/skills/xurl/SKILL.md
 ---
 
 # xurl — X (Twitter) API via the Official CLI
@@ -115,7 +113,7 @@ After this, the agent can use any command below without further setup. OAuth 2.0
 
 > **Common pitfall:** If you omit `--app my-app` from `xurl auth oauth2`, the OAuth token is saved to the built-in `default` app profile — which has no client-id or client-secret. Commands will fail with auth errors even though the OAuth flow appeared to succeed. If you hit this, re-run `xurl auth oauth2 --app my-app` and `xurl auth default my-app`.
 
-> **Docker HOME pitfall:** In the official the agent Docker layout, `/opt/data` is `ARKOS_HOME`, but the agent tool subprocesses use `/opt/data/home` as `HOME`. That means `~/.xurl` resolves to `/opt/data/home/.xurl` for the agent-run `xurl` commands, not `/opt/data/.xurl`. Run the user setup with the same HOME:
+> **Docker HOME pitfall:** In the official Docker layout, `/opt/data` is `ARKOS_HOME`, but the agent tool subprocesses use `/opt/data/home` as `HOME`. That means `~/.xurl` resolves to `/opt/data/home/.xurl` for the agent-run `xurl` commands, not `/opt/data/.xurl`. Run the user setup with the same HOME:
 > ```bash
 > HOME=/opt/data/home xurl auth apps add my-app --client-id YOUR_CLIENT_ID --client-secret YOUR_CLIENT_SECRET
 > HOME=/opt/data/home xurl auth oauth2 --app my-app YOUR_USERNAME

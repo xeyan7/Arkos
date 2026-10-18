@@ -1,7 +1,7 @@
 {
   "name": "@arkos/monorepo",
   "private": true,
-  "license": "MIT",
+  "license": "UNLICENSED",
   "workspaces": {
     "packages": [
       "apps/*",
@@ -27,15 +27,12 @@
     "dev": "node scripts/dev-runner.ts dev",
     "dev:server": "node scripts/dev-runner.ts dev:server",
     "dev:web": "node scripts/dev-runner.ts dev:web",
-    "dev:marketing": "turbo run dev --filter=@arkos/marketing",
     "dev:desktop": "node scripts/dev-runner.ts dev:desktop",
     "electron": "bun run start:desktop",
     "electron:dev": "node scripts/dev-runner.ts dev:desktop --home-dir ./.arkos/electron-dev",
     "start": "turbo run start --filter=@arkos/cli",
     "start:desktop": "turbo run start --filter=@arkos/desktop",
-    "start:marketing": "turbo run preview --filter=@arkos/marketing",
     "build": "turbo run build",
-    "build:marketing": "turbo run build --filter=@arkos/marketing",
     "build:desktop": "turbo run build --filter=@arkos/desktop --filter=@arkos/cli",
     "postinstall": "effect-tsgo patch --typescript --typescript-package @typescript/native",
     "typecheck": "effect-tsgo patch --typescript --typescript-package @typescript/native && turbo run typecheck",

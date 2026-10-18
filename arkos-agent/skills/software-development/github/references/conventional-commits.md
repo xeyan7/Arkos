@@ -30,7 +30,7 @@ Add `!` after type or `BREAKING CHANGE:` in footer:
 feat(api)!: change authentication to use bearer tokens
 
 BREAKING CHANGE: API endpoints now require Bearer token instead of API key header.
-Migration guide: https://docs.example.com/migrate-auth
+Migration guide: see the API changelog.
 ```
 
 ## Multi-line Body

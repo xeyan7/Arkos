@@ -48,7 +48,7 @@ export function remoteAccessPolicyError(
 ): string | null {
   const isRemoteBind = !isLoopbackHost(config.host);
   if (config.publicUrl && !normalizeHttpsPublicOrigin(config.publicUrl)) {
-    return "ARKOS_PUBLIC_URL/--public-url must be an HTTPS root origin without credentials, path, query, or fragment (for example https://arkos.example.com).";
+    return "ARKOS_PUBLIC_URL/--public-url must be an HTTPS root origin without credentials, path, query, or fragment (for example https://<your-host>).";
   }
   const isPubliclyExposed = isRemoteBind || Boolean(config.publicUrl);
   if (!isPubliclyExposed) return null;

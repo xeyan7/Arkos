@@ -184,21 +184,3 @@ class SecretCache(Generic[K]):
     def clear(self, home_path: Optional[Path] = None) -> None:
         self.memory.clear()
         self.disk.clear(home_path)
-
-
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'FetchResult': ('agent.secret_sources.base', 'FetchResult'),
-    'is_valid_env_name': ('agent.secret_sources.base', 'is_valid_env_name'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

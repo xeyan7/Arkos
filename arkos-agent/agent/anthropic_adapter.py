@@ -596,31 +596,3 @@ import platform  # noqa: F401,E402
 import secrets  # noqa: F401,E402
 import stat  # noqa: F401,E402
 from urllib.parse import urlparse  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'CredentialPersistError': ('agent.anthropic_credentials', 'CredentialPersistError'),
-    'base_url_host_matches': ('utils', 'base_url_host_matches'),
-    'base_url_hostname': ('utils', 'base_url_hostname'),
-    'claude_code_credentials_path': ('agent.anthropic_credentials', 'claude_code_credentials_path'),
-    'get_arkos_home': ('arkos_constants', 'get_arkos_home'),
-    'is_claude_code_token_valid': ('agent.anthropic_credentials', 'is_claude_code_token_valid'),
-    'is_rotation_consumed_uncommitted': ('agent.anthropic_credentials', 'is_rotation_consumed_uncommitted'),
-    'mark_rotation_consumed_uncommitted': ('agent.anthropic_credentials', 'mark_rotation_consumed_uncommitted'),
-    'read_claude_code_credentials': ('agent.anthropic_credentials', 'read_claude_code_credentials'),
-    'read_arkos_oauth_credentials': ('agent.anthropic_credentials', 'read_arkos_oauth_credentials'),
-    'refresh_anthropic_oauth_pure': ('agent.anthropic_credentials', 'refresh_anthropic_oauth_pure'),
-    'resolve_anthropic_token': ('agent.anthropic_credentials', 'resolve_anthropic_token'),
-    'run_arkos_oauth_login_pure': ('agent.anthropic_credentials', 'run_arkos_oauth_login_pure'),
-    'run_oauth_setup_token': ('agent.anthropic_credentials', 'run_oauth_setup_token'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

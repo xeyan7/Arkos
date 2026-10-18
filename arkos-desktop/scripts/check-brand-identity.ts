@@ -13,7 +13,6 @@ const retiredCompanyName = `${retiredShortName}${characters(116, 111, 111, 108, 
 const retiredSecondName = characters(100, 112, 99, 111, 100, 101);
 const retiredPredecessorName = characters(99, 111, 100, 101, 116, 104, 105, 110, 103);
 const incorrectBundleDomain = characters(99, 111, 109, 46, 115, 121, 110, 97, 114, 97);
-const retiredCompanyDisplayName = `${characters(84, 51)} ${characters(84, 111, 111, 108, 115)}`;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const joinedWithOptionalSeparator = (left: string, right: string): string =>
@@ -22,7 +21,8 @@ const joinedWithOptionalSeparator = (left: string, right: string): string =>
 const forbiddenPatterns = [
   // No project website has been configured. A rename must not invent one.
   /https?:\/\/(?:www\.)?(?:try)?arkos\.(?:com|dev|app|ai|sh)(?:[/:?#\s"']|$)/i,
-  /https?:\/\/github\.com\/xeyan7\/Arkos\/(?:getting-started|workflows|reference)(?:\/|$)/i,
+  // Repository documentation links for the product name are not a published surface.
+  /https?:\/\/github\.com\/[^/\s]+\/[Aa]rkos\/(?:getting-started|workflows|reference)(?:\/|$)/i,
   new RegExp(
     joinedWithOptionalSeparator(retiredShortName, retiredFirstName.slice(retiredShortName.length)),
     "i",
@@ -60,10 +60,6 @@ interface ApprovedIdentityLine {
 }
 
 const approvedIdentityLines: readonly ApprovedIdentityLine[] = [
-  {
-    path: "LICENSE",
-    line: `Copyright (c) 2026 ${retiredCompanyDisplayName} Inc.`,
-  },
   // These two terms are the cubic time coefficient in the reviewed native
   // patch. Keep the patch and its recorded checksum unchanged.
   ...[0, 1].map((axis) => ({

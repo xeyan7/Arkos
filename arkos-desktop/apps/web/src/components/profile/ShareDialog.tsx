@@ -5,8 +5,7 @@
 // Layer: web profile feature.
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { SiReddit, SiX } from "react-icons/si";
-import { FaLinkedinIn } from "react-icons/fa6";
+import { SiX } from "react-icons/si";
 import type { ProfileStats, ProfileTokenStats } from "@arkos/contracts";
 import { Dialog, DialogPopup, DialogTitle } from "~/components/ui/dialog";
 import { CopyIcon, DownloadIcon } from "~/lib/icons";
@@ -190,22 +189,6 @@ export function ShareDialog({
               onClick={() => void handleShare("x")}
             >
               <SiX className="size-5" />
-            </ShareButton>
-            <ShareButton
-              label="LinkedIn"
-              busy={busy === "linkedin"}
-              disabled={actionsDisabled}
-              onClick={() => void handleShare("linkedin")}
-            >
-              <FaLinkedinIn className="size-5" />
-            </ShareButton>
-            <ShareButton
-              label="Reddit"
-              busy={busy === "reddit"}
-              disabled={actionsDisabled}
-              onClick={() => void handleShare("reddit")}
-            >
-              <SiReddit className="size-5" />
             </ShareButton>
             <ShareButton
               label="Save"

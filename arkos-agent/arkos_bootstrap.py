@@ -93,7 +93,7 @@ def harden_import_path(src_root: str | None = None) -> None:
 def activate_durable_lazy_target() -> None:
     """Put the durable lazy-install dir (``ARKOS_LAZY_INSTALL_TARGET``) on ``sys.path``.
 
-    Immutable Docker images seal the venv and redirect lazy installs to the data volume;
+    Read-only container images seal the venv, so lazy installs are redirected to the data volume;
     packages installed there on a previous run must be importable before any backend
     imports its SDK. Appends to the END of ``sys.path`` so the core venv always wins name
     collisions (see ``tools.lazy_deps``). Never raises; unset target is a no-op.

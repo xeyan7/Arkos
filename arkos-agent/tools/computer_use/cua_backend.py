@@ -349,21 +349,3 @@ import re  # noqa: F401,E402
 import shutil  # noqa: F401,E402
 import tempfile  # noqa: F401,E402
 import time  # noqa: F401,E402
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'CaptureResult': ('tools.computer_use.backend', 'CaptureResult'),
-    'UIElement': ('tools.computer_use.backend', 'UIElement'),
-    'cua_driver_install_hint': ('tools.computer_use.cua_backend_driver', 'cua_driver_install_hint'),
-    'cua_driver_update_check': ('tools.computer_use.cua_backend_driver', 'cua_driver_update_check'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

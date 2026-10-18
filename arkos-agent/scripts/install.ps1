@@ -383,8 +383,10 @@ $script:ResolvedPathReport = @{
 # Configuration
 # ============================================================================
 
-$RepoUrlSsh = if ($env:ARKOS_REPO_URL_SSH) { $env:ARKOS_REPO_URL_SSH } else { "git@github.com:xeyan7/Arkos.git" }
-$RepoUrlHttps = if ($env:ARKOS_REPO_URL_HTTPS) { $env:ARKOS_REPO_URL_HTTPS } else { "https://github.com/xeyan7/Arkos.git" }
+# No default repository URL: fresh git installs require an explicit source.
+# Set ARKOS_REPO_URL_SSH (optional, tried first) and/or ARKOS_REPO_URL_HTTPS.
+$RepoUrlSsh = if ($env:ARKOS_REPO_URL_SSH) { $env:ARKOS_REPO_URL_SSH } else { "" }
+$RepoUrlHttps = if ($env:ARKOS_REPO_URL_HTTPS) { $env:ARKOS_REPO_URL_HTTPS } else { "" }
 $PythonVersion = "3.11"
 # Minor versions the installer accepts when the requested $PythonVersion isn't
 # available, in preference order. Only checkout-private uv-managed interpreters
@@ -2380,6 +2382,11 @@ function Install-Repository {
     if (-not $didUpdate) {
         $cloneSuccess = $false
 
+        if (-not $RepoUrlSsh -and -not $RepoUrlHttps -and -not $env:ARKOS_ARCHIVE_URL_BASE) {
+            throw "No repository URL configured. Set ARKOS_REPO_URL_HTTPS (and optionally " +
+                  "ARKOS_REPO_URL_SSH), or ARKOS_ARCHIVE_URL_BASE for the ZIP fallback."
+        }
+
         # Fix Windows git "copy-fd: write returned: Invalid argument" error.
         # Git for Windows can fail on atomic file operations (hook templates,
         # config lock files) due to antivirus, OneDrive, or NTFS filter drivers.
@@ -2391,17 +2398,19 @@ function Install-Repository {
         git config --global windows.appendAtomically false 2>$null
 
         # Try SSH first, then HTTPS, with -c flag for atomic write fix
-        Write-Info "Trying SSH clone..."
-        $env:GIT_SSH_COMMAND = "ssh -o BatchMode=yes -o ConnectTimeout=5"
-        try {
-            Invoke-NativeWithRelaxedErrorAction { git -c windows.appendAtomically=false clone --depth 1 --branch $Branch $RepoUrlSsh $InstallDir }
-            if ($LASTEXITCODE -eq 0) { $cloneSuccess = $true }
-        } catch { }
-        $env:GIT_SSH_COMMAND = $null
+        if ($RepoUrlSsh) {
+            Write-Info "Trying SSH clone..."
+            $env:GIT_SSH_COMMAND = "ssh -o BatchMode=yes -o ConnectTimeout=5"
+            try {
+                Invoke-NativeWithRelaxedErrorAction { git -c windows.appendAtomically=false clone --depth 1 --branch $Branch $RepoUrlSsh $InstallDir }
+                if ($LASTEXITCODE -eq 0) { $cloneSuccess = $true }
+            } catch { }
+            $env:GIT_SSH_COMMAND = $null
+        }
 
-        if (-not $cloneSuccess) {
+        if (-not $cloneSuccess -and $RepoUrlHttps) {
             if (Test-Path $InstallDir) { Remove-Item -Recurse -Force $InstallDir -ErrorAction SilentlyContinue }
-            Write-Info "SSH failed, trying HTTPS..."
+            Write-Info "Trying HTTPS clone..."
             try {
                 Invoke-NativeWithRelaxedErrorAction { git -c windows.appendAtomically=false clone --depth 1 --branch $Branch $RepoUrlHttps $InstallDir }
                 if ($LASTEXITCODE -eq 0) { $cloneSuccess = $true }
@@ -2461,7 +2470,7 @@ function Install-Repository {
                     # config below and install.ps1:1461-1469). The later pin on
                     # the shared path is idempotent and still covers git clones.
                     git -c windows.appendAtomically=false config core.autocrlf false 2>$null
-                    git remote add origin $RepoUrlHttps 2>$null
+                    if ($RepoUrlHttps) { git remote add origin $RepoUrlHttps 2>$null }
                     $fetchRef = if ($Commit) { $Commit } elseif ($Tag) { "refs/tags/$Tag" } else { $Branch }
                     Write-Info "Fetching $fetchRef so the ZIP checkout has a resolvable HEAD..."
                     $prevZipEAP = $ErrorActionPreference
@@ -4000,8 +4009,8 @@ function Try-RestoreElectronDist {
 function Install-DesktopVoiceDeps {
     # Desktop ships with working voice out of the box: eagerly install the
     # wake-word + local-STT stacks ([wake] + [voice] extras) instead of
-    # leaving them to lazy first-use install. Policy change (Maintainers, July
-    # 2026,  testing): the first ear-click used to trigger a
+    # leaving them to lazy first-use install. Policy change (July 2026): the
+    # first ear-click used to trigger a
     # multi-minute onnxruntime pip install that froze the UI and blew RPC
     # timeouts. Best-effort -- lazy install remains the fallback for anything
     # this step fails to fetch.

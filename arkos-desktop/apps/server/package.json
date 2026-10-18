@@ -1,12 +1,7 @@
 {
   "name": "@arkos/cli",
   "version": "1.0.1",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/xeyan7/Arkos.git",
-    "directory": "apps/server"
-  },
+  "license": "UNLICENSED",
   "bin": {
     "arkos": "dist/index.mjs",
     "arkos-restore-migration-backup": "dist/restoreMigrationBackup.mjs"

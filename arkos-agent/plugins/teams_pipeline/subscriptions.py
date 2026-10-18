@@ -128,18 +128,3 @@ def resolve_store_path(path: str | None) -> str:
 
 def build_store(path: str | None = None) -> TeamsPipelineStore:
     return TeamsPipelineStore(resolve_store_path(path))
-
-
-_PLUGIN_COMPAT_LAZY = {
-    'resolve_teams_pipeline_store_path': ('plugins.teams_pipeline.store', 'resolve_teams_pipeline_store_path'),
-}
-
-
-def __getattr__(name):
-    target = _PLUGIN_COMPAT_LAZY.get(name)
-    if target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    import importlib
-    from arkos_cli.plugin_compat import warn_once
-    warn_once(__name__, name, *target)
-    return getattr(importlib.import_module(target[0]), target[1])

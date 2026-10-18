@@ -38,10 +38,6 @@ Use `AIAgent.run_conversation()` with stream, tool-start, tool-complete, thinkin
 
 `arkos_cli` is a backend namespace for configuration, authentication, profiles, and provider discovery. Its name does not imply an installed Arkos CLI. Optional web-server dependencies remain in the `web` extra for future API hosts.
 
-See [ENGINE_CLEANUP_AUDIT.md](ENGINE_CLEANUP_AUDIT.md) for the file inventory, removals, and remaining integration gaps.
-
-See [ENGINE_HEALTH_REVIEW.md](ENGINE_HEALTH_REVIEW.md) for the latest repairs, validation results, and supported-engine limitations.
-
 ## Internal development guides
 
 - [AGENTS.md](AGENTS.md) — Engine design invariants and internal change standards

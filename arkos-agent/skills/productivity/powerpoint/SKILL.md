@@ -3,7 +3,6 @@ name: powerpoint
 description: Create, read, edit .pptx decks with python-pptx.
 version: 1.1.0
 author: Arkos distribution
-license: MIT
 platforms: [linux, macos, windows]
 metadata:
   arkos:

@@ -56,6 +56,7 @@ import {
   ARKOS_BETA_INSTALL_DIR_ENV,
   ARKOS_STABLE_EXECUTABLE_ENV,
   ARKOS_STABLE_HOME_ENV,
+  ARKOS_STABLE_RELEASES_URL_ENV,
 } from "@arkos/shared/betaChannel";
 import { ARKOS_DESKTOP_SMOKE_USER_DATA_ENV } from "@arkos/shared/desktopIdentity";
 import {
@@ -115,7 +116,7 @@ describe("DesktopBetaChannel", () => {
     expect(state.lastImportAt).toBeNull();
     expect(state.canInstall).toBe(false);
     expect(state.install).toBeNull();
-    expect(state.downloadUrl).toContain("releases");
+    expect(state.downloadUrl).toBe("");
   });
 
   it("refuses the import when beta is missing", async () => {
@@ -417,13 +418,14 @@ describe("switching back to stable", () => {
     const env = {
       [ARKOS_STABLE_EXECUTABLE_ENV]: executable,
       [ARKOS_STABLE_HOME_ENV]: join(root, "stable-home"),
+      [ARKOS_STABLE_RELEASES_URL_ENV]: "https://releases.example-org.test/stable",
       [ARKOS_DESKTOP_SMOKE_USER_DATA_ENV]: join(root, "beta-userdata"),
     };
     const channel = makeChannel(root, "beta", { platform: "darwin", env, canTrashOwnBundle: true });
     const state = channel.getState();
     expect(state.stableInstalled).toBe(true);
     expect(state.canMoveBetaToTrash).toBe(true);
-    expect(state.stableDownloadUrl).toBe("https://github.com/xeyan7/Arkos/releases");
+    expect(state.stableDownloadUrl).toBe("https://releases.example-org.test/stable");
 
     expect(await channel.leave()).toEqual({ ok: true });
     const last = spawnCalls.at(-1);

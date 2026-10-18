@@ -1445,7 +1445,7 @@ async function handleDesktopMigrationRecovery(): Promise<DesktopMigrationRecover
       // in-app update button is unreachable by definition. A newer build is
       // often the actual fix, and this dialog is the only surface left to
       // offer it from: installing it in place when the updater can reach the
-      // feed, and handing over the download page otherwise.
+      // feed, and handing over the release page otherwise.
       const releaseUrl = updateState.releaseUrl;
       const canInstallUpdate = canInstallUpdateFromRecovery();
       const restoreFailed = previousFailure?.attempt === "restore";

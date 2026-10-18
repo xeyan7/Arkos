@@ -5,16 +5,17 @@ Applies on top of the root `AGENTS.md`. (Long-form site guides are not shipped i
 ## Two surfaces
 
 - **`skills/`** — built-in, loadable by default, organised by category (`skills/github/`, `skills/mlops/`).
-- **`optional-skills/`** — heavier/niche skills shipped but NOT active; installed via
-  `arkos skills install official/<category>/<skill>` (adapter `tools/skills_hub_official.py`
-  `OptionalSkillSource`). Categories: `autonomous-ai-agents, blockchain, communication, creative,
+- **`optional-skills/`** — heavier/niche skills shipped but NOT active; in a full checkout they
+  install via `arkos skills install official/<category>/<skill>`. (Engine build: the skills-hub
+  adapters — `tools/skills_hub*.py`, including `OptionalSkillSource` — are not shipped.)
+  Categories: `autonomous-ai-agents, blockchain, communication, creative,
   devops, email, health, mcp, migration, mlops, productivity, research, security, web-development`.
 
 Reviewing a skill PR: check the target directory — heavy-dep or niche skills go to `optional-skills/`.
 
 ## SKILL.md frontmatter
 
-`name`, `description`, `version`, `author`, `license`, `platforms` (OS gate: `[macos]`,
+`name`, `description`, `version`, `author`, `platforms` (OS gate: `[macos]`,
 `[linux, macos]`, ...), `metadata.arkos.tags`, `metadata.arkos.category`,
 `metadata.arkos.related_skills`, `metadata.arkos.config` (config.yaml settings the skill needs —
 stored under `skills.config.<key>`, prompted during setup, injected at load). Top-level `tags:` /
@@ -41,8 +42,10 @@ Every new or modernised skill — bundled, optional, or contributed — meets al
    `grep`); gate narrower only when the dependency is genuinely platform-bound.
 4. **Bundled metadata identifies the Arkos distribution.** Use `author: Arkos distribution`
    for shipped skills. This identifies the maintained distribution, not original copyright
-   ownership. Preserve required source copyright and license notices in the source or
-   `THIRD_PARTY_NOTICES.md`; do not copy personal contributor labels into product metadata.
+   ownership, and it does not confer or replace any license rights. Arkos is proprietary:
+   do not add a `license` field to bundled frontmatter. Preserve required third-party source
+   copyright and license notices in the source or `THIRD_PARTY_NOTICES.md`; do not copy
+   personal contributor labels into product metadata.
 5. **Modern section order:** `# <Skill> Skill`, 2–3 sentence intro (what it does and doesn't),
    `## When to Use`, `## Prerequisites`, `## How to Run`, `## Quick Reference`, `## Procedure`,
    `## Pitfalls`, `## Verification`. ~200 lines for a complex skill, ~100 simple. Cut intro fluff,
@@ -55,16 +58,14 @@ Every new or modernised skill — bundled, optional, or contributed — meets al
    usually stale; edits outside the skill's own block are dropped during salvage.
 
 No `offset`/`limit` pagination on skill-loading tools — the agent must read a skill fully (root).
-The salvage/modernisation checklist for external skill PRs is `references/new-skill-pr-salvage.md`
-in the `arkos-agent-dev` skill.
 
 ## Curator (skill lifecycle)
 
 Background maintenance that tracks usage on agent-created skills and auto-archives stale ones;
 archives go to `~/.arkos/skills/.archive/` and are restorable. Core `agent/curator.py` (review
 loop, auto-transitions, LLM review prompt) + `agent/curator_backup.py` (pre-run tar.gz snapshots);
-CLI `arkos curator status|run|...` (engine build: `arkos_cli/curator.py` entry deleted,
-backend `agent/curator.py` remains); telemetry `tools/skill_usage.py` owns `~/.arkos/skills/.usage.json`
+CLI `arkos curator status|run|...` (engine build: the `arkos curator` entry and the
+`agent/curator*.py` runtime modules are not shipped); telemetry `tools/skill_usage.py` owns `~/.arkos/skills/.usage.json`
 (`use_count`, `view_count`, `patch_count`, `last_activity_at`, `state` active/stale/archived,
 `pinned`). Config `curator:` — `enabled, interval_hours, min_idle_hours, stale_after_days,
 archive_after_days, backup.*`; its LLM calls route through `auxiliary` (`agent/AGENTS.md`).
