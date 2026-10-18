@@ -1,3 +1,4 @@
+// GitHub URLs in this test are synthetic fixtures, not project links.
 import type { OrchestrationThreadPullRequest } from "@arkos/contracts";
 import { describe, expect, it } from "vitest";
 
@@ -6,7 +7,7 @@ import { deriveThreadGitMetadataPatch } from "./threadGitMetadata.ts";
 const pullRequest: OrchestrationThreadPullRequest = {
   number: 574,
   title: "Cache provider usage",
-  url: "https://github.com/xeyan7/Arkos/pull/574",
+  url: "https://github.com/example-org/example-repo/pull/574",
   baseBranch: "main",
   headBranch: "feat/provider-usage-snapshot-cache",
   state: "open",
@@ -26,7 +27,7 @@ const dedicatedWorktree = {
 const otherPullRequest: OrchestrationThreadPullRequest = {
   ...pullRequest,
   number: 575,
-  url: "https://github.com/xeyan7/Arkos/pull/575",
+  url: "https://github.com/example-org/example-repo/pull/575",
   headBranch: "feat/next-change",
 };
 

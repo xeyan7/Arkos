@@ -1,3 +1,4 @@
+// GitHub URLs in this test are synthetic fixtures, not project links.
 import {
   ApprovalRequestId,
   CheckpointRef,
@@ -1800,7 +1801,7 @@ projectionSnapshotLayer("ProjectionSnapshotQuery", (it) => {
           'project-pr',
           'Thread with PR',
           '{"provider":"codex","model":"gpt-5-codex"}',
-          '{"number":1,"title":"Add placeholder temp files","url":"https://github.com/xeyan7/Arkos/pull/1","baseBranch":"main","headBranch":"arkos/greeting-1","state":"open"}',
+          '{"number":1,"title":"Add placeholder temp files","url":"https://github.com/example-org/example-repo/pull/1","baseBranch":"main","headBranch":"arkos/greeting-1","state":"open"}',
           '2026-02-25T00:00:02.000Z',
           '2026-02-25T00:00:03.000Z',
           NULL

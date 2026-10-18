@@ -172,8 +172,12 @@ it("shows installation and auth beside activity switches with visible setup guid
       name: `${descriptor.displayName} setup guide`,
       exact: true,
     });
-    await expect.element(guide).toBeVisible();
-    expect(guide.element().getAttribute("href")).toBe(descriptor.setupDocsHref);
+    if (descriptor.setupDocsHref) {
+      await expect.element(guide).toBeVisible();
+      expect(guide.element().getAttribute("href")).toBe(descriptor.setupDocsHref);
+    } else {
+      expect(guide.elements()).toHaveLength(0);
+    }
   }
 });
 

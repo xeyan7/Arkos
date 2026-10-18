@@ -1,5 +1,7 @@
 # Arkos Beta
 
+This document describes the source build configuration. No Arkos releases are currently published in the configured repository; these packaging instructions do not imply that installers or a hosted diagnostics dashboard exist.
+
 Arkos Beta is a packaged prerelease flavor of the desktop app. It is a separate
 application that installs and updates side-by-side with stable Arkos, and it never
 shares stable's data directory or update feed.
@@ -23,9 +25,7 @@ shares stable's data directory or update feed.
   `BETA_ONLY_FEATURES` in `packages/shared/src/betaFeatures.ts`. The code ships in
   both apps; Stable just switches listed features off. Remove the entry to promote
   a feature to Stable. See [Beta-only features](#beta-only-features).
-- **Diagnostics are Beta-only.** Beta sends redacted error events, raw crash
-  dumps, and anonymous usage counts to a private dashboard. Stable sends nothing. See
-  [Diagnostics](#diagnostics).
+- **Diagnostics are local by default.** Beta keeps diagnostic events locally. Uploads require an explicitly configured endpoint; Stable does not construct the diagnostics sender.
 
 ### Release order
 
@@ -324,11 +324,7 @@ visible trail no longer subscribes. First use can request macOS audio access.
 
 ## Diagnostics
 
-Beta builds ship always-on diagnostics — crash reports plus anonymous usage
-counts (which providers are used, how many chats and turns) — while stable
-builds contain no sender code at all. See [diagnostics.md](docs/diagnostics.md) for
-exactly what is collected, what usage counters exclude, and how the Cloudflare
-ingest works.
+Beta diagnostics remain local by default. Set `ARKOS_BETA_DIAGNOSTICS_URL` only to an ingestion service you control to enable event and crash uploads. No hosted Arkos diagnostics service is configured in this checkout.
 
 ## Data
 

@@ -48,8 +48,8 @@ import {
 import { redactDiagnosticText } from "@arkos/shared/diagnosticsRedaction";
 import { Schema } from "effect";
 
-/** Override point for self-hosted / dev ingestion; production default ships in the binary. */
-export const BETA_DIAGNOSTICS_ENDPOINT = "https://arkos-beta-diagnostics.kartik-9f9.workers.dev";
+/** Diagnostics stay local unless an ingestion endpoint is explicitly configured. */
+export const BETA_DIAGNOSTICS_ENDPOINT = "";
 export const BETA_DIAGNOSTICS_ENDPOINT_ENV = "ARKOS_BETA_DIAGNOSTICS_URL";
 
 const FLUSH_INTERVAL_MS = 5 * 60 * 1000;
@@ -867,7 +867,7 @@ export class BetaDiagnostics {
    * cannot stall quit.
    */
   async flush(timeoutMs = 15_000): Promise<void> {
-    if (this.flushing || this.disposed) return;
+    if (!this.endpoint || this.flushing || this.disposed) return;
     this.flushing = true;
     // The promise resolves only after `flushing` clears, so dispose() can
     // chain a final flush on it.

@@ -4,24 +4,11 @@
   <p><strong>A focused workspace for coding agents.</strong><br>
   Projects, provider sessions, execution surfaces, and review tools in one local-first desktop application.</p>
   <p>
-    <a href="https://github.com/xeyan7/Arkos/releases/latest">Download</a>
-    &nbsp;·&nbsp;
-    <a href="https://github.com/xeyan7/Arkos">Website</a>
-    &nbsp;·&nbsp;
-    <a href="https://github.com/xeyan7/Arkos">Documentation</a>
-    &nbsp;·&nbsp;
-    <a href="./docs/external-mcp.md">MCP integration</a>
+    <a href="https://github.com/xeyan7/Arkos">Repository</a>
     &nbsp;·&nbsp;
     <a href="https://github.com/xeyan7/Arkos/issues/new/choose">Report an issue</a>
   </p>
 </div>
-
-<p align="center">
-  <img src="./assets/prod/readme-workspace-light.png" width="1200" alt="Arkos workspace on first launch">
-</p>
-
-<details open>
-  <summary><strong>Table of contents</strong></summary>
 
 | Workspace layer      | Responsibility                                                |
 | -------------------- | ------------------------------------------------------------- |
@@ -93,7 +80,7 @@ Managed worktrees provide a boundary for parallel changes. Handoffs preserve pro
 
 Automations support recurring agent runs and keep their outcomes attached to projects and threads. External MCP integrations provide scoped, user-approved access for other local clients.
 
-See [External MCP integrations](./docs/external-mcp.md) for setup, pairing, project access, and permission boundaries.
+
 
 ### 7. Appearance and workspace preferences
 
@@ -117,9 +104,9 @@ Configure the shell to match the way you work with light and dark themes, typogr
 
 ### Desktop application
 
-Download the latest build from [GitHub Releases](https://github.com/xeyan7/Arkos/releases) or visit the [Arkos repository](https://github.com/xeyan7/Arkos/).
+Run the Electron app directly from source for development; no desktop installer is required. See the developer launch commands below.
 
-Current native release targets are Windows x64, macOS Intel, macOS Apple Silicon, and Linux x64.
+The source includes build targets for Windows x64, macOS Intel, macOS Apple Silicon, and Linux x64. This does not imply published installers are available.
 
 Workspace Git features require [Git 2.29 or newer](https://github.com/git/git/blob/v2.29.0/Documentation/RelNotes/2.29.0.txt). Background refreshes preserve the FETCH_HEAD used by explicit fetch workflows. Ahead/behind counts use local refs and can update on the next status poll, up to 60 seconds after a successful background refresh; status reads do not wait for the remote.
 
@@ -133,12 +120,20 @@ The development checkout uses [Bun 1.4.2](https://bun.sh/) and [Node.js 24.13.1]
 
 ```console
 git clone https://github.com/xeyan7/Arkos.git
-cd arkos
+cd Arkos/arkos-desktop
 bun install
 bun run dev
 ```
 
-`bun run typecheck` checks all seven workspaces with TypeScript 7 and the native
+For the Electron desktop development window:
+
+```powershell
+$env:NODE_OPTIONS = '--max-old-space-size=8192'
+bun run build:desktop --env-mode=loose
+bun run electron:dev -- -- --env-mode=loose
+```
+
+`bun run typecheck` checks the configured workspaces with TypeScript 7 and the native
 Effect checker. CI and each workspace's `typecheck` script use the same compiler.
 `bun run typecheck:native` remains an alias for the default check.
 

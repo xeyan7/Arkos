@@ -1,3 +1,4 @@
+// GitHub URLs in this test are synthetic fixtures, not project links.
 import { assert, describe, it } from "@effect/vitest";
 import type { ModelInfo, Options as ClaudeQueryOptions } from "@anthropic-ai/claude-agent-sdk";
 import type {
@@ -991,7 +992,7 @@ function makeHarnessLayer(
           url:
             reference.startsWith("http://") || reference.startsWith("https://")
               ? reference
-              : "https://github.com/xeyan7/Arkos/pull/841",
+              : "https://github.com/example-org/example-repo/pull/841",
           baseBranch: "main",
           headBranch: "fix/created-at-thread-order",
           state: "open",
@@ -6177,7 +6178,7 @@ describe("AgentGateway", () => {
         token: "token-parent",
         name: "arkos_set_thread_pull_request",
         args: {
-          reference: "https://github.com/xeyan7/Arkos/pull/841",
+          reference: "https://github.com/example-org/example-repo/pull/841",
         },
       });
 

@@ -14,7 +14,6 @@ import {
   TerminalIcon,
 } from "~/lib/icons";
 
-export const ARKOS_DOCS_URL = "https://github.com/xeyan7/Arkos";
 
 export interface TourCard {
   readonly id: string;
@@ -23,7 +22,7 @@ export interface TourCard {
   readonly title: string;
   readonly description: string;
   readonly highlights: ReadonlyArray<string>;
-  readonly docsHref: string;
+  readonly docsHref: string | null;
   readonly icon: LucideIcon;
 }
 
@@ -39,7 +38,7 @@ export const TOUR_CARDS: ReadonlyArray<TourCard> = [
       "Hand a thread to another provider",
       "Usage for every provider",
     ],
-    docsHref: `${ARKOS_DOCS_URL}/getting-started/providers`,
+    docsHref: null,
     icon: BotIcon,
   },
   {
@@ -49,7 +48,7 @@ export const TOUR_CARDS: ReadonlyArray<TourCard> = [
     description:
       "Each task owns one body of work: its conversation, provider session, working environment, tool activity, and Git changes. Run tasks in parallel on managed Git worktrees so two agents never edit the same checkout.",
     highlights: ["Managed worktrees", "Forks from any message", "Subagents and side chats"],
-    docsHref: `${ARKOS_DOCS_URL}/workflows/worktrees`,
+    docsHref: null,
     icon: GitForkIcon,
   },
   {
@@ -63,7 +62,7 @@ export const TOUR_CARDS: ReadonlyArray<TourCard> = [
       "Commit → push → PR",
       "Native pull-request workspace",
     ],
-    docsHref: `${ARKOS_DOCS_URL}/workflows/pull-requests`,
+    docsHref: null,
     icon: GitPullRequestIcon,
   },
   {
@@ -73,7 +72,7 @@ export const TOUR_CARDS: ReadonlyArray<TourCard> = [
     description:
       "Agents drive a visible, task-owned browser you can watch and annotate. On macOS, an iOS Simulator pane streams the device so agents can build, launch, and tap through an app while you follow along.",
     highlights: ["Shared Chromium surface", "Element annotations", "iOS Simulator pane"],
-    docsHref: `${ARKOS_DOCS_URL}/workflows/browser-verification`,
+    docsHref: null,
     icon: GlobeIcon,
   },
   {
@@ -87,7 +86,7 @@ export const TOUR_CARDS: ReadonlyArray<TourCard> = [
       "Natural-language stop conditions",
       "Thread goals",
     ],
-    docsHref: `${ARKOS_DOCS_URL}/workflows/automations`,
+    docsHref: null,
     icon: ClockIcon,
   },
   {
@@ -97,7 +96,7 @@ export const TOUR_CARDS: ReadonlyArray<TourCard> = [
     description:
       "A built-in MCP surface lets a supported provider session create tasks, wait on them, read transcripts, and steer other threads. Pair Codex, Claude Code, or Claude Desktop from outside with scoped, revocable credentials.",
     highlights: ["Parallel task batches", "External MCP pairing", "Approval boundaries"],
-    docsHref: `${ARKOS_DOCS_URL}/workflows/agent-gateway`,
+    docsHref: null,
     icon: TerminalIcon,
   },
   {
@@ -107,7 +106,7 @@ export const TOUR_CARDS: ReadonlyArray<TourCard> = [
     description:
       "Everything in the workspace has a shortcut, and the keymap is editable from Settings. A few worth learning on day one:",
     highlights: [],
-    docsHref: `${ARKOS_DOCS_URL}/reference/keyboard-shortcuts`,
+    docsHref: null,
     icon: KeyboardIcon,
   },
 ];

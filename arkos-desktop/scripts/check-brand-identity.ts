@@ -3,7 +3,7 @@
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const characters = (...codes: number[]): string => String.fromCharCode(...codes);
@@ -13,8 +13,6 @@ const retiredCompanyName = `${retiredShortName}${characters(116, 111, 111, 108, 
 const retiredSecondName = characters(100, 112, 99, 111, 100, 101);
 const retiredPredecessorName = characters(99, 111, 100, 101, 116, 104, 105, 110, 103);
 const incorrectBundleDomain = characters(99, 111, 109, 46, 115, 121, 110, 97, 114, 97);
-const retiredFirstDisplayName = characters(84, 51, 67, 111, 100, 101);
-const retiredFirstSpacedDisplayName = `${characters(84, 51)} Code`;
 const retiredCompanyDisplayName = `${characters(84, 51)} ${characters(84, 111, 111, 108, 115)}`;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -22,6 +20,9 @@ const joinedWithOptionalSeparator = (left: string, right: string): string =>
   `${escapeRegExp(left)}[\\s._/@:-]*${escapeRegExp(right)}`;
 
 const forbiddenPatterns = [
+  // No project website has been configured. A rename must not invent one.
+  /https?:\/\/(?:www\.)?(?:try)?arkos\.(?:com|dev|app|ai|sh)(?:[/:?#\s"']|$)/i,
+  /https?:\/\/github\.com\/xeyan7\/Arkos\/(?:getting-started|workflows|reference)(?:\/|$)/i,
   new RegExp(
     joinedWithOptionalSeparator(retiredShortName, retiredFirstName.slice(retiredShortName.length)),
     "i",
@@ -44,6 +45,12 @@ const forbiddenPatterns = [
     "i",
   ),
   new RegExp(escapeRegExp(incorrectBundleDomain), "i"),
+  ...[
+    characters(115, 121, 110, 97, 114, 97),
+    characters(115, 121, 97, 110, 97, 114, 97),
+    characters(99, 121, 97, 110, 97, 114, 97),
+    characters(115, 121, 110, 97, 116, 97),
+  ].map((name) => new RegExp(escapeRegExp(name), "i")),
 ] as const;
 
 interface ApprovedIdentityLine {
@@ -57,52 +64,6 @@ const approvedIdentityLines: readonly ApprovedIdentityLine[] = [
     path: "LICENSE",
     line: `Copyright (c) 2026 ${retiredCompanyDisplayName} Inc.`,
   },
-  {
-    path: "README.md",
-    markdownSection: "## Origins",
-    line: `Arkos began as a clone of [${retiredFirstDisplayName}](https://github.com/pingdotgg/${retiredFirstName}), but it has since become a substantially different product with its own branding, packaging, release system, provider orchestration, desktop app behavior, and product direction.`,
-  },
-  {
-    path: "CHANGELOG.md",
-    markdownSection: "## 0.7.0 - 2026-08-05",
-    line: `**A review of the Arkos codebase found an analytics configuration that came from the original ${retiredFirstSpacedDisplayName} codebase when Arkos was created as a clone in March. We did not add it, and we have no access to the PostHog project receiving the events.**`,
-  },
-  {
-    path: "apps/web/src/whatsNew/entries.ts",
-    line: `"A review of the Arkos codebase found an analytics configuration that came from the original ${retiredFirstSpacedDisplayName} codebase when Arkos was created as a clone in March.",`,
-  },
-  {
-    // The website's copy of the same published disclosure as CHANGELOG.md.
-    path: "apps/marketing/src/data/changelog.ts",
-    line: `"A review of the Arkos codebase found an analytics configuration that came from the original ${retiredFirstDisplayName.slice(0, 2)} Code codebase when Arkos was created as a clone in March.",`,
-  },
-  {
-    // A real user's words, quoted verbatim on the homepage. The retired name
-    // here refers to someone else's product, not to Arkos's own identity.
-    path: "apps/marketing/src/data/testimonials.ts",
-    line: `"I've been using @tryArkos for a few hours now. I'm really impressed. I'd already tried ${retiredFirstDisplayName.slice(0, 2)} Chat, Orca, and Terax, but none of them managed to grab my attention quite like Arkos did.",`,
-  },
-  // Preserve the recorded license provenance; these are exact attribution
-  // lines, not permission to reintroduce retired product names in these docs.
-  {
-    path: "docs/computer-use-cua/extraction-plan.md",
-    markdownSection: "## Upstream license and PR-back feasibility",
-    line: `also MIT (LICENSE, ${retiredCompanyDisplayName} Inc and Emanuele Di Pietro). There is no license`,
-  },
-  {
-    path: "docs/computer-use-cua/handoffs/arkos-cu-v2-mega-handoff-2026-09-16.md",
-    line: `- Decide what ships open: likely the driver patch + host protocol + tools + docs (MIT/Apache), either as its own project or upstreamed into trycua/cua; Arkos product code can stay whatever it is. Keep \`CUA-LICENSE.txt\` attribution; Arkos repo is MIT (${retiredCompanyDisplayName} Inc + Emanuele Di Pietro).`,
-  },
-  {
-    path: "docs/computer-use-cua/open-decisions-sheet.md",
-    markdownSection: "## 3. Which license",
-    line: `- Verification: Arkos repo is MIT, held by ${retiredCompanyDisplayName} Inc and Emanuele Di Pietro`,
-  },
-  {
-    path: "docs/computer-use-cua/workstream-f-opensource-spec.md",
-    markdownSection: "## Current state",
-    line: `The tree already carries two licenses. The Arkos repo is MIT, held by ${retiredCompanyDisplayName} Inc and Emanuele Di Pietro (\`LICENSE:1\`, \`LICENSE:3\`). The Cua driver redistribution license is MIT, held by Cua AI Inc (\`docs/computer-use-cua/CUA-LICENSE.txt:1\`, \`docs/computer-use-cua/CUA-LICENSE.txt:3\`). The redistribution license is referenced from the computer use README (\`docs/computer-use-cua/README.md:15\`). A full read of \`package.json:1\` through the end of the file shows no license field, so the root manifest states no license of its own. This is unverified as a problem, but an auditor will flag it.`,
-  },
   // These two terms are the cubic time coefficient in the reviewed native
   // patch. Keep the patch and its recorded checksum unchanged.
   ...[0, 1].map((axis) => ({
@@ -111,96 +72,36 @@ const approvedIdentityLines: readonly ApprovedIdentityLine[] = [
   })),
 ];
 
-// These are existing macOS TCC fixture identities, including identities in
-// recorded evidence. Renaming them would change permission ownership or falsify
-// the evidence. Only the complete reviewed ID is allowed at each exact path;
-// the rest of every line still goes through the ordinary branding checks.
-const approvedFixtureBundleIdentityPatterns = new Map<string, RegExp>(
-  [
-    {
-      suffix: "cua-fixture",
-      paths: [
-        "apps/desktop/src/cuaFixtures/electron.ts",
-        "apps/desktop/src/cuaFixtures/live.ts",
-        "scripts/computer-use-fixtures/build-electron.mjs",
-        "docs/computer-use-cua/evidence/efficiency-implementation-2026-09-08/native/signed-fixture-permission-check.json",
-        "docs/computer-use-cua/evidence/fixture-g5-set-value-2026-09-17.report.json",
-        "docs/computer-use-cua/evidence/gateway-native-report.json",
-        "docs/computer-use-cua/evidence/live-provider-report.json",
-        "docs/computer-use-cua/evidence/native-fixture-report.json",
-        "docs/computer-use-cua/evidence/native-fixture-run6-report.json",
-        "docs/computer-use-cua/evidence/native-revision1-final-report.json",
-        "docs/computer-use-cua/evidence/native-revision1-foreground-initial-report.json",
-        "docs/computer-use-cua/evidence/native-revision1-renewed-build-permission-refusal.json",
-        "docs/computer-use-cua/evidence/native-revision1-report.json",
-        "docs/computer-use-cua/evidence/overlay-disabled-report.json",
-        "docs/computer-use-cua/evidence/overlay-enabled-report.json",
-        "docs/computer-use-cua/evidence/rev15-electron-2026-09-17-report.json",
-        "docs/computer-use-cua/evidence/short-cursor-report.json",
-      ],
-    },
-    {
-      suffix: "cua-fixture-external",
-      paths: [
-        "docs/computer-use-cua/evidence/rev17-cancellation-2026-09-17-notes.md",
-        "docs/computer-use-cua/evidence/rev17-cancellation-2026-09-17-report.json",
-        "docs/computer-use-cua/evidence/rev17-gateway-2026-09-17-notes.md",
-        "docs/computer-use-cua/evidence/rev17-gateway-2026-09-17-report.json",
-        "docs/computer-use-cua/evidence/rev17-live-2026-09-17-live-report.json",
-        "docs/computer-use-cua/evidence/rev17-live-2026-09-17-notes.md",
-        "docs/computer-use-cua/evidence/rev17-live-2026-09-17-report.json",
-        "docs/computer-use-cua/evidence/rev17-native-2026-09-17-notes.md",
-        "docs/computer-use-cua/evidence/rev17-native-2026-09-17-report.json",
-      ],
-    },
-    {
-      suffix: "cua-canary",
-      paths: [
-        "scripts/computer-use-fixtures/build-canary.mjs",
-        "scripts/computer-use-fixtures/canary-main.ts",
-        "scripts/computer-use-fixtures/live-cert.ts",
-        "docs/computer-use-cua/belief-canary-runbook.md",
-        "docs/computer-use-cua/handoffs/arkos-cu-v2-session-handoff-2026-09-17.md",
-        "docs/computer-use-cua/evidence/rev20-realapp-calculator-2026-09-17-report.json",
-        "docs/computer-use-cua/evidence/rev20-realapp-notes-2026-09-17-report.json",
-      ],
-    },
-    {
-      suffix: "test",
-      paths: [
-        "apps/server/src/computer/CuaComputerBackend.test.ts",
-        "apps/server/src/computer/computerSignatureChange.test.ts",
-      ],
-    },
-    {
-      suffix: "latency-probe",
-      paths: [
-        "docs/computer-use-cua/evidence/latency-rev17-probe.ts",
-        "docs/computer-use-cua/evidence/latency-rev17-supplement-probe.ts",
-      ],
-    },
-    {
-      suffix: "cua-display-cert",
-      paths: ["scripts/computer-use-fixtures/multi-display-cert.ts"],
-    },
-  ].flatMap(({ suffix, paths }) =>
-    paths.map(
-      (path) =>
-        [
-          path,
-          new RegExp(
-            `(?<![a-zA-Z0-9_.-])${escapeRegExp(`${incorrectBundleDomain}.${suffix}`)}(?![a-zA-Z0-9_.-])`,
-            "g",
-          ),
-        ] as const,
-    ),
-  ),
-);
-
 // Raster images cannot be searched for embedded text. Keep the user-facing
 // screenshots behind reviewed digests so changing either one requires another
 // explicit visual identity audit instead of silently bypassing this guard.
-const approvedVisualAssetDigests = new Map<string, string>([]);
+const approvedVisualAssetDigests = new Map<string, string>([
+  [
+    "assets/prod/black-universal-1024.png",
+    "1e50bf53afd89d79554e78881f4fe61c2f14337878dce0d64d699236f706b9cc",
+  ],
+  [
+    "assets/dev/blueprint-universal-1024.png",
+    "1e50bf53afd89d79554e78881f4fe61c2f14337878dce0d64d699236f706b9cc",
+  ],
+  [
+    "assets/beta/beta-universal-1024.png",
+    "6a7f5af32aaa6a2bccc007d3307eea9628e67ece085bf82d9d2fdfddac4e180d",
+  ],
+  ["apps/web/public/arkos.png", "1e50bf53afd89d79554e78881f4fe61c2f14337878dce0d64d699236f706b9cc"],
+  [
+    "assets/prod/readme-split-view-dark.png",
+    "f4c3a1eebf298b4b46ec5fd0e2c841e946ffa004a9c861678b521879e060d2df",
+  ],
+  [
+    "assets/prod/readme-appearance-dark.png",
+    "8d151fe29a68635d961f1ae13ee53b32a5aaf6fb59a58d8356b8036c1c70ddaa",
+  ],
+  [
+    "apps/desktop/resources/app-icon-windows.ico",
+    "6c3db0b670e682efad1c277e6302b5e0ad67466ff19a51d27d19850904f39044",
+  ],
+]);
 
 export interface BrandIdentityFile {
   readonly path: string;
@@ -247,14 +148,10 @@ export function findBrandIdentityViolations(
       violations.push({ path: file.path, line: null, text: file.path });
     }
     const consumedLines = new Set<number>();
-    const approvedFixtureIdentity = approvedFixtureBundleIdentityPatterns.get(file.path);
     let markdownSection: string | null = null;
     for (const [index, line] of file.contents.split(/\r?\n/).entries()) {
       if (/^#{1,2}\s+/.test(line)) markdownSection = line.trim();
-      const textToCheck = approvedFixtureIdentity
-        ? line.replace(approvedFixtureIdentity, "")
-        : line;
-      if (!containsForbiddenIdentity(textToCheck)) continue;
+      if (!containsForbiddenIdentity(line)) continue;
       const approvedLine = findApprovedIdentityLine(
         file.path,
         line,
@@ -307,7 +204,9 @@ export function readTrackedFiles(cwd = process.cwd()): BrandIdentityBinaryFile[]
   // exist as directories or be absent when submodules have not been initialized.
   const paths = entries
     .filter((entry) => !entry.startsWith("160000 "))
-    .map((entry) => entry.slice(entry.indexOf("\t") + 1));
+    .map((entry) => entry.slice(entry.indexOf("\t") + 1))
+    // Audit the current working tree, including intentional file removals.
+    .filter((path) => existsSync(resolve(cwd, path)));
   return paths.map((path) => ({ path, contents: readFileSync(resolve(cwd, path)) }));
 }
 

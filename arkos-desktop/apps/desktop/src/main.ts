@@ -469,7 +469,7 @@ const betaDiagnostics =
       })
     : null;
 
-if (betaDiagnostics) {
+if (betaDiagnostics && resolveBetaDiagnosticsEndpoint(process.env)) {
   crashReporter.start({
     productName: APP_DISPLAY_NAME,
     companyName: "Arkos",
@@ -6059,7 +6059,9 @@ if (!hasSingleInstanceLock) {
 async function bootstrap(): Promise<void> {
   writeDesktopLogHeader("bootstrap start");
   pythonBridge = await startPythonBridge({
-    appPath: app.getAppPath(), userData: app.getPath("userData"), log: writeDesktopLogHeader,
+    appPath: app.getAppPath(),
+    userData: app.getPath("userData"),
+    log: writeDesktopLogHeader,
   });
   if (!(await requireCurrentDesktopMigrationBundle())) {
     return;

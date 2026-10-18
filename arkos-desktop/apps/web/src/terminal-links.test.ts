@@ -61,15 +61,15 @@ describe("resolvePathLinkTarget", () => {
     expect(
       resolvePathLinkTarget(
         "src/components/ThreadTerminalDrawer.tsx:42:7",
-        "/Users/julius/project",
+        "/Users/developer/project",
       ),
-    ).toBe("/Users/julius/project/src/components/ThreadTerminalDrawer.tsx:42:7");
+    ).toBe("/Users/developer/project/src/components/ThreadTerminalDrawer.tsx:42:7");
   });
 
   it("keeps absolute paths unchanged", () => {
     expect(
-      resolvePathLinkTarget("/Users/julius/project/src/main.ts:12", "/Users/julius/project"),
-    ).toBe("/Users/julius/project/src/main.ts:12");
+      resolvePathLinkTarget("/Users/developer/project/src/main.ts:12", "/Users/developer/project"),
+    ).toBe("/Users/developer/project/src/main.ts:12");
   });
 });
 

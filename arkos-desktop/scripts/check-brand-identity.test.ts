@@ -13,15 +13,10 @@ import {
 const characters = (...codes: number[]): string => String.fromCharCode(...codes);
 const shortName = characters(116, 51);
 const firstName = `${shortName}${characters(99, 111, 100, 101)}`;
-const firstDisplayName = characters(84, 51, 67, 111, 100, 101);
-const firstSpacedDisplayName = `${characters(84, 51)} Code`;
 const secondName = characters(100, 112, 99, 111, 100, 101);
 const companyDisplayName = `${characters(84, 51)} ${characters(84, 111, 111, 108, 115)}`;
 const fixtureBundleDomain = characters(99, 111, 109, 46, 115, 121, 110, 97, 114, 97);
 const legalNotice = `Copyright (c) 2026 ${companyDisplayName} Inc.`;
-const originsAttribution = `Arkos began as a clone of [${firstDisplayName}](https://github.com/pingdotgg/${firstName}), but it has since become a substantially different product with its own branding, packaging, release system, provider orchestration, desktop app behavior, and product direction.`;
-const releaseAttribution = `**A review of the Arkos codebase found an analytics configuration that came from the original ${firstSpacedDisplayName} codebase when Arkos was created as a clone in March. We did not add it, and we have no access to the PostHog project receiving the events.**`;
-const inAppReleaseAttribution = `"A review of the Arkos codebase found an analytics configuration that came from the original ${firstSpacedDisplayName} codebase when Arkos was created as a clone in March.",`;
 
 describe("brand identity guard", () => {
   it("scans owned files while ignoring initialized and absent gitlinks", () => {
@@ -46,9 +41,9 @@ describe("brand identity guard", () => {
         ),
       ).toHaveLength(1);
 
-      // Missing owned files must still fail rather than silently weakening the guard.
+      // Deleted source files are absent from the resulting working tree.
       rmSync(join(cwd, path));
-      expect(() => readTrackedFiles(cwd)).toThrow();
+      expect(readTrackedFiles(cwd)).toEqual([]);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -70,6 +65,23 @@ describe("brand identity guard", () => {
     ).toEqual([]);
   });
 
+  it("rejects invented project websites and malformed repository documentation links", () => {
+    const repository = "https://github.com/xeyan7/Arkos";
+    for (const contents of [
+      `https://${"arkos.com"}`,
+      `https://${"www.try"}${"arkos.app/docs"}`,
+      `${repository}/workflows/worktrees`,
+    ]) {
+      expect(findBrandIdentityViolations([{ path: "source.ts", contents }])).toHaveLength(1);
+    }
+    expect(
+      findBrandIdentityViolations([
+        { path: "source.ts", contents: "https://github.com/xeyan7/Arkos" },
+        { path: "source.ts", contents: "https://arkos.example.test" },
+      ]),
+    ).toEqual([]);
+  });
+
   it("allows the exact legal attribution once in LICENSE", () => {
     expect(findBrandIdentityViolations([{ path: "LICENSE", contents: legalNotice }])).toEqual([]);
     expect(
@@ -78,67 +90,6 @@ describe("brand identity guard", () => {
     expect(
       findBrandIdentityViolations([
         { path: "LICENSE", contents: `${legalNotice}\n${legalNotice}` },
-      ]),
-    ).toHaveLength(1);
-  });
-
-  it("allows the exact predecessor attribution only in the README Origins section", () => {
-    expect(
-      findBrandIdentityViolations([
-        { path: "README.md", contents: `## Origins\n\n${originsAttribution}` },
-      ]),
-    ).toEqual([]);
-    expect(
-      findBrandIdentityViolations([
-        { path: "README.md", contents: `## About\n\n${originsAttribution}` },
-      ]),
-    ).toHaveLength(1);
-    expect(
-      findBrandIdentityViolations([
-        {
-          path: "README.md",
-          contents: `## Origins\n\n${originsAttribution}\nLegacy ${firstName}`,
-        },
-      ]),
-    ).toHaveLength(1);
-  });
-
-  it("allows the exact 0.7.0 release attribution only in its approved locations", () => {
-    expect(
-      findBrandIdentityViolations([
-        { path: "CHANGELOG.md", contents: `## 0.7.0 - 2026-08-05\n\n${releaseAttribution}` },
-        {
-          path: "apps/web/src/whatsNew/entries.ts",
-          contents: inAppReleaseAttribution,
-        },
-      ]),
-    ).toEqual([]);
-    expect(
-      findBrandIdentityViolations([
-        { path: "CHANGELOG.md", contents: `## 0.6.7 - 2026-08-05\n\n${releaseAttribution}` },
-        { path: "apps/web/src/other.ts", contents: inAppReleaseAttribution },
-      ]),
-    ).toHaveLength(2);
-  });
-
-  it("preserves exact Computer license attribution without exempting surrounding prose", () => {
-    const path = "docs/computer-use-cua/extraction-plan.md";
-    const section = "## Upstream license and PR-back feasibility";
-    const attribution = `also MIT (LICENSE, ${companyDisplayName} Inc and Emanuele Di Pietro). There is no license`;
-    expect(findBrandIdentityViolations([{ path, contents: `${section}\n${attribution}` }])).toEqual(
-      [],
-    );
-    for (const contents of [
-      `## Other\n${attribution}`,
-      `${section}\n${attribution}\n${attribution}`,
-      `${section}\n${attribution} ${firstName}`,
-      `${section}\n${attribution}\n${secondName}`,
-    ]) {
-      expect(findBrandIdentityViolations([{ path, contents }])).toHaveLength(1);
-    }
-    expect(
-      findBrandIdentityViolations([
-        { path: "docs/computer-use-cua/other.md", contents: `${section}\n${attribution}` },
       ]),
     ).toHaveLength(1);
   });
@@ -163,35 +114,7 @@ describe("brand identity guard", () => {
     ).toHaveLength(2);
   });
 
-  it.each([
-    ["apps/desktop/src/cuaFixtures/electron.ts", "cua-fixture"],
-    ["apps/server/src/computer/computerSignatureChange.test.ts", "test"],
-  ])("preserves only the reviewed fixture identity at %s", (path, suffix) => {
-    const bundleId = `${fixtureBundleDomain}.${suffix}`;
-    expect(
-      findBrandIdentityViolations([
-        { path, contents: `bundleId: "${bundleId}",\n"tccutil reset ScreenCapture ${bundleId}"` },
-      ]),
-    ).toEqual([]);
-    for (const forbidden of [
-      firstName,
-      companyDisplayName,
-      secondName,
-      fixtureBundleDomain,
-      `${fixtureBundleDomain}.other-fixture`,
-      `${bundleId}.child`,
-      `${bundleId}-copy`,
-      `${bundleId}_copy`,
-      `prefix${bundleId}`,
-      bundleId.toUpperCase(),
-    ]) {
-      expect(
-        findBrandIdentityViolations([{ path, contents: `"${bundleId}" "${forbidden}"` }]),
-      ).toHaveLength(1);
-    }
-  });
-
-  it("does not extend fixture identity exemptions to other paths or fixture families", () => {
+  it("rejects retired bundle identities in code, fixtures, and evidence", () => {
     const bundleId = `${fixtureBundleDomain}.cua-fixture`;
     expect(
       findBrandIdentityViolations([

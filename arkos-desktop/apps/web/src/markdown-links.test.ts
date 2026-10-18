@@ -10,20 +10,20 @@ import {
 
 describe("resolveMarkdownFileLinkTarget", () => {
   it("resolves relative file paths against cwd", () => {
-    expect(resolveMarkdownFileLinkTarget("src/processRunner.ts:71", "/Users/julius/project")).toBe(
-      "/Users/julius/project/src/processRunner.ts:71",
+    expect(resolveMarkdownFileLinkTarget("src/processRunner.ts:71", "/Users/developer/project")).toBe(
+      "/Users/developer/project/src/processRunner.ts:71",
     );
   });
 
   it("does not treat filename line references as external schemes", () => {
-    expect(resolveMarkdownFileLinkTarget("script.ts:10", "/Users/julius/project")).toBe(
-      "/Users/julius/project/script.ts:10",
+    expect(resolveMarkdownFileLinkTarget("script.ts:10", "/Users/developer/project")).toBe(
+      "/Users/developer/project/script.ts:10",
     );
   });
 
   it("maps #L line anchors to editor line suffixes", () => {
-    expect(resolveMarkdownFileLinkTarget("/Users/julius/project/src/main.ts#L42C7")).toBe(
-      "/Users/julius/project/src/main.ts:42:7",
+    expect(resolveMarkdownFileLinkTarget("/Users/developer/project/src/main.ts#L42C7")).toBe(
+      "/Users/developer/project/src/main.ts:42:7",
     );
   });
 

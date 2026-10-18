@@ -19,9 +19,8 @@ export const ARKOS_BETA_WINDOWS_INSTALLER_GUID = "a8e63b48-d4f3-4db5-9e12-368107
 export const ARKOS_BETA_RELEASES_URL =
   "https://github.com/xeyan7/Arkos/releases?q=prerelease%3Atrue";
 
-/** Latest stable release, offered from beta when stable Arkos is not installed. */
-export const ARKOS_STABLE_RELEASES_URL =
-  "https://github.com/xeyan7/Arkos/releases/latest";
+/** Repository release listing; no latest-release target is assumed. */
+export const ARKOS_STABLE_RELEASES_URL = "https://github.com/xeyan7/Arkos/releases";
 
 /** electron-builder NSIS `guid` for stable (production) builds. */
 export const ARKOS_STABLE_WINDOWS_INSTALLER_GUID = "368107a8-afe6-5db5-ab3b-d4f331684868";

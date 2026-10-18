@@ -547,11 +547,11 @@ Both patches are regenerated against the pinned source; the Linux follow-on
 patch changes only revision context, preserving its existing browser-only scope.
 
 The report follow-up and remaining native qualification work are recorded in
-[`live-report-followup-2026-09-20.md`](../../../../docs/computer-use-cua/live-report-followup-2026-09-20.md).
+`live-report-followup-2026-09-20.md`.
 
 Current integration verification and limits are recorded in
-[`integration-refresh.md`](../../../../docs/computer-use-cua/integration-refresh.md).
-[`qualification.md`](../../../../docs/computer-use-cua/qualification.md) records
+`integration-refresh.md`.
+`qualification.md` records
 the historical revision 1 GUI qualification. Revision 2 compilation, pure tests
 and control-plane checks do not establish a fresh GUI or RAM qualification.
 
@@ -564,7 +564,7 @@ input or closed admission. Exact-window Enter prefers advertised AXConfirm;
 otherwise native keyboard ambiguity remains guarded. Known background popup
 presses refuse before dispatch. No synthetic activation-belief protocol ships.
 
-See [the report follow-up](../../../../docs/computer-use-cua/live-report-followup-2026-09-20.md)
+See the report follow-up
 for coverage and outstanding live Chromium acceptance criteria.
 
 ### Revision 36: usable background windows and input

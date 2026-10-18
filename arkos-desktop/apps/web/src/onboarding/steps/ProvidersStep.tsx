@@ -228,7 +228,7 @@ export function ProvidersStep(props: { readonly detection: ProviderDetection }) 
                       {isConnecting ? "Done" : "Sign in"}
                     </button>
                   ) : null}
-                  {state === "not-installed" ? (
+                  {state === "not-installed" && descriptor.setupDocsHref ? (
                     <a
                       href={descriptor.setupDocsHref}
                       target="_blank"

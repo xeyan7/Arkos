@@ -86,14 +86,14 @@ describe("getOrphanedWorktreePathForThread", () => {
 describe("formatWorktreePathForDisplay", () => {
   it("shows only the last path segment for unix-like paths", () => {
     const result = formatWorktreePathForDisplay(
-      "/Users/julius/.arkos/worktrees/arkos-mvp/arkos-4e609bb8",
+      "/Users/developer/.arkos/worktrees/arkos-mvp/arkos-4e609bb8",
     );
     expect(result).toBe("arkos-4e609bb8");
   });
 
   it("normalizes windows separators before selecting the final segment", () => {
     const result = formatWorktreePathForDisplay(
-      "C:\\Users\\julius\\.arkos\\worktrees\\arkos-mvp\\arkos-4e609bb8",
+      "C:\\Users\\developer\\.arkos\\worktrees\\arkos-mvp\\arkos-4e609bb8",
     );
     expect(result).toBe("arkos-4e609bb8");
   });

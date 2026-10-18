@@ -844,8 +844,24 @@ describe("production gate", () => {
 });
 
 describe("resolveBetaDiagnosticsEndpoint", () => {
-  it("uses the production default and honors a secure override", () => {
-    expect(resolveBetaDiagnosticsEndpoint({})).toBe(BETA_DIAGNOSTICS_ENDPOINT);
+  it("keeps queued events local without a configured endpoint", async () => {
+    const root = makeRoot();
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    try {
+      const diagnostics = makeDiagnostics(root);
+      diagnostics.track("app.start", { kind: "lifecycle" });
+      await diagnostics.flush();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(readFileSync(join(root, "diagnostics", "events.jsonl"), "utf8")).toContain(
+        "app.start",
+      );
+      await diagnostics.dispose();
+    } finally {
+      fetchSpy.mockRestore();
+    }
+  });
+  it("disables uploads by default and honors a secure override", () => {
+    expect(resolveBetaDiagnosticsEndpoint({})).toBe("");
     expect(
       resolveBetaDiagnosticsEndpoint({
         ARKOS_BETA_DIAGNOSTICS_URL: "https://staging.example.workers.dev",

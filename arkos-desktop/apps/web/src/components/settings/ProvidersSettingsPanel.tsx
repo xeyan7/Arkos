@@ -2149,15 +2149,17 @@ export function ProvidersSettingsPanel({
         }
         actions={
           <>
-            <Button
-              variant="outline"
-              size="xs"
-              render={<a href={option.setupDocsHref} target="_blank" rel="noreferrer" />}
-              aria-label={`${option.title} setup guide`}
-            >
-              Setup guide
-              <ExternalLinkIcon className="size-3" />
-            </Button>
+            {option.setupDocsHref ? (
+              <Button
+                variant="outline"
+                size="xs"
+                render={<a href={option.setupDocsHref} target="_blank" rel="noreferrer" />}
+                aria-label={`${option.title} setup guide`}
+              >
+                Setup guide
+                <ExternalLinkIcon className="size-3" />
+              </Button>
+            ) : null}
             <Switch
               checked={enabled}
               disabled={!serverSettingsQuery.data || providerEnablementMutationPending}

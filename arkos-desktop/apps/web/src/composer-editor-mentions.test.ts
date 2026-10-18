@@ -1,3 +1,4 @@
+// GitHub URLs in this test are synthetic fixtures, not project links.
 import { describe, expect, it } from "vitest";
 
 import {
@@ -241,17 +242,17 @@ describe("splitPromptIntoDisplaySegments", () => {
 
   it("converts a trailing URL into a link segment for read-only rendering", () => {
     expect(
-      splitPromptIntoDisplaySegments("https://github.com/xeyan7/Arkos/pull/155"),
-    ).toEqual([{ type: "link", url: "https://github.com/xeyan7/Arkos/pull/155" }]);
+      splitPromptIntoDisplaySegments("https://github.com/example-org/example-repo/pull/155"),
+    ).toEqual([{ type: "link", url: "https://github.com/example-org/example-repo/pull/155" }]);
   });
 
   it("renders a URL on its own line followed by trailing prose", () => {
     expect(
       splitPromptIntoDisplaySegments(
-        "https://github.com/xeyan7/Arkos/pull/155\nfix the conflicts",
+        "https://github.com/example-org/example-repo/pull/155\nfix the conflicts",
       ),
     ).toEqual([
-      { type: "link", url: "https://github.com/xeyan7/Arkos/pull/155" },
+      { type: "link", url: "https://github.com/example-org/example-repo/pull/155" },
       { type: "text", text: "\nfix the conflicts" },
     ]);
   });

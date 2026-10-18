@@ -423,7 +423,7 @@ describe("switching back to stable", () => {
     const state = channel.getState();
     expect(state.stableInstalled).toBe(true);
     expect(state.canMoveBetaToTrash).toBe(true);
-    expect(state.stableDownloadUrl).toContain("releases/latest");
+    expect(state.stableDownloadUrl).toBe("https://github.com/xeyan7/Arkos/releases");
 
     expect(await channel.leave()).toEqual({ ok: true });
     const last = spawnCalls.at(-1);

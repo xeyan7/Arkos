@@ -275,11 +275,11 @@ $$
 
   it("keeps dollar signs in markdown file links from becoming math", async () => {
     const source =
-      "Files touched:\n\n- [_chat.$threadId.tsx](/Users/julius/project/apps/web/src/routes/_chat.$threadId.tsx:1192)";
-    const markup = await renderMarkdown(source, "/Users/julius/project");
+      "Files touched:\n\n- [_chat.$threadId.tsx](/Users/developer/project/apps/web/src/routes/_chat.$threadId.tsx:1192)";
+    const markup = await renderMarkdown(source, "/Users/developer/project");
 
     expect(markup).toContain(
-      'href="/Users/julius/project/apps/web/src/routes/_chat.$threadId.tsx:1192"',
+      'href="/Users/developer/project/apps/web/src/routes/_chat.$threadId.tsx:1192"',
     );
     expect(markup).toContain("_chat.$threadId.tsx");
     expect(markup).not.toContain('class="katex"');

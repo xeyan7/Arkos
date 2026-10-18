@@ -15,8 +15,8 @@ export interface ProviderDescriptor {
    * can route steers without a runtime round-trip; keep the two in sync.
    */
   readonly supportsNativeTurnSteering: boolean;
-  /** Arkos docs page covering install, sign-in, and verification for this runtime. */
-  readonly setupDocsHref: string;
+  /** Verified setup guide, or null when no guide is configured. */
+  readonly setupDocsHref: string | null;
   readonly usage: {
     readonly signInCommand: string;
     readonly learnMoreHref: string;
@@ -37,7 +37,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "codex",
     displayName: PROVIDER_DISPLAY_NAMES.codex,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: true,
     usage: {
       signInCommand: "codex login",
@@ -48,7 +48,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "claudeAgent",
     displayName: PROVIDER_DISPLAY_NAMES.claudeAgent,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: true,
     usage: {
       signInCommand: "claude",
@@ -59,7 +59,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "cursor",
     displayName: PROVIDER_DISPLAY_NAMES.cursor,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: false,
     usage: {
       signInCommand: "cursor-agent login",
@@ -70,7 +70,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "antigravity",
     displayName: PROVIDER_DISPLAY_NAMES.antigravity,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: false,
     usage: {
       signInCommand: "agy",
@@ -81,7 +81,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "grok",
     displayName: PROVIDER_DISPLAY_NAMES.grok,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: false,
     usage: {
       signInCommand: "grok login",
@@ -92,7 +92,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "droid",
     displayName: PROVIDER_DISPLAY_NAMES.droid,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: false,
     usage: {
       signInCommand: "droid",
@@ -103,7 +103,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "opencode",
     displayName: PROVIDER_DISPLAY_NAMES.opencode,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: false,
     usage: {
       signInCommand: "opencode auth login",
@@ -114,7 +114,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "pi",
     displayName: PROVIDER_DISPLAY_NAMES.pi,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: true,
     usage: {
       signInCommand: "pi",
@@ -125,7 +125,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "devin",
     displayName: PROVIDER_DISPLAY_NAMES.devin,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: false,
     usage: {
       signInCommand: "devin auth login",
@@ -136,7 +136,7 @@ export const PROVIDER_DESCRIPTORS = defineProviderDescriptors([
     kind: "omp",
     displayName: PROVIDER_DISPLAY_NAMES.omp,
     available: true,
-    setupDocsHref: "https://github.com/xeyan7/Arkos",
+    setupDocsHref: null,
     supportsNativeTurnSteering: false,
     usage: null,
   },
