@@ -1,0 +1,55 @@
+{
+  "sums": {
+    "arkos-desktop/node_modules/.old_modules-ebf38ca398e739c7": {
+      "count": 13201,
+      "bytes": 166960582,
+      "tracked": 0
+    },
+    "arkos-desktop/release": {
+      "count": 82,
+      "bytes": 387281921,
+      "tracked": 0
+    },
+    "arkos-desktop/dist": {
+      "count": 3,
+      "bytes": 426266,
+      "tracked": 0
+    },
+    "engine-audit/dist": {
+      "count": 2,
+      "bytes": 2836964,
+      "tracked": 0
+    },
+    "arkos-desktop/apps/server/dist": {
+      "count": 23,
+      "bytes": 8075883,
+      "tracked": 0
+    },
+    "arkos-desktop/apps/desktop/dist-electron": {
+      "count": 4,
+      "bytes": 1850795,
+      "tracked": 0
+    },
+    "arkos-desktop/apps/web/dist": {
+      "count": 0,
+      "bytes": 0,
+      "tracked": 0
+    }
+  },
+  "old_modules_link_targets": [],
+  "release_vs_electron": {
+    "equal": 73,
+    "different": [],
+    "unmatched": [
+      "resources/app/dist/assets/index-5bRrjxwK.css",
+      "resources/app/dist/assets/index-6zhaXS46.css",
+      "resources/app/dist/assets/index-BT2hEW76.js",
+      "resources/app/dist/assets/index-pJzEev8K.js",
+      "resources/app/dist/index.html",
+      "resources/app/dist-electron/main.cjs",
+      "resources/app/dist-electron/preload.cjs",
+      "resources/app/package.json",
+      "resources/bridge/host.py"
+    ]
+  }
+}

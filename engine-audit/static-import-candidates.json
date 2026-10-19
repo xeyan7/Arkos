@@ -1,0 +1,135 @@
+[
+  {
+    "path": "arkos-desktop/apps/desktop/src/browserAnnotations/guestPreload.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/desktop/src/cuaDriverHostStandalone.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/desktop/src/cuaFixtures/electron.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/desktop/src/fixtures/posixBackendShutdown.mjs",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/server/src/agentGateway/schemaTestUtils.ts",
+    "test_importers": [
+      "arkos-desktop/apps/server/src/agentGateway/mcpTransport.test.ts",
+      "arkos-desktop/apps/server/src/agentGateway/sanitizeToolInputSchema.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/apps/server/src/device/FakeDeviceBackend.ts",
+    "test_importers": [
+      "arkos-desktop/apps/server/src/agentGateway/deviceTools.test.ts",
+      "arkos-desktop/apps/server/src/device/DeviceManager.coldBoot.test.ts",
+      "arkos-desktop/apps/server/src/device/DeviceManager.test.ts",
+      "arkos-desktop/apps/server/src/device/wsDeviceHandlers.test.ts",
+      "arkos-desktop/apps/server/src/serverLayers.device.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/apps/server/src/fixtures/desktopParentLifetime.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/server/src/fixtures/desktopParentOwner.mjs",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/server/src/git/testing/fakeGitHubCli.ts",
+    "test_importers": [
+      "arkos-desktop/apps/server/src/git/Layers/GitHubCli.test.ts",
+      "arkos-desktop/apps/server/src/git/Layers/GitManager.test.ts",
+      "arkos-desktop/apps/server/src/githubInbox/Layers/GitHubInboxService.test.ts",
+      "arkos-desktop/apps/server/src/pullRequests/Layers/PullRequestService.test.ts",
+      "arkos-desktop/apps/server/src/pullRequests/pullRequestOperations.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/apps/server/src/orchestration/testing/fakeProjectionSnapshotQuery.ts",
+    "test_importers": [
+      "arkos-desktop/apps/server/src/checkpointing/Layers/CheckpointDiffQuery.test.ts",
+      "arkos-desktop/apps/server/src/provider/Layers/ProviderSessionReaper.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/apps/server/src/restoreMigrationBackup.ts",
+    "test_importers": [
+      "arkos-desktop/apps/server/src/restoreMigrationBackup.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/apps/server/src/runtimeDependencySmoke.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/web/src/bootstrap.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/web/src/components/chat/project/projectAgentDialog.logic.ts",
+    "test_importers": [
+      "arkos-desktop/apps/web/src/components/chat/project/projectAgentDialog.logic.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/apps/web/src/components/profile/profileTestFixtures.ts",
+    "test_importers": [
+      "arkos-desktop/apps/web/src/components/profile/ProfileUsageCoverage.test.tsx",
+      "arkos-desktop/apps/web/src/components/profile/ShareCard.browser.tsx",
+      "arkos-desktop/apps/web/src/components/profile/profileSelectors.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/apps/web/src/composerDraftStoreTestFixtures.ts",
+    "test_importers": [
+      "arkos-desktop/apps/web/src/components/chat/usePendingUserInputDrafts.browser.tsx",
+      "arkos-desktop/apps/web/src/components/tasks/useTaskDelegation.browser.tsx",
+      "arkos-desktop/apps/web/src/composerDraftStore.attachments.test.ts",
+      "arkos-desktop/apps/web/src/composerDraftStore.browserAnnotations.test.ts",
+      "arkos-desktop/apps/web/src/composerDraftStore.models.test.ts",
+      "arkos-desktop/apps/web/src/composerDraftStore.persistence.test.ts",
+      "arkos-desktop/apps/web/src/composerDraftStore.test.ts",
+      "arkos-desktop/apps/web/src/hooks/useOpenThreadTabs.browser.tsx",
+      "arkos-desktop/apps/web/src/hooks/useScratchComposerDraft.browser.tsx",
+      "arkos-desktop/apps/web/src/lib/draftThreadCreate.test.ts",
+      "arkos-desktop/apps/web/src/lib/groupWorkerRouting.test.ts",
+      "arkos-desktop/apps/web/src/lib/kanbanDispatch.test.ts",
+      "arkos-desktop/apps/web/src/lib/kanbanTaskCreate.test.ts",
+      "arkos-desktop/apps/web/src/lib/queuedComposerDispatch.test.ts",
+      "arkos-desktop/apps/web/src/lib/queuedComposerDrain.test.ts",
+      "arkos-desktop/apps/web/src/lib/startContainerChat.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/apps/web/src/hooks/useComputerSupport.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/web/src/lib/composerImagePreparation.worker.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/web/src/lib/pendingInteraction.ts",
+    "test_importers": []
+  },
+  {
+    "path": "arkos-desktop/apps/web/src/lib/pullRequestReactQuery.testUtils.ts",
+    "test_importers": [
+      "arkos-desktop/apps/web/src/components/chat/environment/EnvironmentPullRequestSection.browser.tsx",
+      "arkos-desktop/apps/web/src/components/githubInbox/GitHubInboxAgentActions.browser.tsx",
+      "arkos-desktop/apps/web/src/lib/pullRequestReactQuery.action.test.ts",
+      "arkos-desktop/apps/web/src/lib/pullRequestReactQuery.pin.test.ts",
+      "arkos-desktop/apps/web/src/lib/pullRequestReactQuery.refresh.test.ts"
+    ]
+  },
+  {
+    "path": "arkos-desktop/packages/shared/src/computerKeyNames.ts",
+    "test_importers": []
+  }
+]

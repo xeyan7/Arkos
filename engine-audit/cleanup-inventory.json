@@ -1,0 +1,324 @@
+{
+  "scanned_root": "E:/app",
+  "date": "2026-10-19",
+  "file_count": 121166,
+  "logical_bytes": 3389693429,
+  "categories": {
+    "source-and-other": {
+      "files": 9385,
+      "bytes": 73267873
+    },
+    "runtime-state": {
+      "files": 28,
+      "bytes": 1568837
+    },
+    "python-environment": {
+      "files": 9268,
+      "bytes": 114541666
+    },
+    "build-output": {
+      "files": 118,
+      "bytes": 415964308
+    },
+    "node_modules": {
+      "files": 102363,
+      "bytes": 2784258227
+    },
+    "log": {
+      "files": 4,
+      "bytes": 92518
+    }
+  },
+  "cleanup_candidates": [
+    {
+      "confidence": "High",
+      "path": "arkos-desktop/node_modules/.old_modules-ebf38ca398e739c7",
+      "files": 13201,
+      "bytes": 166960582,
+      "reason": "Old dependency installation; no resolved dependency links target it."
+    },
+    {
+      "confidence": "High",
+      "path": "arkos-desktop/release",
+      "files": 82,
+      "bytes": 387281921,
+      "reason": "Packaged v0.1.0 desktop; current source desktop package is v1.0.1."
+    },
+    {
+      "confidence": "High",
+      "path": "arkos-desktop/dist",
+      "files": 3,
+      "bytes": 426266,
+      "reason": "Old root frontend build; current web build lives under apps/web/dist."
+    },
+    {
+      "confidence": "High",
+      "path": "engine-audit/dist",
+      "files": 2,
+      "bytes": 2836964,
+      "reason": "Old audit wheel; current engine explicitly blocks wheel/sdist distribution."
+    },
+    {
+      "confidence": "High",
+      "path": "engine-audit/*.log",
+      "files": 4,
+      "bytes": 92518,
+      "reason": "Completed historical test/build logs; retain only for audit history."
+    }
+  ],
+  "total_candidate_bytes": 557598251,
+  "source_candidates": [
+    {
+      "path": "arkos-desktop/apps/web/src/hooks/useComputerSupport.ts",
+      "bytes": 2163
+    },
+    {
+      "path": "arkos-desktop/apps/web/src/lib/pendingInteraction.ts",
+      "bytes": 1059
+    },
+    {
+      "path": "arkos-desktop/apps/web/src/components/chat/project/projectAgentDialog.logic.ts",
+      "bytes": 694
+    },
+    {
+      "path": "arkos-desktop/apps/web/src/components/chat/project/projectAgentDialog.logic.test.ts",
+      "bytes": 1214
+    },
+    {
+      "path": "arkos-desktop/packages/shared/src/computerKeyNames.ts",
+      "bytes": 3391
+    }
+  ],
+  "duplicates": [
+    {
+      "bytes_each": 29564,
+      "paths": [
+        "arkos-desktop/apps/web/public/arkos.png",
+        "arkos-desktop/assets/dev/blueprint-ios-1024.png",
+        "arkos-desktop/assets/dev/blueprint-macos-1024.png",
+        "arkos-desktop/assets/dev/blueprint-universal-1024.png",
+        "arkos-desktop/assets/prod/black-ios-1024.png",
+        "arkos-desktop/assets/prod/black-macos-1024.png",
+        "arkos-desktop/assets/prod/black-universal-1024.png"
+      ]
+    },
+    {
+      "bytes_each": 30644,
+      "paths": [
+        "arkos-desktop/assets/beta/Arkos.icon/Assets/glyph.png",
+        "arkos-desktop/assets/prod/Arkos-Custom.icon/Assets/glyph.png",
+        "arkos-desktop/assets/prod/Arkos-Dark.icon/Assets/glyph.png"
+      ]
+    },
+    {
+      "bytes_each": 27677,
+      "paths": [
+        "arkos-desktop/apps/desktop/resources/arkos.png",
+        "arkos-desktop/apps/desktop/resources/icon.png",
+        "arkos-desktop/assets/prod/Arkos.icon/Assets/glyph.png"
+      ]
+    },
+    {
+      "bytes_each": 46357,
+      "paths": [
+        "arkos-agent/optional-skills/research/research-paper-writing/templates/colm2025/natbib.sty",
+        "arkos-agent/optional-skills/research/research-paper-writing/templates/iclr2026/natbib.sty"
+      ]
+    },
+    {
+      "bytes_each": 41133,
+      "paths": [
+        "arkos-desktop/assets/beta/beta-macos-1024.png",
+        "arkos-desktop/assets/beta/beta-macos-legacy-1024.png"
+      ]
+    },
+    {
+      "bytes_each": 32781,
+      "paths": [
+        "arkos-desktop/apps/desktop/resources/dock-icon.png",
+        "arkos-desktop/assets/prod/black-macos-legacy-1024.png"
+      ]
+    },
+    {
+      "bytes_each": 28338,
+      "paths": [
+        "arkos-agent/optional-skills/research/research-paper-writing/templates/colm2025/colm2025_conference.bst",
+        "arkos-agent/optional-skills/research/research-paper-writing/templates/iclr2026/iclr2026_conference.bst"
+      ]
+    },
+    {
+      "bytes_each": 20877,
+      "paths": [
+        "arkos-agent/optional-skills/research/research-paper-writing/templates/colm2025/fancyhdr.sty",
+        "arkos-agent/optional-skills/research/research-paper-writing/templates/iclr2026/fancyhdr.sty"
+      ]
+    },
+    {
+      "bytes_each": 8869,
+      "paths": [
+        "arkos-desktop/apps/desktop/resources/app-icon-windows.ico",
+        "arkos-desktop/assets/dev/blueprint-windows.ico",
+        "arkos-desktop/assets/prod/arkos-black-windows.ico"
+      ]
+    },
+    {
+      "bytes_each": 12792,
+      "paths": [
+        "arkos-agent/optional-skills/research/research-paper-writing/templates/colm2025/math_commands.tex",
+        "arkos-agent/optional-skills/research/research-paper-writing/templates/iclr2026/math_commands.tex"
+      ]
+    },
+    {
+      "bytes_each": 3504,
+      "paths": [
+        "arkos-desktop/apps/web/public/apple-touch-icon.png",
+        "arkos-desktop/assets/dev/blueprint-web-apple-touch-180.png",
+        "arkos-desktop/assets/prod/arkos-black-web-apple-touch-180.png"
+      ]
+    },
+    {
+      "bytes_each": 2733,
+      "paths": [
+        "arkos-desktop/apps/web/public/favicon.ico",
+        "arkos-desktop/assets/dev/blueprint-web-favicon.ico",
+        "arkos-desktop/assets/prod/arkos-black-web-favicon.ico"
+      ]
+    },
+    {
+      "bytes_each": 849,
+      "paths": [
+        "arkos-desktop/assets/beta/Arkos.icon/icon.json",
+        "arkos-desktop/assets/prod/Arkos-Custom.icon/icon.json",
+        "arkos-desktop/assets/prod/Arkos-Dark.icon/icon.json",
+        "arkos-desktop/assets/prod/Arkos.icon/icon.json"
+      ]
+    },
+    {
+      "bytes_each": 666,
+      "paths": [
+        "arkos-desktop/apps/web/public/favicon-32x32.png",
+        "arkos-desktop/assets/dev/blueprint-web-favicon-32x32.png",
+        "arkos-desktop/assets/prod/arkos-black-web-favicon-32x32.png"
+      ]
+    },
+    {
+      "bytes_each": 1082,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-fill/square-placeholder.svg",
+        "arkos-desktop/apps/web/public/central-icons-fill/stop.svg"
+      ]
+    },
+    {
+      "bytes_each": 335,
+      "paths": [
+        "arkos-agent/skills/productivity/docx/LICENSE",
+        "arkos-agent/skills/productivity/pdf/LICENSE",
+        "arkos-agent/skills/productivity/powerpoint/LICENSE",
+        "arkos-agent/skills/productivity/xlsx/LICENSE"
+      ]
+    },
+    {
+      "bytes_each": 907,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/edit-small-1.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/edit-small-2.svg"
+      ]
+    },
+    {
+      "bytes_each": 768,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/calendar-1.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/calendar-2.svg"
+      ]
+    },
+    {
+      "bytes_each": 757,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/square-placeholder.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/stop.svg"
+      ]
+    },
+    {
+      "bytes_each": 745,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/arrow-left-right.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/arrow-right-left.svg"
+      ]
+    },
+    {
+      "bytes_each": 358,
+      "paths": [
+        "arkos-desktop/apps/web/public/favicon-16x16.png",
+        "arkos-desktop/assets/dev/blueprint-web-favicon-16x16.png",
+        "arkos-desktop/assets/prod/arkos-black-web-favicon-16x16.png"
+      ]
+    },
+    {
+      "bytes_each": 679,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/package-delivery-1.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/package-delivery-2.svg"
+      ]
+    },
+    {
+      "bytes_each": 548,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/rec-keyframe-2.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/rec-keyframe.svg"
+      ]
+    },
+    {
+      "bytes_each": 538,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/box-2-alt-fill.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/box-2.svg"
+      ]
+    },
+    {
+      "bytes_each": 512,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/cloud-simple.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/cloud-weather.svg"
+      ]
+    },
+    {
+      "bytes_each": 488,
+      "paths": [
+        "arkos-desktop/apps/desktop/resources/entitlements.mac.inherit.plist",
+        "arkos-desktop/apps/desktop/resources/entitlements.mac.plist"
+      ]
+    },
+    {
+      "bytes_each": 424,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-fill/cloud-simple.svg",
+        "arkos-desktop/apps/web/public/central-icons-fill/cloud-weather.svg"
+      ]
+    },
+    {
+      "bytes_each": 381,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-reversed/form-rectangle.svg",
+        "arkos-desktop/apps/web/public/central-icons-reversed/fullscreen-2.svg"
+      ]
+    },
+    {
+      "bytes_each": 298,
+      "paths": [
+        "arkos-desktop/apps/web/public/central-icons-fill/aspect-ratio-3-4.svg",
+        "arkos-desktop/apps/web/public/central-icons-fill/page-empty.svg"
+      ]
+    }
+  ],
+  "empty_files": [
+    "arkos-agent/optional-skills/creative/pixel-art/scripts/__init__.py",
+    "arkos-agent/plugins/web/__init__.py",
+    "arkos-agent/plugins/__init__.py"
+  ],
+  "errors": [],
+  "skipped_link_count": 3437,
+  "notes": [
+    "Inventory excludes Git internals and scan-generated files.",
+    "Sizes are logical; hardlinks may reduce actual recoverable disk space."
+  ]
+}
