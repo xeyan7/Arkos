@@ -22,6 +22,7 @@ import {
   type ErrorComponentProps,
   useNavigate,
   useParams,
+  useLocation,
 } from "@tanstack/react-router";
 import {
   Suspense,
@@ -39,6 +40,7 @@ import { Throttler } from "@tanstack/react-pacer";
 import { APP_DISPLAY_NAME, APP_VERSION } from "../branding";
 import { isBetaFeatureOn } from "../betaFeatures";
 import { DesktopWindowControls } from "../components/DesktopWindowControls";
+import { ArkosLanding } from "../components/ArkosLanding";
 import { RunningChatsQuitCoordinator } from "../components/RunningChatsQuitCoordinator";
 import { AppSnapCoordinator } from "../components/AppSnapCoordinator";
 import { AppSnapWelcomeDialog } from "../components/AppSnapWelcomeDialog";
@@ -276,6 +278,10 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootRouteView() {
+  const isHome = useLocation({
+    select: (location: { pathname: string; search: object }) =>
+      location.pathname === "/" && !(location.search as { space?: string }).space,
+  });
   useAppTypography();
   useAppDensity();
   useChatWidth();
@@ -318,6 +324,16 @@ function RootRouteView() {
       {desktopWindowControls}
     </>
   );
+
+  // The screenshot-matched home is a frontend-only surface and can render before
+  // the backend connects. Existing chat and tool routes keep their normal shell.
+  if (isHome)
+    return (
+      <>
+        <ArkosLanding />
+        {desktopWindowControls}
+      </>
+    );
 
   if (compatibilityIssue) {
     return (
