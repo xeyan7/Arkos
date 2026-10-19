@@ -66,6 +66,9 @@ export function RestoreOrCreateChatRoute({
   const createFreshChatInFlightRef = useRef(false);
 
   useEffect(() => {
+    // StrictMode runs setup again after a simulated unmount in development.
+    // Re-arm the guard so an empty saved route can finish recovery and open a draft.
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
     };
