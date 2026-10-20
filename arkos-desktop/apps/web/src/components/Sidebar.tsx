@@ -58,6 +58,8 @@ import {
   useRef,
   useSyncExternalStore,
   useState,
+  lazy,
+  Suspense,
   type DragEvent as ReactDragEvent,
   type ComponentType,
   type MouseEvent,
@@ -289,7 +291,6 @@ import {
   SidebarThreadRowContent,
   type SidebarThreadTerminalStatus,
 } from "./SidebarThreadRowContent";
-import { GroupSettingsDialog } from "./chat/group/GroupSettingsDialog";
 import { SidebarGroupsSurface } from "./SidebarGroupsSurface";
 import {
   activateThreadWhenHydrated,
@@ -458,7 +459,6 @@ import {
   SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME,
   SIDEBAR_SECTION_LABEL_CLASS_NAME,
 } from "../sidebarRowStyles";
-import { SettingsSidebarNav } from "./SettingsSidebarNav";
 import {
   ComposerPickerMenuPopup,
   ComposerPickerMenuSubPopup,
@@ -520,6 +520,17 @@ import {
 import { isSidechatThread } from "@arkos/shared/sidechatThread";
 
 // Central glyphs for the sidebar section-header buttons (expand/collapse, sort, add).
+// These surfaces are only used after an explicit navigation or dialog action.
+// Group settings pulls in editors and plugin settings; keep it off first paint.
+const GroupSettingsDialog = lazy(() =>
+  import("./chat/group/GroupSettingsDialog").then((module) => ({
+    default: module.GroupSettingsDialog,
+  })),
+);
+const SettingsSidebarNav = lazy(() =>
+  import("./SettingsSidebarNav").then((module) => ({ default: module.SettingsSidebarNav })),
+);
+
 const ExpandAllIcon = createCentralIconComponent("expand-45");
 const CollapseAllIcon = createCentralIconComponent("minimize-45");
 const SortFilterIcon = createCentralIconComponent("filter-2");
@@ -890,7 +901,7 @@ function SidebarHelpMenu({
   onOpenFeedback,
   onCustomizeSidebar,
   inRail: inRailProp,
-  wide = false,
+  wide: wideProp,
 }: {
   onOpenShortcuts: () => void;
   onOpenFeedback: () => void;
@@ -901,6 +912,7 @@ function SidebarHelpMenu({
   wide?: boolean;
 }) {
   const inRail = inRailProp ?? false;
+  const wide = wideProp ?? false;
   // `openCount` keys the dialog so each open remounts the accordion — its rows
   // capture `defaultOpen` in mount state, so a stale mount would ignore a
   // newly selected version.
@@ -6980,19 +6992,21 @@ export default function Sidebar() {
               <SidebarGroup className="p-0">
                 {/* The rail is the way back, so the panel opens on its title like every section. */}
                 <SidebarPanelTitle title="Settings" />
-                <SettingsSidebarNav
-                  activeSection={activeSettingsSection}
-                  onSelectSection={(section, options) => {
-                    void navigate({
-                      to: "/settings",
-                      search: (previous) => ({
-                        ...previous,
-                        section: section === "general" ? undefined : section,
-                        target: options?.target,
-                      }),
-                    });
-                  }}
-                />
+                <Suspense fallback={null}>
+                  <SettingsSidebarNav
+                    activeSection={activeSettingsSection}
+                    onSelectSection={(section, options) => {
+                      void navigate({
+                        to: "/settings",
+                        search: (previous) => ({
+                          ...previous,
+                          section: section === "general" ? undefined : section,
+                          target: options?.target,
+                        }),
+                      });
+                    }}
+                  />
+                </Suspense>
               </SidebarGroup>
             ) : showRailAutomationsPanel ? (
               <RailAutomationsPanel
@@ -7849,55 +7863,58 @@ export default function Sidebar() {
       ) : null}
 
       {projectAgentDialogProject ? (
-        <GroupSettingsDialog
-          key={projectAgentDialogProject.id}
-          open={projectAgentDialogState !== null}
-          mode={projectAgentDialogState?.mode ?? "onboarding"}
-          projectId={projectAgentDialogProject.id}
-          projectName={projectAgentDialogProject.name}
-          workspacePath={projectAgentDialogProject.cwd}
-          defaultModelSelection={projectAgentDialogProject.defaultModelSelection ?? null}
-          allowDiscard={projectAgentDialogState?.discardable === true}
-          onOpenChange={(open) => {
-            if (!open) {
-              setProjectAgentDialogState(null);
-            }
-          }}
-          onSaved={(overview) => {
-            if (projectAgentDialogState?.mode !== "onboarding") return;
-            const coordinatorThreadId = overview.config?.coordinatorThreadId;
-            const firstMessage = projectAgentDialogState.firstMessage;
-            if (coordinatorThreadId && firstMessage) {
-              void postGroupPickupMessage(coordinatorThreadId, firstMessage);
-            }
-            if (coordinatorThreadId) {
-              pendingCoordinatorActivationRef.current?.cancel();
-              pendingCoordinatorActivationRef.current = {
-                pathname,
-                cancel: activateThreadWhenHydrated({
-                  hasThread: () =>
-                    useStore.getState().sidebarThreadSummaryById[coordinatorThreadId] !== undefined,
-                  subscribe: (listener) => useStore.subscribe(listener),
-                  // The sidebar intent path resolves against the summary map captured at
-                  // render time; a thread created by this dialog hydrates later, so wait
-                  // for its row and then open it directly.
-                  activate: () => {
-                    prewarmThreadDetailForIntent(coordinatorThreadId);
-                    setOptimisticActiveThreadId(coordinatorThreadId);
-                    setSelectionAnchor(coordinatorThreadId);
-                    openChatThreadPage(coordinatorThreadId);
-                    rememberLastThreadRouteNow({ threadId: coordinatorThreadId });
-                    void navigate({
-                      to: "/$threadId",
-                      params: { threadId: coordinatorThreadId },
-                      search: (previous) => ({ ...previous, splitViewId: undefined }),
-                    });
-                  },
-                }),
-              };
-            }
-          }}
-        />
+        <Suspense fallback={null}>
+          <GroupSettingsDialog
+            key={projectAgentDialogProject.id}
+            open={projectAgentDialogState !== null}
+            mode={projectAgentDialogState?.mode ?? "onboarding"}
+            projectId={projectAgentDialogProject.id}
+            projectName={projectAgentDialogProject.name}
+            workspacePath={projectAgentDialogProject.cwd}
+            defaultModelSelection={projectAgentDialogProject.defaultModelSelection ?? null}
+            allowDiscard={projectAgentDialogState?.discardable === true}
+            onOpenChange={(open) => {
+              if (!open) {
+                setProjectAgentDialogState(null);
+              }
+            }}
+            onSaved={(overview) => {
+              if (projectAgentDialogState?.mode !== "onboarding") return;
+              const coordinatorThreadId = overview.config?.coordinatorThreadId;
+              const firstMessage = projectAgentDialogState.firstMessage;
+              if (coordinatorThreadId && firstMessage) {
+                void postGroupPickupMessage(coordinatorThreadId, firstMessage);
+              }
+              if (coordinatorThreadId) {
+                pendingCoordinatorActivationRef.current?.cancel();
+                pendingCoordinatorActivationRef.current = {
+                  pathname,
+                  cancel: activateThreadWhenHydrated({
+                    hasThread: () =>
+                      useStore.getState().sidebarThreadSummaryById[coordinatorThreadId] !==
+                      undefined,
+                    subscribe: (listener) => useStore.subscribe(listener),
+                    // The sidebar intent path resolves against the summary map captured at
+                    // render time; a thread created by this dialog hydrates later, so wait
+                    // for its row and then open it directly.
+                    activate: () => {
+                      prewarmThreadDetailForIntent(coordinatorThreadId);
+                      setOptimisticActiveThreadId(coordinatorThreadId);
+                      setSelectionAnchor(coordinatorThreadId);
+                      openChatThreadPage(coordinatorThreadId);
+                      rememberLastThreadRouteNow({ threadId: coordinatorThreadId });
+                      void navigate({
+                        to: "/$threadId",
+                        params: { threadId: coordinatorThreadId },
+                        search: (previous) => ({ ...previous, splitViewId: undefined }),
+                      });
+                    },
+                  }),
+                };
+              }
+            }}
+          />
+        </Suspense>
       ) : null}
 
       {searchPaletteOpen ? (

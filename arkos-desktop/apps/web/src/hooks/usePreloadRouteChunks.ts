@@ -14,11 +14,15 @@ export function usePreloadRouteChunks() {
   const router = useRouter();
 
   useEffect(() => {
-    // New-task navigation is a primary startup action. Warm that route as soon
-    // as the root commits so an immediate click never waits for the browser's
-    // idle callback (which can be delayed for several seconds during hydration).
-    router.preloadRoute({ to: "/$threadId", params: { threadId: "chunk-preload" } }).catch(() => {
-      // Preloading is best-effort; navigation falls back to loading on demand.
+    // Let the shell paint before fetching the large chat graph. A root commit
+    // can happen before first paint, particularly when a layout effect runs.
+    let secondFrame: number | undefined;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        router
+          .preloadRoute({ to: "/$threadId", params: { threadId: "chunk-preload" } })
+          .catch(() => {});
+      });
     });
 
     const preloadSettings = () => {
@@ -27,11 +31,34 @@ export function usePreloadRouteChunks() {
       });
     };
 
-    if (typeof requestIdleCallback === "function") {
-      const idleCallbackId = requestIdleCallback(preloadSettings, { timeout: 5000 });
-      return () => cancelIdleCallback(idleCallbackId);
-    }
-    const timeoutId = setTimeout(preloadSettings, 1500);
-    return () => clearTimeout(timeoutId);
+    // Idle callbacks can fire between network responses while the initial chat
+    // is still loading. Do not let speculative settings imports compete with it.
+    let idleCallbackId: number | undefined;
+    let routeWaitId: ReturnType<typeof setTimeout> | undefined;
+    const timeoutId = setTimeout(function waitForInitialRoute() {
+      // A slow initial navigation may still be loading when this timer fires.
+      // Speculative settings imports must not extend that navigation's delay.
+      if (router.state.isLoading) {
+        routeWaitId = setTimeout(waitForInitialRoute, 1_000);
+        return;
+      }
+      if (typeof requestIdleCallback === "function") {
+        idleCallbackId = requestIdleCallback(
+          () => {
+            if (router.state.isLoading) {
+              routeWaitId = setTimeout(waitForInitialRoute, 1_000);
+            } else preloadSettings();
+          },
+          { timeout: 5000 },
+        );
+      } else preloadSettings();
+    }, 30_000);
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);
+      clearTimeout(timeoutId);
+      clearTimeout(routeWaitId);
+      if (idleCallbackId !== undefined) cancelIdleCallback(idleCallbackId);
+    };
   }, [router]);
 }

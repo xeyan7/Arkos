@@ -4,6 +4,7 @@
 
 import { RouteInsetSurface } from "~/components/RouteInsetSurface";
 import { ArkosLogo } from "~/components/ArkosLogo";
+import { RouteSurfaceHeader } from "./RouteSurface";
 
 export function SplashScreen({
   errorMessage,
@@ -18,6 +19,8 @@ export function SplashScreen({
     // The shared route surface, so the splash sits in the same block as every other route
     // (under the rail layout's top band) and goes clear with whole-window glass.
     <RouteInsetSurface>
+      {/* Keep navigation reachable while route recovery is loading or has failed. */}
+      <RouteSurfaceHeader />
       <div className="flex min-h-0 min-w-0 flex-1 items-center justify-center">
         <div className="flex flex-col items-center gap-5 select-none">
           <ArkosLogo aria-label="Arkos" className="size-24" />

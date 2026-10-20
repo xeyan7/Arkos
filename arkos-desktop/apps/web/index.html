@@ -73,6 +73,10 @@
           transform: scale(1);
         }
       }
+      .app-boot-splash__icon--handoff {
+        opacity: 1;
+        animation: app-boot-splash-pulse 2.4s ease-in-out infinite;
+      }
       @keyframes app-boot-splash-pulse {
         0%,
         100% {
@@ -87,6 +91,9 @@
       @media (prefers-reduced-motion: reduce) {
         .app-boot-splash__icon {
           animation: app-boot-splash-in 200ms ease-out forwards;
+        }
+        .app-boot-splash__icon--handoff {
+          animation: none;
         }
       }
     </style>

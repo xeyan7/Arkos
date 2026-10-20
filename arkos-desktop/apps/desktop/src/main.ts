@@ -145,6 +145,7 @@ import {
   ensureWindowsShellAppUserModelHelper,
   nativeWindowHandleToHwnd,
 } from "./windowsShellAppUserModel";
+import { resolveDesktopRendererMode } from "./desktopRendererMode";
 import { createExclusiveApplyQueue } from "./exclusiveApplyQueue";
 import { extractIcoPngImages, toWindowsShellIco } from "./windowsShellIco";
 import {
@@ -389,8 +390,22 @@ const packagedDesktopFlavor = app.isPackaged
 const isSourceDesktopBuild =
   requestedSourceBuildMarker === ARKOS_SOURCE_DESKTOP_BUILD_MARKER &&
   packagedDesktopFlavor === undefined;
-const isDevelopment =
-  (!app.isPackaged || isSourceDesktopBuild) && Boolean(process.env.VITE_DEV_SERVER_URL);
+const { isDevelopment, useBundledRenderer } = resolveDesktopRendererMode({
+  isPackaged: app.isPackaged,
+  isSourceDesktopBuild,
+  devServerUrl: process.env.VITE_DEV_SERVER_URL,
+  bundledRenderer: process.env.ARKOS_BUNDLED_RENDERER,
+});
+// Coarse launch timing, logged once per stage. Useful in packaged telemetry and
+// visible in the dev console, where the packaged rotating log is not active.
+const startupStartedAtMs = Date.now();
+function logStartupTiming(stage: string): void {
+  const elapsedMs = Date.now() - startupStartedAtMs;
+  writeDesktopLogHeader(`startup timing stage=${stage} elapsedMs=${elapsedMs}`);
+  if (isDevelopment) {
+    console.info(`[desktop-startup] ${stage} ${elapsedMs}ms`);
+  }
+}
 const desktopFlavor = resolveArkosDesktopRuntimeFlavor({
   isPackaged: app.isPackaged,
   isDevelopment,
@@ -603,6 +618,10 @@ const browserOsKeyStore = {
 };
 const browserVault = new BrowserVault(Path.join(BASE_DIR, "browser-vault"), browserOsKeyStore);
 let browserSessionRestore: BrowserSessionRestore | undefined;
+// Session restore decrypts a cookie snapshot and can wait on the OS keychain. It is
+// not needed to paint the first window, so startup watches it here instead of
+// blocking the backend and window on it.
+let browserSessionRestoreReady: Promise<void> | null = null;
 const browserVaultCapture = new BrowserVaultCapture(browserVault);
 const browserManager = new DesktopBrowserManager({
   onRuntimeReady: (runtime) => browserVaultCapture.register(runtime),
@@ -891,6 +910,7 @@ function ensureInitialBackendWindowOpen(baseUrl: string): void {
     hasExistingWindow: () => (mainWindow ?? BrowserWindow.getAllWindows()[0] ?? null) !== null,
     createWindow: () => {
       mainWindow = createWindow();
+      logStartupTiming("window-created");
     },
     getReadinessInFlight: () => backendInitialWindowOpenInFlight,
     setReadinessInFlight: (promise) => {
@@ -1681,7 +1701,7 @@ function handleFatalStartupError(stage: string, error: unknown): void {
 }
 
 function registerDesktopProtocol(): void {
-  if (isDevelopment || desktopProtocolRegistered) return;
+  if ((isDevelopment && !useBundledRenderer) || desktopProtocolRegistered) return;
 
   // An unreadable first observation cannot be replaced by a later baseline:
   // Electron may already hold the header for the generation that disappeared.
@@ -2508,14 +2528,14 @@ function cancelDeferredWindowsShellStamp(): void {
   resolve?.();
 }
 
-function stampWindowsShellAppUserModel(
+async function stampWindowsShellAppUserModel(
   input: Parameters<typeof applyWindowsShellAppUserModel>[0],
   options?: {
     flush?: boolean;
   },
-): void {
+): Promise<void> {
   try {
-    applyWindowsShellAppUserModel(input, Path.join(STATE_DIR, "taskbar-icons"), options);
+    await applyWindowsShellAppUserModel(input, Path.join(STATE_DIR, "taskbar-icons"), options);
   } catch (error) {
     console.warn(
       `[desktop] Failed to stamp Windows AppUserModel icon properties: ${formatErrorMessage(error)}`,
@@ -2532,16 +2552,14 @@ function queueWindowsShellAppUserModelStamp(
 ): Promise<void> {
   cancelDeferredWindowsShellStamp();
   if (options?.immediate === true) {
-    stampWindowsShellAppUserModel(input, options);
-    return Promise.resolve();
+    return stampWindowsShellAppUserModel(input, options);
   }
   return new Promise((resolve) => {
     windowsShellStampResolve = resolve;
     windowsShellStampTimer = setImmediate(() => {
       windowsShellStampTimer = null;
       windowsShellStampResolve = null;
-      stampWindowsShellAppUserModel(input, options);
-      resolve();
+      void stampWindowsShellAppUserModel(input, options).finally(resolve);
     });
   });
 }
@@ -4850,6 +4868,7 @@ async function shutdownDesktopRuntime(reason: string): Promise<void> {
         stopCapture: () => browserVaultCapture.dispose(),
         clearKeys: () => browserVault.dispose(),
       });
+      await browserSessionRestoreReady;
       await browserSessionRestore?.shutdown();
       restoreStdIoCapture?.();
       if (betaDiagnostics) {
@@ -5523,6 +5542,7 @@ function registerIpcHandlers(): void {
       async (domains) => {
         if (!browserSessionRestore) throw new Error("Browser session restoration is unavailable.");
         try {
+          await browserSessionRestoreReady;
           await browserSessionRestore.rememberImport(domains);
         } catch (error) {
           const allowed = [
@@ -5728,6 +5748,7 @@ function createWindow(): BrowserWindow {
     window.setTitle(APP_DISPLAY_NAME);
   });
   window.webContents.on("did-finish-load", () => {
+    logStartupTiming("renderer-loaded");
     window.setTitle(APP_DISPLAY_NAME);
     emitUpdateState();
   });
@@ -5739,6 +5760,7 @@ function createWindow(): BrowserWindow {
       window.maximize();
     }
     window.show();
+    logStartupTiming("window-visible");
     if (process.platform === "win32") {
       void applyPersistedDesktopAppIcon(window);
     }
@@ -5793,14 +5815,18 @@ function createWindow(): BrowserWindow {
     }
   });
 
-  if (isDevelopment) {
+  if (isDevelopment && !useBundledRenderer) {
     void window.loadURL(process.env.VITE_DEV_SERVER_URL as string);
-    window.webContents.openDevTools({ mode: "detach" });
   } else {
     void window.loadURL(desktopIdentity.entryUrl);
   }
+  if (isDevelopment && /^(1|true)$/i.test(process.env.ARKOS_OPEN_DEVTOOLS?.trim() ?? "")) {
+    window.webContents.openDevTools({ mode: "detach" });
+  }
 
-  if (process.platform === "linux" || process.platform === "win32") {
+  // Windows applies the persisted icon once on ready-to-show; doing it here too
+  // stamps Explorer twice while the renderer is still starting.
+  if (process.platform === "linux") {
     try {
       void applyPersistedDesktopAppIcon(window, { reregisterTaskbarButton: false });
     } catch (error) {
@@ -6058,14 +6084,17 @@ if (!hasSingleInstanceLock) {
 
 async function bootstrap(): Promise<void> {
   writeDesktopLogHeader("bootstrap start");
+  logStartupTiming("bootstrap-start");
   pythonBridge = await startPythonBridge({
     appPath: app.getAppPath(),
     userData: app.getPath("userData"),
     log: writeDesktopLogHeader,
   });
+  logStartupTiming("python-bridge");
   if (!(await requireCurrentDesktopMigrationBundle())) {
     return;
   }
+  logStartupTiming("migration-bundle-check");
   // Ahead of the recovery gate on purpose. A startup that blocks below returns
   // early, and every path that could ship the fix for whatever blocked it lives
   // after that return: an install wedged on a bad migration would be unable to
@@ -6077,20 +6106,25 @@ async function bootstrap(): Promise<void> {
   if (migrationRecoveryOutcome !== "continue") {
     return;
   }
+  logStartupTiming("migration-recovery");
 
   backendAuthToken = Crypto.randomBytes(24).toString("hex");
   await reserveBackendEndpoint("bootstrap");
+  logStartupTiming("backend-endpoint-reserved");
 
-  browserSessionRestore = new BrowserSessionRestore(
+  const restore = new BrowserSessionRestore(
     Path.join(BASE_DIR, "browser-session-restore"),
     createCookieSessionBackend(BROWSER_SESSION_PARTITION),
     browserOsKeyStore,
   );
-  try {
+  browserSessionRestore = restore;
+  // Never block the first window on the keychain or a cookie snapshot. Import and
+  // shutdown await this promise before touching the restored session.
+  browserSessionRestoreReady = (async () => {
     let restoreTimer: NodeJS.Timeout | undefined;
     try {
       await Promise.race([
-        browserSessionRestore.initialize().finally(() => clearTimeout(restoreTimer)),
+        restore.initialize(),
         new Promise<never>((_, reject) => {
           restoreTimer = setTimeout(
             () => reject(new Error("Browser session restoration timed out.")),
@@ -6101,49 +6135,32 @@ async function bootstrap(): Promise<void> {
     } finally {
       clearTimeout(restoreTimer);
     }
-  } catch {
+  })().catch(() => {
     console.warn(
       "[Arkos browser] Secure session restoration is unavailable; no saved session cookies were restored.",
     );
-  }
+  });
 
   registerIpcHandlers();
   writeDesktopLogHeader("bootstrap ipc handlers registered");
-  try {
-    await ensureBrowserHostPipeServer();
-  } catch (error) {
-    console.warn("[Arkos browser] Failed to start browser host pipe", error);
-  }
-  await startCuaHost();
+  logStartupTiming("ipc-registered");
   startBackend();
   writeDesktopLogHeader("bootstrap backend start requested");
+  logStartupTiming("backend-start-requested");
 
-  if (isDevelopment) {
-    void waitForBackendWindowReady(backendHttpUrl)
-      .then((source) => {
-        writeDesktopLogHeader(`bootstrap backend ready source=${source}`);
-        if (!mainWindow) {
-          mainWindow = createWindow();
-          writeDesktopLogHeader("bootstrap main window created");
-        }
-      })
-      .catch((error) => {
-        if (isBackendReadinessAborted(error)) {
-          return;
-        }
-        writeDesktopLogHeader(
-          `bootstrap backend readiness warning message=${formatErrorMessage(error)}`,
-        );
-        console.warn("[desktop] backend readiness check timed out during dev bootstrap", error);
-        if (!mainWindow) {
-          mainWindow = createWindow();
-          writeDesktopLogHeader("bootstrap main window created after readiness warning");
-        }
-      });
-    return;
-  }
-
+  // Surface the window before backend readiness, matching packaged behavior in
+  // development too. The renderer already paints its splash and reconnects when
+  // the websocket comes up, so waiting here only multiplied launch time.
   ensureInitialBackendWindowOpen(backendHttpUrl);
+
+  // Browser automation services are not needed to paint the first frame. Start
+  // them once the window is on its way instead of delaying it.
+  void ensureBrowserHostPipeServer().catch((error) => {
+    console.warn("[Arkos browser] Failed to start browser host pipe", error);
+  });
+  void startCuaHost().catch((error) => {
+    console.warn("[desktop] Failed to start computer-use host", error);
+  });
 }
 
 app.on("before-quit", (event) => {
@@ -6208,6 +6225,7 @@ if (hasSingleInstanceLock) {
     .whenReady()
     .then(() => {
       writeDesktopLogHeader("app ready");
+      logStartupTiming("app-ready");
       if (betaDiagnostics) {
         betaDiagnostics.start();
         const previousLaunchVersion = parseLastLaunchVersion(readLaunchVersionRecordContents());
@@ -6227,13 +6245,13 @@ if (hasSingleInstanceLock) {
       }
       configureAppIdentity();
       if (process.platform === "win32") {
-        try {
-          ensureWindowsShellAppUserModelHelper(Path.join(STATE_DIR, "taskbar-icons"));
-        } catch (error) {
-          console.warn(
-            `[desktop] Failed to prepare Windows shell icon helper: ${formatErrorMessage(error)}`,
-          );
-        }
+        void ensureWindowsShellAppUserModelHelper(Path.join(STATE_DIR, "taskbar-icons")).catch(
+          (error) => {
+            console.warn(
+              `[desktop] Failed to prepare Windows shell icon helper: ${formatErrorMessage(error)}`,
+            );
+          },
+        );
       }
       applyInitialMacDockIcon();
       registerMacAppearanceIconSync();
@@ -6282,7 +6300,7 @@ if (hasSingleInstanceLock) {
         }
         handleDesktopAppForegrounded();
         if (BrowserWindow.getAllWindows().length === 0) {
-          if (!isDevelopment) {
+          if (!isDevelopment || useBundledRenderer) {
             ensureInitialBackendWindowOpen(backendHttpUrl);
             return;
           }

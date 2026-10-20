@@ -9,6 +9,7 @@ import viteConfig from "../vite.config";
 
 const REACT_COMPILER_PLUGIN = "@rolldown/plugin-babel";
 const REACT_FAST_REFRESH_PLUGIN = "vite:react-refresh";
+const FAST_DEV_SOURCE_MAP_PLUGIN = "arkos-fast-dev-source-maps";
 
 function inlineWebConfig(): InlineConfig {
   return {
@@ -65,4 +66,22 @@ describe("web Vite React Compiler activation", () => {
 
     expect(pluginNames).toContain(REACT_COMPILER_PLUGIN);
   });
+
+  it("omits inline debug maps for normal dev launches but preserves test diagnostics", async () => {
+    vi.stubEnv("ARKOS_WEB_SOURCEMAP", "0");
+    expect(await resolveWebPluginNames("serve", "development")).toContain(
+      FAST_DEV_SOURCE_MAP_PLUGIN,
+    );
+    expect(await resolveWebPluginNames("serve", "test")).not.toContain(FAST_DEV_SOURCE_MAP_PLUGIN);
+  });
+
+  it.each(["1", "true", "hidden"])(
+    "retains development source maps when requested with %s",
+    async (flag) => {
+      vi.stubEnv("ARKOS_WEB_SOURCEMAP", flag);
+      expect(await resolveWebPluginNames("serve", "development")).not.toContain(
+        FAST_DEV_SOURCE_MAP_PLUGIN,
+      );
+    },
+  );
 });

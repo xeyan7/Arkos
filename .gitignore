@@ -23,6 +23,7 @@ dist/
 build/
 .next/
 out/
+.bun-tmp/
 
 # OS / editors
 .DS_Store

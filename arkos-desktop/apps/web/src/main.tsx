@@ -12,6 +12,10 @@ import { isElectron } from "./env";
 import { isMacPlatform } from "./lib/utils";
 import { installGlassOverlayCutout } from "./lib/glassOverlayCutout";
 import { installRendererErrorDiagnostics } from "./lib/rendererErrorDiagnostics";
+import { markRendererStartup } from "./rendererStartupTiming";
+import { RouterStartupSplash } from "./components/BootSplash";
+
+markRendererStartup("main-evaluated");
 
 const disposeRendererDiagnostics = installRendererErrorDiagnostics();
 if (import.meta.hot) import.meta.hot.dispose(() => disposeRendererDiagnostics?.());
@@ -36,5 +40,6 @@ if (isElectron) {
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <RouterProvider router={router} />
+    <RouterStartupSplash router={router} />
   </React.StrictMode>,
 );

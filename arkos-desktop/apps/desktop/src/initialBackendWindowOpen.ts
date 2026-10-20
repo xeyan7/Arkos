@@ -20,7 +20,7 @@ export interface InitialBackendWindowOpenOptions {
 }
 
 export function openInitialBackendWindow(options: InitialBackendWindowOpenOptions): void {
-  if (options.isDevelopment || options.baseUrl.length === 0) {
+  if (options.baseUrl.length === 0) {
     return;
   }
 

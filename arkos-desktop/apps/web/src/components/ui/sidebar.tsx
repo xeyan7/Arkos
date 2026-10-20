@@ -363,6 +363,7 @@ function Sidebar({
             className,
           )}
           data-slot="sidebar-container"
+          inert={state === "collapsed" && collapsible === "offcanvas"}
           {...props}
         >
           {/* The inner surface is the safe place for visual skinning. The outer shell owns
@@ -437,6 +438,7 @@ function SidebarRail({
   placement: placementProp,
   className,
   onClick,
+  onLostPointerCapture,
   onPointerCancel,
   onPointerDown,
   onPointerMove,
@@ -627,6 +629,13 @@ function SidebarRail({
     endResizeInteraction(event);
   };
 
+  const handleLostPointerCapture = (event: React.PointerEvent<HTMLButtonElement>) => {
+    onLostPointerCapture?.(event);
+    // A dialog or another drag surface can take capture before pointerup.
+    // Always retire the old resize so it cannot keep global input styles active.
+    endResizeInteraction(event);
+  };
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(event);
     if (event.defaultPrevented) return;
@@ -702,6 +711,7 @@ function SidebarRail({
       data-placement={placement}
       data-slot="sidebar-rail"
       onClick={handleClick}
+      onLostPointerCapture={handleLostPointerCapture}
       onPointerCancel={handlePointerCancel}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

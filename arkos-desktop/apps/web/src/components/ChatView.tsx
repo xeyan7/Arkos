@@ -361,8 +361,6 @@ import {
   shouldShowCoordinatorSuggestions,
   visibleCoordinatorSuggestionChips,
 } from "./chat/project/coordinatorSuggestions.logic";
-import { ProjectPanel } from "./chat/project/ProjectPanel";
-import { LibraryPanel } from "./chat/group/LibraryPanel";
 import { useHubWorkItems } from "./chat/project/useHubWorkItems";
 import { hubWorkItemsBySourceMessage } from "./chat/project/hubWorkItems";
 import { useProjectAgentSummaries } from "./chat/project/useProjectAgentSummaries";
@@ -453,6 +451,12 @@ import { isSidechatThread, isStandaloneSidechatThread } from "@arkos/shared/side
 // is conditional, so loading it lazily keeps the terminal stack out of the initial
 // chat bundle and defers the cost to the first time a terminal is actually opened.
 const ThreadTerminalDrawer = lazy(() => import("./ThreadTerminalDrawer"));
+const ProjectPanel = lazy(() =>
+  import("./chat/project/ProjectPanel").then((module) => ({ default: module.ProjectPanel })),
+);
+const LibraryPanel = lazy(() =>
+  import("./chat/group/LibraryPanel").then((module) => ({ default: module.LibraryPanel })),
+);
 
 const EMPTY_ACTIVITIES: OrchestrationThreadActivity[] = [];
 const EMPTY_MESSAGES: ChatMessage[] = [];
@@ -6751,36 +6755,40 @@ export default function ChatView({
             />
           ) : null}
           {projectPanelEnabled ? (
-            <ProjectPanel
-              open={projectPanelVisible}
-              variant={environmentOverlayVariant}
-              projectId={activeProjectId}
-              projectName={activeProjectDisplayName ?? activeProject?.name ?? "Project"}
-              workspacePath={activeProject?.cwd ?? ""}
-              // "Use default" must mean the app's default model, not whatever the
-              // active thread happens to run (W14).
-              defaultModelSelection={groupPanelDefaultModelSelection}
-              importedInstructions={projectInstructions}
-              onOpenCoordinator={(threadId) => onNavigateToThread(threadId)}
-              onOpenThread={(threadId) => onNavigateToThread(threadId)}
-              onOpenThreadSplit={onOpenThreadSplit}
-              onOpenAutomation={onOpenAutomation}
-              onClose={() => setProjectFromAuxiliary(false)}
-              settingsDialogOpen={coordinatorSettingsOpen}
-              settingsInitialSection={coordinatorSettingsSection}
-              onSettingsDialogOpenChange={(open) => {
-                setCoordinatorSettingsOpen(open);
-                if (!open) setCoordinatorSettingsSection(undefined);
-              }}
-            />
+            <Suspense fallback={null}>
+              <ProjectPanel
+                open={projectPanelVisible}
+                variant={environmentOverlayVariant}
+                projectId={activeProjectId}
+                projectName={activeProjectDisplayName ?? activeProject?.name ?? "Project"}
+                workspacePath={activeProject?.cwd ?? ""}
+                // "Use default" must mean the app's default model, not whatever the
+                // active thread happens to run (W14).
+                defaultModelSelection={groupPanelDefaultModelSelection}
+                importedInstructions={projectInstructions}
+                onOpenCoordinator={(threadId) => onNavigateToThread(threadId)}
+                onOpenThread={(threadId) => onNavigateToThread(threadId)}
+                onOpenThreadSplit={onOpenThreadSplit}
+                onOpenAutomation={onOpenAutomation}
+                onClose={() => setProjectFromAuxiliary(false)}
+                settingsDialogOpen={coordinatorSettingsOpen}
+                settingsInitialSection={coordinatorSettingsSection}
+                onSettingsDialogOpenChange={(open) => {
+                  setCoordinatorSettingsOpen(open);
+                  if (!open) setCoordinatorSettingsSection(undefined);
+                }}
+              />
+            </Suspense>
           ) : null}
           {projectPanelEnabled ? (
-            <LibraryPanel
-              open={libraryPanelVisible}
-              variant={environmentOverlayVariant}
-              projectId={activeProjectId}
-              onClose={() => setLibraryFromAuxiliary(false)}
-            />
+            <Suspense fallback={null}>
+              <LibraryPanel
+                open={libraryPanelVisible}
+                variant={environmentOverlayVariant}
+                projectId={activeProjectId}
+                onClose={() => setLibraryFromAuxiliary(false)}
+              />
+            </Suspense>
           ) : null}
         </div>
         {/* end chat column */}

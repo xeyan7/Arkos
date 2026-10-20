@@ -12,7 +12,9 @@ import {
 } from "./SidebarHeaderNavigationControls";
 import { RouteSurfaceHeader } from "./RouteSurface";
 import { SurfaceContentTabs } from "./chat/SurfaceContentTabs";
-import { SidebarProvider, useSidebar } from "./ui/sidebar";
+import { AppShellTopStrip } from "./AppShellTopStrip";
+import { SplashScreen } from "./SplashScreen";
+import { Sidebar, SidebarProvider, SIDEBAR_OFFCANVAS_MOTION_CLASS, useSidebar } from "./ui/sidebar";
 
 vi.mock("~/env", () => ({ isElectron: true }));
 
@@ -107,7 +109,110 @@ async function renderShell(vertical = false) {
   );
 }
 
+// Mirror the full workspace shell: no rail, an animated sidebar gap, and
+// the real strip whose controls move into the route header on collapse.
+function WorkspaceShell({ loading = false }: { loading?: boolean }) {
+  const [route, setRoute] = useState<HTMLElement | null>(null);
+  return (
+    <SidebarLeadingControlsDock railSlot={null} routeColumn={route}>
+      <div className="flex min-h-0 shrink-0 flex-col">
+        <AppShellTopStrip />
+        <div className="app-rail-panel relative flex shrink-0 overflow-hidden [contain:paint]">
+          <Sidebar
+            className={SIDEBAR_OFFCANVAS_MOTION_CLASS}
+            gapClassName={SIDEBAR_OFFCANVAS_MOTION_CLASS}
+          >
+            Thread list
+          </Sidebar>
+        </div>
+      </div>
+      <main ref={setRoute} className="chat-content-card relative min-w-0 flex-1">
+        {loading ? (
+          <SplashScreen errorMessage="Could not restore the conversation" onRetry={() => {}} />
+        ) : (
+          <>
+            <RouteSurfaceHeader>
+              <span>Workspace</span>
+            </RouteSurfaceHeader>
+            <input aria-label="Workspace composer" />
+          </>
+        )}
+      </main>
+    </SidebarLeadingControlsDock>
+  );
+}
+
 describe("sidebar leading controls dock", () => {
+  it("follows sidebar drag-resizing without needing a window resize", async () => {
+    await page.viewport(1280, 800);
+    const screen = await render(
+      <SidebarProvider defaultOpen data-sidebar-layout="rail" className="h-svh overflow-hidden">
+        <WorkspaceShell />
+      </SidebarProvider>,
+    );
+    try {
+      const toggle = page.getByRole("button", { name: "Toggle thread sidebar" });
+      const wrapper = screen.container.querySelector<HTMLElement>('[data-slot="sidebar-wrapper"]')!;
+      for (const width of [420, 280]) {
+        wrapper.style.setProperty("--sidebar-width", `${width}px`);
+        await expect
+          .poll(() => {
+            const slot = screen.container.querySelector<HTMLElement>(
+              ".app-shell-top-strip [aria-hidden]",
+            )!;
+            return Math.abs(
+              toggle.element().getBoundingClientRect().left - slot.getBoundingClientRect().left,
+            );
+          })
+          .toBeLessThan(1);
+      }
+    } finally {
+      await screen.unmount();
+    }
+  });
+  it.each([false, true])(
+    "keeps the toggle on its live header after closing and reopening the full workspace sidebar (loading=%s)",
+    async (loading) => {
+      await page.viewport(1280, 800);
+      const screen = await render(
+        <SidebarProvider defaultOpen data-sidebar-layout="rail" className="h-svh overflow-hidden">
+          <WorkspaceShell loading={loading} />
+        </SidebarProvider>,
+      );
+      try {
+        const toggle = page.getByRole("button", { name: "Toggle thread sidebar" });
+        for (let count = 0; count < 4; count++) {
+          await toggle.click();
+          const collapsed = count % 2 === 0;
+          await expect
+            .element(screen.container.querySelector<HTMLElement>('[data-slot="sidebar"]')!)
+            .toHaveAttribute("data-state", collapsed ? "collapsed" : "expanded");
+          await expect
+            .poll(() => {
+              const header = screen.container.querySelector<HTMLElement>(
+                collapsed ? ".app-top-bar" : ".app-shell-top-strip",
+              )!;
+              const placeholder = header.querySelector<HTMLElement>("[aria-hidden]")!;
+              return Math.abs(
+                toggle.element().getBoundingClientRect().left -
+                  placeholder.getBoundingClientRect().left,
+              );
+            })
+            .toBeLessThan(1);
+          const rect = toggle.element().getBoundingClientRect();
+          expect(
+            nativeDragRegionAt(
+              screen.container,
+              rect.left + rect.width / 2,
+              rect.top + rect.height / 2,
+            ),
+          ).toBe("no-drag");
+        }
+      } finally {
+        await screen.unmount();
+      }
+    },
+  );
   it("keeps clipped thread tabs from excluding the chrome beside their scroll viewport", async () => {
     await page.viewport(1280, 800);
     const onSelect = vi.fn();

@@ -5,11 +5,15 @@ import "./storageOriginMigration";
 
 import { bootstrapSignedOutScreen } from "./authSignedOut";
 import { bootstrapPairingSession } from "./pairingBootstrap";
+import { markRendererStartup } from "./rendererStartupTiming";
+
+markRendererStartup("bootstrap");
 
 if (!bootstrapSignedOutScreen()) {
   void bootstrapPairingSession().then((result) => {
     if (result === "not-pairing") {
-      return import("./main");
+      markRendererStartup("main-import-start");
+      return import("./main").then(() => markRendererStartup("main-import-complete"));
     }
   });
 }

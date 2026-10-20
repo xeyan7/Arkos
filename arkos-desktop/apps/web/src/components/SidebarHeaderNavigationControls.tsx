@@ -138,8 +138,25 @@ export function SidebarLeadingControlsDock({
       );
     };
     measure();
+    // Sidebar collapse, drag-resize, and adjacent panes move this box without
+    // resizing the window. Follow the layout so the real controls stay over
+    // their no-drag placeholder in Electron as well as their visible header.
+    const observer = new ResizeObserver(measure);
+    observer.observe(anchor);
+    if (routeColumn) observer.observe(routeColumn);
+    if (railSlot) observer.observe(railSlot);
+    for (
+      let element = anchor.parentElement;
+      element && !element.matches('[data-slot="sidebar-wrapper"]');
+      element = element.parentElement
+    ) {
+      observer.observe(element);
+    }
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, [anchor, railSlot, routeColumn]);
 
   // Phones keep the cluster inside the host header (the drawer floats over content).

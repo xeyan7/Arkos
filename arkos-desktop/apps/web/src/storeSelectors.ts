@@ -21,6 +21,37 @@ import type {
 
 const EMPTY_THREAD_SHELLS: ThreadShell[] = [];
 
+/** Project recovery must not hydrate transcripts or notify React on streaming updates. */
+export function createHasThreadWithoutProjectSelector(): (state: AppState) => boolean {
+  let previousProjects: AppState["projects"] | undefined;
+  let previousIds: AppState["threadIds"] | undefined;
+  let previousShells: AppState["threadShellById"] | undefined;
+  let projectIds = new Set<ProjectId>();
+  let result = false;
+
+  return (state) => {
+    const projectsChanged = previousProjects !== state.projects;
+    if (
+      !projectsChanged &&
+      previousIds === state.threadIds &&
+      previousShells === state.threadShellById
+    )
+      return result;
+
+    if (projectsChanged) {
+      projectIds = new Set(state.projects.map((project) => project.id));
+      previousProjects = state.projects;
+    }
+    previousIds = state.threadIds;
+    previousShells = state.threadShellById;
+    result = (state.threadIds ?? []).some((id) => {
+      const shell = state.threadShellById?.[id];
+      return shell !== undefined && !projectIds.has(shell.projectId);
+    });
+    return result;
+  };
+}
+
 export interface ThreadWorkspaceMetadata {
   envMode: ThreadEnvironmentMode | undefined;
   worktreePath: string | null;

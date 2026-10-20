@@ -6,6 +6,7 @@ import type { AppState } from "./store";
 import {
   createAccountRateLimitThreadsSelector,
   createAllThreadsSelector,
+  createHasThreadWithoutProjectSelector,
   createAllThreadsMessagelessSelector,
   createComposerThreadMentionSourcesSelector,
   createLastActivityTimestampSelector,
@@ -64,6 +65,47 @@ function makeState(slices: TestStateSlices): AppState {
 function makeActivity(id: string, kind: string) {
   return { id, kind, createdAt: "2026-01-01T00:00:00.000Z", payload: {} };
 }
+
+describe("createHasThreadWithoutProjectSelector", () => {
+  it("tracks project removal, thread reassignment, and thread removal", () => {
+    const select = createHasThreadWithoutProjectSelector();
+    const state = {
+      ...makeState({ threadIds: [threadIdA], threadShellById: { [threadIdA]: shellA } }),
+      projects: [{ id: projectId } as AppState["projects"][number]],
+    } as AppState;
+    expect(select(state)).toBe(false);
+    expect(select({ ...state, projects: [] })).toBe(true);
+    expect(select(state)).toBe(false);
+    const reassigned = {
+      ...state,
+      threadShellById: { [threadIdA]: { ...shellA, projectId: "missing" as ProjectId } },
+    };
+    expect(select(reassigned)).toBe(true);
+    expect(select({ ...reassigned, threadIds: [] })).toBe(false);
+  });
+
+  it("ignores streaming detail and updated timestamps without reading transcripts", () => {
+    const select = createHasThreadWithoutProjectSelector();
+    const state = {
+      ...makeState({ threadIds: [threadIdA], threadShellById: { [threadIdA]: shellA } }),
+      projects: [{ id: projectId } as AppState["projects"][number]],
+      get messageByThreadId(): AppState["messageByThreadId"] {
+        throw new Error("Must not hydrate messages");
+      },
+    } as AppState;
+    expect(select(state)).toBe(false);
+    expect(
+      select({
+        ...makeState({
+          threadIds: state.threadIds ?? [],
+          threadShellById: { [threadIdA]: { ...shellA, updatedAt: "2026-10-20T10:00:00Z" } },
+          messageIdsByThreadId: { [threadIdA]: [messageId] },
+        }),
+        projects: state.projects,
+      } as AppState),
+    ).toBe(false);
+  });
+});
 
 describe("createThreadShellsSelector", () => {
   it("returns shells in threadIds order", () => {

@@ -276,15 +276,28 @@ export function resolveCscCompiler(
   return null;
 }
 
-export function ensureWindowsShellAppUserModelHelper(cacheDirectory: string): string {
-  FS.mkdirSync(cacheDirectory, { recursive: true });
+const pendingHelperBuilds = new Map<string, Promise<string>>();
+
+export function ensureWindowsShellAppUserModelHelper(cacheDirectory: string): Promise<string> {
+  const current = pendingHelperBuilds.get(cacheDirectory);
+  if (current) return current;
+  const pending = prepareWindowsShellHelper(cacheDirectory).finally(() => {
+    if (pendingHelperBuilds.get(cacheDirectory) === pending)
+      pendingHelperBuilds.delete(cacheDirectory);
+  });
+  pendingHelperBuilds.set(cacheDirectory, pending);
+  return pending;
+}
+
+async function prepareWindowsShellHelper(cacheDirectory: string): Promise<string> {
+  await FS.promises.mkdir(cacheDirectory, { recursive: true });
   const exePath = Path.join(cacheDirectory, windowsShellAppUserModelHelperName());
   if (FS.existsSync(exePath)) return exePath;
   const csc = resolveCscCompiler();
   if (!csc) throw new Error("csc.exe not found");
   const csPath = Path.join(cacheDirectory, "windows-shell-appusermodel.cs");
-  FS.writeFileSync(csPath, WINDOWS_SHELL_APPUSERMODEL_SOURCE, "utf8");
-  const compiled = ChildProcess.spawnSync(
+  await FS.promises.writeFile(csPath, WINDOWS_SHELL_APPUSERMODEL_SOURCE, "utf8");
+  await runHelper(
     csc,
     [
       "/nologo",
@@ -294,23 +307,21 @@ export function ensureWindowsShellAppUserModelHelper(cacheDirectory: string): st
       `/out:${exePath}`,
       csPath,
     ],
-    { windowsHide: true, encoding: "utf8" },
+    10_000,
   );
-  if (compiled.status !== 0 || !FS.existsSync(exePath)) {
-    throw new Error(compiled.stderr?.toString().trim() || "Failed to compile Windows shell helper");
-  }
+  if (!FS.existsSync(exePath)) throw new Error("Failed to compile Windows shell helper");
   return exePath;
 }
 
-export function applyWindowsShellAppUserModel(
+export async function applyWindowsShellAppUserModel(
   input: WindowsShellAppUserModelInput,
   cacheDirectory: string,
   _options?: ApplyWindowsShellAppUserModelOptions,
-): void {
-  const helper = ensureWindowsShellAppUserModelHelper(cacheDirectory);
+): Promise<void> {
+  const helper = await ensureWindowsShellAppUserModelHelper(cacheDirectory);
   const iconResource = windowsShellIconResource(input.iconPath);
   const hwnd = input.hwnd === undefined || input.hwnd === null ? "-" : String(input.hwnd);
-  runHelper(helper, [
+  await runHelper(helper, [
     "apply",
     input.appId,
     iconResource,
@@ -321,19 +332,23 @@ export function applyWindowsShellAppUserModel(
   ]);
 }
 
-function runHelper(helper: string, args: string[]): void {
-  const result = ChildProcess.spawnSync(helper, args, {
-    windowsHide: true,
-    encoding: "utf8",
-    timeout: WINDOWS_SHELL_HELPER_TIMEOUT_MS,
-    killSignal: "SIGTERM",
-  });
-  if (result.error) {
-    throw result.error;
-  }
-  if (result.status !== 0) {
-    throw new Error(
-      result.stderr?.trim() || result.stdout?.trim() || `helper exited ${result.status}`,
+function runHelper(
+  helper: string,
+  args: string[],
+  timeout = WINDOWS_SHELL_HELPER_TIMEOUT_MS,
+): Promise<void> {
+  // Explorer can synchronously message Electron while applying shell properties.
+  // Keep the main loop free to answer, including during the renderer's sync IPC.
+  return new Promise((resolve, reject) => {
+    ChildProcess.execFile(
+      helper,
+      args,
+      { windowsHide: true, encoding: "utf8", timeout, killSignal: "SIGTERM" },
+      (error, stdout, stderr) => {
+        if (error)
+          reject(new Error(stderr.trim() || stdout.trim() || error.message, { cause: error }));
+        else resolve();
+      },
     );
-  }
+  });
 }

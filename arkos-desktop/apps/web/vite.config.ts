@@ -7,6 +7,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import zlib from "node:zlib";
 import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import babel from "@rolldown/plugin-babel";
@@ -14,6 +15,11 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig, type Plugin } from "vite";
 import pkg from "./package.json" with { type: "json" };
 import { listFiles, pruneProductionIcons } from "./scripts/production-assets";
+import { createIconDependencyOptimizer } from "./scripts/icon-dependency-optimizer";
+
+const iconDependencies = await createIconDependencyOptimizer(
+  fileURLToPath(new URL("./src", import.meta.url)),
+);
 
 const port = Number(process.env.PORT ?? 5733);
 const sourcemapEnv = process.env.ARKOS_WEB_SOURCEMAP?.trim().toLowerCase();
@@ -24,6 +30,27 @@ const buildSourcemap =
     : sourcemapEnv === "hidden"
       ? "hidden"
       : false;
+
+function developmentSourceMapsPlugin(): Plugin {
+  return {
+    name: "arkos-fast-dev-source-maps",
+    apply: (_config, { command, mode }) =>
+      command === "serve" &&
+      mode !== "test" &&
+      !/^(1|true|hidden)$/i.test(process.env.ARKOS_WEB_SOURCEMAP?.trim() ?? ""),
+    enforce: "post",
+    transform(code, id) {
+      if (id.includes("node_modules") || !/\.[cm]?[jt]sx?(?:\?|$)/.test(id)) return;
+      // Inline debug maps account for about two thirds of the served app code.
+      // Keep them opt-in for source debugging, rather than making every normal
+      // dev launch transfer and retain them. Tests retain their mapped stacks.
+      return {
+        code,
+        map: { version: 3, sources: [], sourcesContent: [], names: [], mappings: "" },
+      };
+    },
+  };
+}
 
 // Prune before compression. closeBundle hooks are parallel by default;
 // enforce: "post" alone does not make the asynchronous compression hook wait.
@@ -139,6 +166,7 @@ function precompressPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [
+    iconDependencies.watchPlugin,
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
@@ -165,11 +193,17 @@ export default defineConfig({
         )) satisfies Plugin["apply"],
     })),
     tailwindcss(),
+    developmentSourceMapsPlugin(),
     centralIconPrunePlugin(),
     precompressPlugin(),
   ],
   optimizeDeps: {
+    rolldownOptions: {
+      treeshake: true,
+      plugins: [iconDependencies.optimizerPlugin],
+    },
     include: [
+      ...iconDependencies.packages,
       "@pierre/diffs",
       "@pierre/diffs/react",
       "@pierre/diffs/worker/worker.js",

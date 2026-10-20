@@ -4,6 +4,7 @@ import { createRouter } from "@tanstack/react-router";
 
 import { routeTree } from "./routeTree.gen";
 import { StoreProvider } from "./store";
+import { BootSplash } from "./components/BootSplash";
 
 type RouterHistory = NonNullable<Parameters<typeof createRouter>[0]["history"]>;
 
@@ -17,6 +18,11 @@ export function getRouter(history: RouterHistory) {
     // fetches the route chunk on link hover/touch — first navigation skips the
     // chunk download/parse wait.
     defaultPreload: "intent",
+    // The default pending view is empty. React replaces the HTML logo before
+    // lazy routes finish, exposing a blank window unless we provide one.
+    defaultPendingComponent: BootSplash,
+    defaultPendingMs: 0,
+    defaultPendingMinMs: 0,
     context: {
       queryClient,
     },

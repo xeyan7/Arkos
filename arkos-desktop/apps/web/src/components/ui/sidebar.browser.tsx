@@ -2,12 +2,13 @@ import "../../index.css";
 
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cdp, page } from "vitest/browser";
+import { cdp, page, userEvent } from "vitest/browser";
 import { render } from "vitest-browser-react";
 
 import {
   Sidebar,
   SidebarProvider,
+  SidebarRail,
   SidebarTrigger,
   SIDEBAR_OFFCANVAS_MOTION_CLASS,
   useSidebar,
@@ -35,6 +36,63 @@ function ControlledSidebar() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("sidebar toggles", () => {
+  it("releases the global drag state when another control takes pointer capture", async () => {
+    await page.viewport(1280, 800);
+    const onResize = vi.fn();
+    const screen = await render(
+      <SidebarProvider defaultOpen>
+        <Sidebar resizable={{ onResize }}>
+          <SidebarRail />
+        </Sidebar>
+      </SidebarProvider>,
+    );
+    try {
+      const rail = screen.container.querySelector<HTMLButtonElement>('[data-slot="sidebar-rail"]')!;
+      const capture = vi.spyOn(rail, "setPointerCapture").mockImplementation(() => {});
+      const x = rail.getBoundingClientRect().left;
+      rail.dispatchEvent(
+        new PointerEvent("pointerdown", { bubbles: true, pointerId: 1, button: 0, clientX: x }),
+      );
+      expect(document.body.style.cursor).toBe("col-resize");
+      rail.dispatchEvent(new PointerEvent("lostpointercapture", { bubbles: true, pointerId: 1 }));
+      expect(document.body.style.cursor).toBe("");
+      expect(document.body.style.userSelect).toBe("");
+      expect(onResize).toHaveBeenCalledTimes(1);
+      capture.mockRestore();
+    } finally {
+      await screen.unmount();
+    }
+  });
+  it("keeps collapsed offscreen controls out of the keyboard focus order", async () => {
+    await page.viewport(1280, 800);
+    const screen = await render(
+      <SidebarProvider defaultOpen>
+        <SidebarTrigger aria-label="Toggle focus panel" className="relative z-50" />
+        <Sidebar>
+          <input aria-label="Sidebar search" />
+        </Sidebar>
+        <input aria-label="Conversation composer" />
+      </SidebarProvider>,
+    );
+    try {
+      const toggle = page.getByRole("button", { name: "Toggle focus panel" });
+      await toggle.click();
+      const panel = screen.container.querySelector<HTMLElement>('[data-slot="sidebar-container"]')!;
+      expect(panel.inert).toBe(true);
+      await userEvent.tab();
+      expect(document.activeElement).toBe(
+        page.getByRole("textbox", { name: "Conversation composer" }).element(),
+      );
+      await toggle.click();
+      expect(panel.inert).toBe(false);
+      await userEvent.tab();
+      expect(document.activeElement).toBe(
+        page.getByRole("textbox", { name: "Sidebar search" }).element(),
+      );
+    } finally {
+      await screen.unmount();
+    }
+  });
   it.each(["left", "right"] as const)(
     "settles the %s panel and layout gap immediately with reduced motion",
     async (side) => {

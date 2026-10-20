@@ -1,4 +1,5 @@
 import { ServerBusyIndicator } from "../components/ServerBusyIndicator";
+import { markRendererStartup } from "../rendererStartupTiming";
 import { EditorDirtyRouteGuard } from "../components/EditorDirtyRouteGuard";
 import {
   ORCHESTRATION_STREAM_OVERFLOW_CODE,
@@ -32,6 +33,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Throttler } from "@tanstack/react-pacer";
@@ -49,10 +51,7 @@ import { useProjectImportDialogStore } from "../projectImport/projectImportDialo
 import { FeatureTourDialog } from "../components/FeatureTourDialog";
 import { SafariAccessOnboarding } from "../components/SafariAccessOnboarding";
 import { QueuedComposerDrainCoordinator } from "../components/QueuedComposerDrainCoordinator";
-import { FeedbackDialog } from "../components/FeedbackDialog";
 import { SETTINGS_TARGETS } from "../settingsNavigation";
-import ShortcutsDialog from "../components/ShortcutsDialog";
-import WhatsNewDialog from "../components/WhatsNewDialog";
 import { useWhatsNew } from "../whatsNew/useWhatsNew";
 import { WhatsNewPopoutCard } from "../whatsNew/WhatsNewPopoutCard";
 import { shouldRenderTerminalWorkspace } from "../components/ChatView.logic";
@@ -80,7 +79,7 @@ import {
 } from "../composerDraftStore";
 import { useStore } from "../store";
 import { EMPTY_THREAD_IDS } from "../storeState";
-import { createAllThreadsSelector, createThreadSelector } from "../storeSelectors";
+import { createHasThreadWithoutProjectSelector, createThreadSelector } from "../storeSelectors";
 import { selectThreadTerminalState, useTerminalStateStore } from "../terminalStateStore";
 import { terminalActivityFromEvent } from "../terminalActivity";
 import {
@@ -274,6 +273,7 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootRouteView() {
+  useEffect(() => markRendererStartup("root-committed"), []);
   useAppTypography();
   useAppDensity();
   useChatWidth();
@@ -797,6 +797,22 @@ function ProviderUpdateNotifications({
   return null;
 }
 
+const ShortcutsDialog = lazy(() => import("../components/ShortcutsDialog"));
+const WhatsNewDialog = lazy(() => import("../components/WhatsNewDialog"));
+const FeedbackDialog = lazy(() =>
+  import("../components/FeedbackDialog").then((module) => ({ default: module.FeedbackDialog })),
+);
+
+// Load on first use, then keep mounted so close transitions and dialog state survive.
+function DeferredDialog({ open, children }: { open: boolean; children: ReactNode }) {
+  const [hasOpened, setHasOpened] = useState(false);
+  useEffect(() => {
+    if (open) setHasOpened(true);
+  }, [open]);
+  if (!open && !hasOpened) return null;
+  return <Suspense fallback={null}>{children}</Suspense>;
+}
+
 function GlobalShortcutsDialog() {
   const [open, setOpen] = useState(false);
   const { focusedThreadId, activeProject } = useFocusedChatContext();
@@ -833,18 +849,20 @@ function GlobalShortcutsDialog() {
   }, []);
 
   return (
-    <ShortcutsDialog
-      open={open}
-      onOpenChange={setOpen}
-      keybindings={keybindings}
-      projectScripts={activeProject?.kind === "project" ? activeProject.scripts : []}
-      platform={platform}
-      context={{
-        terminalFocus: isTerminalFocused(),
-        terminalOpen,
-        terminalWorkspaceOpen,
-      }}
-    />
+    <DeferredDialog open={open}>
+      <ShortcutsDialog
+        open={open}
+        onOpenChange={setOpen}
+        keybindings={keybindings}
+        projectScripts={activeProject?.kind === "project" ? activeProject.scripts : []}
+        platform={platform}
+        context={{
+          terminalFocus: isTerminalFocused(),
+          terminalOpen,
+          terminalWorkspaceOpen,
+        }}
+      />
+    </DeferredDialog>
   );
 }
 
@@ -874,7 +892,11 @@ function GlobalFeedbackDialog() {
     hasThreadError: Boolean(activeThread?.error),
   };
 
-  return <FeedbackDialog open={isOpen} context={context} onOpenChange={setOpen} />;
+  return (
+    <DeferredDialog open={isOpen}>
+      <FeedbackDialog open={isOpen} context={context} onOpenChange={setOpen} />
+    </DeferredDialog>
+  );
 }
 
 // The dialog pulls in the provider sign-in terminal (xterm and addons), so it stays out
@@ -955,13 +977,15 @@ function GlobalWhatsNewSurface() {
           onDismiss={dismissPopout}
         />
       )}
-      <WhatsNewDialog
-        open={isDialogOpen}
-        onOpenChange={onDialogOpenChange}
-        currentEntry={currentEntry}
-        allEntries={allEntries}
-        currentVersion={currentVersion}
-      />
+      <DeferredDialog open={isDialogOpen}>
+        <WhatsNewDialog
+          open={isDialogOpen}
+          onOpenChange={onDialogOpenChange}
+          currentEntry={currentEntry}
+          allEntries={allEntries}
+          currentVersion={currentVersion}
+        />
+      </DeferredDialog>
     </>
   );
 }
@@ -2783,7 +2807,9 @@ function EventRouter() {
 function DesktopProjectBootstrap() {
   const syncServerReadModel = useStore((store) => store.syncServerReadModel);
   const projects = useStore((store) => store.projects);
-  const threads = useStore(selectAllThreads);
+  // Recovery only needs project ownership. Full threads rebuild their message and
+  // activity arrays on every streaming flush, even while this check is idle.
+  const hasThreadWithoutProject = useStore(selectHasThreadWithoutProject);
   const threadsHydrated = useStore((store) => store.threadsHydrated);
   const recoveryAttemptGateRef = useRef<ReturnType<
     typeof createDesktopProjectRecoveryAttemptGate
@@ -2800,8 +2826,6 @@ function DesktopProjectBootstrap() {
       return;
     }
 
-    const projectIds = new Set(projects.map((project) => project.id));
-    const hasThreadWithoutProject = threads.some((thread) => !projectIds.has(thread.projectId));
     if (projects.length > 0 && !hasThreadWithoutProject) {
       return;
     }
@@ -2835,9 +2859,15 @@ function DesktopProjectBootstrap() {
       disposed = true;
       attempt.release();
     };
-  }, [projects, recoveryAttemptGate, syncServerReadModel, threads, threadsHydrated]);
+  }, [
+    projects,
+    recoveryAttemptGate,
+    syncServerReadModel,
+    hasThreadWithoutProject,
+    threadsHydrated,
+  ]);
 
   // Desktop hydration normally runs through EventRouter project + orchestration sync.
   return null;
 }
-const selectAllThreads = createAllThreadsSelector();
+const selectHasThreadWithoutProject = createHasThreadWithoutProjectSelector();
