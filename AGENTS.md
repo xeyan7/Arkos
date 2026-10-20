@@ -2,6 +2,10 @@
 
 When a user asks to launch Arkos Electron, do not install the desktop application. Launch it directly from the source checkout in developer mode.
 
+## Never install unless explicitly asked
+
+Starting the desktop app never means installing it. Whenever the user asks to start the desktop app in developer mode — or asks to start the desktop app in any other way, or anything related to starting it — never install the desktop app until the user clearly and explicitly instructs you to install it. Just start it in developer mode. Do not install it on the desktop. Only start it in developer mode.
+
 ## Standard developer launch
 
 From `E:\app\arkos-desktop`, restore project dependencies if needed, build the desktop and backend, then start Electron:
