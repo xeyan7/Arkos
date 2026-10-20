@@ -19,7 +19,7 @@ import { verifyPortableBuild } from "./lib/portable-build.ts";
 import {
   BETA_ASSET_PATHS,
   desktopIconAssetPaths,
-  publishIconOverrides,
+  distributionIconOverrides,
 } from "./lib/brand-assets.ts";
 import {
   createDesktopPlatformBuildConfig,
@@ -578,7 +578,7 @@ function stageClientFavicons(stageAppDir: string, flavor: typeof BuildFlavor.Typ
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
 
-    for (const override of publishIconOverrides(flavor)) {
+    for (const override of distributionIconOverrides(flavor)) {
       const sourcePath = yield* iconSourceFor(override.sourceRelativePath);
       const targetPath = path.join(stageAppDir, "apps/server", override.targetRelativePath);
       if (!(yield* fs.exists(targetPath))) {

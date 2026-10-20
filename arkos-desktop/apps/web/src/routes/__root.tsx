@@ -22,7 +22,6 @@ import {
   type ErrorComponentProps,
   useNavigate,
   useParams,
-  useLocation,
 } from "@tanstack/react-router";
 import {
   Suspense,
@@ -40,7 +39,6 @@ import { Throttler } from "@tanstack/react-pacer";
 import { APP_DISPLAY_NAME, APP_VERSION } from "../branding";
 import { isBetaFeatureOn } from "../betaFeatures";
 import { DesktopWindowControls } from "../components/DesktopWindowControls";
-import { ArkosLanding } from "../components/ArkosLanding";
 import { RunningChatsQuitCoordinator } from "../components/RunningChatsQuitCoordinator";
 import { AppSnapCoordinator } from "../components/AppSnapCoordinator";
 import { AppSnapWelcomeDialog } from "../components/AppSnapWelcomeDialog";
@@ -60,9 +58,7 @@ import { WhatsNewPopoutCard } from "../whatsNew/WhatsNewPopoutCard";
 import { shouldRenderTerminalWorkspace } from "../components/ChatView.logic";
 import { Button, dialogActionButtonClassName } from "../components/ui/button";
 import { AnchoredToastProvider, ToastProvider, toastManager } from "../components/ui/toast";
-import { useGitProgressToastPreview } from "../components/useGitProgressToastPreview";
 import { resolveAndPersistPreferredEditor } from "../editorPreferences";
-import { useFeatureFlags } from "../featureFlags";
 import { useFocusedChatContext } from "../focusedChatContext";
 import { useFeedbackDialogStore } from "../feedbackDialogStore";
 import type { FeedbackThreadContext } from "../feedback";
@@ -278,10 +274,6 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootRouteView() {
-  const isHome = useLocation({
-    select: (location: { pathname: string; search: object }) =>
-      location.pathname === "/" && !(location.search as { space?: string }).space,
-  });
   useAppTypography();
   useAppDensity();
   useChatWidth();
@@ -325,16 +317,6 @@ function RootRouteView() {
     </>
   );
 
-  // The screenshot-matched home is a frontend-only surface and can render before
-  // the backend connects. Existing chat and tool routes keep their normal shell.
-  if (isHome)
-    return (
-      <>
-        <ArkosLanding />
-        {desktopWindowControls}
-      </>
-    );
-
   if (compatibilityIssue) {
     return (
       <>
@@ -363,7 +345,6 @@ function RootRouteView() {
     <>
       <ToastProvider position="top-center">
         <AnchoredToastProvider>
-          <GitProgressToastPreviewDev />
           <EventRouter />
           <EditorDirtyRouteGuard />
           <ProviderStatusRefreshCoordinator />
@@ -434,13 +415,6 @@ function TransportCompatibilityView({ issue }: { issue: WsCompatibilityError }) 
       </section>
     </div>
   );
-}
-
-function GitProgressToastPreviewDev() {
-  const featureFlags = useFeatureFlags();
-  const enabled = import.meta.env.DEV && featureFlags["pin-git-progress-toast-preview"];
-  useGitProgressToastPreview(enabled);
-  return null;
 }
 
 function ProviderStatusRefreshCoordinator() {

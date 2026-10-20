@@ -1,35 +1,10 @@
-import { useRef, useState, type ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import {
-  IconActivity,
-  IconBox,
-  IconBrandGithub,
+  IconArrowUpRight,
   IconBulb,
-  IconChevronDown,
-  IconChevronLeft,
-  IconChevronRight,
-  IconCircle,
-  IconDeviceDesktop,
-  IconFilter,
-  IconFolder,
   IconHammer,
-  IconInbox,
-  IconLayoutSidebar,
-  IconMicrophone,
-  IconPaperclip,
-  IconPlayerPlay,
-  IconPlus,
-  IconRocket,
-  IconRobot,
-  IconSearch,
-  IconSend,
-  IconSettings,
-  IconShieldLock,
-  IconSitemap,
-  IconSparkles,
-  IconSun,
   IconTelescope,
   IconWalk,
-  IconX,
 } from "@tabler/icons-react";
 import "./ArkosLanding.css";
 
@@ -60,26 +35,6 @@ const prompts: { icon: LineIcon; color: string; lines: [string, string]; prompt:
     prompt: "Help me trace an agent execution. ",
   },
 ];
-const recentChats = [
-  "Feeling Unwell Today",
-  "what is the best way to...",
-  "Hi",
-  "how do I set up a postg...",
-  "How are you?",
-];
-const tools: [string, LineIcon][] = [
-  ["Appearance", IconSun],
-  ["Workflows", IconSitemap],
-  ["Integrations", IconBox],
-  ["Resources", IconSparkles],
-  ["Connections", IconActivity],
-  ["Deployments", IconRocket],
-  ["Agents", IconRobot],
-  ["GitHub", IconBrandGithub],
-  ["Activity", IconActivity],
-  ["Run history", IconPlayerPlay],
-];
-
 /** Small original vector mascots, matching the reference's overlapping illustrated badges. */
 function AgentFaces() {
   return (
@@ -144,318 +99,43 @@ function AgentFaces() {
   );
 }
 
-export function ArkosLanding() {
-  const [draft, setDraft] = useState("");
-  const [project, setProject] = useState("Bruno");
-  const [mode, setMode] = useState("Chat");
-  const [fast, setFast] = useState(true);
-  const [sidebar, setSidebar] = useState(true);
-  const [searching, setSearching] = useState(false);
-  const [search, setSearch] = useState("");
-  const [notice, setNotice] = useState("");
-  const [attachment, setAttachment] = useState("");
-  const composer = useRef<HTMLTextAreaElement>(null);
-  const fileInput = useRef<HTMLInputElement>(null);
-  const fillDraft = (text: string) => {
-    setDraft(text);
-    setNotice("");
-    composer.current?.focus();
-  };
-  const reset = () => {
-    setDraft("");
-    setNotice("");
-    setAttachment("");
-    composer.current?.focus();
-  };
-
+/** Welcome content only. The real chat owns the project, model, draft, and send action. */
+export function ArkosLanding({
+  heading,
+  onSelectPrompt,
+}: {
+  heading: ReactNode;
+  onSelectPrompt: (prompt: string) => void;
+}) {
   return (
-    <div className={`arkos-landing${sidebar ? "" : " arkos-sidebar-hidden"}`}>
-      <aside className="arkos-home-sidebar" aria-label="Workspace navigation">
-        <div className="arkos-sidebar-chrome drag-region">
-          <button aria-label="Back" onClick={() => window.history.back()}>
-            <IconChevronLeft />
-          </button>
-          <button aria-label="Forward" onClick={() => window.history.forward()}>
-            <IconChevronRight />
-          </button>
-          <button aria-label="Hide sidebar" onClick={() => setSidebar(false)}>
-            <IconLayoutSidebar />
-          </button>
-        </div>
-        <div className="arkos-workspace-row">
+    <section className="arkos-welcome" aria-label="Get started">
+      <AgentFaces />
+      <h2 data-testid="empty-landing-heading">{heading}</h2>
+      <p className="arkos-welcome-description">
+        Plan, build, and understand your agents. Start with an idea.
+      </p>
+      <div className="arkos-prompt-grid">
+        {prompts.map(({ icon: Icon, color, lines, prompt }) => (
           <button
-            className="arkos-workspace-name"
-            onClick={() => setNotice("You’re in Adarsh’s workspace.")}
+            type="button"
+            className={`arkos-prompt-card ${color}`}
+            key={color}
+            onClick={() => onSelectPrompt(prompt)}
           >
-            Adarsh’s workspace <IconChevronDown />
-          </button>
-          <button aria-label="Search workspace" onClick={() => setSearching(!searching)}>
-            <IconSearch />
-          </button>
-        </div>
-        {searching && (
-          <input
-            className="arkos-workspace-search"
-            autoFocus
-            aria-label="Search projects and recent chats"
-            placeholder="Search workspace…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        )}
-        <nav className="arkos-primary-nav" aria-label="Main navigation">
-          {(
-            [
-              ["New", IconPlus],
-              ["Agents", IconRobot],
-              ["Cockpit", IconDeviceDesktop],
-              ["Inbox", IconInbox],
-              ["Activity", IconActivity],
-            ] as [string, LineIcon][]
-          ).map(([label, Icon]) => (
-            <button
-              key={label}
-              onClick={() =>
-                label === "New"
-                  ? reset()
-                  : setNotice(
-                      `${label} will be connected in the next phase. This preview covers the home screen.`,
-                    )
-              }
-            >
-              <Icon />
-              <span>{label}</span>
-              {label === "Inbox" && <span className="arkos-inbox-count">1</span>}
-            </button>
-          ))}
-        </nav>
-        <section className="arkos-sidebar-section" aria-label="Projects">
-          <div className="arkos-section-heading">
-            <span>Projects</span>
-            <button aria-label="Filter projects" onClick={() => setSearching(!searching)}>
-              <IconFilter />
-            </button>
-          </div>
-          {[
-            ["Bruno", "Billing"],
-            ["Rowan", "Email Triage"],
-          ]
-            .filter((p) => p.join(" ").toLowerCase().includes(search.toLowerCase()))
-            .map(([name, detail]) => (
-              <button
-                className="arkos-project-row"
-                key={name}
-                onClick={() => {
-                  setProject(name!);
-                  setNotice("");
-                }}
-                aria-pressed={project === name}
-              >
-                <span className={`arkos-project-avatar ${name === "Rowan" ? "rowan" : ""}`}>◈</span>
-                <span>
-                  {name}
-                  <span className="arkos-project-detail"> · {detail}</span>
-                </span>
-              </button>
-            ))}
-        </section>
-        <section className="arkos-sidebar-section arkos-recents" aria-label="Recent chats">
-          <div className="arkos-section-heading">Recents</div>
-          {recentChats
-            .filter((chat) => chat.toLowerCase().includes(search.toLowerCase()))
-            .map((chat) => (
-              <button key={chat} onClick={() => fillDraft(chat)}>
-                <IconCircle />
-                <span>{chat}</span>
-              </button>
-            ))}
-        </section>
-        <button
-          className="arkos-profile"
-          onClick={() => setNotice("Adarsh Choudhary · Personal workspace")}
-        >
-          <span className="arkos-profile-avatar">A</span>
-          <span>Adarsh Choudhary</span>
-          <IconChevronDown />
-        </button>
-      </aside>
-
-      <main className="arkos-home-main">
-        <header className="arkos-home-header drag-region">
-          {!sidebar && (
-            <button aria-label="Show sidebar" onClick={() => setSidebar(true)}>
-              <IconLayoutSidebar />
-            </button>
-          )}
-          <IconDeviceDesktop />
-          <button onClick={() => setNotice("Invoice Tracking Agent Planning · Home")}>
-            Invoice Tracking Agent Planning <IconChevronDown />
-          </button>
-        </header>
-        <div className="arkos-home-content">
-          <section className="arkos-welcome" aria-label="Get started">
-            <AgentFaces />
-            <h1>What are we working on today, Adarsh?</h1>
-            <div className="arkos-prompt-grid">
-              {prompts.map(({ icon: Icon, color, lines, prompt }) => (
-                <button className="arkos-prompt-card" key={color} onClick={() => fillDraft(prompt)}>
-                  <Icon className={`arkos-prompt-icon ${color}`} />
-                  <span>
-                    {lines[0]}
-                    <br />
-                    {lines[1]}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-          <div className="arkos-composer-area">
-            {notice && (
-              <div className="arkos-home-notice" role="status">
-                <span>{notice}</span>
-                <button aria-label="Dismiss message" onClick={() => setNotice("")}>
-                  <IconX />
-                </button>
-              </div>
-            )}
-            <div className="arkos-composer-context">
-              <IconFolder />
-              <select
-                aria-label="Active agent"
-                value={project}
-                onChange={(e) => setProject(e.target.value)}
-              >
-                <option>Bruno</option>
-                <option>Rowan</option>
-              </select>
-              <span className="arkos-connected-apps" aria-label="Connected apps">
-                <span>✣</span>
-                <span>ϟ</span>
-                <span>◈</span>
+            <span className="arkos-prompt-card-top">
+              <span className="arkos-prompt-icon-wrap">
+                <Icon className="arkos-prompt-icon" aria-hidden="true" />
               </span>
-            </div>
-            <form
-              className="arkos-home-composer"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (draft.trim())
-                  setNotice(
-                    "Your draft is ready. Agent execution is not connected in this frontend preview.",
-                  );
-              }}
-            >
-              {attachment && (
-                <div className="arkos-attachment">
-                  <IconPaperclip />
-                  {attachment}
-                  <button
-                    type="button"
-                    aria-label="Remove attachment"
-                    onClick={() => setAttachment("")}
-                  >
-                    <IconX />
-                  </button>
-                </div>
-              )}
-              <textarea
-                ref={composer}
-                aria-label={`Describe what ${project} should do`}
-                placeholder={`Describe what ${project} should do.`}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-              />
-              <div className="arkos-composer-toolbar">
-                <div className="arkos-composer-tools">
-                  <button
-                    type="button"
-                    aria-label="Attach file"
-                    onClick={() => fileInput.current?.click()}
-                  >
-                    <IconPaperclip />
-                  </button>
-                  <input
-                    type="file"
-                    ref={fileInput}
-                    hidden
-                    onChange={(e) => setAttachment(e.target.files?.[0]?.name ?? "")}
-                  />
-                  <button
-                    type="button"
-                    aria-label="Agent settings"
-                    onClick={() => setNotice("Agent settings will be connected in the next phase.")}
-                  >
-                    <IconSettings />
-                  </button>
-                  <button
-                    className="arkos-speed"
-                    type="button"
-                    aria-pressed={fast}
-                    onClick={() => setFast(!fast)}
-                  >
-                    <IconShieldLock />
-                    {fast ? "Fast" : "Standard"}
-                  </button>
-                </div>
-                <div className="arkos-composer-options">
-                  <label className="arkos-model">
-                    <span>✺</span>
-                    <select aria-label="Model">
-                      <option>Sonnet 5</option>
-                      <option>Opus 4.6</option>
-                      <option>GPT-5.4</option>
-                    </select>
-                    <IconChevronDown />
-                  </label>
-                  <div className="arkos-mode" aria-label="Conversation mode">
-                    {["Chat", "Test"].map((item) => (
-                      <button
-                        type="button"
-                        key={item}
-                        aria-pressed={mode === item}
-                        onClick={() => setMode(item)}
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    aria-label="Voice input"
-                    onClick={() => setNotice("Voice input will be connected in the next phase.")}
-                  >
-                    <IconMicrophone />
-                  </button>
-                  <button
-                    type="submit"
-                    className="arkos-send"
-                    aria-label="Send message"
-                    disabled={!draft.trim()}
-                  >
-                    <IconSend />
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </main>
-      <aside className="arkos-home-rail" aria-label="Workspace tools">
-        <button aria-label="Toggle sidebar" onClick={() => setSidebar(!sidebar)}>
-          <IconLayoutSidebar />
-        </button>
-        <div>
-          {tools.map(([label, Icon]) => (
-            <button
-              key={label}
-              aria-label={label}
-              title={label}
-              onClick={() => setNotice(`${label} will be connected in the next phase.`)}
-            >
-              <Icon />
-            </button>
-          ))}
-        </div>
-      </aside>
-    </div>
+              <IconArrowUpRight className="arkos-prompt-arrow" aria-hidden="true" />
+            </span>
+            <span>
+              {lines[0]}
+              <br />
+              {lines[1]}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }

@@ -4,8 +4,8 @@ import type { DesktopWindowState } from "@arkos/contracts";
 
 import { useDesktopCustomTitleBarActive } from "~/hooks/useDesktopCustomTitleBar";
 import { isElectron } from "~/env";
-import { Maximize2, Minimize2, MinusIcon, XIcon } from "~/lib/icons";
-import { cn, getNavigatorPlatform, isWindowsPlatform } from "~/lib/utils";
+import { MinusIcon, XIcon } from "~/lib/icons";
+import { cn } from "~/lib/utils";
 
 import { CHAT_SURFACE_HEADER_HEIGHT_CLASS } from "./chat/chatHeaderControls";
 import { toastManager } from "./ui/toast";
@@ -15,14 +15,6 @@ const DEFAULT_WINDOW_STATE: DesktopWindowState = {
   isFullscreen: false,
 };
 
-// Native Windows caption glyphs. These code points resolve in "Segoe Fluent Icons"
-// (Windows 11) and fall back to "Segoe MDL2 Assets" (Windows 10): minimize, maximize,
-// restore (overlapping squares), and close.
-const GLYPH_MINIMIZE = "\uE921";
-const GLYPH_MAXIMIZE = "\uE922";
-const GLYPH_RESTORE = "\uE923";
-const GLYPH_CLOSE = "\uE8BB";
-
 // Match the native Windows caption-button footprint: 46px wide, full top-bar
 // height (CHAT_SURFACE_HEADER_HEIGHT_CLASS), flat (no radius/border), glyph centered. These are deliberately plain
 // <button>s rather than the app's Button/Tooltip primitives — those inject a
@@ -30,7 +22,7 @@ const GLYPH_CLOSE = "\uE8BB";
 // intercepts the click — so the chrome stays pixel-native and onClick routes
 // straight to the window-control IPC.
 const CAPTION_BUTTON_CLASS =
-  "flex h-full w-[46px] shrink-0 items-center justify-center text-foreground/90 outline-none transition-colors duration-75 select-none hover:bg-foreground/[0.09] active:bg-foreground/[0.05] [-webkit-app-region:no-drag]";
+  "flex h-full w-[46px] shrink-0 items-center justify-center text-foreground outline-none focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ring transition-colors duration-75 select-none hover:bg-foreground/[0.09] active:bg-foreground/[0.05] [-webkit-app-region:no-drag]";
 
 // Windows close-button accent: red fill on hover with a white glyph.
 const CLOSE_BUTTON_CLASS = "hover:bg-[#c42b1c] hover:text-white active:bg-[#b9281b]";
@@ -41,18 +33,6 @@ function reportWindowControlError(title: string, error: unknown): void {
     title,
     description: error instanceof Error ? error.message : "Please try again.",
   });
-}
-
-function CaptionGlyph({ glyph }: { glyph: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="text-[10px] leading-none"
-      style={{ fontFamily: '"Segoe Fluent Icons", "Segoe MDL2 Assets"' }}
-    >
-      {glyph}
-    </span>
-  );
 }
 
 function CaptionSvg({ children }: { children: ReactNode }) {
@@ -66,8 +46,6 @@ function CaptionSvg({ children }: { children: ReactNode }) {
 export function DesktopWindowControls({ className }: { className?: string }) {
   const [windowState, setWindowState] = useState<DesktopWindowState>(DEFAULT_WINDOW_STATE);
   const customTitleBarActive = useDesktopCustomTitleBarActive();
-  const platform = getNavigatorPlatform();
-  const useWindowsGlyphs = isWindowsPlatform(platform);
   const controls = typeof window === "undefined" ? undefined : window.desktopBridge?.windowControls;
 
   useEffect(() => {
@@ -99,7 +77,7 @@ export function DesktopWindowControls({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex items-stretch [-webkit-app-region:no-drag]",
+        "desktop-window-controls flex items-stretch [-webkit-app-region:no-drag]",
         CHAT_SURFACE_HEADER_HEIGHT_CLASS,
         className,
       )}
@@ -115,13 +93,9 @@ export function DesktopWindowControls({ className }: { className?: string }) {
           });
         }}
       >
-        {useWindowsGlyphs ? (
-          <CaptionGlyph glyph={GLYPH_MINIMIZE} />
-        ) : (
-          <CaptionSvg>
-            <MinusIcon className="size-3.5" />
-          </CaptionSvg>
-        )}
+        <CaptionSvg>
+          <MinusIcon className="size-3.5" />
+        </CaptionSvg>
       </button>
       <button
         type="button"
@@ -137,13 +111,21 @@ export function DesktopWindowControls({ className }: { className?: string }) {
             });
         }}
       >
-        {useWindowsGlyphs ? (
-          <CaptionGlyph glyph={isMaximized ? GLYPH_RESTORE : GLYPH_MAXIMIZE} />
-        ) : (
-          <CaptionSvg>
-            {isMaximized ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
-          </CaptionSvg>
-        )}
+        <CaptionSvg>
+          <svg
+            viewBox="0 0 16 16"
+            className="size-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.25"
+          >
+            {isMaximized ? (
+              <path d="M5.5 5.5v-3h8v8h-3m-8-5h8v8h-8z" />
+            ) : (
+              <rect x="3" y="3" width="10" height="10" />
+            )}
+          </svg>
+        </CaptionSvg>
       </button>
       <button
         type="button"
@@ -156,13 +138,9 @@ export function DesktopWindowControls({ className }: { className?: string }) {
           });
         }}
       >
-        {useWindowsGlyphs ? (
-          <CaptionGlyph glyph={GLYPH_CLOSE} />
-        ) : (
-          <CaptionSvg>
-            <XIcon className="size-3.5" />
-          </CaptionSvg>
-        )}
+        <CaptionSvg>
+          <XIcon className="size-3.5" />
+        </CaptionSvg>
       </button>
     </div>
   );

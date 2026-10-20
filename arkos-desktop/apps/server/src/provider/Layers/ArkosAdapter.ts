@@ -18,7 +18,7 @@ export async function arkosBridgeRequest(path: string, body: unknown = {}) {
   const response = await fetch(new URL(path, endpoint), {
     method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
     body: JSON.stringify(body),
-    signal: path === "/turn" ? undefined : AbortSignal.timeout(100_000),
+    signal: path === "/turn" ? null : AbortSignal.timeout(100_000),
   });
   if (!response.ok) throw new Error(`Arkos Python: ${await response.text()}`);
   return response;

@@ -336,8 +336,8 @@ export const DEFAULT_THEME_STATE: ThemeState = {
     dark: "arkos",
     light: "arkos",
   },
-  systemUiFont: true,
-  mode: "system",
+  systemUiFont: false,
+  mode: "light",
   translucency: DEFAULT_WINDOW_TRANSLUCENCY_BY_VARIANT,
 };
 

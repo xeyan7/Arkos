@@ -29,9 +29,9 @@ describe("parseStoredThemeState", () => {
   it.each([null, undefined, ""])("uses Arkos for an absent stored theme (%j)", (raw) => {
     const state = parseStoredThemeState(raw);
     expect(state.codeThemeIds).toEqual({ dark: "arkos", light: "arkos" });
-    expect(state.chromeThemes.dark.accent).toBe("#f2612d");
-    expect(state.chromeThemes.light.accent).toBe("#c74614");
-    expect(state.mode).toBe("system");
+    expect(state.chromeThemes.dark.accent).toBe("#a3c5a4");
+    expect(state.chromeThemes.light.accent).toBe("#496a53");
+    expect(state.mode).toBe("light");
   });
 
   it.each(["dark", "light", "system"] as const)(
@@ -78,7 +78,7 @@ describe("parseStoredThemeState", () => {
     const saved = parseStoredThemeState("dark");
     const reset = resetThemeVariant(saved, "dark");
     expect(reset.codeThemeIds).toEqual({ dark: "arkos", light: "codex" });
-    expect(reset.chromeThemes.dark.accent).toBe("#f2612d");
+    expect(reset.chromeThemes.dark.accent).toBe("#a3c5a4");
     expect(reset.chromeThemes.light).toEqual(saved.chromeThemes.light);
     expect(reset.mode).toBe("dark");
   });
@@ -363,7 +363,7 @@ describe("buildThemeCssVariables", () => {
         codex.variables["--codex-base-surface"],
       );
       // Editing a slot must not change the user's system-mode or other-slot choices.
-      expect(state.mode).toBe("system");
+      expect(state.mode).toBe(DEFAULT_THEME_STATE.mode);
       expect(state.chromeThemes.dark).toEqual(DEFAULT_THEME_STATE.chromeThemes.dark);
     },
   );
@@ -404,6 +404,14 @@ describe("buildThemeCssVariables", () => {
 });
 
 describe("window translucency", () => {
+  // Glass behavior remains available when explicitly enabled; the new workspace defaults are opaque.
+  const glassState = {
+    ...DEFAULT_THEME_STATE,
+    chromeThemes: {
+      light: { ...DEFAULT_THEME_STATE.chromeThemes.light, opaqueWindows: false },
+      dark: { ...DEFAULT_THEME_STATE.chromeThemes.dark, opaqueWindows: false },
+    },
+  };
   const macDesktop = { electron: true, isMac: true };
 
   const sidebarOnly = (opacity: number) => ({
@@ -420,7 +428,7 @@ describe("window translucency", () => {
   });
 
   it("makes the whole window one translucent coat when not limited to the sidebar", () => {
-    const dark = buildThemeCssVariables(resolveThemePack(DEFAULT_THEME_STATE, "dark"), "dark", {
+    const dark = buildThemeCssVariables(resolveThemePack(glassState, "dark"), "dark", {
       ...macDesktop,
       translucency: { opacity: 72, blur: null, sidebarOnly: false },
     });
@@ -445,7 +453,7 @@ describe("window translucency", () => {
       dark.variables["--app-glass-raised-surface"],
     );
     expect(dark.variables["--app-overlay-backing"]).toBe("");
-    const light = buildThemeCssVariables(resolveThemePack(DEFAULT_THEME_STATE, "light"), "light", {
+    const light = buildThemeCssVariables(resolveThemePack(glassState, "light"), "light", {
       ...macDesktop,
       translucency: { opacity: 38, blur: null, sidebarOnly: false },
     });
@@ -455,7 +463,7 @@ describe("window translucency", () => {
   });
 
   it("keeps the content opaque and the shell clear for opaque windows", () => {
-    const opaque = buildThemeCssVariables(resolveThemePack(DEFAULT_THEME_STATE, "dark"), "dark", {
+    const opaque = buildThemeCssVariables(resolveThemePack(glassState, "dark"), "dark", {
       electron: true,
       isMac: false,
     });
@@ -471,12 +479,12 @@ describe("window translucency", () => {
 
   it("keeps the long-standing sidebar fills when limited to the sidebar", () => {
     const dark = buildThemeCssVariables(
-      resolveThemePack(DEFAULT_THEME_STATE, "dark"),
+      resolveThemePack(glassState, "dark"),
       "dark",
       sidebarOnly(72),
     );
     const light = buildThemeCssVariables(
-      resolveThemePack(DEFAULT_THEME_STATE, "light"),
+      resolveThemePack(glassState, "light"),
       "light",
       sidebarOnly(38),
     );
@@ -502,7 +510,7 @@ describe("window translucency", () => {
   });
 
   it("scales the sidebar and rail fills with the chosen opacity", () => {
-    const pack = resolveThemePack(DEFAULT_THEME_STATE, "light");
+    const pack = resolveThemePack(glassState, "light");
     const clear = buildThemeCssVariables(pack, "light", sidebarOnly(0));
     const dense = buildThemeCssVariables(pack, "light", sidebarOnly(90));
     expect(clear.variables["--app-sidebar-surface"]).toMatch(/ 0%, transparent\)$/);

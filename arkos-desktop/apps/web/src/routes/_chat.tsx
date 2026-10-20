@@ -47,8 +47,6 @@ import {
 import { useStore } from "../store";
 import { createProjectLastActivityAtSelector } from "../storeSelectors";
 import { useSpacesUiStore } from "../spacesUiStore";
-import { railItemShowsPanel } from "../appRail.logic";
-import { useRailShellStore } from "../railShellStore";
 import { selectThreadTerminalState, useTerminalStateStore } from "../terminalStateStore";
 import { useThreadSelectionStore } from "../threadSelectionStore";
 import { onServerMaintenanceUpdated } from "../wsNativeApi";
@@ -564,26 +562,10 @@ function ChatRouteLayout() {
   });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
-  // Kanban, Pull requests, and Automations take the full width; the panel
-  // (Home/Spaces lists) only shows for the items that own one. Forced closed like the
-  // editor view, so the route header takes over the toggle and traffic-light gutter.
-  const railActiveItem = useRailShellStore((store) => store.activeItem);
-  const railPanelView = useRailShellStore((store) => store.panelView);
-  const selectRailPanelItem = useRailShellStore((store) => store.selectPanelItem);
-  const railHidesPanel = !railItemShowsPanel(railActiveItem);
-  const resolvedSidebarOpen = isEditorView || railHidesPanel ? false : sidebarOpen;
-  // Toggling the panel open on a full-width route brings back the current panel item.
-  const handleSidebarOpenChange = useCallback(
-    (open: boolean) => {
-      if (open && railHidesPanel) {
-        selectRailPanelItem(railPanelView);
-      }
-      setSidebarOpen(open);
-    },
-    [railHidesPanel, railPanelView, selectRailPanelItem],
-  );
-  // ThreadSidebar portals its AppRail into this element, left of the panel.
-  const [railSlot, setRailSlot] = useState<HTMLDivElement | null>(null);
+  // One full workspace sidebar stays available on every screen.
+  const resolvedSidebarOpen = sidebarOpen;
+  const handleSidebarOpenChange = setSidebarOpen;
+  const railSlot = null;
   // The route column slides with the panel; the leading controls dock needs it to stay put.
   const [routeColumn, setRouteColumn] = useState<HTMLDivElement | null>(null);
 
@@ -622,34 +604,35 @@ function ChatRouteLayout() {
     </div>
   );
 
-  // The shell (Codex-style): the left column holds the window-chrome strip over the fixed
-  // rail and the off-canvas panel; the route column keeps its own header on the shell band.
-  // The panel's wrapper is its fixed container's containing block (paint containment), so
-  // the existing <Sidebar> offcanvas slide and resize run unchanged below the strip and are
-  // clipped at the rail. The strip height reaches CSS as a variable (see index.css).
+  // One full-width workspace column contains the navigation and live lists.
+  // Route headers retain their controls and the existing offcanvas/resize behavior.
   return (
     <SidebarProvider
       defaultOpen
       open={resolvedSidebarOpen}
       onOpenChange={handleSidebarOpenChange}
       className="h-svh overflow-hidden bg-[var(--app-rail-shell-background)]"
-      style={{ "--app-top-strip-height": `${CHAT_SURFACE_HEADER_HEIGHT_PX}px` } as CSSProperties}
+      style={
+        {
+          "--app-top-strip-height": `${CHAT_SURFACE_HEADER_HEIGHT_PX}px`,
+          "--sidebar-width": "270px",
+        } as CSSProperties
+      }
       data-sidebar-side="left"
       data-sidebar-layout="rail"
+      data-workspace-shell="full"
     >
       <ThreadRetentionMaintenanceToast />
       <ChatRouteGlobalShortcuts />
       <AppRailSlotProvider value={railSlot}>
         <SidebarLeadingControlsDock routeColumn={routeColumn} railSlot={railSlot}>
           {isMobile ? (
-            // Phones show the sidebar as a sheet that carries its own rail (see ThreadSidebar),
-            // so the shell keeps no left column.
+            // On phones the same full sidebar opens as a sheet over route content.
             sidebarElement
           ) : (
-            <div className="flex min-h-0 shrink-0 flex-col">
+            <div className="workspace-sidebar-column flex min-h-0 shrink-0 flex-col">
               <AppShellTopStrip />
               <div className="flex min-h-0 flex-1">
-                <div ref={setRailSlot} className="flex shrink-0" />
                 <div className="app-rail-panel relative flex shrink-0 overflow-hidden [contain:paint]">
                   {sidebarElement}
                 </div>

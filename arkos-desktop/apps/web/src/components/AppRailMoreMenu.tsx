@@ -6,6 +6,7 @@
 
 import { ComposerPickerMenuPopup } from "./chat/ComposerPickerMenuPopup";
 import { APP_RAIL_GLYPH_CLASS_NAME, appRailButtonClassName, RAIL_MORE_GLYPHS } from "./AppRail";
+import { Button } from "./ui/button";
 import { SidebarIconButton } from "./SidebarIconButton";
 import {
   Menu,
@@ -31,6 +32,7 @@ export function AppRailMoreMenu({
   onOpenStudio,
   onCustomize,
   active,
+  wide = false,
 }: {
   readonly spaces: ReadonlyArray<AppRailMoreMenuEntry>;
   readonly projects: ReadonlyArray<AppRailMoreMenuEntry>;
@@ -42,19 +44,33 @@ export function AppRailMoreMenu({
   readonly onCustomize: () => void;
   /** Studio has no rail button of its own, so "…" stands for it while it is open. */
   readonly active: boolean;
+  readonly wide?: boolean;
 }) {
+  const MoreIcon = active ? RAIL_MORE_GLYPHS.active : RAIL_MORE_GLYPHS.idle;
   return (
     <Menu>
-      <SidebarIconButton
-        render={<MenuTrigger />}
-        icon={active ? RAIL_MORE_GLYPHS.active : RAIL_MORE_GLYPHS.idle}
-        iconClassName={APP_RAIL_GLYPH_CLASS_NAME}
-        label="More"
-        tooltip="More"
-        tooltipSide="right"
-        aria-current={active ? "page" : undefined}
-        className={appRailButtonClassName(active)}
-      />
+      {wide ? (
+        <Button
+          render={<MenuTrigger />}
+          variant="ghost"
+          className="workspace-navigation-row"
+          aria-current={active ? "page" : undefined}
+        >
+          <MoreIcon className="workspace-navigation-icon" />
+          <span className="workspace-navigation-label">More</span>
+        </Button>
+      ) : (
+        <SidebarIconButton
+          render={<MenuTrigger />}
+          icon={active ? RAIL_MORE_GLYPHS.active : RAIL_MORE_GLYPHS.idle}
+          iconClassName={APP_RAIL_GLYPH_CLASS_NAME}
+          label="More"
+          tooltip="More"
+          tooltipSide="right"
+          aria-current={active ? "page" : undefined}
+          className={appRailButtonClassName(active)}
+        />
+      )}
       <ComposerPickerMenuPopup
         align="start"
         side="right"
@@ -69,7 +85,7 @@ export function AppRailMoreMenu({
           </>
         ) : null}
         <MenuGroup>
-          <MenuGroupLabel>Spaces in the rail</MenuGroupLabel>
+          <MenuGroupLabel>Spaces in sidebar</MenuGroupLabel>
           {spaces.map((entry) => (
             <MenuCheckboxItem
               key={entry.key}
@@ -82,7 +98,7 @@ export function AppRailMoreMenu({
         </MenuGroup>
         <MenuSeparator />
         <MenuGroup>
-          <MenuGroupLabel>Projects in the rail</MenuGroupLabel>
+          <MenuGroupLabel>Projects in sidebar</MenuGroupLabel>
           {projects.length === 0 ? (
             <div className="px-2.5 py-1 text-ui text-muted-foreground">No projects yet</div>
           ) : (

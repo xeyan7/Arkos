@@ -1,284 +1,43 @@
-.arkos-landing {
-  --home-ink: #242824;
-  --home-muted: #7e857f;
-  display: flex;
-  width: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  color: var(--home-ink);
-  background: #f7f7f5;
-  font-family: "Segoe UI", Arial, sans-serif;
-  font-size: 13px;
-  line-height: 1.4;
-  color-scheme: light;
-}
-.arkos-landing button {
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  -webkit-app-region: no-drag;
-}
-.arkos-landing button:focus-visible,
-.arkos-landing select:focus-visible,
-.arkos-landing textarea:focus-visible,
-.arkos-landing input:focus-visible {
-  outline: 2px solid #7b9a89;
-  outline-offset: 3px;
-}
-.arkos-landing button:disabled {
-  cursor: default;
-}
-.arkos-landing svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 1.35;
-  flex-shrink: 0;
-}
-.arkos-landing button {
-  border: 0;
-  background: transparent;
-}
-.arkos-landing button:hover {
-  background-color: #73877412;
-}
-.arkos-home-sidebar {
-  width: 24%;
-  max-width: 290px;
-  min-width: 220px;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  border-right: 1px solid #d5ddd7;
-  background:
-    radial-gradient(ellipse at 20% 2%, #dce5d8 0%, transparent 58%),
-    radial-gradient(ellipse at 95% 38%, #d8ebea99 0%, transparent 60%),
-    radial-gradient(ellipse at 18% 88%, #ece9d7aa 0%, transparent 35%), #e7ece7;
-}
-.arkos-sidebar-chrome {
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-  height: 44px;
-  align-items: center;
-  padding: 0 12px;
-}
-.arkos-sidebar-chrome button {
-  display: grid;
-  place-items: center;
-  width: 23px;
-  height: 25px;
-  color: #778077;
-  border-radius: 5px;
-}
-.arkos-sidebar-chrome svg {
-  width: 13px;
-  height: 13px;
-}
-.arkos-workspace-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
-  height: 36px;
-  gap: 8px;
-}
-.arkos-workspace-name {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600 !important;
-  white-space: nowrap;
-}
-.arkos-workspace-name svg {
-  width: 10px;
-  color: #889087;
-}
-.arkos-workspace-row > button:last-child {
-  color: #737e74;
-  padding: 3px;
-}
-.arkos-workspace-row > button:last-child svg {
-  width: 14px;
-}
-.arkos-primary-nav {
-  padding: 6px 10px 0;
-}
-.arkos-primary-nav button,
-.arkos-recents button,
-.arkos-project-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 10px;
-  min-height: 27px;
-  padding: 4px 5px;
-  border-radius: 6px;
-}
-.arkos-primary-nav svg {
-  color: #717b70;
-}
-.arkos-primary-nav button {
-  color: #555f55;
-}
-.arkos-inbox-count {
-  margin-left: auto;
-  padding: 0 4px;
-  background: #d9e0d6;
-  font-size: 11px;
-  border-radius: 3px;
-}
-.arkos-sidebar-section {
-  margin-top: 24px;
-  padding: 0 10px;
-}
-.arkos-section-heading {
-  min-height: 26px;
-  padding: 0 5px 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #8b948a;
-}
-.arkos-section-heading button {
-  display: flex;
-  color: #798679;
-}
-.arkos-section-heading svg {
-  width: 14px;
-  height: 14px;
-}
-.arkos-project-row {
-  gap: 9px;
-}
-.arkos-project-detail {
-  color: #8b9187;
-}
-.arkos-project-avatar {
-  display: grid;
-  place-items: center;
-  font-family: Georgia, serif;
-  background: #d2d6c6;
-  border-radius: 50%;
-  width: 15px;
-  height: 15px;
-  font-size: 15px;
-  color: #283829;
-}
-.arkos-project-avatar.rowan {
-  background: #e6d8dc;
-}
-.arkos-recents {
-  margin-top: 23px;
-}
-.arkos-recents button {
-  color: #5d655c;
-  gap: 10px;
-  min-height: 27px;
-}
-.arkos-recents svg {
-  width: 10px;
-  height: 10px;
-  color: #8d978c;
-}
-.arkos-recents button span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.arkos-profile {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 15px;
-  border-top: 1px solid #dce2d9 !important;
-  font-size: 12px !important;
-}
-.arkos-profile > svg {
-  margin-left: auto;
-  width: 11px;
-  color: #91988b;
-}
-.arkos-profile-avatar {
-  display: grid;
-  place-items: center;
-  width: 19px;
-  height: 19px;
-  border-radius: 50%;
-  color: #f5f3e8;
-  background: linear-gradient(145deg, #9fa9a5, #435259 50%, #a48b76);
-  font-size: 10px;
-}
-.arkos-home-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.arkos-home-header {
-  height: 45px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 17px;
-  padding: 0 24px;
-  font-size: 12px;
-}
-.arkos-home-header > svg {
-  width: 16px;
-}
-.arkos-home-header button {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 12px;
-  border-radius: 5px;
-  padding: 4px;
-}
-.arkos-home-header button svg {
-  width: 12px;
-  color: #899086;
-}
-.arkos-home-content {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 44px 14px;
-}
 .arkos-welcome {
+  --home-accent: var(--info);
   width: 100%;
   max-width: 700px;
-  margin-top: auto;
-  margin-bottom: auto;
-  padding-top: 94px;
-  padding-bottom: 28px;
+  padding: 28px 20px;
+  color: var(--foreground);
+  font-family: var(--font-ui-family);
 }
 .arkos-agent-faces {
   display: flex;
   justify-content: center;
   padding-left: 9px;
-  margin-bottom: 29px;
+  margin-bottom: 24px;
 }
 .arkos-agent-faces svg {
   width: 42px;
   height: 42px;
   margin-left: -9px;
-  border: 1px solid #727971;
+  border: 1px solid #7e8c7c80;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px #f7f7f5;
+  box-shadow:
+    0 0 0 3px var(--color-background-surface),
+    0 3px 6px #243b2510;
   overflow: hidden;
 }
-.arkos-welcome h1 {
-  margin: 0 0 24px;
+.arkos-welcome h2 {
+  margin: 0 0 10px;
   text-align: center;
-  font-weight: 400;
-  font-size: clamp(19px, 1.9vw, 25px);
-  line-height: 1.4;
+  font-weight: 550;
+  letter-spacing: -0.035em;
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.arkos-welcome-description {
+  margin: 0 0 28px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
   text-wrap: balance;
 }
 .arkos-prompt-grid {
@@ -290,386 +49,110 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 17px;
-  min-height: 107px;
-  padding: 18px 18px 17px;
-  border-radius: 16px;
-  border: 1px solid #e8e9e5 !important;
-  background: #fbfbf9 !important;
+  gap: 15px;
+  min-width: 0;
+  min-height: 128px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card);
   box-shadow:
-    0 3px 9px #202b2008,
-    0 7px 18px #202b2003;
-  font-size: 13px !important;
-  color: #53574e !important;
-  line-height: 1.4 !important;
-}
-.arkos-prompt-card:hover {
-  background: #f0f3ed !important;
-  border-color: #d3ddd0 !important;
-}
-.arkos-prompt-icon.gold {
-  color: #a29654;
-}
-.arkos-prompt-icon.violet {
-  color: #89749a;
-}
-.arkos-prompt-icon.green {
-  color: #5f927b;
-}
-.arkos-prompt-icon.rose {
-  color: #a77470;
-}
-.arkos-composer-area {
-  width: 100%;
-  max-width: 700px;
-  flex-shrink: 0;
-  position: relative;
-}
-.arkos-composer-context {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 34px;
-  margin: 0 14px -3px;
-  border-radius: 19px 19px 0 0;
-  padding: 0 12px 3px;
-  background: #e7e8e3;
-  font-size: 12px;
-}
-.arkos-composer-context > svg {
-  width: 14px;
-  color: #72796d;
-}
-.arkos-composer-context select {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  flex: 1;
+    0 2px 4px #29322c03,
+    0 4px 12px #29322c05;
+  color: var(--foreground);
+  font: 500 13px/1.4 var(--font-ui-family);
+  text-align: left;
   cursor: pointer;
-  outline-offset: 0;
+  -webkit-app-region: no-drag;
 }
-.arkos-connected-apps {
-  display: flex;
-  font-weight: 700;
-  font-size: 16px;
-  gap: 1px;
+.arkos-prompt-card:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
 }
-.arkos-connected-apps span:nth-child(1) {
-  color: #55a39b;
-}
-.arkos-connected-apps span:nth-child(2) {
-  color: #d2ac53;
-}
-.arkos-connected-apps span:nth-child(3) {
-  color: #698c9c;
-}
-.arkos-home-composer {
-  position: relative;
-  border: 1px solid #dedfd9;
-  border-radius: 20px;
-  padding: 14px 15px 12px;
-  background: #fcfcfa;
-  box-shadow: 0 3px 12px #29322c09;
-}
-.arkos-home-composer textarea {
-  width: 100%;
-  height: 34px;
-  min-height: 34px;
-  max-height: 160px;
-  resize: none;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #393f37;
-  padding: 0;
-  font: inherit;
-  font-size: 12px;
-  line-height: 1.5;
-}
-.arkos-home-composer:focus-within {
-  border-color: #aebca9;
-}
-.arkos-landing .arkos-home-composer textarea:focus-visible {
-  outline: none;
-}
-.arkos-home-composer textarea::placeholder {
-  color: #6c7068;
-  opacity: 1;
-}
-.arkos-composer-toolbar,
-.arkos-composer-tools,
-.arkos-composer-options {
+.arkos-prompt-card-top {
   display: flex;
   align-items: center;
-}
-.arkos-composer-toolbar {
   justify-content: space-between;
-  gap: 12px;
+  width: 100%;
 }
-.arkos-composer-tools {
-  gap: 12px;
-}
-.arkos-composer-options {
-  gap: 12px;
-}
-.arkos-composer-toolbar button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 25px;
-  border-radius: 6px;
-  color: #7c8177;
-  padding: 2px;
-}
-.arkos-composer-toolbar svg {
-  width: 15px;
-  height: 15px;
-}
-.arkos-composer-toolbar .arkos-speed {
-  gap: 4px;
-  color: #637e8b;
-  font-size: 11px;
-}
-.arkos-model {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: #74776e;
-}
-.arkos-model > span {
-  color: #ba947e;
-  font-size: 16px;
-}
-.arkos-model select {
-  appearance: none;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  max-width: 78px;
-}
-.arkos-model svg {
-  width: 10px;
-}
-.arkos-mode {
-  display: flex;
-  padding: 2px;
-  background: #eeefeb;
-  border-radius: 20px;
-}
-.arkos-mode button {
-  font-size: 11px;
-  padding: 1px 10px;
-  min-height: 22px;
-  border-radius: 20px;
-}
-.arkos-mode button[aria-pressed="true"] {
-  color: #31362e;
-  background: #fafbf8;
-  box-shadow: 0 1px 3px #2936290c;
-}
-.arkos-composer-toolbar .arkos-send {
-  background: #526a56;
-  color: #fff;
-  border-radius: 50%;
-  width: 27px;
-  height: 27px;
-}
-.arkos-composer-toolbar .arkos-send:disabled {
-  background: #c6c9c2;
-}
-.arkos-home-rail {
-  display: flex;
-  flex-direction: column;
-  width: 38px;
-  border-left: 1px solid #e8e9e4;
-  padding-top: 11px;
-  flex-shrink: 0;
-  gap: 18px;
-}
-.arkos-home-rail > div {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.arkos-home-rail button {
+.arkos-prompt-icon-wrap {
   display: grid;
   place-items: center;
   width: 32px;
-  height: 29px;
-  color: #7a8076;
-  border-radius: 5px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--prompt-tint);
+  color: var(--prompt-ink);
 }
-.arkos-home-rail svg {
+.arkos-prompt-icon,
+.arkos-prompt-arrow {
   width: 16px;
   height: 16px;
+  stroke-width: 1.5;
 }
-.arkos-home-notice {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  border: 1px solid #dde2d8;
-  background: #eff3e9;
-  border-radius: 10px;
-  font-size: 12px;
+.arkos-prompt-card.gold {
+  --prompt-tint: #f4efd9;
+  --prompt-ink: #89792e;
 }
-.arkos-home-notice button {
-  margin-left: auto;
-  display: flex;
+.arkos-prompt-card.violet {
+  --prompt-tint: #eee8f4;
+  --prompt-ink: #89749a;
 }
-.arkos-attachment {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
-  max-width: 100%;
-  margin-bottom: 10px;
-  border-radius: 6px;
-  background: #ecefe6;
-  padding: 4px 7px;
-  font-size: 11px;
-  overflow-wrap: anywhere;
+.arkos-prompt-card.green {
+  --prompt-tint: #e5f0e6;
+  --prompt-ink: #4e8265;
 }
-.arkos-attachment button {
-  display: flex;
+.arkos-prompt-card.rose {
+  --prompt-tint: #f6e8e3;
+  --prompt-ink: #a77470;
 }
-.arkos-workspace-search {
-  margin: 4px 14px;
-  padding: 7px;
-  border: 1px solid #c6d3c5;
-  border-radius: 6px;
-  background: #f5f7f1;
-  font: inherit;
-  width: calc(100% - 28px);
+.arkos-prompt-arrow {
+  color: var(--muted-foreground);
+  opacity: 0.45;
 }
-.arkos-sidebar-hidden .arkos-home-sidebar {
-  display: none;
-}
-@media (min-height: 850px) {
-  .arkos-home-content {
-    padding-bottom: 24px;
+@media (hover: hover) and (pointer: fine) {
+  .arkos-prompt-card:hover {
+    background: var(--muted);
+    border-color: var(--info);
+    box-shadow: 0 4px 14px #293b2910;
   }
-  .arkos-welcome {
-    padding-bottom: 110px;
+  .arkos-prompt-card:hover .arkos-prompt-arrow {
+    opacity: 1;
+    color: var(--info);
   }
 }
-@media (max-width: 1000px) {
-  .arkos-home-sidebar {
-    min-width: 185px;
-  }
-  .arkos-home-content {
-    padding-inline: 36px;
+@media (max-width: 900px) {
+  .arkos-prompt-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .arkos-prompt-card {
-    padding: 16px;
-    min-height: 100px;
-    font-size: 12px !important;
-  }
-  .arkos-landing {
-    font-size: 12px;
-  }
-  .arkos-prompt-grid {
-    gap: 10px;
+    min-height: 96px;
+    padding: 12px;
+    gap: 8px;
   }
 }
-@media (max-width: 760px) {
-  .arkos-home-sidebar {
-    min-width: 170px;
-    width: 25%;
-  }
-  .arkos-home-content {
-    padding-inline: 20px;
-  }
-  .arkos-prompt-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .arkos-prompt-card {
-    min-height: 86px;
-    gap: 12px;
-  }
+@media (max-height: 700px) {
   .arkos-welcome {
-    padding-block: 25px;
+    padding-block: 12px;
   }
   .arkos-agent-faces {
-    margin-bottom: 20px;
-  }
-  .arkos-home-header {
-    padding-inline: 16px;
-    gap: 10px;
-  }
-  .arkos-composer-options {
-    gap: 6px;
-  }
-  .arkos-composer-tools {
-    gap: 7px;
-  }
-}
-@media (max-width: 560px) {
-  .arkos-composer-tools > button[aria-label="Agent settings"],
-  .arkos-composer-options > button[aria-label="Voice input"] {
-    display: none;
-  }
-  .arkos-composer-toolbar .arkos-speed {
-    font-size: 0;
-    gap: 0;
-  }
-  .arkos-home-sidebar {
-    display: none;
-  }
-  .arkos-home-header > svg {
-    display: none;
-  }
-  .arkos-home-rail {
-    width: 33px;
-  }
-  .arkos-home-content {
-    padding-inline: 14px;
-  }
-  .arkos-composer-tools {
-    gap: 5px;
-  }
-  .arkos-composer-options {
-    gap: 4px;
-  }
-  .arkos-mode button {
-    padding-inline: 7px;
-  }
-  .arkos-model select {
-    max-width: 62px;
-  }
-  .arkos-welcome h1 {
-    font-size: 20px;
-  }
-  .arkos-home-header button {
-    font-size: 11px;
-  }
-}
-@media (max-height: 600px) {
-  .arkos-welcome {
-    padding-block: 18px;
-  }
-  .arkos-agent-faces {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
   .arkos-agent-faces svg {
-    width: 38px;
-    height: 38px;
+    width: 30px;
+    height: 30px;
   }
-  .arkos-welcome h1 {
-    margin-bottom: 20px;
+  .arkos-welcome-description {
+    margin-bottom: 14px;
   }
   .arkos-prompt-card {
-    min-height: 94px;
-    gap: 12px;
+    min-height: 84px;
+    padding: 10px;
+    gap: 6px;
   }
-  .arkos-sidebar-section {
-    margin-top: 20px;
+  .arkos-prompt-icon-wrap {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
   }
 }

@@ -4,6 +4,7 @@
 // Exports: THEME_SEED_CATALOG for code-theme seed lookup.
 
 import type { ChromeTheme, ThemeVariant } from "./theme.logic";
+import { WORKSPACE_CHROME_THEMES } from "./workspaceAppearance";
 
 // Arkos uses Codex's complete palette and material, changing only the accent.
 const CODEX_THEME_SEEDS: Record<ThemeVariant, ChromeTheme> = {
@@ -129,10 +130,7 @@ export const THEME_SEED_CATALOG: Record<string, Partial<Record<ThemeVariant, Chr
     },
   },
   codex: CODEX_THEME_SEEDS,
-  arkos: {
-    dark: { ...CODEX_THEME_SEEDS.dark, accent: "#f2612d" },
-    light: { ...CODEX_THEME_SEEDS.light, accent: "#c74614" },
-  },
+  arkos: WORKSPACE_CHROME_THEMES,
   dracula: {
     dark: {
       accent: "#ff79c6",

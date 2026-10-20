@@ -53,12 +53,10 @@ import { autoAnimate } from "@formkit/auto-animate";
 import {
   useCallback,
   useEffect,
-  lazy,
   startTransition,
   useMemo,
   useRef,
   useSyncExternalStore,
-  Suspense,
   useState,
   type DragEvent as ReactDragEvent,
   type ComponentType,
@@ -232,13 +230,10 @@ import {
   formatCadence,
   groupAutomationsByContinuedThread,
 } from "../routes/-automations.shared";
-import { useIsMobile } from "../hooks/useMediaQuery";
 import { shouldRenderTerminalWorkspace } from "./ChatView.logic";
 import { isModelPickerShortcutScopeActive } from "./chat/ComposerModelPicker.logic";
 import {
   APP_RAIL_GLYPH_CLASS_NAME,
-  AppRail,
-  AppRailPortal,
   appRailButtonClassName,
   railCentralGlyphs,
   railItemGlyphs,
@@ -252,7 +247,7 @@ import {
   SidebarCustomizeList,
 } from "./SidebarCustomizeList";
 import { AppRailMoreMenu } from "./AppRailMoreMenu";
-import { AppRailUsage } from "./AppRailUsage";
+import { WorkspaceNavigation } from "./WorkspaceNavigation";
 import { ProjectSidebarIcon } from "./ProjectSidebarIcon";
 import { ThreadHoverCardContent } from "./ThreadHoverCardContent";
 import { ProjectHoverCardContent } from "./ProjectHoverCardContent";
@@ -279,9 +274,8 @@ import {
 } from "./SidebarActivityView";
 import { DesktopUpdateRailButton } from "./DesktopUpdateRailButton";
 import { SidebarIconButton, sidebarIconButtonSlotClass } from "./SidebarIconButton";
-import { OneTimeCoachmark, TASKS_COACHMARK } from "./OneTimeCoachmark";
+import { OneTimeCoachmark } from "./OneTimeCoachmark";
 import { SidebarLeadingIcon } from "./SidebarLeadingIcon";
-import { SidebarPrimaryAction } from "./SidebarPrimaryAction";
 import { RailAutomationsPanel } from "./RailAutomationsPanel";
 import { SIDEBAR_PANEL_TITLE_CLASS_NAME, SidebarPanelTitle } from "./SidebarPanelTitle";
 import { SidebarMetaChipStack } from "./SidebarMetaChip";
@@ -372,6 +366,7 @@ import {
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 import {
   SidebarContent,
+  useSidebar,
   SidebarFooter,
   SidebarGroup,
   SidebarMenu,
@@ -407,7 +402,6 @@ import {
   runProjectProvisionWithCancellationRecovery,
   resolvePullRequestReviewBadge,
   resolveSidebarThreadListPaging,
-  DEBUG_FEATURE_FLAGS_MENU_STORAGE_KEY,
   resolveProjectEmptyState,
   resolveProjectStatusIndicator,
   resolveSettingsBackTarget,
@@ -424,7 +418,6 @@ import {
   type SidebarDerivedProjectData,
   type SidebarActionBadge,
   type SidebarView,
-  shouldShowDebugFeatureFlagsMenu,
   shouldPrunePinnedThreads,
   shouldClearThreadSelectionOnMouseDown,
   sortProjectsForSidebar,
@@ -566,13 +559,6 @@ const GITHUB_CANCEL_RECOVERY_MAX_ATTEMPTS = 40;
 const GITHUB_CANCEL_RECOVERY_DELAY_MS = 250;
 /** Snap the optimistic segment selection back if the navigation never lands. */
 const EMPTY_PROJECT_SIDEBAR_DATA: ReadonlyMap<ProjectId, SidebarDerivedProjectData> = new Map();
-const DebugFeatureFlagsMenu = import.meta.env.DEV
-  ? lazy(() =>
-      import("./DebugFeatureFlagsMenu").then((module) => ({
-        default: module.DebugFeatureFlagsMenu,
-      })),
-    )
-  : null;
 
 type ProjectContextMenuId =
   | "open-in-finder"
@@ -603,27 +589,6 @@ const PROJECT_CONTEXT_MENU_ICON_CLASS_NAME = SIDEBAR_CONTEXT_MENU_ICON_CLASS_NAM
 
 function ProjectContextMenuIcon({ icon }: { icon: LucideIcon }) {
   return <SidebarContextMenuIcon icon={icon} />;
-}
-
-type DebugFeatureFlagsWindow = Window & {
-  arkosShowFeatureFlags?: () => void;
-  arkosHideFeatureFlags?: () => void;
-};
-
-function readDebugFeatureFlagsMenuVisibility(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  try {
-    return shouldShowDebugFeatureFlagsMenu({
-      isDev: import.meta.env.DEV,
-      hostname: window.location.hostname,
-      storageValue: window.localStorage.getItem(DEBUG_FEATURE_FLAGS_MENU_STORAGE_KEY),
-    });
-  } catch {
-    return false;
-  }
 }
 
 function threadJumpLabelMapsEqual(
@@ -925,6 +890,7 @@ function SidebarHelpMenu({
   onOpenFeedback,
   onCustomizeSidebar,
   inRail: inRailProp,
+  wide = false,
 }: {
   onOpenShortcuts: () => void;
   onOpenFeedback: () => void;
@@ -932,6 +898,7 @@ function SidebarHelpMenu({
   onCustomizeSidebar: (() => void) | null;
   /** Rail layout: the trigger takes the rail button look and the menu opens to the side. */
   inRail?: boolean;
+  wide?: boolean;
 }) {
   const inRail = inRailProp ?? false;
   // `openCount` keys the dialog so each open remounts the accordion — its rows
@@ -950,19 +917,26 @@ function SidebarHelpMenu({
   return (
     <>
       <Menu>
-        <SidebarIconButton
-          render={<MenuTrigger />}
-          icon={CircleQuestionIcon}
-          label="Help"
-          tooltip="Help"
-          {...(inRail
-            ? {
-                tooltipSide: "right" as const,
-                iconClassName: APP_RAIL_GLYPH_CLASS_NAME,
-                className: appRailButtonClassName(false),
-              }
-            : {})}
-        />
+        {wide ? (
+          <Button render={<MenuTrigger />} variant="ghost" className="workspace-navigation-row">
+            <CircleQuestionIcon className="workspace-navigation-icon" />
+            <span className="workspace-navigation-label">Help</span>
+          </Button>
+        ) : (
+          <SidebarIconButton
+            render={<MenuTrigger />}
+            icon={CircleQuestionIcon}
+            label="Help"
+            tooltip="Help"
+            {...(inRail
+              ? {
+                  tooltipSide: "right" as const,
+                  iconClassName: APP_RAIL_GLYPH_CLASS_NAME,
+                  className: appRailButtonClassName(false),
+                }
+              : {})}
+          />
+        )}
         <ComposerPickerMenuPopup
           align="end"
           side={inRail ? "right" : "top"}
@@ -1274,9 +1248,6 @@ export default function Sidebar() {
     readGitHubProvisioningCapability,
     readGitHubProvisioningServerCapability,
   );
-  const [showDebugFeatureFlagsMenu, setShowDebugFeatureFlagsMenu] = useState(
-    readDebugFeatureFlagsMenuVisibility,
-  );
   const projects = useStore((store) => store.projects);
   const spaces = useStore((store) => store.spaces);
   // Selection state only; the handlers and sync effects live in useSpacesController.
@@ -1286,9 +1257,8 @@ export default function Sidebar() {
   );
   const activeSpaceId = resolveActiveSpaceId(storedActiveSpaceId, spaces, pendingActiveSpaceId);
   const threadsHydrated = useStore((store) => store.threadsHydrated);
-  // Nav destinations live in the rail (portaled next to this panel) and the panel shows
-  // Home or Spaces.
-  const isMobile = useIsMobile();
+  // Keep saved destination ordering while presenting a single full workspace sidebar.
+  const { isMobile, setOpenMobile } = useSidebar();
   const railActiveItem = useRailShellStore((store) => store.activeItem);
   const railPanelView = useRailShellStore((store) => store.panelView);
   const railSpacesProjectId = useRailShellStore((store) => store.spacesProjectId);
@@ -1470,48 +1440,6 @@ export default function Sidebar() {
     };
   }, [projects.length, syncServerShellSnapshot, threadsHydrated]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const canInstallConsoleCommand = shouldShowDebugFeatureFlagsMenu({
-      isDev: import.meta.env.DEV,
-      hostname: window.location.hostname,
-      storageValue: "true",
-    });
-    if (!canInstallConsoleCommand) {
-      return;
-    }
-
-    const debugWindow = window as DebugFeatureFlagsWindow;
-    const updateVisibility = () => {
-      setShowDebugFeatureFlagsMenu(readDebugFeatureFlagsMenuVisibility());
-    };
-    const showFeatureFlags = () => {
-      window.localStorage.setItem(DEBUG_FEATURE_FLAGS_MENU_STORAGE_KEY, "true");
-      updateVisibility();
-    };
-    const hideFeatureFlags = () => {
-      window.localStorage.removeItem(DEBUG_FEATURE_FLAGS_MENU_STORAGE_KEY);
-      updateVisibility();
-    };
-
-    debugWindow.arkosShowFeatureFlags = showFeatureFlags;
-    debugWindow.arkosHideFeatureFlags = hideFeatureFlags;
-    window.addEventListener("storage", updateVisibility);
-    updateVisibility();
-
-    return () => {
-      window.removeEventListener("storage", updateVisibility);
-      if (debugWindow.arkosShowFeatureFlags === showFeatureFlags) {
-        delete debugWindow.arkosShowFeatureFlags;
-      }
-      if (debugWindow.arkosHideFeatureFlags === hideFeatureFlags) {
-        delete debugWindow.arkosHideFeatureFlags;
-      }
-    };
-  }, []);
   const setSplitFocusedPane = useSplitViewStore((store) => store.setFocusedPane);
   const openRightDockPane = useRightDockStore((store) => store.openPane);
   // Query defaults are applied after destructuring: a default inside the destructuring
@@ -6686,11 +6614,13 @@ export default function Sidebar() {
       return {
         ...base,
         badge: null,
-        active: railActiveItem === id && activeRailShortcutKey === null,
+        onMouseEnter: () => prewarmSidebarViewTarget("threads"),
+        onFocus: () => prewarmSidebarViewTarget("threads"),
+        active: railActiveItem === id && activeRailShortcutKey === null && !activityViewEnabled,
         onSelect: () => {
           // Home is the threads panel, so it keeps the Activity view the user chose;
           // only the Spaces drill-in replaces it.
-          if (id === "spaces") setActivityViewEnabledSmoothly(false);
+          setActivityViewEnabledSmoothly(false);
           selectRailPanelItem(id);
           // Projects live next to the threads only: from another section, Home and
           // Spaces go back to the thread view instead of opening over that section.
@@ -6703,6 +6633,8 @@ export default function Sidebar() {
         ...base,
         badge: null,
         active: railActiveItem === "studio",
+        onMouseEnter: () => prewarmSidebarViewTarget("groups"),
+        onFocus: () => prewarmSidebarViewTarget("groups"),
         onSelect: () => openRailStudio?.(),
       };
     }
@@ -6726,7 +6658,21 @@ export default function Sidebar() {
     activeItem: railSlotActiveItem,
     ...railAvailability,
   });
-  const railItems: AppRailItem[] = railVisibleItemIds.map(railItemFor);
+  const railItems: AppRailItem[] = [
+    ...railVisibleItemIds.map(railItemFor),
+    {
+      id: "activity",
+      label: "Activity",
+      glyphs: { idle: BellIcon, active: BellIcon },
+      badge: null,
+      active: isOnThreadsSection && activityViewEnabled,
+      onSelect: () => {
+        selectRailPanelItem("home");
+        if (!isOnThreadsSection) handleSidebarViewChange("threads");
+        setActivityViewEnabledSmoothly(true);
+      },
+    },
+  ];
   const searchPaletteNavigationActions: SidebarSearchAction[] = (
     ["inbox", "kanban", "studio", "automations"] as const
   )
@@ -6812,6 +6758,7 @@ export default function Sidebar() {
       onOpenStudio={openRailStudio}
       onCustomize={() => setIsCustomizingNav(true)}
       // "…" stands for Groups while it is open, unless Groups has its own rail button.
+      wide
       active={railActiveItem === "studio" && !railVisibleItemIds.includes("studio")}
     />
   );
@@ -6872,9 +6819,6 @@ export default function Sidebar() {
       },
     },
   ];
-  // The rail owns the route destinations, so the panel keeps only "New thread": always
-  // there, since the rail's Customize has no New thread row to bring it back.
-  const panelSidebarNavIds: readonly SidebarNavItemId[] = ["newThread"];
   // Automations owns its panel (its list), like Settings and Groups do.
   const showRailAutomationsPanel = isOnAutomations;
   const showRailSpacesPanel =
@@ -6931,34 +6875,8 @@ export default function Sidebar() {
   const projectContextMenuHasOpenServer =
     projectContextMenuServer !== null && firstLocalServerUrl(projectContextMenuServer) !== null;
 
-  const appRailProps = {
-    items: railItems,
-    shortcuts: railShortcutItems,
-    moreSlot: railMoreMenu,
-    bottomItems: railBottomItems,
-    bottomSlot: (
-      <>
-        <AppRailUsage
-          onOpenUsageSettings={() => {
-            void navigate({ to: "/settings", search: { section: "usage" } });
-          }}
-        />
-        <SidebarHelpMenu inRail {...sidebarHelpMenuProps} />
-        {showDesktopUpdateButton && desktopUpdateState ? (
-          <DesktopUpdateRailButton
-            state={desktopUpdateState}
-            installing={installingDesktopUpdate}
-            onClick={handleDesktopUpdateButtonClick}
-          />
-        ) : null}
-      </>
-    ),
-    onContextMenu: handleNavContextMenu,
-  };
-
   return (
     <>
-      {isMobile ? null : <AppRailPortal {...appRailProps} />}
       {railCustomizeAnchor ? (
         <Popover
           open={isCustomizingNav}
@@ -6995,17 +6913,44 @@ export default function Sidebar() {
           </PopoverPopup>
         </Popover>
       ) : null}
-      {/* Phones show the sidebar as a sheet over the shell, so the rail rides inside it,
-          beside the panel. On desktop both wrappers vanish (`contents`) and the rail is
-          portaled into the shell instead. */}
-      <div className={isMobile ? "flex min-h-0 flex-1" : "contents"}>
-        {isMobile ? (
-          <div ref={setMobileRailElement} className="flex shrink-0">
-            <AppRail {...appRailProps} />
-          </div>
-        ) : null}
-        <div className={isMobile ? "flex min-h-0 min-w-0 flex-1 flex-col" : "contents"}>
-          <SidebarContent className="gap-0 font-system-ui">
+      <div className="workspace-sidebar-body flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="contents">
+          <SidebarContent className="workspace-sidebar-content gap-0 font-system-ui">
+            <div ref={setMobileRailElement} className="workspace-sidebar-heading">
+              <span className="workspace-sidebar-name">
+                {activeSpace?.name ?? "Arkos workspace"}
+              </span>
+              <SidebarIconButton
+                icon={SearchIcon}
+                label="Search workspace"
+                size="header"
+                onClick={() => {
+                  setSearchPaletteMode("search");
+                  setSearchPaletteOpen(true);
+                }}
+              />
+            </div>
+            <div className="workspace-new-chat">
+              <Button
+                variant="ghost"
+                className="workspace-navigation-row"
+                onClick={() => {
+                  handlePrimaryNewThread();
+                  if (isMobile) setOpenMobile(false);
+                }}
+              >
+                <NewThreadIcon className="workspace-navigation-icon" />
+                <span className="workspace-navigation-label">New chat</span>
+              </Button>
+            </div>
+            <WorkspaceNavigation items={railItems} />
+            {railShortcutItems.length > 0 ? (
+              <WorkspaceNavigation label="Workspace shortcuts" items={railShortcutItems} />
+            ) : null}
+            <div className="workspace-navigation-more" onContextMenu={handleNavContextMenu}>
+              {railMoreMenu}
+            </div>
+            <div className="workspace-sidebar-divider" />
             {showArm64IntelBuildWarning && arm64IntelBuildWarningDescription ? (
               <SidebarGroup className="px-2 pt-2 pb-0">
                 <Alert variant="warning" className="rounded-2xl border-warning/40 bg-warning/8">
@@ -7062,12 +7007,9 @@ export default function Sidebar() {
                   // edge as its first letter is from the side.
                   className="flex items-center gap-1 pt-1.5 pb-1 pr-2.5 pl-1.5"
                 >
-                  <SidebarSurfacePicker
-                    views={["threads", ...(groupsSectionVisible ? (["groups"] as const) : [])]}
-                    activeView={isOnGroups ? "groups" : "threads"}
-                    onSelectView={handleSidebarViewChange}
-                    onPrewarmView={prewarmSidebarViewTarget}
-                  />
+                  <span className="workspace-section-title">
+                    {isOnGroups ? "Hubs" : activityViewEnabled ? "Activity" : "Projects"}
+                  </span>
                   <div className="ml-auto flex items-center gap-1.5">
                     <SidebarIconButton
                       icon={SearchIcon}
@@ -7094,34 +7036,6 @@ export default function Sidebar() {
                 {/* The keyed content remounts with a short enter animation while the picker
                 stays mounted so its thumb can glide between Projects and Groups. */}
                 <div key={sidebarSurfaceKey} className="sidebar-surface-enter">
-                  {/* Primary sidebar actions stay limited to features we currently ship. */}
-                  {!isOnGroups ? (
-                    <SidebarGroup
-                      className="px-1.5 pt-1 pb-1.5"
-                      onContextMenu={handleNavContextMenu}
-                    >
-                      <SidebarMenu className="gap-0.5">
-                        {panelSidebarNavIds.map((id) => {
-                          const item = sidebarNavDescriptors[id];
-                          return (
-                            <SidebarPrimaryAction
-                              key={id}
-                              {...(id === "tasks" ? { coachmark: TASKS_COACHMARK } : {})}
-                              icon={item.icon}
-                              {...(item.iconClassName ? { iconClassName: item.iconClassName } : {})}
-                              label={item.label}
-                              active={item.active}
-                              badge={item.badge}
-                              onClick={item.onClick}
-                              {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
-                              {...(item.onFocus ? { onFocus: item.onFocus } : {})}
-                            />
-                          );
-                        })}
-                      </SidebarMenu>
-                    </SidebarGroup>
-                  ) : null}
-
                   {isOnGroups ? (
                     <SidebarGroupsSurface
                       groupProjects={groupProjects}
@@ -7453,21 +7367,28 @@ export default function Sidebar() {
             ) : null}
           </SidebarContent>
 
-          <SidebarFooter
-            // Help and the update button live in the rail; the footer only carries debug tools.
-            className="gap-2 border-sidebar-border border-t-0 p-2 pt-0 font-system-ui"
-          >
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <div className="flex flex-col gap-1">
-                  {DebugFeatureFlagsMenu && showDebugFeatureFlagsMenu && !isOnSettings ? (
-                    <Suspense fallback={null}>
-                      <DebugFeatureFlagsMenu />
-                    </Suspense>
-                  ) : null}
-                </div>
-              </SidebarMenuItem>
-            </SidebarMenu>
+          <SidebarFooter className="workspace-sidebar-footer gap-1 p-2 font-system-ui">
+            <WorkspaceNavigation label="Workspace settings" items={railBottomItems} />
+            <button
+              type="button"
+              className="workspace-navigation-row"
+              onClick={() => {
+                void navigate({ to: "/settings", search: { section: "usage" } });
+              }}
+            >
+              <CircleQuestionIcon className="workspace-navigation-icon" />
+              <span>Usage & limits</span>
+            </button>
+            <div className="workspace-sidebar-utilities">
+              <SidebarHelpMenu wide {...sidebarHelpMenuProps} />
+              {showDesktopUpdateButton && desktopUpdateState ? (
+                <DesktopUpdateRailButton
+                  state={desktopUpdateState}
+                  installing={installingDesktopUpdate}
+                  onClick={handleDesktopUpdateButtonClick}
+                />
+              ) : null}
+            </div>
           </SidebarFooter>
         </div>
       </div>

@@ -122,7 +122,6 @@ import {
 } from "../composerSlashCommands";
 import { stripDiffSearchParams } from "../diffRouteSearch";
 import { isElectron } from "../env";
-import { useFeatureFlags } from "../featureFlags";
 import {
   resolveThreadMentionForThreadId,
   useComposerCommandMenuItems,
@@ -275,7 +274,7 @@ import { PullRequestThreadDialog } from "./PullRequestThreadDialog";
 import { RenameThreadDialog } from "./RenameThreadDialog";
 import { hasUnseenSnoozeReturn } from "./Sidebar.logic";
 import { SidebarHeaderNavigationControls } from "./SidebarHeaderNavigationControls";
-import { ArkosLogo } from "./ArkosLogo";
+import { ArkosLanding } from "./ArkosLanding";
 import TerminalWorkspaceTabs from "./TerminalWorkspaceTabs";
 import { ThreadWorktreeHandoffDialog } from "./ThreadWorktreeHandoffDialog";
 
@@ -387,7 +386,6 @@ import type { LateComposerSendHandlers } from "./chat/chatSendTypes";
 import { composerTranscriptBottomInsetPx, useComposerOverlayHeight } from "./chat/composerOverlay";
 import {
   CHAT_BACKGROUND_CLASS_NAME,
-  CHAT_COLUMN_FRAME_CLASS_NAME,
   CHAT_COLUMN_GUTTER_CLASS_NAME,
   COMPOSER_COLUMN_FRAME_CLASS_NAME,
   COMPOSER_COMMAND_MENU_FLOATING_WRAPPER_CLASS_NAME,
@@ -1445,8 +1443,6 @@ export default function ChatView({
     enableComputerControl: settings.computerControlEnabled,
   });
   const enableComputerControl = computerControlMode !== "off";
-  const featureFlags = useFeatureFlags();
-  const showDebugTaskBanner = import.meta.env.DEV && featureFlags["show-debug-task-banner"];
 
   const phase = derivePhase(activeThread?.session ?? null);
   const isConnecting = phase === "connecting";
@@ -1576,27 +1572,6 @@ export default function ChatView({
   const planSidebarToggleLabel = planSidebarOpen ? `Hide ${planSidebarLabel}` : planSidebarLabel;
   const planSidebarToggleTitle = `${planSidebarOpen ? "Hide" : "Show"} ${planSidebarLabel.toLowerCase()} sidebar`;
   const activeTaskList = useMemo((): ActiveTaskListState | null => {
-    if (showDebugTaskBanner) {
-      return {
-        createdAt: new Date().toISOString(),
-        turnId: activeLatestTurn?.turnId ?? null,
-        tasks: [
-          {
-            task: "Inspect banner layout without overlapping transcript text",
-            status: "inProgress",
-          },
-          {
-            task: "Confirm compact task banner width",
-            status: "pending",
-          },
-          {
-            task: "Verify sidebar task controls",
-            status: "completed",
-          },
-        ],
-      };
-    }
-
     // Only while a turn is live: deriveActiveTaskListState falls back to the latest
     // unfinished prior-turn list (follow-up turns, reloads mid-turn), but once the
     // thread is idle the card must clear — providers routinely end a turn without
@@ -1604,7 +1579,7 @@ export default function ChatView({
     return latestTurnSettled
       ? null
       : deriveActiveTaskListState(threadActivities, activeLatestTurn?.turnId);
-  }, [activeLatestTurn?.turnId, latestTurnSettled, showDebugTaskBanner, threadActivities]);
+  }, [activeLatestTurn?.turnId, latestTurnSettled, threadActivities]);
   const activeBackgroundTasks = useMemo(
     () =>
       latestTurnSettled
@@ -2011,7 +1986,7 @@ export default function ChatView({
     threadDetailHydration,
   ]);
   // Empty top-level threads render the centered landing composer instead of the transcript pane.
-  // Home-scoped chats get the global "What should we work on?" copy plus the project picker,
+  // Home-scoped chats get the global "What are we working on today?" copy plus the project picker,
   // while project-scoped drafts reuse the same centered layout with folder-specific copy.
   const isCenteredEmptyLanding =
     timelineEntries.length === 0 &&
@@ -6463,53 +6438,50 @@ export default function ChatView({
                     stacked on top of the input) so starting a chat keeps the composer
                     where it lives for the rest of the conversation. */}
                 <div className="relative flex min-h-0 flex-1 items-center justify-center">
-                  <div
-                    className={cn(
-                      "flex flex-col items-center gap-4 px-6 text-center select-none",
-                      CHAT_COLUMN_FRAME_CLASS_NAME,
-                    )}
-                  >
-                    <ArkosLogo aria-label="Arkos logo" className="size-10" />
-                    <h2
-                      data-testid="empty-landing-heading"
-                      className="text-[26px] font-normal leading-[1.15] tracking-[-0.015em] text-foreground/95 sm:text-[30px]"
-                    >
-                      {isEmptyChatLanding ? (
-                        "What should we work on?"
-                      ) : (
-                        <>
-                          What should we do in{" "}
-                          {showEmptyLandingProjectPicker ? (
-                            <ProjectPicker
-                              align="center"
-                              side="bottom"
-                              selectionMode="project"
-                              selectedProjectId={activeProject.id}
-                              selectedWorkspaceRoot={activeProject.cwd}
-                              showResetToHome
-                              onSelectProject={handleSelectProjectForEmptyDraft}
-                              onCreateProjectFromPath={handleCreateProjectFromPickerPath}
-                              onResetToHome={handleResetWorkspaceToHome}
-                              renderTrigger={
-                                <button
-                                  type="button"
-                                  data-testid="empty-landing-heading-project-trigger"
-                                  className="cursor-pointer rounded-sm text-inherit underline decoration-dotted decoration-[1.5px] underline-offset-[6px] transition-colors duration-150 ease-out hover:text-foreground/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 motion-reduce:transition-none"
-                                >
-                                  {activeProjectDisplayName ?? "this folder"}
-                                </button>
-                              }
-                            />
-                          ) : (
-                            <span className="text-inherit">
-                              {activeProjectDisplayName ?? "this folder"}
-                            </span>
-                          )}
-                          ?
-                        </>
-                      )}
-                    </h2>
-                  </div>
+                  <ArkosLanding
+                    onSelectPrompt={(text) => {
+                      discardPromptHistoryNavigationForComposerMutation();
+                      setPromptFromTraits(text);
+                    }}
+                    heading={
+                      <>
+                        {isEmptyChatLanding ? (
+                          "What are we working on today?"
+                        ) : (
+                          <>
+                            What should we do in{" "}
+                            {showEmptyLandingProjectPicker ? (
+                              <ProjectPicker
+                                align="center"
+                                side="bottom"
+                                selectionMode="project"
+                                selectedProjectId={activeProject.id}
+                                selectedWorkspaceRoot={activeProject.cwd}
+                                showResetToHome
+                                onSelectProject={handleSelectProjectForEmptyDraft}
+                                onCreateProjectFromPath={handleCreateProjectFromPickerPath}
+                                onResetToHome={handleResetWorkspaceToHome}
+                                renderTrigger={
+                                  <button
+                                    type="button"
+                                    data-testid="empty-landing-heading-project-trigger"
+                                    className="cursor-pointer rounded-sm text-inherit underline decoration-dotted decoration-[1.5px] underline-offset-[6px] transition-colors duration-150 ease-out hover:text-foreground/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 motion-reduce:transition-none"
+                                  >
+                                    {activeProjectDisplayName ?? "this folder"}
+                                  </button>
+                                }
+                              />
+                            ) : (
+                              <span className="text-inherit">
+                                {activeProjectDisplayName ?? "this folder"}
+                              </span>
+                            )}
+                            ?
+                          </>
+                        )}
+                      </>
+                    }
+                  />
                 </div>
                 <div className="w-full shrink-0 pb-3 sm:pb-4">
                   {composerSection}

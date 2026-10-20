@@ -3663,9 +3663,7 @@ describe("ChatView transcript geometry (full app)", () => {
         .click();
       await page.getByRole("menuitemcheckbox", { name: "Void", exact: true }).click();
       await expect
-        .poll(
-          () => JSON.parse(localStorage.getItem("arkos:app-settings:v1") ?? "{}").railShortcuts,
-        )
+        .poll(() => JSON.parse(localStorage.getItem("arkos:app-settings:v1") ?? "{}").railShortcuts)
         .toEqual(["project:temporarily-absent", "space:void"]);
     } finally {
       await mounted.cleanup();
@@ -11324,6 +11322,39 @@ describe("ChatView transcript geometry (full app)", () => {
       }
     },
   );
+
+  it("connects the new welcome cards to the real composer and wide sidebar routes", async () => {
+    const snapshot = addThreadToSnapshot(createDraftOnlySnapshot(), THREAD_ID);
+    const emptyThread = { ...snapshot.threads[0]!, session: null };
+    const mounted = await mountChatView({
+      viewport: DEFAULT_VIEWPORT,
+      snapshot: { ...snapshot, threads: [emptyThread] },
+    });
+    try {
+      await expect.element(page.getByTestId("empty-landing-heading")).toBeVisible();
+      expect(document.querySelector('[aria-label="Primary"]')).toBeNull();
+      const nav = page.getByRole("navigation", { name: "Workspace navigation", exact: true });
+      await expect.element(nav.getByRole("button", { name: "Home", exact: true })).toBeVisible();
+      await page.getByRole("button", { name: "Plan an agent from an idea" }).click();
+      await vi.waitFor(() =>
+        expect(page.getByTestId("composer-editor").element().textContent).toContain(
+          "Help me plan an agent from an idea.",
+        ),
+      );
+      expect((await waitForSendButton()).disabled).toBe(false);
+      await nav.getByRole("button", { name: "Automations", exact: true }).click();
+      await vi.waitFor(() => expect(mounted.router.state.location.pathname).toBe("/automations"));
+      await expect.element(nav.getByRole("button", { name: "Home", exact: true })).toBeVisible();
+      await page
+        .getByRole("navigation", { name: "Workspace settings", exact: true })
+        .getByRole("button", { name: "Settings", exact: true })
+        .click();
+      await vi.waitFor(() => expect(mounted.router.state.location.pathname).toBe("/settings"));
+      await expect.element(nav.getByRole("button", { name: "Home", exact: true })).toBeVisible();
+    } finally {
+      await mounted.cleanup();
+    }
+  });
 
   it("keeps the transcript open while the first turn starts before its message arrives", async () => {
     const snapshot = addThreadToSnapshot(createDraftOnlySnapshot(), THREAD_ID);

@@ -33,6 +33,13 @@ import {
   updateThemePackFromShareString,
 } from "../theme/theme.logic";
 
+import {
+  WORKSPACE_STYLE_REVISION,
+  WORKSPACE_CHROME_THEMES,
+  WORKSPACE_LIGHT_VARIABLES,
+  migrateWorkspaceAppearance,
+} from "../theme/workspaceAppearance";
+
 type ThemeSnapshot = {
   state: ThemeState;
   systemDark: boolean;
@@ -78,7 +85,14 @@ function readStoredThemeState(): ThemeState {
   }
 
   try {
-    return parseStoredThemeState(localStorage.getItem(STORAGE_KEY));
+    const state = parseStoredThemeState(localStorage.getItem(STORAGE_KEY));
+    if (localStorage.getItem("arkos:workspace-style-revision") !== WORKSPACE_STYLE_REVISION) {
+      const migrated = migrateWorkspaceAppearance(state);
+      localStorage.setItem(STORAGE_KEY, serializeThemeState(migrated));
+      localStorage.setItem("arkos:workspace-style-revision", WORKSPACE_STYLE_REVISION);
+      return migrated;
+    }
+    return state;
   } catch {
     return DEFAULT_THEME_STATE;
   }
@@ -196,7 +210,17 @@ function applyThemeState(state: ThemeState, suppressTransitions = false) {
   root.setAttribute("data-window-material", cssVariableBuild.material);
   root.setAttribute("data-window-translucency", cssVariableBuild.translucencyScope);
 
-  for (const [name, value] of Object.entries(cssVariableBuild.variables)) {
+  const workspaceStyle =
+    activeTheme.theme.accent === WORKSPACE_CHROME_THEMES[variant].accent &&
+    activeTheme.theme.surface === WORKSPACE_CHROME_THEMES[variant].surface;
+  root.setAttribute("data-workspace-style", workspaceStyle ? "sage" : "custom");
+  // Clear the previous material tokens before applying a different/custom theme.
+  for (const name of Object.keys(WORKSPACE_LIGHT_VARIABLES)) root.style.removeProperty(name);
+  const variables = {
+    ...cssVariableBuild.variables,
+    ...(workspaceStyle && variant === "light" ? WORKSPACE_LIGHT_VARIABLES : {}),
+  };
+  for (const [name, value] of Object.entries(variables)) {
     if (value.trim().length === 0) {
       root.style.removeProperty(name);
       continue;
