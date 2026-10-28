@@ -7,30 +7,22 @@
 // viewer's `involves:@me` search. Each takes its own read slot and releases it on completion, so
 // a read never holds one slot while waiting for another.
 
+// Per-(repository, state, sort) inbox snapshots with the request budget rules from the inbox plan:
+// a short freshness window shared by every caller, a free conditional probe before refetching,
+// a rate-limit gate, and exponential backoff for failing repositories. The last good snapshot is
+// kept so a rate-limited or failing repository still shows its rows with a warning.
+//
+// A full read is two GraphQL documents sent at the same time: the repository lists and the
+// viewer's `involves:@me` search. Each takes its own read slot and releases it on completion, so
+// a read never holds one slot while waiting for another.
 import type { GitHubInboxRateLimit, GitHubInboxSort, GitHubInboxState } from "@arkos/contracts";
 import { Effect, type Scope } from "effect";
 
 import { GitHubCliError } from "../git/Errors";
-import type {
-  GitHubCliShape,
-  GitHubGraphQlRateLimit,
-  GitHubInboxIssue,
-  GitHubInboxPullRequest,
-  GitHubRepositoryInboxInvolvement,
-  GitHubRepositoryInboxLists,
-  GitHubRepositoryInboxSnapshot,
-} from "../git/Services/GitHubCli";
+import type { GitHubCliShape, GitHubGraphQlRateLimit, GitHubInboxIssue, GitHubInboxPullRequest, GitHubRepositoryInboxInvolvement, GitHubRepositoryInboxLists, GitHubRepositoryInboxSnapshot } from "../git/Services/GitHubCli";
 import { makeKeyedSingleFlightCache } from "../pullRequests/KeyedSingleFlightCache";
 import { isGlobalGitHubCliError } from "../pullRequests/projectRepositoryAccess";
-import {
-  GITHUB_INBOX_FORCE_REFRESH_COOLDOWN_MS,
-  GITHUB_INBOX_MAX_PROBE_EXTENSION_MS,
-  GITHUB_INBOX_RATE_LIMIT_FALLBACK_PAUSE_MS,
-  GITHUB_INBOX_RATE_LIMIT_FLOOR,
-  GITHUB_INBOX_SNAPSHOT_TTL_MS,
-  githubInboxFailureBackoffMs,
-  summarizeGitHubInboxError,
-} from "./githubInbox.logic";
+import { GITHUB_INBOX_FORCE_REFRESH_COOLDOWN_MS, GITHUB_INBOX_MAX_PROBE_EXTENSION_MS, GITHUB_INBOX_RATE_LIMIT_FALLBACK_PAUSE_MS, GITHUB_INBOX_RATE_LIMIT_FLOOR, GITHUB_INBOX_SNAPSHOT_TTL_MS, githubInboxFailureBackoffMs, summarizeGitHubInboxError } from "./githubInbox.logic";
 
 const MAX_STORED_SNAPSHOTS = 512;
 

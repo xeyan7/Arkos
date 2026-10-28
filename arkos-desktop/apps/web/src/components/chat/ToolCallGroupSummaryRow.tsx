@@ -6,6 +6,13 @@
 // Exports: ToolCallGroupSummaryRow
 // Depends on: DisclosureRegion/DisclosureChevron (shared disclosure motion)
 
+// FILE: ToolCallGroupSummaryRow.tsx
+// Purpose: One-line disclosure for a run of tool calls. Settled runs read as a
+//          summary ("Ran 2 commands, Edited 2 files"); a live run wears its
+//          latest status or call instead. Both expand to the individual rows.
+// Layer: Web chat presentation component
+// Exports: ToolCallGroupSummaryRow
+// Depends on: DisclosureRegion/DisclosureChevron (shared disclosure motion)
 import { useEffect, useState, type ReactNode } from "react";
 
 import { DisclosureChevron } from "../ui/DisclosureChevron";
@@ -17,11 +24,7 @@ import { extractWebFetchUrl } from "../../lib/toolCallLabel";
 import { LinkChipIcon } from "../LinkChipIcon";
 import type { WorkLogEntry } from "../../session-logic";
 import { multiFileEditLabel, type ToolCallGroupSummary } from "./toolCallGroup.logic";
-import {
-  renderWorkEntryIcon,
-  workEntryDisplayText,
-  workEntryLeftIcon,
-} from "./TimelineWorkEntryRow";
+import { renderWorkEntryIcon, workEntryDisplayText, workEntryLeftIcon } from "./TimelineWorkEntryRow";
 
 export function ToolCallGroupSummaryRow(props: {
   summary: ToolCallGroupSummary;

@@ -4,48 +4,24 @@
 //          clock, and the create dialog with its form and warning state.
 // Layer: Route-private UI module (the "-" prefix keeps it out of the route tree)
 
-import {
-  type AutomationCreateInput,
-  type AutomationDefinition,
-  type AutomationRun,
-} from "@arkos/contracts";
+// FILE: -automations.list.tsx
+// Purpose: The automation list pieces shared by the Automations page and the rail layout's
+//          Automations panel: the list row, its subtitle and unread rules, the countdown
+//          clock, and the create dialog with its form and warning state.
+// Layer: Route-private UI module (the "-" prefix keeps it out of the route tree)
+import { type AutomationCreateInput, type AutomationDefinition, type AutomationRun } from "@arkos/contracts";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { getProviderStartOptions, useAppSettings } from "~/appSettings";
-import {
-  hasBlockingAutomationDraftWarnings,
-  updateAutomationDraftWarningAcknowledgement,
-  type AutomationDraftWarning,
-  type AutomationDraftWarningId,
-} from "~/lib/automationDraft";
+import { hasBlockingAutomationDraftWarnings, updateAutomationDraftWarningAcknowledgement, type AutomationDraftWarning, type AutomationDraftWarningId } from "~/lib/automationDraft";
 import { automationLifecycleState } from "~/lib/automationStatus";
 import { CentralIcon } from "~/lib/central-icons";
 import { cn } from "~/lib/utils";
-import {
-  SIDEBAR_ROW_ACTIVE_CLASS_NAME,
-  SIDEBAR_ROW_FOCUS_CLASS_NAME,
-  SIDEBAR_ROW_HOVER_CLASS_NAME,
-} from "~/sidebarRowStyles";
+import { SIDEBAR_ROW_ACTIVE_CLASS_NAME, SIDEBAR_ROW_FOCUS_CLASS_NAME, SIDEBAR_ROW_HOVER_CLASS_NAME } from "~/sidebarRowStyles";
 import { ELEVATED_HOVER_SURFACE_CLASS_NAME } from "~/surfaceStyles";
 import { useStore } from "~/store";
 import { createSidebarThreadSummariesSelector } from "~/storeSelectors";
-import {
-  type AutomationFormState,
-  AutomationDialog,
-  acknowledgedRiskIdsForFormWarnings,
-  automationAttentionLabel,
-  buildAutomationFormWarnings,
-  createInputFromForm,
-  formatCadenceLong,
-  formatNextRun,
-  formFromDefinition,
-  isFormSubmittable,
-  isLiveRun,
-  isRowInteractiveEventTarget,
-  isUnresolvedTriageResult,
-  projectModelSelection,
-  runStatusLabel,
-} from "./-automations.shared";
+import { type AutomationFormState, AutomationDialog, acknowledgedRiskIdsForFormWarnings, automationAttentionLabel, buildAutomationFormWarnings, createInputFromForm, formatCadenceLong, formatNextRun, formFromDefinition, isFormSubmittable, isLiveRun, isRowInteractiveEventTarget, isUnresolvedTriageResult, projectModelSelection, runStatusLabel } from "./-automations.shared";
 
 // Sidebar summaries carry every field these surfaces read (id, projectId, title,
 // sidechatSourceThreadId) and do not rebuild on streamed message/activity deltas

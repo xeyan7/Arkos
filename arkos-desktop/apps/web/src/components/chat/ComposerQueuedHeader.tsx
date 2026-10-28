@@ -6,22 +6,20 @@
 // Layer: Chat composer UI
 // Exports: ComposerQueuedHeader
 
+// FILE: ComposerQueuedHeader.tsx
+// Purpose: Queued follow-up rows shown as a panel that merges into the top of the
+// composer input (each with Steer / Delete / Edit actions). Rounded only on top with
+// a flat, borderless bottom that fuses flush onto the composer; spans the full composer
+// width while the composer below keeps its own full rounding.
+// Layer: Chat composer UI
+// Exports: ComposerQueuedHeader
 import type { QueuedComposerTurn } from "../../composerDraftStore";
 import { SteerIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import ChatMarkdown from "../ChatMarkdown";
-import {
-  ComposerStackedPanelRow,
-  ComposerStackedPanelRowMain,
-} from "./ComposerStackedPanelContent";
-import {
-  COMPOSER_STACKED_PANEL_DIVIDER_CLASS_NAME,
-  ComposerStackedPanel,
-} from "./ComposerStackedPanel";
-import {
-  COMPOSER_STACKED_PANEL_ICON_CLASS_NAME,
-  COMPOSER_STACKED_PANEL_PREVIEW_MARKDOWN_CLASS_NAME,
-} from "./composerStackedPanelStyles";
+import { ComposerStackedPanelRow, ComposerStackedPanelRowMain } from "./ComposerStackedPanelContent";
+import { COMPOSER_STACKED_PANEL_DIVIDER_CLASS_NAME, ComposerStackedPanel } from "./ComposerStackedPanel";
+import { COMPOSER_STACKED_PANEL_ICON_CLASS_NAME, COMPOSER_STACKED_PANEL_PREVIEW_MARKDOWN_CLASS_NAME } from "./composerStackedPanelStyles";
 import { QueuedComposerActions } from "./QueuedComposerActions";
 
 function firstNonEmptyLine(value: string): string {

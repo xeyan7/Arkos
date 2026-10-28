@@ -3,109 +3,18 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 
-import {
-  AutomationId,
-  CommandId,
-  DEFAULT_PROJECT_AGENT_LIMITS,
-  EventId,
-  MessageId,
-  NEW_HUB_MAX_CONCURRENT_WORKERS,
-  PROJECT_AGENT_DIGEST_DEBOUNCE_MS,
-  PROJECT_AGENT_INITIAL_SUMMARY_THREAD_COUNT,
-  ProjectActivityId,
-  ProjectAgentConfig,
-  ProjectDocumentRevisionId,
-  ProjectEvidenceId,
-  ProjectGoal,
-  ProjectGoalId,
-  ProjectId,
-  ProjectInboxEventId,
-  ProjectTask,
-  ProjectTaskAttemptId,
-  ProjectTaskId,
-  ThreadId,
-  PROVIDER_DISPLAY_NAMES,
-  hubWorkItem,
-  type OrchestrationCommand,
-  type ProjectActivity,
-  type ProjectActivityKind,
-  type ProjectInboxEvent,
-  type ProjectManagedWorker,
-  type OrchestrationThreadShell,
-  type LibraryEntry,
-  type ProjectThreadIndexEntry,
-  type ProjectAgentDeleteGroupResult,
-  type ProjectAgentGroupThreadEntry,
-  type ProjectAgentOverview,
-  type ProjectAgentResolveWorkerInput,
-  type ProjectAgentSummary,
-  type ProjectAgentStreamEvent,
-  type ProjectDocumentRevision,
-  type ProjectTaskStatus,
-  type ProviderSession,
-} from "@arkos/contracts";
+import { AutomationId, CommandId, DEFAULT_PROJECT_AGENT_LIMITS, EventId, MessageId, NEW_HUB_MAX_CONCURRENT_WORKERS, PROJECT_AGENT_DIGEST_DEBOUNCE_MS, PROJECT_AGENT_INITIAL_SUMMARY_THREAD_COUNT, ProjectActivityId, ProjectAgentConfig, ProjectDocumentRevisionId, ProjectEvidenceId, ProjectGoal, ProjectGoalId, ProjectId, ProjectInboxEventId, ProjectTask, ProjectTaskAttemptId, ProjectTaskId, ThreadId, PROVIDER_DISPLAY_NAMES, hubWorkItem, type OrchestrationCommand, type ProjectActivity, type ProjectActivityKind, type ProjectInboxEvent, type ProjectManagedWorker, type OrchestrationThreadShell, type LibraryEntry, type ProjectThreadIndexEntry, type ProjectAgentDeleteGroupResult, type ProjectAgentGroupThreadEntry, type ProjectAgentOverview, type ProjectAgentResolveWorkerInput, type ProjectAgentSummary, type ProjectAgentStreamEvent, type ProjectDocumentRevision, type ProjectTaskStatus, type ProviderSession } from "@arkos/contracts";
 import { groupThreadStateLabel, resolveGroupThreadState } from "@arkos/shared/groupThreadState";
 import { HubWorkRepository } from "../../persistence/Services/HubWorkRepository";
 import { coordinatorCheckinTurnReport } from "@arkos/shared/coordinatorCheckin";
 import { resolveThreadWorkspaceCwd } from "@arkos/shared/threadEnvironment";
 import { isOrdinaryProjectRow } from "@arkos/shared/projectContainers";
-import {
-  coordinatorWelcomeDisplayName,
-  coordinatorWelcomeMessageId,
-  coordinatorWelcomeText,
-  isGroupCoordinatorHostProject,
-} from "../groupCoordinatorHost.ts";
-import {
-  assertLibraryRootLocation,
-  ensureLibraryRepo,
-  isGitDirName,
-  listLibraryEntries,
-  moveLibraryRoot,
-  normalizeLibraryRelativePath,
-  resolveLibraryRoot,
-  resolveLibraryWriteTarget,
-} from "../libraryStore.ts";
-import {
-  commitLibraryChange,
-  pushLibraryIfConfigured,
-  withLibraryQueue,
-  withLibraryQueues,
-  withLibraryRootLock,
-} from "../libraryGit.ts";
+import { coordinatorWelcomeDisplayName, coordinatorWelcomeMessageId, coordinatorWelcomeText, isGroupCoordinatorHostProject } from "../groupCoordinatorHost.ts";
+import { assertLibraryRootLocation, ensureLibraryRepo, isGitDirName, listLibraryEntries, moveLibraryRoot, normalizeLibraryRelativePath, resolveLibraryRoot, resolveLibraryWriteTarget } from "../libraryStore.ts";
+import { commitLibraryChange, pushLibraryIfConfigured, withLibraryQueue, withLibraryQueues, withLibraryRootLock } from "../libraryGit.ts";
 import { isContainedPath } from "../../workspace/realPathContainment.ts";
-import {
-  canWriteMemoryDocument,
-  decodeProjectAgentListCursor,
-  detectProjectTaskDependencyCycle,
-  encodeProjectAgentListCursor,
-  INITIAL_PROJECT_DIGEST_SUMMARY,
-  isCoordinatorCuratedDocumentPath,
-  isGeneratedDocumentPath,
-  isInboxDocumentPath,
-  isMemoryDocumentPath,
-  isMemoryNoteDocumentPath,
-  isMemoryThreadDocumentPath,
-  isUserOwnedDocumentPath,
-  MEMORY_AUTO_DOCUMENT_PATH,
-  normalizeProjectDocumentPath,
-  sanitizeProjectDigestSummary,
-  truncateToContextBudget,
-} from "@arkos/shared/projectAgent";
-import {
-  Cause,
-  Clock,
-  Duration,
-  Effect,
-  Equal,
-  Exit,
-  Layer,
-  Option,
-  PubSub,
-  Queue,
-  Ref,
-  Semaphore,
-  Stream,
-} from "effect";
+import { canWriteMemoryDocument, decodeProjectAgentListCursor, detectProjectTaskDependencyCycle, encodeProjectAgentListCursor, INITIAL_PROJECT_DIGEST_SUMMARY, isCoordinatorCuratedDocumentPath, isGeneratedDocumentPath, isInboxDocumentPath, isMemoryDocumentPath, isMemoryNoteDocumentPath, isMemoryThreadDocumentPath, isUserOwnedDocumentPath, MEMORY_AUTO_DOCUMENT_PATH, normalizeProjectDocumentPath, sanitizeProjectDigestSummary, truncateToContextBudget } from "@arkos/shared/projectAgent";
+import { Cause, Clock, Duration, Effect, Equal, Exit, Layer, Option, PubSub, Queue, Ref, Semaphore, Stream } from "effect";
 
 import { AutomationService } from "../../automation/Services/AutomationService.ts";
 import { notifyAfterCommit } from "../../persistence/commitNotifications.ts";
@@ -119,72 +28,18 @@ import { GitCore } from "../../git/Services/GitCore.ts";
 import { TextGeneration } from "../../git/Services/TextGeneration.ts";
 import { OrchestrationEngineService } from "../../orchestration/Services/OrchestrationEngine.ts";
 import { ProjectionSnapshotQuery } from "../../orchestration/Services/ProjectionSnapshotQuery.ts";
-import {
-  normalizeDigestError,
-  ProjectAgentRepository,
-} from "../../persistence/Services/ProjectAgentRepository.ts";
+import { normalizeDigestError, ProjectAgentRepository } from "../../persistence/Services/ProjectAgentRepository.ts";
 import { ProjectionThreadRepository } from "../../persistence/Services/ProjectionThreads.ts";
 import { LibraryError, ProjectAgentServiceError } from "../Errors.ts";
 import { isAllowedGroupCoordinatorCreateTarget } from "../groupCreateAllowlist.ts";
 import { gateProjectAgentServiceForStable, isServerGroupsEnabled } from "../groupsBetaGate.ts";
 import { cleanupGroupWorkspaceRoot } from "../../groupWorkspaceScaffold.ts";
-import {
-  hashDocumentContent,
-  materializeDocumentPath,
-  projectContextRoot,
-  readProjectDocumentMirror,
-  writeProjectDocumentMirror,
-} from "../materializer.ts";
-import {
-  mergePinnedFocusItems,
-  validateDigestFocusItems,
-  wakeReceiptRequestId,
-} from "../digest.ts";
-import {
-  canAcceptTask,
-  canConfigureProject,
-  canStartGoal,
-  canWriteUserOwnedDocuments,
-  coordinatorStatusFromGoal,
-  isCoordinatorPrincipal,
-  isUserPrincipal,
-  projectAgentSummariesForPrincipal,
-  type ProjectAgentPrincipal,
-} from "../principal.ts";
-import {
-  PROJECT_BOT_HEARTBEAT_PROMPT,
-  PROJECT_BOT_PLAYBOOK,
-  PROJECT_BOT_PLAYBOOK_PATH,
-  PROJECT_BOT_WATCH_RULES,
-} from "../projectBotPlaybook.ts";
-import {
-  classifyWorkerSettlement,
-  formatWorkerBatchRollup,
-  formatWorkerMonitorRow,
-  formatWorkerSettlementReport,
-  formatWorkerWatchLine,
-  isFailedWorkerSessionStatus,
-  isTerminalWorkerSettleOutcome,
-  isWorkerAlertEvent,
-  lastAssistantTextFromMessages,
-  shouldMaterializeWorkerSettlementReport,
-  WORKER_DISCONNECT_GRACE_MS,
-  WORKER_NEVER_STARTED_MS,
-  WORKER_RECOVERY_MAX_ATTEMPTS,
-  WORKER_RECOVERY_NUDGE_TEXT,
-  WORKER_RECOVERY_COMMAND_PREFIX,
-  WORKER_RECOVERY_REDELIVER_DELAY_MS,
-  WORKER_STUCK_RUNNING_QUIET_MS,
-  WORKER_STUCK_WAITING_MS,
-  WORKER_TOOL_OVERTIME_MS,
-  WORKER_WAKE_EVENT_TYPES,
-  workerInboxReportPath,
-  workerMonitorNoticeForEvent,
-} from "../workerHealth.ts";
-import {
-  ProjectAgentService,
-  type ProjectAgentServiceShape,
-} from "../Services/ProjectAgentService.ts";
+import { hashDocumentContent, materializeDocumentPath, projectContextRoot, readProjectDocumentMirror, writeProjectDocumentMirror } from "../materializer.ts";
+import { mergePinnedFocusItems, validateDigestFocusItems, wakeReceiptRequestId } from "../digest.ts";
+import { canAcceptTask, canConfigureProject, canStartGoal, canWriteUserOwnedDocuments, coordinatorStatusFromGoal, isCoordinatorPrincipal, isUserPrincipal, projectAgentSummariesForPrincipal, type ProjectAgentPrincipal } from "../principal.ts";
+import { PROJECT_BOT_HEARTBEAT_PROMPT, PROJECT_BOT_PLAYBOOK, PROJECT_BOT_PLAYBOOK_PATH, PROJECT_BOT_WATCH_RULES } from "../projectBotPlaybook.ts";
+import { classifyWorkerSettlement, formatWorkerBatchRollup, formatWorkerMonitorRow, formatWorkerSettlementReport, formatWorkerWatchLine, isFailedWorkerSessionStatus, isTerminalWorkerSettleOutcome, isWorkerAlertEvent, lastAssistantTextFromMessages, shouldMaterializeWorkerSettlementReport, WORKER_DISCONNECT_GRACE_MS, WORKER_NEVER_STARTED_MS, WORKER_RECOVERY_MAX_ATTEMPTS, WORKER_RECOVERY_NUDGE_TEXT, WORKER_RECOVERY_COMMAND_PREFIX, WORKER_RECOVERY_REDELIVER_DELAY_MS, WORKER_STUCK_RUNNING_QUIET_MS, WORKER_STUCK_WAITING_MS, WORKER_TOOL_OVERTIME_MS, WORKER_WAKE_EVENT_TYPES, workerInboxReportPath, workerMonitorNoticeForEvent } from "../workerHealth.ts";
+import { ProjectAgentService, type ProjectAgentServiceShape } from "../Services/ProjectAgentService.ts";
 
 const fail = (message: string, code?: ProjectAgentServiceError["code"]) =>
   new ProjectAgentServiceError({ message, ...(code ? { code } : {}) });

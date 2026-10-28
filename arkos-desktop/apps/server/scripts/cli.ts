@@ -6,10 +6,7 @@ import { Data, Effect, FileSystem, Logger, Option, Path } from "effect";
 import { Command, Flag } from "effect/unstable/cli";
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
-import {
-  DEVELOPMENT_ICON_OVERRIDES,
-  DISTRIBUTION_ICON_OVERRIDES,
-} from "../../../scripts/lib/brand-assets.ts";
+import { DEVELOPMENT_ICON_OVERRIDES, DISTRIBUTION_ICON_OVERRIDES } from "../../../scripts/lib/brand-assets.ts";
 import { resolveCatalogDependencies } from "../../../scripts/lib/resolve-catalog.ts";
 import rootPackageJson from "../../../package.json" with { type: "json" };
 import serverPackageJson from "../package.json" with { type: "json" };

@@ -1,22 +1,10 @@
-import {
-  createStalePendingInteractionMatcher,
-  respondingInteractionReclaimCutoff,
-} from "@arkos/shared/pendingInteractions";
+import { createStalePendingInteractionMatcher, respondingInteractionReclaimCutoff } from "@arkos/shared/pendingInteractions";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 import { Effect, Layer, Option, Schema } from "effect";
 
 import { toPersistenceSqlError } from "../Errors.ts";
-import {
-  ClaimProjectionPendingInteractionResponseInput,
-  DeleteProjectionPendingInteractionInput,
-  GetProjectionPendingInteractionInput,
-  ListProjectionPendingInteractionsInput,
-  ProjectionPendingInteraction,
-  ProjectionPendingInteractionCounts,
-  ProjectionPendingInteractionRepository,
-  type ProjectionPendingInteractionRepositoryShape,
-} from "../Services/ProjectionPendingInteractions.ts";
+import { ClaimProjectionPendingInteractionResponseInput, DeleteProjectionPendingInteractionInput, GetProjectionPendingInteractionInput, ListProjectionPendingInteractionsInput, ProjectionPendingInteraction, ProjectionPendingInteractionCounts, ProjectionPendingInteractionRepository, type ProjectionPendingInteractionRepositoryShape } from "../Services/ProjectionPendingInteractions.ts";
 
 const makeProjectionPendingInteractionRepository = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;

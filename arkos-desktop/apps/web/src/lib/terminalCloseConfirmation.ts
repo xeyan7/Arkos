@@ -3,6 +3,10 @@
 // Layer: UI logic helper
 // Depends on: Native dialog contract from the app shell.
 
+// FILE: terminalCloseConfirmation.ts
+// Purpose: Shares terminal-tab close confirmation copy and dialog plumbing across chat and workspace surfaces.
+// Layer: UI logic helper
+// Depends on: Native dialog contract from the app shell.
 import type { NativeApi } from "@arkos/contracts";
 
 function formatTerminalCloseSubject(terminalTitle: string | null | undefined): string {

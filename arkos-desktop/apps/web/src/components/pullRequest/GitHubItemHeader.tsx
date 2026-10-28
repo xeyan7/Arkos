@@ -7,11 +7,15 @@
 // Layer: Pull request presentation
 // Exports: GitHubItemHeader, GitHubItemHeaderItem, GitHubItemBackButton
 
-import type {
-  GitHubIssueDetail,
-  GitPullRequestMergeability,
-  PullRequestDetail,
-} from "@arkos/contracts";
+// FILE: GitHubItemHeader.tsx
+// Purpose: The header a GitHub item's detail opens with, the same for pull requests and issues:
+//          a state pill (its chevron opens the host's state menu) beside "repo #n"; the large
+//          title; author, time, and (pull requests) head to base; then the labels. The actions
+//          (and, on a narrow window, the back control) live in the page's top bar. Hosts that
+//          show the detail as a page use it (the inbox); the chat dock keeps its compact header.
+// Layer: Pull request presentation
+// Exports: GitHubItemHeader, GitHubItemHeaderItem, GitHubItemBackButton
+import type { GitHubIssueDetail, GitPullRequestMergeability, PullRequestDetail } from "@arkos/contracts";
 import type { ReactNode } from "react";
 
 import { ComposerPickerMenuPopup } from "~/components/chat/ComposerPickerMenuPopup";
@@ -23,15 +27,8 @@ import { cn } from "~/lib/utils";
 import { GitHubLabelChips } from "./GitHubLabelChips";
 import { PullRequestActorLabel } from "./PullRequestActorLabel";
 import { PullRequestMetaLine } from "./PullRequestMetaLine";
-import {
-  IssueStateGlyph,
-  PullRequestStateGlyph,
-  pullRequestStateLabel,
-} from "./PullRequestStateGlyph";
-import {
-  resolveIssueStatePresentation,
-  resolvePrStatePresentation,
-} from "./pullRequestStatePresentation";
+import { IssueStateGlyph, PullRequestStateGlyph, pullRequestStateLabel } from "./PullRequestStateGlyph";
+import { resolveIssueStatePresentation, resolvePrStatePresentation } from "./pullRequestStatePresentation";
 import { PR_FINE_TEXT_CLASS_NAME, PR_META_TEXT_CLASS_NAME } from "./pullRequestText";
 
 type HeaderFields =

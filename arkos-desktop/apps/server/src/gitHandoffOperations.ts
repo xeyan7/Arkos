@@ -1,8 +1,4 @@
-import {
-  GitHandoffThreadInput,
-  GitHandoffThreadResult,
-  type OrchestrationCommand,
-} from "@arkos/contracts";
+import { GitHandoffThreadInput, GitHandoffThreadResult, type OrchestrationCommand } from "@arkos/contracts";
 import { resolveWorktreeHandoffWorkspaceMetadata } from "@arkos/shared/worktreeHandoff";
 import { Data, Effect, Schema } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";

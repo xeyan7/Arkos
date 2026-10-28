@@ -4,10 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { performance } from "node:perf_hooks";
 import { setTimeout as pause } from "node:timers/promises";
-import {
-  CuaActionError,
-  type CuaComputerBackend,
-} from "../../../server/src/computer/CuaComputerBackend";
+import { CuaActionError, type CuaComputerBackend } from "../../../server/src/computer/CuaComputerBackend";
 
 interface FixtureState {
   event: "state";

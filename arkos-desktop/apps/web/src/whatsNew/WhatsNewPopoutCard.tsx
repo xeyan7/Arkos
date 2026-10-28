@@ -5,6 +5,24 @@
 // IndieDevs `UpdateCard` pattern but themed for our dark-first surface.
 // Layer: overlay — rendered once from the root route next to the dialog.
 
+// FILE: whatsNew/WhatsNewPopoutCard.tsx
+// Purpose: Post-update "popout" card that lives in the bottom-left corner of
+// the app after an upgrade. Clicking the card body opens the release-notes
+// dialog; clicking the ✕ dismisses the update silently. Matches the
+// IndieDevs `UpdateCard` pattern but themed for our dark-first surface.
+// Layer: overlay — rendered once from the root route next to the dialog.
+// FILE: whatsNew/WhatsNewPopoutCard.tsx
+// Purpose: Post-update "popout" card that lives in the bottom-left corner of
+// the app after an upgrade. Clicking the card body opens the release-notes
+// dialog; clicking the ✕ dismisses the update silently. Matches the
+// IndieDevs `UpdateCard` pattern but themed for our dark-first surface.
+// Layer: overlay — rendered once from the root route next to the dialog.
+// FILE: whatsNew/WhatsNewPopoutCard.tsx
+// Purpose: Post-update "popout" card that lives in the bottom-left corner of
+// the app after an upgrade. Clicking the card body opens the release-notes
+// dialog; clicking the ✕ dismisses the update silently. Matches the
+// IndieDevs `UpdateCard` pattern but themed for our dark-first surface.
+// Layer: overlay — rendered once from the root route next to the dialog.
 import { useEffect, useState, type KeyboardEvent } from "react";
 
 import { XIcon } from "~/lib/icons";

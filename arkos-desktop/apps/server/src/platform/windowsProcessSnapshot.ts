@@ -2,6 +2,9 @@
 // Purpose: Maintains one bounded Windows process-table observer shared by runtime owners.
 // Layer: Server Windows platform runtime
 
+// FILE: windowsProcessSnapshot.ts
+// Purpose: Maintains one bounded Windows process-table observer shared by runtime owners.
+// Layer: Server Windows platform runtime
 import { type ChildProcessWithoutNullStreams } from "node:child_process";
 import path from "node:path";
 

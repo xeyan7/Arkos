@@ -12,6 +12,20 @@
  * their own app, so it is reported as `drift` unless strictFocus is set.
  * Null sample fields are observation gaps, not theft.
  */
+/**
+ * Focus-theft probe: runner-side half of scripts/computer-use-fixtures/
+ * focus_probe.m. The binary streams one NDJSON focus sample per tick
+ * ({t, pid, app, keyWin, keyTitle, topWin, topTitle, space, focused});
+ * this module parses that stream, picks the baseline, and reports every
+ * post-baseline deviation so a fixture or cert run can assert "no theft"
+ * instead of eyeballing a log.
+ *
+ * Theft fields are frontmost pid, key window id, top window id and active
+ * Space id: the user's frontmost app and key window must not move because of
+ * us. The AX focused element changes legitimately when the user tabs inside
+ * their own app, so it is reported as `drift` unless strictFocus is set.
+ * Null sample fields are observation gaps, not theft.
+ */
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 

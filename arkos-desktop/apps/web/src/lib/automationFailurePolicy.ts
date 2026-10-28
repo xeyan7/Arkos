@@ -5,6 +5,12 @@
 // contract's `stopAfterConsecutiveFailures` field. Used by the creation dialog and the
 // detail page's "On failure" row so both surfaces read identically.
 
+// FILE: automationFailurePolicy.ts
+// Purpose: Single vocabulary for the "stop after N consecutive failures" policy.
+// Layer: Web lib (pure helpers)
+// Exports: preset options plus converters between the form's preset string and the
+// contract's `stopAfterConsecutiveFailures` field. Used by the creation dialog and the
+// detail page's "On failure" row so both surfaces read identically.
 import { DEFAULT_AUTOMATION_STOP_AFTER_CONSECUTIVE_FAILURES } from "@arkos/contracts";
 
 /** "never" or a positive integer rendered as a string ("1", "3", "5", …). */

@@ -3,10 +3,10 @@ import { MODEL_SCREEN_IMAGE_MAX_DIMENSION } from "@arkos/shared/modelImageBudget
 // Purpose: Normalize oversized composer images without decoding unbounded pixels on the UI thread.
 // Layer: Web composer utility
 
-import {
-  PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
-  PROVIDER_SEND_TURN_MAX_IMAGE_IMPORT_BYTES,
-} from "@arkos/contracts";
+// FILE: composerImagePreparation.ts
+// Purpose: Normalize oversized composer images without decoding unbounded pixels on the UI thread.
+// Layer: Web composer utility
+import { PROVIDER_SEND_TURN_MAX_IMAGE_BYTES, PROVIDER_SEND_TURN_MAX_IMAGE_IMPORT_BYTES } from "@arkos/contracts";
 
 const MEBIBYTE = 1024 * 1024;
 const JPEG_HEADER_READ_BYTES = 1024 * 1024;

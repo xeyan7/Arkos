@@ -7,6 +7,14 @@
 // Layer: Orchestration command normalization
 // Depends on: contracts thresholds, private path permission helpers.
 
+// FILE: threadGoalMaterialization.ts
+// Purpose: Codex-style large-goal handling. A goal longer than the inline
+//   threshold would blow up every provider turn (the persisted goal is injected
+//   into each prompt), so the full text is materialized to a per-thread file and
+//   the stored goal becomes a short "read this file" reference that stays
+//   resolvable on every subsequent turn.
+// Layer: Orchestration command normalization
+// Depends on: contracts thresholds, private path permission helpers.
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";

@@ -4,20 +4,17 @@
 // Exports: useDeviceVideoStream
 // Depends on: DevicePanel.logic frame gate, deviceFrameSource transport
 
+// FILE: useDeviceVideoStream.ts
+// Purpose: Drive a WebCodecs H.264 decoder from the device frame socket into a canvas.
+// Layer: Device pane runtime hook
+// Exports: useDeviceVideoStream
+// Depends on: DevicePanel.logic frame gate, deviceFrameSource transport
 import type { DeviceUdid } from "@arkos/contracts";
 import type { DeviceFrame } from "@arkos/shared/deviceFrame";
 import { useEffect, useRef, useState } from "react";
 
-import {
-  createDeviceFrameGateState,
-  stepDeviceFrameGate,
-  type DeviceFrameGateState,
-} from "../DevicePanel.logic";
-import {
-  createDeviceFrameSource,
-  type DeviceFrameSource,
-  type DeviceFrameSourceResetReason,
-} from "~/lib/deviceFrameSource";
+import { createDeviceFrameGateState, stepDeviceFrameGate, type DeviceFrameGateState } from "../DevicePanel.logic";
+import { createDeviceFrameSource, type DeviceFrameSource, type DeviceFrameSourceResetReason } from "~/lib/deviceFrameSource";
 
 /**
  * Ceiling on the frame-socket reconnect backoff.

@@ -3,6 +3,10 @@
 // Layer: Web domain helper
 // Exports: date/slug helpers plus unique chat workspace path resolution.
 
+// FILE: chatWorkspaceFolders.ts
+// Purpose: Build Codex-style local workspace folders for general chats.
+// Layer: Web domain helper
+// Exports: date/slug helpers plus unique chat workspace path resolution.
 import { workspaceRootsEqual } from "@arkos/shared/threadWorkspace";
 
 const FALLBACK_CHAT_WORKSPACE_SLUG = "new-thread";

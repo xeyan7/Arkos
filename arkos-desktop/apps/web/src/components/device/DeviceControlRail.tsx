@@ -8,16 +8,16 @@
 // real ones are, leaving this row for Home, capture, and the two session
 // actions.
 
-import {
-  DeviceDetachIcon,
-  DeviceHomeIcon,
-  DevicePowerIcon,
-  DeviceRecordIcon,
-  DeviceRecordStopIcon,
-  DeviceRotateIcon,
-  DeviceShutterIcon,
-  type LucideIcon,
-} from "~/lib/icons";
+// FILE: DeviceControlRail.tsx
+// Purpose: Slim icon toolbar of device actions below the phone bezel.
+// Layer: Device pane presentation
+// Exports: DeviceControlRail, DEVICE_RAIL_HEIGHT_CLASS, DEVICE_RAIL_GROUPS
+//
+// The rail carries the actions that have no home on the hardware itself:
+// lock and volume moved onto the drawn side buttons of the bezel, where the
+// real ones are, leaving this row for Home, capture, and the two session
+// actions.
+import { DeviceDetachIcon, DeviceHomeIcon, DevicePowerIcon, DeviceRecordIcon, DeviceRecordStopIcon, DeviceRotateIcon, DeviceShutterIcon, type LucideIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 

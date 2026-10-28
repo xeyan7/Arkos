@@ -1,10 +1,4 @@
-import {
-  MAX_SCRIPT_ID_LENGTH,
-  SCRIPT_RUN_COMMAND_PATTERN,
-  type KeybindingCommand,
-  type ProjectScript,
-  type ThreadId,
-} from "@arkos/contracts";
+import { MAX_SCRIPT_ID_LENGTH, SCRIPT_RUN_COMMAND_PATTERN, type KeybindingCommand, type ProjectScript, type ThreadId } from "@arkos/contracts";
 import { Schema } from "effect";
 
 function normalizeScriptId(value: string): string {

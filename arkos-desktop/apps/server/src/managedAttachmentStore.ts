@@ -8,15 +8,8 @@ import { Effect } from "effect";
 import { resolveAttachmentRelativePath } from "./attachmentPaths";
 import { inferAttachmentExtension, inferImageExtension } from "./imageMime";
 import type { ManagedAttachmentPrincipal } from "./managedAttachmentPrincipal";
-import type {
-  ManagedAttachmentBlob,
-  ManagedAttachmentRepositoryShape,
-} from "./persistence/Services/ManagedAttachments";
-import {
-  ensurePrivateDirectorySync,
-  repairPrivateFile,
-  syncDirectoryEntry,
-} from "./privatePathPermissions";
+import type { ManagedAttachmentBlob, ManagedAttachmentRepositoryShape } from "./persistence/Services/ManagedAttachments";
+import { ensurePrivateDirectorySync, repairPrivateFile, syncDirectoryEntry } from "./privatePathPermissions";
 
 export const MANAGED_ATTACHMENT_STAGING_TTL_MS = 60 * 60 * 1_000;
 const MANAGED_ATTACHMENT_ID_PREFIX = "att_v2_";

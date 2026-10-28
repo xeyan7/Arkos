@@ -21,19 +21,173 @@
  * counts as theft. Grant the *runner's* terminal/app Accessibility (and
  * Screen Recording for window titles) to measure keyWin and focused.
  */
+/**
+ * focus-probe: standalone focus-theft meter for fixture and certification
+ * runs. Wraps the focus_probe.m sampler binary (NDJSON on stdout) with the
+ * analyzer from apps/desktop/src/cuaFixtures/focusProbe.ts and turns the
+ * result into an assertable exit code plus a JSON report.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --wrap -- ./my-cert-script.sh
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30 \
+ *     --expect-frontmost-pid 4242 --expect-key-window 9001 \
+ *     --report report.json --samples-out samples.ndjson
+ *
+ * Exit codes: 0 theft-free, 1 usage/environment error, 2 off-baseline
+ * samples detected (or coverage too thin to make the claim).
+ *
+ * The probe is read-only: NSWorkspace/SLPS for the frontmost pid, AX for the
+ * key window and focused element, CGWindowList for the top window, and a
+ * private SLSGetActiveSpace read for the Space. A null field means the
+ * matching grant/symbol was unavailable; it narrows coverage, it never
+ * counts as theft. Grant the *runner's* terminal/app Accessibility (and
+ * Screen Recording for window titles) to measure keyWin and focused.
+ */
+/**
+ * focus-probe: standalone focus-theft meter for fixture and certification
+ * runs. Wraps the focus_probe.m sampler binary (NDJSON on stdout) with the
+ * analyzer from apps/desktop/src/cuaFixtures/focusProbe.ts and turns the
+ * result into an assertable exit code plus a JSON report.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --wrap -- ./my-cert-script.sh
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30 \
+ *     --expect-frontmost-pid 4242 --expect-key-window 9001 \
+ *     --report report.json --samples-out samples.ndjson
+ *
+ * Exit codes: 0 theft-free, 1 usage/environment error, 2 off-baseline
+ * samples detected (or coverage too thin to make the claim).
+ *
+ * The probe is read-only: NSWorkspace/SLPS for the frontmost pid, AX for the
+ * key window and focused element, CGWindowList for the top window, and a
+ * private SLSGetActiveSpace read for the Space. A null field means the
+ * matching grant/symbol was unavailable; it narrows coverage, it never
+ * counts as theft. Grant the *runner's* terminal/app Accessibility (and
+ * Screen Recording for window titles) to measure keyWin and focused.
+ */
+/**
+ * focus-probe: standalone focus-theft meter for fixture and certification
+ * runs. Wraps the focus_probe.m sampler binary (NDJSON on stdout) with the
+ * analyzer from apps/desktop/src/cuaFixtures/focusProbe.ts and turns the
+ * result into an assertable exit code plus a JSON report.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --wrap -- ./my-cert-script.sh
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30 \
+ *     --expect-frontmost-pid 4242 --expect-key-window 9001 \
+ *     --report report.json --samples-out samples.ndjson
+ *
+ * Exit codes: 0 theft-free, 1 usage/environment error, 2 off-baseline
+ * samples detected (or coverage too thin to make the claim).
+ *
+ * The probe is read-only: NSWorkspace/SLPS for the frontmost pid, AX for the
+ * key window and focused element, CGWindowList for the top window, and a
+ * private SLSGetActiveSpace read for the Space. A null field means the
+ * matching grant/symbol was unavailable; it narrows coverage, it never
+ * counts as theft. Grant the *runner's* terminal/app Accessibility (and
+ * Screen Recording for window titles) to measure keyWin and focused.
+ */
+/**
+ * focus-probe: standalone focus-theft meter for fixture and certification
+ * runs. Wraps the focus_probe.m sampler binary (NDJSON on stdout) with the
+ * analyzer from apps/desktop/src/cuaFixtures/focusProbe.ts and turns the
+ * result into an assertable exit code plus a JSON report.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --wrap -- ./my-cert-script.sh
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30 \
+ *     --expect-frontmost-pid 4242 --expect-key-window 9001 \
+ *     --report report.json --samples-out samples.ndjson
+ *
+ * Exit codes: 0 theft-free, 1 usage/environment error, 2 off-baseline
+ * samples detected (or coverage too thin to make the claim).
+ *
+ * The probe is read-only: NSWorkspace/SLPS for the frontmost pid, AX for the
+ * key window and focused element, CGWindowList for the top window, and a
+ * private SLSGetActiveSpace read for the Space. A null field means the
+ * matching grant/symbol was unavailable; it narrows coverage, it never
+ * counts as theft. Grant the *runner's* terminal/app Accessibility (and
+ * Screen Recording for window titles) to measure keyWin and focused.
+ */
+/**
+ * focus-probe: standalone focus-theft meter for fixture and certification
+ * runs. Wraps the focus_probe.m sampler binary (NDJSON on stdout) with the
+ * analyzer from apps/desktop/src/cuaFixtures/focusProbe.ts and turns the
+ * result into an assertable exit code plus a JSON report.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --wrap -- ./my-cert-script.sh
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30 \
+ *     --expect-frontmost-pid 4242 --expect-key-window 9001 \
+ *     --report report.json --samples-out samples.ndjson
+ *
+ * Exit codes: 0 theft-free, 1 usage/environment error, 2 off-baseline
+ * samples detected (or coverage too thin to make the claim).
+ *
+ * The probe is read-only: NSWorkspace/SLPS for the frontmost pid, AX for the
+ * key window and focused element, CGWindowList for the top window, and a
+ * private SLSGetActiveSpace read for the Space. A null field means the
+ * matching grant/symbol was unavailable; it narrows coverage, it never
+ * counts as theft. Grant the *runner's* terminal/app Accessibility (and
+ * Screen Recording for window titles) to measure keyWin and focused.
+ */
+/**
+ * focus-probe: standalone focus-theft meter for fixture and certification
+ * runs. Wraps the focus_probe.m sampler binary (NDJSON on stdout) with the
+ * analyzer from apps/desktop/src/cuaFixtures/focusProbe.ts and turns the
+ * result into an assertable exit code plus a JSON report.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --wrap -- ./my-cert-script.sh
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30 \
+ *     --expect-frontmost-pid 4242 --expect-key-window 9001 \
+ *     --report report.json --samples-out samples.ndjson
+ *
+ * Exit codes: 0 theft-free, 1 usage/environment error, 2 off-baseline
+ * samples detected (or coverage too thin to make the claim).
+ *
+ * The probe is read-only: NSWorkspace/SLPS for the frontmost pid, AX for the
+ * key window and focused element, CGWindowList for the top window, and a
+ * private SLSGetActiveSpace read for the Space. A null field means the
+ * matching grant/symbol was unavailable; it narrows coverage, it never
+ * counts as theft. Grant the *runner's* terminal/app Accessibility (and
+ * Screen Recording for window titles) to measure keyWin and focused.
+ */
+/**
+ * focus-probe: standalone focus-theft meter for fixture and certification
+ * runs. Wraps the focus_probe.m sampler binary (NDJSON on stdout) with the
+ * analyzer from apps/desktop/src/cuaFixtures/focusProbe.ts and turns the
+ * result into an assertable exit code plus a JSON report.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --wrap -- ./my-cert-script.sh
+ *   bun scripts/computer-use-fixtures/focus-probe.ts --duration 30 \
+ *     --expect-frontmost-pid 4242 --expect-key-window 9001 \
+ *     --report report.json --samples-out samples.ndjson
+ *
+ * Exit codes: 0 theft-free, 1 usage/environment error, 2 off-baseline
+ * samples detected (or coverage too thin to make the claim).
+ *
+ * The probe is read-only: NSWorkspace/SLPS for the frontmost pid, AX for the
+ * key window and focused element, CGWindowList for the top window, and a
+ * private SLSGetActiveSpace read for the Space. A null field means the
+ * matching grant/symbol was unavailable; it narrows coverage, it never
+ * counts as theft. Grant the *runner's* terminal/app Accessibility (and
+ * Screen Recording for window titles) to measure keyWin and focused.
+ */
 import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  analyzeFocusSamples,
-  parseFocusProbeLine,
-  type FocusProbeDone,
-  type FocusProbeExpect,
-  type FocusProbeMeta,
-  type FocusProbeSample,
-} from "../../apps/desktop/src/cuaFixtures/focusProbe";
+import { analyzeFocusSamples, parseFocusProbeLine, type FocusProbeDone, type FocusProbeExpect, type FocusProbeMeta, type FocusProbeSample } from "../../apps/desktop/src/cuaFixtures/focusProbe";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const defaultBinary = "/private/tmp/arkos-cua-implementation/focus-probe";

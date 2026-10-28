@@ -2,13 +2,12 @@
 // Purpose: Pure grouping/sorting model for the sidebar Activity view (threads as tasks).
 // Exports: eligibility, stable ordering, settle helpers, and the view-model builder.
 
+// FILE: SidebarActivityView.logic.ts
+// Purpose: Pure grouping/sorting model for the sidebar Activity view (threads as tasks).
+// Exports: eligibility, stable ordering, settle helpers, and the view-model builder.
 import type { ProjectId, ThreadId } from "@arkos/contracts";
 import type { SidebarThreadSummary } from "../types";
-import {
-  hasUnseenCompletion,
-  hasUnseenSnoozeReturn,
-  isThreadActivelyWorking,
-} from "./Sidebar.logic";
+import { hasUnseenCompletion, hasUnseenSnoozeReturn, isThreadActivelyWorking } from "./Sidebar.logic";
 
 export function isThreadRunningForActivity(
   thread: Pick<SidebarThreadSummary, "hasLiveTailWork" | "session" | "latestTurn">,

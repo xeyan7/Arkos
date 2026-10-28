@@ -3,12 +3,11 @@
 // Layer: Web settings/notification utility
 // Exports: update candidate helpers, notification keys, and auto-refresh timing.
 
-import {
-  PROVIDER_DISPLAY_NAMES,
-  type ProviderKind,
-  type ServerProviderStatus,
-  type ServerSettings,
-} from "@arkos/contracts";
+// FILE: providerUpdates.ts
+// Purpose: Shared provider-update filtering and refresh cadence for global toasts and settings.
+// Layer: Web settings/notification utility
+// Exports: update candidate helpers, notification keys, and auto-refresh timing.
+import { PROVIDER_DISPLAY_NAMES, type ProviderKind, type ServerProviderStatus, type ServerSettings } from "@arkos/contracts";
 import { isProviderKind } from "./providerOrdering";
 
 export const PROVIDER_UPDATE_INITIAL_REFRESH_DELAY_MS = 10_000;

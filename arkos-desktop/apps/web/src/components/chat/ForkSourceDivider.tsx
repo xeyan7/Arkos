@@ -2,6 +2,9 @@
 // Purpose: Link a forked transcript back to the immediate source chat.
 // Layer: Chat transcript UI
 
+// FILE: ForkSourceDivider.tsx
+// Purpose: Link a forked transcript back to the immediate source chat.
+// Layer: Chat transcript UI
 import { type ThreadId } from "@arkos/contracts";
 import { memo, type MouseEvent } from "react";
 

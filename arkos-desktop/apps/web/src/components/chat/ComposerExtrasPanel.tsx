@@ -6,31 +6,19 @@
 // Layer: Chat composer presentation
 // Depends on: ComposerMenuPanel chrome, the AppSnap window picker hook, caller-owned composer state.
 
-import type {
-  DesktopAppSnapWindowEntry,
-  ProviderInteractionMode,
-  ThreadId,
-} from "@arkos/contracts";
+// FILE: ComposerExtrasPanel.tsx
+// Purpose: Composer `+` panel — one flat "Add" list (files, frontmost app window, goal, and the
+//   plan / debug / fast toggles) rendered with the shared command-menu panel chrome above the
+//   composer. The window row captures the frontmost app directly; its trailing arrow (or
+//   ArrowRight) opens the full window list as a second view.
+// Layer: Chat composer presentation
+// Depends on: ComposerMenuPanel chrome, the AppSnap window picker hook, caller-owned composer state.
+import type { DesktopAppSnapWindowEntry, ProviderInteractionMode, ThreadId } from "@arkos/contracts";
 import { useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 
-import {
-  ArrowLeftIcon,
-  BugIcon,
-  CheckIcon,
-  ChevronRightIcon,
-  FastModeIcon,
-  GoalIcon,
-  ListTodoIcon,
-  PaperclipIcon,
-  WindowIcon,
-} from "~/lib/icons";
+import { ArrowLeftIcon, BugIcon, CheckIcon, ChevronRightIcon, FastModeIcon, GoalIcon, ListTodoIcon, PaperclipIcon, WindowIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
-import {
-  COMPOSER_MENU_PANEL_GLYPH_CLASS_NAME,
-  ComposerMenuPanel,
-  type ComposerMenuPanelGroup,
-  type ComposerMenuPanelRow,
-} from "./ComposerMenuPanel";
+import { COMPOSER_MENU_PANEL_GLYPH_CLASS_NAME, ComposerMenuPanel, type ComposerMenuPanelGroup, type ComposerMenuPanelRow } from "./ComposerMenuPanel";
 import { useAppSnapWindows } from "./useAppSnapWindows";
 
 /** Marks the `+` trigger so the panel's outside-press close does not fight the trigger's toggle. */

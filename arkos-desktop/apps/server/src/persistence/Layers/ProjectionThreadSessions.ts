@@ -4,19 +4,7 @@ import { Effect, Layer } from "effect";
 
 import { toPersistenceSqlError } from "../Errors.ts";
 
-import {
-  ProjectionThreadSession,
-  ProjectionThreadSessionRepository,
-  type ProjectionThreadSessionRepositoryShape,
-  ClearActiveToolsInput,
-  DeleteProjectionThreadSessionInput,
-  GetProjectionThreadSessionInput,
-  GetToolInFlightInput,
-  MarkToolFinishedInput,
-  MarkToolStartedInput,
-  ToolInFlight,
-  TouchLastActivityInput,
-} from "../Services/ProjectionThreadSessions.ts";
+import { ProjectionThreadSession, ProjectionThreadSessionRepository, type ProjectionThreadSessionRepositoryShape, ClearActiveToolsInput, DeleteProjectionThreadSessionInput, GetProjectionThreadSessionInput, GetToolInFlightInput, MarkToolFinishedInput, MarkToolStartedInput, ToolInFlight, TouchLastActivityInput } from "../Services/ProjectionThreadSessions.ts";
 
 const makeProjectionThreadSessionRepository = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;

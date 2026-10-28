@@ -8,12 +8,16 @@
 // MCP, but a user typing "what do you see on the simulator?" expects the image
 // to already be attached rather than to wait a round trip for the agent to ask.
 
-import type {
-  DeviceScreenshotResult,
-  NativeApi,
-  ThreadDeviceState,
-  ThreadId,
-} from "@arkos/contracts";
+// FILE: devicePromptContext.ts
+// Purpose: Attach a simulator screenshot when the composer prompt is clearly about the device screen.
+// Layer: Composer helper
+// Exports: prompt matchers, screenshot -> attachment conversion, and the resolution entry point
+// Depends on: nativeApi device namespace, composer image preparation
+//
+// Mirrors browserPromptContext: the agent can take its own screenshot through
+// MCP, but a user typing "what do you see on the simulator?" expects the image
+// to already be attached rather than to wait a round trip for the agent to ask.
+import type { DeviceScreenshotResult, NativeApi, ThreadDeviceState, ThreadId } from "@arkos/contracts";
 
 import type { ComposerImageAttachment } from "../composerDraftStore";
 import { prepareComposerImageAttachmentsFromFiles } from "./composerSend";

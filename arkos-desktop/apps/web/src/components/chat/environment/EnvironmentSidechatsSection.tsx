@@ -4,12 +4,7 @@ import { IconButton } from "~/components/ui/icon-button";
 import { PlusIcon, SidechatIcon, TrashCanIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
-import {
-  ENVIRONMENT_ROW_ICON_CLASS_NAME,
-  EnvironmentRow,
-  EnvironmentSectionDivider,
-  EnvironmentSectionLabel,
-} from "./EnvironmentRow";
+import { ENVIRONMENT_ROW_ICON_CLASS_NAME, EnvironmentRow, EnvironmentSectionDivider, EnvironmentSectionLabel } from "./EnvironmentRow";
 
 export interface EnvironmentSidechatPanelItem {
   readonly id: ThreadId;

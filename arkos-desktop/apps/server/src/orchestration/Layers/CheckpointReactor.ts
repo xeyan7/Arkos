@@ -1,37 +1,8 @@
-import {
-  CheckpointRef,
-  CommandId,
-  EventId,
-  MessageId,
-  type ProjectId,
-  ThreadId,
-  TurnId,
-  type OrchestrationEvent,
-  type OrchestrationProjectShell,
-  type OrchestrationThread,
-  type ProviderSession,
-  type ProviderRuntimeEvent,
-} from "@arkos/contracts";
-import {
-  Cause,
-  Deferred,
-  Effect,
-  Fiber,
-  Layer,
-  Option,
-  Queue,
-  Schedule,
-  Semaphore,
-  ServiceMap,
-  Stream,
-} from "effect";
+import { CheckpointRef, CommandId, EventId, MessageId, type ProjectId, ThreadId, TurnId, type OrchestrationEvent, type OrchestrationProjectShell, type OrchestrationThread, type ProviderSession, type ProviderRuntimeEvent } from "@arkos/contracts";
+import { Cause, Deferred, Effect, Fiber, Layer, Option, Queue, Schedule, Semaphore, ServiceMap, Stream } from "effect";
 import { makeKeyedDrainableWorker } from "@arkos/shared/KeyedDrainableWorker";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
-import {
-  CHECKPOINT_RUNTIME_CONSUMER,
-  PROVIDER_RUNTIME_INGESTION_CONSUMER,
-  ProviderRuntimeEventRepository,
-} from "../../persistence/Services/ProviderRuntimeEvents.ts";
+import { CHECKPOINT_RUNTIME_CONSUMER, PROVIDER_RUNTIME_INGESTION_CONSUMER, ProviderRuntimeEventRepository } from "../../persistence/Services/ProviderRuntimeEvents.ts";
 import { ProviderRuntimeEventRepositoryLive } from "../../persistence/Layers/ProviderRuntimeEvents.ts";
 import { OrchestrationEventStore } from "../../persistence/Services/OrchestrationEventStore.ts";
 import { OrchestrationEventStoreLive } from "../../persistence/Layers/OrchestrationEventStore.ts";
@@ -40,17 +11,7 @@ import { OrchestrationEventDeliveryRepositoryLive } from "../../persistence/Laye
 import { isProviderKind } from "@arkos/shared/providerInstances";
 
 import { parseCheckpointFilesFromUnifiedDiff } from "../../checkpointing/Diffs.ts";
-import {
-  checkpointRefForThreadMessageStart,
-  checkpointRefForThreadRevertRescue,
-  checkpointRefForThreadTurn,
-  checkpointRefForThreadTurnInManagedFamily,
-  checkpointRefForThreadTurnLive,
-  checkpointRefForThreadTurnStart,
-  checkpointRefForThreadTurnStartInManagedFamily,
-  isManagedCheckpointRefForThread,
-  resolveThreadWorkspaceCwd,
-} from "../../checkpointing/Utils.ts";
+import { checkpointRefForThreadMessageStart, checkpointRefForThreadRevertRescue, checkpointRefForThreadTurn, checkpointRefForThreadTurnInManagedFamily, checkpointRefForThreadTurnLive, checkpointRefForThreadTurnStart, checkpointRefForThreadTurnStartInManagedFamily, isManagedCheckpointRefForThread, resolveThreadWorkspaceCwd } from "../../checkpointing/Utils.ts";
 import { clearWorkspaceIndexCache } from "../../workspaceEntries.ts";
 import { CheckpointStore } from "../../checkpointing/Services/CheckpointStore.ts";
 import { ProjectionTurnRepository } from "../../persistence/Services/ProjectionTurns.ts";
@@ -63,16 +24,8 @@ import { RuntimeReceiptBus } from "../Services/RuntimeReceiptBus.ts";
 import { TurnCheckpointCoordinator } from "../Services/TurnCheckpointCoordinator.ts";
 import { CheckpointInvariantError, type CheckpointStoreError } from "../../checkpointing/Errors.ts";
 import { OrchestrationDispatchError } from "../Errors.ts";
-import {
-  CHECKPOINT_REVERT_FAILED_ACTIVITY_KIND,
-  checkpointRevertActiveTurnDetail,
-  threadHasInFlightTurn,
-} from "../commandInvariants.ts";
-import {
-  canonicalImportPath,
-  findImportGitWorkspace,
-  importPathIdentity,
-} from "../projectImportPaths.ts";
+import { CHECKPOINT_REVERT_FAILED_ACTIVITY_KIND, checkpointRevertActiveTurnDetail, threadHasInFlightTurn } from "../commandInvariants.ts";
+import { canonicalImportPath, findImportGitWorkspace, importPathIdentity } from "../projectImportPaths.ts";
 import { resolveProviderSessionThread } from "../providerSessionThread.ts";
 
 class PinnedCheckpointWorkspace extends ServiceMap.Service<

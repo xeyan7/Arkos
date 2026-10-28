@@ -2,24 +2,14 @@
 // Purpose: Keep ChatView's thread-scoped selectors off the component hot path and out of the render file.
 // Exports: lineage/work-log selector factories used by ChatView.
 
-import {
-  type MessageId,
-  ThreadId,
-  type ThreadId as ThreadIdType,
-  type TurnId,
-} from "@arkos/contracts";
+// FILE: ChatView.selectors.ts
+// Purpose: Keep ChatView's thread-scoped selectors off the component hot path and out of the render file.
+// Exports: lineage/work-log selector factories used by ChatView.
+import { type MessageId, ThreadId, type ThreadId as ThreadIdType, type TurnId } from "@arkos/contracts";
 
 import type { AppState } from "../storeState";
 import { collectByIds, getThreadFromState } from "../threadDerivation";
-import type {
-  ChatMessage,
-  ProposedPlan,
-  Thread,
-  ThreadSession,
-  ThreadShell,
-  ThreadTurnState,
-  TurnDiffSummary,
-} from "../types";
+import type { ChatMessage, ProposedPlan, Thread, ThreadSession, ThreadShell, ThreadTurnState, TurnDiffSummary } from "../types";
 import type { WorkLogEntry } from "../session-logic";
 
 const EMPTY_LINEAGE_ACTIVITIES: Thread["activities"] = [];

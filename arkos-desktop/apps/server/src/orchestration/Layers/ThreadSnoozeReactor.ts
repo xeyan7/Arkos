@@ -3,10 +3,7 @@ import { Cause, Duration, Effect, Layer, Queue, Schedule, Stream } from "effect"
 
 import { OrchestrationEngineService } from "../Services/OrchestrationEngine.ts";
 import { ProjectionSnapshotQuery } from "../Services/ProjectionSnapshotQuery.ts";
-import {
-  ThreadSnoozeReactor,
-  type ThreadSnoozeReactorShape,
-} from "../Services/ThreadSnoozeReactor.ts";
+import { ThreadSnoozeReactor, type ThreadSnoozeReactorShape } from "../Services/ThreadSnoozeReactor.ts";
 
 const RECHECK_INTERVAL_MS = 60_000;
 const RETRY_INTERVAL_MS = 5_000;

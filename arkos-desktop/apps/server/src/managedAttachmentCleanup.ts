@@ -6,11 +6,7 @@ import { Effect, Layer, Semaphore, ServiceMap } from "effect";
 
 import { resolveAttachmentRelativePath } from "./attachmentPaths";
 import { ServerConfig } from "./config";
-import {
-  MANAGED_ATTACHMENT_CLEANUP_MAX_ATTEMPTS,
-  ManagedAttachmentRepository,
-  type ManagedAttachmentCleanupJob,
-} from "./persistence/Services/ManagedAttachments";
+import { MANAGED_ATTACHMENT_CLEANUP_MAX_ATTEMPTS, ManagedAttachmentRepository, type ManagedAttachmentCleanupJob } from "./persistence/Services/ManagedAttachments";
 
 export const MANAGED_ATTACHMENT_WRITING_LEASE_MS = 10 * 60 * 1_000;
 export const MANAGED_ATTACHMENT_CLEANUP_BATCH_SIZE = 64;

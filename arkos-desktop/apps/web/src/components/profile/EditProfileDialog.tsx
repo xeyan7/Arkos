@@ -4,15 +4,15 @@
 // locally and only committed on Save.
 // Layer: web profile feature (all changes persist to localStorage via the parent hooks).
 
+// FILE: EditProfileDialog.tsx
+// Purpose: "Edit profile" modal — edits the local display name, @handle, avatar photo, and
+// accent color. The photo is compressed on-device before it's handed back. Drafts are held
+// locally and only committed on Save.
+// Layer: web profile feature (all changes persist to localStorage via the parent hooks).
 import { type ReactNode, useRef, useState } from "react";
 import { Dialog, DialogClose, DialogPopup, DialogTitle } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from "~/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "~/components/ui/input-group";
 import { CentralIcon } from "~/lib/central-icons";
 import { cn } from "~/lib/utils";
 import { normalizeHandle } from "./profileFormatting";

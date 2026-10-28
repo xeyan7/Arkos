@@ -1,12 +1,9 @@
 // FILE: proposalActivity.ts
 // Purpose: Builds the durable transcript activity for an automation proposal lifecycle.
 
-import {
-  EventId,
-  type AutomationDefinition,
-  type AutomationProposalState,
-  type AutomationSchedule,
-} from "@arkos/contracts";
+// FILE: proposalActivity.ts
+// Purpose: Builds the durable transcript activity for an automation proposal lifecycle.
+import { EventId, type AutomationDefinition, type AutomationProposalState, type AutomationSchedule } from "@arkos/contracts";
 
 export function automationProposalActivityId(automationId: AutomationDefinition["id"]): EventId {
   return EventId.makeUnsafe(`automation-proposal:${automationId}`);

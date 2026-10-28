@@ -1,25 +1,8 @@
 import { type MessageId, type ThreadId } from "@arkos/contracts";
-import {
-  type MutableRefObject,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type MutableRefObject, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import {
-  scheduleFromForm,
-  type AutomationFormState,
-  useAutomations,
-} from "../../routes/-automations.shared";
-import {
-  buildAutomationDraftWarnings,
-  updateAutomationDraftWarningAcknowledgement,
-  type AutomationDraftWarning,
-  type AutomationDraftWarningId,
-} from "../../lib/automationDraft";
+import { scheduleFromForm, type AutomationFormState, useAutomations } from "../../routes/-automations.shared";
+import { buildAutomationDraftWarnings, updateAutomationDraftWarningAcknowledgement, type AutomationDraftWarning, type AutomationDraftWarningId } from "../../lib/automationDraft";
 import { createAllThreadsSelector } from "../../storeSelectors";
 import { useStore } from "../../store";
 import type { ChatMessage, Thread } from "../../types";

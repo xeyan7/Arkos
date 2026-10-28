@@ -4,30 +4,22 @@
 // Layer: Settings UI components
 // Depends on: the shortcut editor model, key capture, the shared dialog, and Keycap.
 
+// FILE: ShortcutRecorderDialog.tsx
+// Purpose: The small dialog that records a command's shortcut: press the keys, see them
+//          as keycaps, save.
+// Layer: Settings UI components
+// Depends on: the shortcut editor model, key capture, the shared dialog, and Keycap.
 import type { KeybindingShortcut, ServerKeybindingEdit } from "@arkos/contracts";
 import { useEffect, useEffectEvent, useId, useRef, useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogDescription, DialogPopup, DialogTitle } from "~/components/ui/dialog";
 import { Keycap } from "~/components/ui/keycap";
-import {
-  buildShortcutEditorRows,
-  evaluateRecordedShortcut,
-  shortcutModifierHint,
-  shortcutResetEdits,
-  shortcutResetTakeovers,
-  shortcutSaveEdits,
-  type ShortcutEditorBinding,
-  type ShortcutEditorRow,
-  type ShortcutEditorSource,
-} from "~/keybindingEditor";
+import { buildShortcutEditorRows, evaluateRecordedShortcut, shortcutModifierHint, shortcutResetEdits, shortcutResetTakeovers, shortcutSaveEdits, type ShortcutEditorBinding, type ShortcutEditorRow, type ShortcutEditorSource } from "~/keybindingEditor";
 import { formatShortcutLabel, splitShortcutLabel, suspendShortcutDispatch } from "~/keybindings";
 import { CentralIcon } from "~/lib/central-icons";
 import { CircleCheckIcon, TriangleAlertIcon } from "~/lib/icons";
-import {
-  shortcutFromKeyboardEvent,
-  shortcutModifiersFromKeyboardEvent,
-} from "~/lib/keybindingCapture";
+import { shortcutFromKeyboardEvent, shortcutModifiersFromKeyboardEvent } from "~/lib/keybindingCapture";
 import { cn, isMacPlatform } from "~/lib/utils";
 
 export interface ShortcutRecorderTarget {

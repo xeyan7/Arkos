@@ -7,36 +7,23 @@
 //          status pill.
 // Layer: Chat UI component
 
+// FILE: LibraryPanel.tsx
+// Purpose: Group Library panel — the third chat auxiliary surface. Lists the
+//          per-group git-versioned file store served by the
+//          `projectAgent.library.*` RPCs and the /api/library/upload route:
+//          search, type filter, list/grid views, expandable folders, preview,
+//          rename/delete, version history with restore, and the remote-push
+//          status pill.
+// Layer: Chat UI component
 import { SidePanelOverlay } from "~/components/chat/SidePanelOverlay";
 import type { LibraryCommit, LibraryEntry, ProjectId } from "@arkos/contracts";
 import { formatBytes } from "@arkos/shared/formatBytes";
-import {
-  type MouseEvent as ReactMouseEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type MouseEvent as ReactMouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  AlertDialog,
-  AlertDialogClose,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogPopup,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogClose, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "~/components/ui/alert-dialog";
 import { IconButton } from "~/components/ui/icon-button";
 import { SearchInput } from "~/components/ui/search-input";
-import {
-  Select,
-  SelectItem,
-  SelectPopup,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { SettingsSegmentedControl } from "~/components/settings/SettingControls";
 import { DisclosureChevron } from "~/components/ui/DisclosureChevron";
 import { Button } from "~/components/ui/button";
@@ -47,35 +34,14 @@ import { FileEntryIcon } from "~/components/chat/FileEntryIcon";
 import { fileRowClassName } from "~/components/chat/fileRowStyles";
 import { PanelStateMessage } from "~/components/chat/PanelStateMessage";
 import { WorkspaceFilePreview } from "~/components/WorkspaceFilePreview";
-import {
-  AddPlusIcon,
-  ArrowLeftIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  CloudSyncIcon,
-  HistoryIcon,
-  PanelCollapseIcon,
-  PanelExpandIcon,
-  XIcon,
-} from "~/lib/icons";
+import { AddPlusIcon, ArrowLeftIcon, ArrowUpIcon, ArrowDownIcon, CloudSyncIcon, HistoryIcon, PanelCollapseIcon, PanelExpandIcon, XIcon } from "~/lib/icons";
 import { formatRelativeTime } from "~/lib/relativeTime";
 import { cn } from "~/lib/utils";
 import { readNativeApi } from "~/nativeApi";
 import { useStore } from "~/store";
 import { createSidebarThreadSummariesSelector } from "~/storeSelectors";
 
-import {
-  DEFAULT_EXPANDED_DIRECTORIES,
-  DEFAULT_LIBRARY_SORT,
-  flattenLibraryRows,
-  type LibraryRow,
-  type LibrarySortKey,
-  type LibrarySortState,
-  type LibraryTypeFilter,
-  type LibraryViewMode,
-  nextLibrarySort,
-  toggleLibraryDirectory,
-} from "./libraryPanel.logic";
+import { DEFAULT_EXPANDED_DIRECTORIES, DEFAULT_LIBRARY_SORT, flattenLibraryRows, type LibraryRow, type LibrarySortKey, type LibrarySortState, type LibraryTypeFilter, type LibraryViewMode, nextLibrarySort, toggleLibraryDirectory } from "./libraryPanel.logic";
 import { useGroupLibrary } from "./useGroupLibrary";
 
 export interface LibraryPanelProps {

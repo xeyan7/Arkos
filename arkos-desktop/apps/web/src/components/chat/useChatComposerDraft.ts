@@ -1,28 +1,11 @@
 import { ThreadId } from "@arkos/contracts";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  clampCollapsedComposerCursor,
-  collapseExpandedComposerCursor,
-  detectComposerTrigger,
-  expandCollapsedComposerCursor,
-  type ComposerTrigger,
-} from "../../composer-logic";
-import {
-  useComposerDraftStore,
-  useComposerThreadDraft,
-  type BrowserAnnotationDraft,
-  type ComposerAssistantSelectionAttachment,
-  type ComposerFileAttachment,
-  type ComposerImageAttachment,
-  type RestoredComposerSourceProposedPlan,
-} from "../../composerDraftStore";
+import { clampCollapsedComposerCursor, collapseExpandedComposerCursor, detectComposerTrigger, expandCollapsedComposerCursor, type ComposerTrigger } from "../../composer-logic";
+import { useComposerDraftStore, useComposerThreadDraft, type BrowserAnnotationDraft, type ComposerAssistantSelectionAttachment, type ComposerFileAttachment, type ComposerImageAttachment, type RestoredComposerSourceProposedPlan } from "../../composerDraftStore";
 import { type PastedTextDraft } from "../../lib/composerPastedText";
 import { type FileCommentDraft } from "../../lib/fileComments";
 import { type PullRequestContextDraft } from "../../lib/pullRequestContext";
-import {
-  removeInlineTerminalContextPlaceholder,
-  type TerminalContextDraft,
-} from "../../lib/terminalContext";
+import { removeInlineTerminalContextPlaceholder, type TerminalContextDraft } from "../../lib/terminalContext";
 import { deriveComposerSendState, type PromptHistoryNavigationState } from "../ChatView.logic";
 import { type ComposerPromptEditorHandle } from "../ComposerPromptEditor";
 import { useComposerAttachmentPersistence } from "./useComposerAttachmentPersistence";

@@ -19,38 +19,19 @@ import "../src/index.css";
 
 import { MessageId, ThreadId, TurnId } from "@arkos/contracts";
 import type { LegendListRef } from "@legendapp/list/react";
-import {
-  Profiler,
-  StrictMode,
-  useMemo,
-  useRef,
-  type ComponentProps,
-  type ProfilerOnRenderCallback,
-} from "react";
+import { Profiler, StrictMode, useMemo, useRef, type ComponentProps, type ProfilerOnRenderCallback } from "react";
 import { createRoot } from "react-dom/client";
 
 import { ChatTranscriptPane } from "../src/components/chat/ChatTranscriptPane";
 import { composerTranscriptBottomInsetPx } from "../src/components/chat/composerOverlay";
-import {
-  COMPOSER_INPUT_SHELL_CLASS_NAME,
-  COMPOSER_INPUT_SURFACE_CLASS_NAME,
-} from "../src/components/chat/composerPickerStyles";
+import { COMPOSER_INPUT_SHELL_CLASS_NAME, COMPOSER_INPUT_SURFACE_CLASS_NAME } from "../src/components/chat/composerPickerStyles";
 import { cn } from "../src/lib/utils";
 import { useStore } from "../src/store";
 import { createThreadSelector } from "../src/storeSelectors";
 import { makeActivity, makeDomainEvent, makeState, makeThread } from "../src/storeTestFixtures";
 import type { ChatMessage } from "../src/types";
 import { deriveTimelineEntries, deriveWorkLogEntries } from "../src/workLog";
-import {
-  createFrameCollector,
-  durationStats,
-  frameReport,
-  installCostToggleStyles,
-  scrollCycleOnTranscript,
-  sleep,
-  type DurationStats,
-  type FrameReport,
-} from "./metrics";
+import { createFrameCollector, durationStats, frameReport, installCostToggleStyles, scrollCycleOnTranscript, sleep, type DurationStats, type FrameReport } from "./metrics";
 import { assistantText, buildStreamCorpus, isoAt } from "./workload";
 
 type TimelineEntries = ComponentProps<typeof ChatTranscriptPane>["timelineEntries"];

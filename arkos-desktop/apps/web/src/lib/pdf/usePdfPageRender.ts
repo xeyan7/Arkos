@@ -10,6 +10,17 @@
 // Layer: Web PDF rendering hook
 // Exports: usePdfPageRender, PdfPageRenderState
 
+// FILE: usePdfPageRender.ts
+// Purpose: Drive the imperative paint pipeline for a single PDF page — HiDPI
+//          canvas render, selectable text layer, and clickable links — keyed on
+//          the active flag and scale. Each pass cancels the previous one so
+//          rapid zooming never races two paints onto the same canvas. While a
+//          page is inactive (far from the viewport) its canvas backing store and
+//          text-layer DOM are released so scrolled-through documents don't
+//          accumulate per-page memory. Lets PdfPageView stay declarative
+//          (refs + JSX only).
+// Layer: Web PDF rendering hook
+// Exports: usePdfPageRender, PdfPageRenderState
 import { type RefObject, useEffect, useRef, useState } from "react";
 
 import type { PDFDocumentProxy, PageViewport, RenderedTextLayer } from "./pdfEngine";

@@ -3,12 +3,11 @@
 // Layer: Desktop main-process helper
 // Exports: menu accelerator resolvers
 
-import {
-  DESKTOP_MENU_SHORTCUT_COMMANDS,
-  DesktopMenuShortcuts,
-  type DesktopMenuShortcutCommand,
-  type KeybindingShortcut,
-} from "@arkos/contracts";
+// FILE: menuShortcuts.ts
+// Purpose: Keeps native desktop menu accelerators consistent across operating systems.
+// Layer: Desktop main-process helper
+// Exports: menu accelerator resolvers
+import { DESKTOP_MENU_SHORTCUT_COMMANDS, DesktopMenuShortcuts, type DesktopMenuShortcutCommand, type KeybindingShortcut } from "@arkos/contracts";
 import { Schema } from "effect";
 import type { MenuItemConstructorOptions } from "electron";
 

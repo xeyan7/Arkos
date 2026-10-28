@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { Schema } from "effect";
-
 import { ProviderSendTurnInput, ProviderSessionStartInput } from "./provider";
 
 const decodeProviderSessionStartInput = Schema.decodeUnknownSync(ProviderSessionStartInput);
@@ -10,7 +9,7 @@ describe("ProviderSessionStartInput", () => {
   it("accepts explicit per-thread computer control provisioning", () => {
     const parsed = decodeProviderSessionStartInput({
       threadId: "thread-computer",
-      provider: "codex",
+      provider: "arkos",
       enableComputerControl: true,
       runtimeMode: "full-access",
     });
@@ -21,31 +20,23 @@ describe("ProviderSessionStartInput", () => {
     expect(() =>
       decodeProviderSessionStartInput({
         threadId: "thread-1",
-        provider: "codex",
+        provider: "arkos",
       }),
     ).toThrow();
   });
 });
 
 describe("ProviderSendTurnInput", () => {
-  it("accepts claude modelSelection including ultrathink", () => {
+  it("accepts arkos modelSelection", () => {
     const parsed = decodeProviderSendTurnInput({
       threadId: "thread-1",
       modelSelection: {
-        provider: "claudeAgent",
-        model: "claude-sonnet-4-6",
-        options: {
-          effort: "ultrathink",
-          fastMode: true,
-        },
+        provider: "arkos",
+        model: "engine-default",
+        options: {},
       },
     });
-
-    expect(parsed.modelSelection?.provider).toBe("claudeAgent");
-    if (parsed.modelSelection?.provider !== "claudeAgent") {
-      throw new Error("Expected claude modelSelection");
-    }
-    expect(parsed.modelSelection.options?.effort).toBe("ultrathink");
-    expect(parsed.modelSelection.options?.fastMode).toBe(true);
+    expect(parsed.modelSelection?.provider).toBe("arkos");
+    expect(parsed.modelSelection?.model).toBe("engine-default");
   });
 });

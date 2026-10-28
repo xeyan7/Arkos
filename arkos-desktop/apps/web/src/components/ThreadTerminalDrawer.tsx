@@ -1,4 +1,5 @@
 // One terminal viewport per chat or dock scope. The owning surface supplies its header.
+// One terminal viewport per chat or dock scope. The owning surface supplies its header.
 import { useEffect, useRef } from "react";
 import { type ThreadId } from "@arkos/contracts";
 import { type TerminalActivityState, type TerminalCliKind } from "@arkos/shared/terminalThreads";

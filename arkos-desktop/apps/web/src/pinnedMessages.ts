@@ -2,22 +2,11 @@
 // Purpose: Pure transforms + dispatch helpers for per-thread pinned messages and notes.
 // Layer: Chat environment panel + message timeline helpers.
 
-import {
-  PINNED_MESSAGE_LABEL_MAX_CHARS,
-  type MessageId,
-  type PinnedMessage,
-  type ThreadId,
-} from "@arkos/contracts";
-import {
-  addPinnedMessage,
-  clampThreadNotes,
-  isMessagePinned,
-  normalizePinLabel,
-  removePinnedMessage,
-  setPinnedMessageDone,
-  setPinnedMessageLabel,
-  togglePinnedMessageDone,
-} from "@arkos/shared/pinnedMessages";
+// FILE: pinnedMessages.ts
+// Purpose: Pure transforms + dispatch helpers for per-thread pinned messages and notes.
+// Layer: Chat environment panel + message timeline helpers.
+import { PINNED_MESSAGE_LABEL_MAX_CHARS, type MessageId, type PinnedMessage, type ThreadId } from "@arkos/contracts";
+import { addPinnedMessage, clampThreadNotes, isMessagePinned, normalizePinLabel, removePinnedMessage, setPinnedMessageDone, setPinnedMessageLabel, togglePinnedMessageDone } from "@arkos/shared/pinnedMessages";
 
 import { newCommandId } from "./lib/utils";
 import { readNativeApi } from "./nativeApi";

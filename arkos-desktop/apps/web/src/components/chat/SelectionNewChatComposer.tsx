@@ -1,5 +1,6 @@
 // Purpose: Floating composer that retains a transcript quote while the user writes a new prompt.
 
+// Purpose: Floating composer that retains a transcript quote while the user writes a new prompt.
 import type { ThreadEnvironmentMode } from "@arkos/contracts";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
@@ -9,12 +10,7 @@ import { ComposerPromptEditor, type ComposerPromptEditorHandle } from "../Compos
 import { Button } from "../ui/button";
 import { AssistantSelectionsSummaryChip } from "./AssistantSelectionsSummaryChip";
 import { ComposerEnvironmentPicker } from "./ComposerEnvironmentPicker";
-import {
-  COMPOSER_EDITOR_PADDING_CLASS_NAME,
-  COMPOSER_FOOTER_ROW_CLASS_NAME,
-  COMPOSER_INPUT_SHELL_CLASS_NAME,
-  COMPOSER_INPUT_SURFACE_CLASS_NAME,
-} from "./composerPickerStyles";
+import { COMPOSER_EDITOR_PADDING_CLASS_NAME, COMPOSER_FOOTER_ROW_CLASS_NAME, COMPOSER_INPUT_SHELL_CLASS_NAME, COMPOSER_INPUT_SURFACE_CLASS_NAME } from "./composerPickerStyles";
 import { cn } from "~/lib/utils";
 import { DisclosureRegion } from "../ui/DisclosureRegion";
 import { TRANSCRIPT_SELECTION_ACTION_HEIGHT_PX } from "./chatSelectionActions";

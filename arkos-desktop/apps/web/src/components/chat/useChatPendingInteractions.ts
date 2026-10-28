@@ -1,11 +1,4 @@
-import {
-  RuntimeMode,
-  ThreadId,
-  type ApprovalRequestId,
-  type ProviderApprovalDecision,
-  type ProviderRequestKind,
-  type ProviderUserInputAnswers,
-} from "@arkos/contracts";
+import { RuntimeMode, ThreadId, type ApprovalRequestId, type ProviderApprovalDecision, type ProviderRequestKind, type ProviderUserInputAnswers } from "@arkos/contracts";
 import { describeErrorMessage } from "@arkos/shared/errorMessages";
 import { respondingInteractionReclaimAt } from "@arkos/shared/pendingInteractions";
 import { pendingRequestInstanceKey } from "@arkos/shared/threadSummary";
@@ -13,28 +6,12 @@ import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { newCommandId } from "~/lib/utils";
 import { readNativeApi } from "~/nativeApi";
-import {
-  collapseExpandedComposerCursor,
-  detectComposerTrigger,
-  expandCollapsedComposerCursor,
-  type ComposerTrigger,
-} from "../../composer-logic";
-import {
-  buildPendingUserInputAnswers,
-  derivePendingUserInputProgress,
-  hasCompletePendingUserInputAnswers,
-  omitNullPendingUserInputAnswers,
-  setPendingUserInputCustomAnswer,
-  togglePendingUserInputOptionSelection,
-  type PendingUserInputDraftAnswer,
-} from "../../pendingUserInput";
+import { collapseExpandedComposerCursor, detectComposerTrigger, expandCollapsedComposerCursor, type ComposerTrigger } from "../../composer-logic";
+import { buildPendingUserInputAnswers, derivePendingUserInputProgress, hasCompletePendingUserInputAnswers, omitNullPendingUserInputAnswers, setPendingUserInputCustomAnswer, togglePendingUserInputOptionSelection, type PendingUserInputDraftAnswer } from "../../pendingUserInput";
 import { expiredUserInputDrafts } from "../../pendingUserInputRecovery";
 import { derivePendingApprovals, derivePendingUserInputs } from "../../session-logic";
 import { useStore } from "../../store";
-import {
-  buildThreadSubscribeInput,
-  clearThreadDetailResumeCursor,
-} from "../../threadDetailResumeCursors";
+import { buildThreadSubscribeInput, clearThreadDetailResumeCursor } from "../../threadDetailResumeCursors";
 import { type Thread } from "../../types";
 import { respondToThreadApproval } from "./respondToThreadApproval";
 import { usePendingUserInputDrafts } from "./usePendingUserInputDrafts";

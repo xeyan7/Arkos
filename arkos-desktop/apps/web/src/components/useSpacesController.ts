@@ -6,6 +6,13 @@
 //      (inputs in, handlers out) keeps it reviewable instead of interleaved through an
 //      8k-line component.
 
+// FILE: useSpacesController.ts
+// Purpose: All Space selection, editing, deletion, and assignment behavior behind the sidebar.
+// Layer: Sidebar controller hook
+// Why: Sidebar.tsx is the largest component in the app; the Spaces feature is a
+//      self-contained unit of handlers, dialog state, and sync effects. One seam here
+//      (inputs in, handlers out) keeps it reviewable instead of interleaved through an
+//      8k-line component.
 import type { ProjectId, SpaceId, ThreadId } from "@arkos/contracts";
 import { useNavigate } from "@tanstack/react-router";
 import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
@@ -13,15 +20,7 @@ import { startTransition, useCallback, useEffect, useMemo, useState } from "reac
 import type { SidebarThreadSortOrder } from "../appSettings";
 import { spaceKey, toSpaceIconName } from "../lib/spaceGrouping";
 import { resolveSpaceSelectionTarget } from "../lib/spaceNavigation";
-import {
-  createSpace,
-  deleteSpace,
-  isOrdinarySpaceProject,
-  moveProjectToSpace,
-  moveProjectsToSpace,
-  reorderSpaces,
-  updateSpace,
-} from "../lib/spaces";
+import { createSpace, deleteSpace, isOrdinarySpaceProject, moveProjectToSpace, moveProjectsToSpace, reorderSpaces, updateSpace } from "../lib/spaces";
 import { readNativeApi } from "../nativeApi";
 import { useSpacesUiStore } from "../spacesUiStore";
 import { useStore } from "../store";

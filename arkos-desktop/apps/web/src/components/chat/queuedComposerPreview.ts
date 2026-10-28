@@ -1,16 +1,9 @@
-import {
-  type BrowserAnnotationDraft,
-  type ComposerFileAttachment,
-  type ComposerImageAttachment,
-} from "../../composerDraftStore";
+import { type BrowserAnnotationDraft, type ComposerFileAttachment, type ComposerImageAttachment } from "../../composerDraftStore";
 import { formatAssistantSelectionQueuePreview } from "../../lib/assistantSelections";
 import { formatBrowserAnnotationLabel } from "../../lib/browserAnnotations";
 import { pastedTextTitle, type PastedTextDraft } from "../../lib/composerPastedText";
 import { formatFileCommentLabel, type FileCommentDraft } from "../../lib/fileComments";
-import {
-  formatPullRequestContextTitleSeed,
-  type PullRequestContextDraft,
-} from "../../lib/pullRequestContext";
+import { formatPullRequestContextTitleSeed, type PullRequestContextDraft } from "../../lib/pullRequestContext";
 import { formatTerminalContextLabel, type TerminalContextDraft } from "../../lib/terminalContext";
 
 export function buildQueuedComposerPreviewText(input: {

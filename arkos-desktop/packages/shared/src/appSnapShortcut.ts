@@ -1,11 +1,21 @@
 // FILE: appSnapShortcut.ts
 // Purpose: Normalize AppSnap's portable two-key shortcut model for desktop and web clients.
 
-import type {
-  DesktopAppSnapKeyChord,
-  DesktopAppSnapShortcut,
-  DesktopAppSnapShortcutModifier,
-} from "@arkos/contracts";
+// FILE: appSnapShortcut.ts
+// Purpose: Normalize AppSnap's portable two-key shortcut model for desktop and web clients.
+// FILE: appSnapShortcut.ts
+// Purpose: Normalize AppSnap's portable two-key shortcut model for desktop and web clients.
+// FILE: appSnapShortcut.ts
+// Purpose: Normalize AppSnap's portable two-key shortcut model for desktop and web clients.
+// FILE: appSnapShortcut.ts
+// Purpose: Normalize AppSnap's portable two-key shortcut model for desktop and web clients.
+// FILE: appSnapShortcut.ts
+// Purpose: Normalize AppSnap's portable two-key shortcut model for desktop and web clients.
+// FILE: appSnapShortcut.ts
+// Purpose: Normalize AppSnap's portable two-key shortcut model for desktop and web clients.
+// FILE: appSnapShortcut.ts
+// Purpose: Normalize AppSnap's portable two-key shortcut model for desktop and web clients.
+import type { DesktopAppSnapKeyChord, DesktopAppSnapShortcut, DesktopAppSnapShortcutModifier } from "@arkos/contracts";
 
 export const DEFAULT_APP_SNAP_SHORTCUT = {
   kind: "both-option-keys",

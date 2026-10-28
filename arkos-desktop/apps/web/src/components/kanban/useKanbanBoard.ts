@@ -3,6 +3,10 @@
 // Layer: UI state hook (projection only — board math lives in kanban.logic.ts)
 // Exports: useKanbanBoard
 
+// FILE: useKanbanBoard.ts
+// Purpose: Subscribes to app/composer/kanban stores and derives the memoized kanban board.
+// Layer: UI state hook (projection only — board math lives in kanban.logic.ts)
+// Exports: useKanbanBoard
 import type { ProjectId, ThreadId } from "@arkos/contracts";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -16,24 +20,11 @@ import { useKanbanUiStore } from "../../kanbanUiStore";
 import { isHomeChatContainerProject } from "../../lib/chatProjects";
 import { isGroupContainerProject } from "../../lib/groupProjects";
 import { useStore } from "../../store";
-import {
-  createLastActivityTimestampSelector,
-  createSidebarDisplayThreadsSelector,
-} from "../../storeSelectors";
+import { createLastActivityTimestampSelector, createSidebarDisplayThreadsSelector } from "../../storeSelectors";
 import { useTerminalStateStore } from "../../terminalStateStore";
 import { useWorkspacePathsStore } from "../../workspacePathsStore";
 import { sortProjectsForSidebar } from "../Sidebar.logic";
-import {
-  areKanbanComposerDraftSnapshotsEqual,
-  buildKanbanBoard,
-  buildKanbanComposerDraftSnapshot,
-  hasKanbanAttentionCandidate,
-  resolveOptimisticDispatchOutcome,
-  shouldToastForExpiredDispatch,
-  type KanbanBoard,
-  type KanbanComposerDraftSnapshot,
-  type KanbanDraftThreadSnapshot,
-} from "./kanban.logic";
+import { areKanbanComposerDraftSnapshotsEqual, buildKanbanBoard, buildKanbanComposerDraftSnapshot, hasKanbanAttentionCandidate, resolveOptimisticDispatchOutcome, shouldToastForExpiredDispatch, type KanbanBoard, type KanbanComposerDraftSnapshot, type KanbanDraftThreadSnapshot } from "./kanban.logic";
 
 // An optimistic dispatch that never produces a runtime signal (provider died
 // silently, server unreachable mid-flight) reverts to Draft after this window.

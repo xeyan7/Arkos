@@ -28,22 +28,40 @@
 // login wiring) so everything downstream — cache placement, the Squirrel.Mac
 // proxy server, `update-downloaded`, quitAndInstall — is unchanged.
 
+// Resumable, stall-aware replacement for electron-updater's macOS file download.
+//
+// Why this exists:
+//   On macOS, electron-updater downloads the update .zip through Electron's
+//   `net.request` (Chromium's network stack). Its only stall protection is
+//   `httpExecutor.addTimeOutHandler`, which does `request.on("socket", s =>
+//   s.setTimeout(...))`. But Electron's `ClientRequest` never emits a `socket`
+//   event (it emits only abort/close/error/finish/login/redirect/response), so
+//   that timeout is dead code: the update download has no idle timeout at all.
+//   When the connection to GitHub's release CDN stalls mid-transfer, nothing
+//   aborts it; the transfer hangs until the OS socket recovers on its own
+//   (TCP retransmission), which can take minutes. electron-updater also never
+//   resumes from a byte offset — a retry re-downloads from 0%.
+//
+// This module installs a `download` implementation onto the updater's existing
+// `httpExecutor` that:
+//   - enforces a real idle timeout (aborts a connection that goes silent),
+//   - resumes from the last received byte via HTTP Range requests,
+//   - retries with bounded backoff while making progress,
+//   - follows redirects manually so it can strip the GitHub auth token before
+//     it ever reaches the cross-origin signed CDN URL,
+//   - discards any pre-existing temp bytes up front (so a failed differential
+//     download can never poison the full-download fallback),
+//   - verifies the sha512 published in latest-mac.yml before completing,
+//   - honours the shared CancellationToken exactly like the stock executor.
+//
+// It reuses the executor's `createRequest` (cached Electron net session + proxy
+// login wiring) so everything downstream — cache placement, the Squirrel.Mac
+// proxy server, `update-downloaded`, quitAndInstall — is unchanged.
 import { createHash } from "node:crypto";
 import { createReadStream, createWriteStream, type WriteStream } from "node:fs";
 import { rm, stat } from "node:fs/promises";
 
-import {
-  buildDownloadHeaders,
-  classifyDownloadResponse,
-  computeProgressInfo,
-  computeRetryDelayMs,
-  DEFAULT_RESUMABLE_DOWNLOAD_CONFIG,
-  isCrossOrigin,
-  selectSha512Encoding,
-  shouldGiveUp,
-  type ResumableDownloadConfig,
-  type ResumableProgressInfo,
-} from "./resumableUpdateDownloadPolicy";
+import { buildDownloadHeaders, classifyDownloadResponse, computeProgressInfo, computeRetryDelayMs, DEFAULT_RESUMABLE_DOWNLOAD_CONFIG, isCrossOrigin, selectSha512Encoding, shouldGiveUp, type ResumableDownloadConfig, type ResumableProgressInfo } from "./resumableUpdateDownloadPolicy";
 
 export {
   buildDownloadHeaders,

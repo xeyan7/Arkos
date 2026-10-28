@@ -4,6 +4,11 @@
 // Layer: Web runtime helper (desktop bridge consumer)
 // Exports: getAudioLevelSubscriber, isAudioLevelAvailable
 
+// FILE: audioLevel.ts
+// Purpose: Shared, ref-counted subscription to the desktop's audio level
+//   (the Mac's audio output, the microphone, or both).
+// Layer: Web runtime helper (desktop bridge consumer)
+// Exports: getAudioLevelSubscriber, isAudioLevelAvailable
 import type { DesktopAudioLevelSource } from "@arkos/contracts";
 import { AUDIO_TRAIL_BETA_FEATURE } from "@arkos/shared/betaFeatures";
 import { isBetaFeatureOn } from "~/betaFeatures";

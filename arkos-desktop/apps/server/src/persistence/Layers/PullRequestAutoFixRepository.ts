@@ -4,12 +4,7 @@ import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 
 import { toPersistenceSqlOrDecodeError } from "../Errors.ts";
-import {
-  PullRequestAutoFixKey,
-  PullRequestAutoFixRepository,
-  type PullRequestAutoFixRepositoryShape,
-  PullRequestAutoFixThreadInput,
-} from "../Services/PullRequestAutoFixRepository.ts";
+import { PullRequestAutoFixKey, PullRequestAutoFixRepository, type PullRequestAutoFixRepositoryShape, PullRequestAutoFixThreadInput } from "../Services/PullRequestAutoFixRepository.ts";
 
 const makePullRequestAutoFixRepository = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;

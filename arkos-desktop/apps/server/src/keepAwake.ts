@@ -8,27 +8,20 @@
  * Process control (spawn, SIGTERM, bounded restart backoff) is isolated behind
  * an injectable runtime so the fold is unit-testable without a real child.
  */
+/**
+ * KeepAwake - Drives macOS `caffeinate -dims` from the persisted
+ * `keepAwakeMode` setting and live agent-turn activity.
+ *
+ * `always` keeps one caffeinate child alive for the server lifetime, `agent`
+ * only while at least one thread session is running a turn, `off` never spawns.
+ * The native assertion also watches the server PID, releasing it after a crash.
+ * Process control (spawn, SIGTERM, bounded restart backoff) is isolated behind
+ * an injectable runtime so the fold is unit-testable without a real child.
+ */
 import { resolveExecutable } from "@arkos/shared/executable";
 import { spawnProcess } from "@arkos/shared/processRuntime";
-import {
-  type KeepAwakeMode,
-  type OrchestrationEvent,
-  type OrchestrationReadModel,
-  type ServerKeepAwakeState,
-  ThreadSessionSetPayload,
-} from "@arkos/contracts";
-import {
-  Deferred,
-  Duration,
-  Effect,
-  Layer,
-  PubSub,
-  Ref,
-  Schema,
-  Scope,
-  ServiceMap,
-  Stream,
-} from "effect";
+import { type KeepAwakeMode, type OrchestrationEvent, type OrchestrationReadModel, type ServerKeepAwakeState, ThreadSessionSetPayload } from "@arkos/contracts";
+import { Deferred, Duration, Effect, Layer, PubSub, Ref, Schema, Scope, ServiceMap, Stream } from "effect";
 import * as Semaphore from "effect/Semaphore";
 import { OrchestrationEngineService } from "./orchestration/Services/OrchestrationEngine";
 import { ProjectionSnapshotQuery } from "./orchestration/Services/ProjectionSnapshotQuery";

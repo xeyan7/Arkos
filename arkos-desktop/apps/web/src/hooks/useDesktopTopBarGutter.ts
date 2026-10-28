@@ -3,10 +3,11 @@
 // Layer: Shared web shell chrome
 // Depends on: sidebar context, electron env detection.
 
-import {
-  DESKTOP_TOP_BAR_TRAFFIC_LIGHT_GUTTER_CSS_VAR,
-  resolveMacDesktopTopBarTrafficLightGutterCssPx,
-} from "@arkos/shared/desktopChrome";
+// FILE: useDesktopTopBarGutter.ts
+// Purpose: Decide when desktop top bars must clear the macOS traffic light buttons.
+// Layer: Shared web shell chrome
+// Depends on: sidebar context, electron env detection.
+import { DESKTOP_TOP_BAR_TRAFFIC_LIGHT_GUTTER_CSS_VAR, resolveMacDesktopTopBarTrafficLightGutterCssPx } from "@arkos/shared/desktopChrome";
 import { useLayoutEffect } from "react";
 
 import { isElectron } from "~/env";

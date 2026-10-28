@@ -1,24 +1,4 @@
-import {
-  IsoDateTime,
-  ProjectActivity,
-  ProjectAgentConfig,
-  ProjectAgentRequestId,
-  ProjectGoalStatus,
-  ProjectDigest,
-  ProjectDocumentHead,
-  ProjectDocumentRevision,
-  ProjectEvidence,
-  ProjectGoal,
-  ProjectGoalId,
-  ProjectId,
-  ProjectInboxEvent,
-  ProjectManagedWorker,
-  ProjectTask,
-  ProjectTaskAttempt,
-  ProjectTaskId,
-  ProjectThreadIndexEntry,
-  ThreadId,
-} from "@arkos/contracts";
+import { IsoDateTime, ProjectActivity, ProjectAgentConfig, ProjectAgentRequestId, ProjectGoalStatus, ProjectDigest, ProjectDocumentHead, ProjectDocumentRevision, ProjectEvidence, ProjectGoal, ProjectGoalId, ProjectId, ProjectInboxEvent, ProjectManagedWorker, ProjectTask, ProjectTaskAttempt, ProjectTaskId, ProjectThreadIndexEntry, ThreadId } from "@arkos/contracts";
 import { Option, Schema, ServiceMap } from "effect";
 import type { Effect } from "effect";
 

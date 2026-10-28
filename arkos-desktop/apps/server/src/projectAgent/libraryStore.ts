@@ -18,12 +18,7 @@ import { Effect } from "effect";
 
 import type { GitCoreShape } from "../git/Services/GitCore.ts";
 import type { GitCommandError } from "../git/Errors.ts";
-import {
-  isContainedPath,
-  prepareRealPathForWriteWithinRoot,
-  resolveRealPathForCreateWithinRoot,
-  resolveRealPathWithinRoot,
-} from "../workspace/realPathContainment.ts";
+import { isContainedPath, prepareRealPathForWriteWithinRoot, resolveRealPathForCreateWithinRoot, resolveRealPathWithinRoot } from "../workspace/realPathContainment.ts";
 import { LibraryError } from "./Errors.ts";
 import { commitLibraryChange, initLibraryRepo } from "./libraryGit.ts";
 import { projectContextRoot } from "./materializer.ts";

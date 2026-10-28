@@ -1,13 +1,7 @@
 import type { GroupSettingsSection } from "../group/groupSettingsDialog.logic";
 import { cn } from "~/lib/utils";
-import {
-  CHAT_COLUMN_FRAME_CLASS_NAME,
-  CHAT_COLUMN_GUTTER_CLASS_NAME,
-} from "../composerPickerStyles";
-import {
-  type CoordinatorSuggestionChip,
-  coordinatorSuggestionSection,
-} from "./coordinatorSuggestions.logic";
+import { CHAT_COLUMN_FRAME_CLASS_NAME, CHAT_COLUMN_GUTTER_CLASS_NAME } from "../composerPickerStyles";
+import { type CoordinatorSuggestionChip, coordinatorSuggestionSection } from "./coordinatorSuggestions.logic";
 
 export function CoordinatorSuggestions({
   chips,

@@ -3,41 +3,23 @@
 // Layer: Root web coordinator
 // Depends on: Desktop bridge, focused chat context, and existing composer attachment intake.
 
-import {
-  type DesktopAppSnapCapture,
-  type DesktopAppSnapShortcut,
-  type DesktopBridge,
-  type ThreadId,
-} from "@arkos/contracts";
+// FILE: AppSnapCoordinator.tsx
+// Purpose: Routes native macOS AppSnaps into the correct Arkos composer draft.
+// Layer: Root web coordinator
+// Depends on: Desktop bridge, focused chat context, and existing composer attachment intake.
+import { type DesktopAppSnapCapture, type DesktopAppSnapShortcut, type DesktopBridge, type ThreadId } from "@arkos/contracts";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef } from "react";
 
 import { useAppSettings } from "../appSettings";
-import {
-  type AppSnapThreadTarget,
-  type TimedAppSnapThreadTarget,
-  didAppSnapHydrationInputsChange,
-  hasHydratedAppSnapCapture,
-  hasPersistedAppSnapCapture,
-  persistedAppSnapCaptureBlobKeys,
-  resolveAppSnapTarget,
-  REQUEST_CURRENT_APP_SNAP_EVENT,
-} from "../appSnap.logic";
+import { type AppSnapThreadTarget, type TimedAppSnapThreadTarget, didAppSnapHydrationInputsChange, hasHydratedAppSnapCapture, hasPersistedAppSnapCapture, persistedAppSnapCaptureBlobKeys, resolveAppSnapTarget, REQUEST_CURRENT_APP_SNAP_EVENT } from "../appSnap.logic";
 import { attachAppSnapCapture } from "../appSnapAttach";
 import { sourceWithCachedIcon } from "../appSnapIntake";
-import {
-  type ComposerImageAttachment,
-  type PersistedComposerImageAttachment,
-  isComposerImageBlobReferenced,
-  useComposerDraftStore,
-} from "../composerDraftStore";
+import { type ComposerImageAttachment, type PersistedComposerImageAttachment, isComposerImageBlobReferenced, useComposerDraftStore } from "../composerDraftStore";
 import { requestComposerFocus } from "../composerFocusRequestStore";
 import { useFocusedChatContext } from "../focusedChatContext";
 import { useHandleNewChat } from "../hooks/useHandleNewChat";
-import {
-  deleteOrphanedComposerImageBlobs,
-  readComposerImageBlob,
-} from "../lib/composerImageBlobStore";
+import { deleteOrphanedComposerImageBlobs, readComposerImageBlob } from "../lib/composerImageBlobStore";
 import { playAppSnapCaptureSound } from "../lib/appSnapSound";
 import { isComposerAppSnapCaptureSource } from "../lib/composerImageSource";
 import { resolveRecentThreadSplitActivation } from "../recentViewActivation.logic";

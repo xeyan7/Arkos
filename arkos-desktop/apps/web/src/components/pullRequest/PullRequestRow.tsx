@@ -6,6 +6,13 @@
 // Layer: Pull request presentation
 // Exports: PullRequestRow, githubInboxItemLabel
 
+// FILE: PullRequestRow.tsx
+// Purpose: One row of the code review list, for a pull request or an issue, in two lines: the
+//          title (up to two lines, full title on hover), then a kind/state glyph, the author (the
+//          same label as the detail header), the relative time, and the number muted at the
+//          end. A sibling pin control never opens the detail.
+// Layer: Pull request presentation
+// Exports: PullRequestRow, githubInboxItemLabel
 import type { GitHubInboxItem, GitHubInboxSort } from "@arkos/contracts";
 import { pullRequestListProjectContexts } from "@arkos/shared/githubRepository";
 import type { ReactNode } from "react";
@@ -14,11 +21,7 @@ import { PinStatusIcon, pinActionLabel } from "~/lib/pin";
 import { formatRelativeTime } from "~/lib/relativeTime";
 import { cn } from "~/lib/utils";
 import { SIDEBAR_ROW_HOVER_CLASS_NAME } from "~/sidebarRowStyles";
-import {
-  PR_BODY_TEXT_CLASS_NAME,
-  PR_FINE_TEXT_CLASS_NAME,
-  PR_QUIET_INK_CLASS_NAME,
-} from "./pullRequestText";
+import { PR_BODY_TEXT_CLASS_NAME, PR_FINE_TEXT_CLASS_NAME, PR_QUIET_INK_CLASS_NAME } from "./pullRequestText";
 import { PullRequestActorLabel } from "./PullRequestActorLabel";
 import { GitHubItemStateGlyph } from "./PullRequestStateGlyph";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";

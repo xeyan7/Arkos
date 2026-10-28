@@ -11,6 +11,90 @@
 // Probe-only by default: compile plus preflight is the symbol tripwire and
 // needs no simulator runtime. Pass --full to boot a simulator per toolchain.
 
+// FILE: device-helper-sweep.ts
+// Purpose: Run the device helper smoke check against every locally installed Xcode.
+// Layer: Release/CI smoke check (macOS only; not part of normal CI).
+// Depends on: scripts/device-helper-smoke.ts.
+//
+// The helper dlopen's private CoreSimulator/SimulatorKit symbols, which move
+// between Xcode releases. Testing against the one toolchain a developer happens
+// to have selected is how a broken symbol reaches users; this sweeps every
+// Xcode on the machine by pointing DEVELOPER_DIR at each in turn.
+//
+// Probe-only by default: compile plus preflight is the symbol tripwire and
+// needs no simulator runtime. Pass --full to boot a simulator per toolchain.
+// FILE: device-helper-sweep.ts
+// Purpose: Run the device helper smoke check against every locally installed Xcode.
+// Layer: Release/CI smoke check (macOS only; not part of normal CI).
+// Depends on: scripts/device-helper-smoke.ts.
+//
+// The helper dlopen's private CoreSimulator/SimulatorKit symbols, which move
+// between Xcode releases. Testing against the one toolchain a developer happens
+// to have selected is how a broken symbol reaches users; this sweeps every
+// Xcode on the machine by pointing DEVELOPER_DIR at each in turn.
+//
+// Probe-only by default: compile plus preflight is the symbol tripwire and
+// needs no simulator runtime. Pass --full to boot a simulator per toolchain.
+// FILE: device-helper-sweep.ts
+// Purpose: Run the device helper smoke check against every locally installed Xcode.
+// Layer: Release/CI smoke check (macOS only; not part of normal CI).
+// Depends on: scripts/device-helper-smoke.ts.
+//
+// The helper dlopen's private CoreSimulator/SimulatorKit symbols, which move
+// between Xcode releases. Testing against the one toolchain a developer happens
+// to have selected is how a broken symbol reaches users; this sweeps every
+// Xcode on the machine by pointing DEVELOPER_DIR at each in turn.
+//
+// Probe-only by default: compile plus preflight is the symbol tripwire and
+// needs no simulator runtime. Pass --full to boot a simulator per toolchain.
+// FILE: device-helper-sweep.ts
+// Purpose: Run the device helper smoke check against every locally installed Xcode.
+// Layer: Release/CI smoke check (macOS only; not part of normal CI).
+// Depends on: scripts/device-helper-smoke.ts.
+//
+// The helper dlopen's private CoreSimulator/SimulatorKit symbols, which move
+// between Xcode releases. Testing against the one toolchain a developer happens
+// to have selected is how a broken symbol reaches users; this sweeps every
+// Xcode on the machine by pointing DEVELOPER_DIR at each in turn.
+//
+// Probe-only by default: compile plus preflight is the symbol tripwire and
+// needs no simulator runtime. Pass --full to boot a simulator per toolchain.
+// FILE: device-helper-sweep.ts
+// Purpose: Run the device helper smoke check against every locally installed Xcode.
+// Layer: Release/CI smoke check (macOS only; not part of normal CI).
+// Depends on: scripts/device-helper-smoke.ts.
+//
+// The helper dlopen's private CoreSimulator/SimulatorKit symbols, which move
+// between Xcode releases. Testing against the one toolchain a developer happens
+// to have selected is how a broken symbol reaches users; this sweeps every
+// Xcode on the machine by pointing DEVELOPER_DIR at each in turn.
+//
+// Probe-only by default: compile plus preflight is the symbol tripwire and
+// needs no simulator runtime. Pass --full to boot a simulator per toolchain.
+// FILE: device-helper-sweep.ts
+// Purpose: Run the device helper smoke check against every locally installed Xcode.
+// Layer: Release/CI smoke check (macOS only; not part of normal CI).
+// Depends on: scripts/device-helper-smoke.ts.
+//
+// The helper dlopen's private CoreSimulator/SimulatorKit symbols, which move
+// between Xcode releases. Testing against the one toolchain a developer happens
+// to have selected is how a broken symbol reaches users; this sweeps every
+// Xcode on the machine by pointing DEVELOPER_DIR at each in turn.
+//
+// Probe-only by default: compile plus preflight is the symbol tripwire and
+// needs no simulator runtime. Pass --full to boot a simulator per toolchain.
+// FILE: device-helper-sweep.ts
+// Purpose: Run the device helper smoke check against every locally installed Xcode.
+// Layer: Release/CI smoke check (macOS only; not part of normal CI).
+// Depends on: scripts/device-helper-smoke.ts.
+//
+// The helper dlopen's private CoreSimulator/SimulatorKit symbols, which move
+// between Xcode releases. Testing against the one toolchain a developer happens
+// to have selected is how a broken symbol reaches users; this sweeps every
+// Xcode on the machine by pointing DEVELOPER_DIR at each in turn.
+//
+// Probe-only by default: compile plus preflight is the symbol tripwire and
+// needs no simulator runtime. Pass --full to boot a simulator per toolchain.
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

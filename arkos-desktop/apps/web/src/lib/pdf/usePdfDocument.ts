@@ -6,6 +6,13 @@
 // Layer: Web PDF rendering hook
 // Exports: usePdfDocument, PdfDocumentState
 
+// FILE: usePdfDocument.ts
+// Purpose: React hook that fetches a PDF's bytes from the allowlisted local-file
+//          route, loads it through the pdf.js engine, and exposes the document
+//          proxy plus first-page size for layout. Owns cancellation + teardown so
+//          switching files never leaks a worker-backed document.
+// Layer: Web PDF rendering hook
+// Exports: usePdfDocument, PdfDocumentState
 import { useEffect, useState } from "react";
 
 import { loadPdfDocument, type PDFDocumentProxy } from "./pdfEngine";

@@ -3,6 +3,10 @@
 // compact always-visible action opens the file in the preferred editor.
 // Layer: Chat changed-files UI
 
+// FILE: EditedFileRow.tsx
+// Purpose: Render one changed-file row; the row itself opens the review, and a
+// compact always-visible action opens the file in the preferred editor.
+// Layer: Chat changed-files UI
 import type { EditorId, ResolvedKeybindingsConfig } from "@arkos/contracts";
 import type { CSSProperties } from "react";
 

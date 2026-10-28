@@ -8,6 +8,15 @@
 //          ToolCallGroupSummary, isSummarizableToolCallEntry,
 //          classifyToolCallSummaryCategory, summarizeToolCallGroup
 
+// FILE: toolCallGroup.logic.ts
+// Purpose: Summarizes a settled run of tool-call work entries into one compact
+//          label ("Ran 2 commands, Edited 2 files, Searched 3 files") for the
+//          collapsed tool-group disclosure in the transcript.
+// Layer: Web chat presentation helpers
+// Exports: MIN_COLLAPSIBLE_TOOL_GROUP_SIZE, workEntryRowCount,
+//          multiFileEditLabel, ToolCallSummaryCategory,
+//          ToolCallGroupSummary, isSummarizableToolCallEntry,
+//          classifyToolCallSummaryCategory, summarizeToolCallGroup
 import { pluralize } from "@arkos/shared/text";
 import { isFileChangeWorkLogEntry, type WorkLogEntry } from "../../session-logic";
 import { deriveReadableCommandDisplay } from "../../lib/toolCallLabel";

@@ -1,17 +1,6 @@
-import {
-  EventId,
-  ProviderInteractionMode,
-  RuntimeMode,
-  ThreadId,
-  type AutomationSchedule,
-  type ModelSelection,
-  type ProviderStartOptions,
-} from "@arkos/contracts";
+import { EventId, ProviderInteractionMode, RuntimeMode, ThreadId, type AutomationSchedule, type ModelSelection, type ProviderStartOptions } from "@arkos/contracts";
 import { automationRequiresTargetThread } from "@arkos/shared/automationMode";
-import {
-  GENERIC_CHAT_THREAD_TITLE,
-  buildPromptThreadTitleFallback,
-} from "@arkos/shared/chatThreads";
+import { GENERIC_CHAT_THREAD_TITLE, buildPromptThreadTitleFallback } from "@arkos/shared/chatThreads";
 import { deriveAssociatedWorktreeMetadata } from "@arkos/shared/threadWorkspace";
 import type { QueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
@@ -19,23 +8,9 @@ import { promoteThreadCreate } from "~/lib/threadCreatePromotion";
 import { newCommandId, randomUUID } from "~/lib/utils";
 import { readNativeApi } from "~/nativeApi";
 import { dispatchThreadNotes } from "~/pinnedMessages";
-import {
-  mergeProjectInstructionsIntoThreadNotes,
-  useProjectInstructionsStore,
-} from "~/projectInstructionsStore";
-import {
-  acknowledgedRiskIdsForDraft,
-  hasBlockingAutomationDraftWarnings,
-  type AutomationDraftWarning,
-  type AutomationDraftWarningId,
-} from "../../lib/automationDraft";
-import {
-  automationQueryKey,
-  createInputFromForm,
-  formatCadence,
-  isFormSubmittable,
-  type AutomationFormState,
-} from "../../routes/-automations.shared";
+import { mergeProjectInstructionsIntoThreadNotes, useProjectInstructionsStore } from "~/projectInstructionsStore";
+import { acknowledgedRiskIdsForDraft, hasBlockingAutomationDraftWarnings, type AutomationDraftWarning, type AutomationDraftWarningId } from "../../lib/automationDraft";
+import { automationQueryKey, createInputFromForm, formatCadence, isFormSubmittable, type AutomationFormState } from "../../routes/-automations.shared";
 import type { Project } from "../../types";
 import { type Thread } from "../../types";
 import { useChatAutomationSetup } from "./useChatAutomationSetup";

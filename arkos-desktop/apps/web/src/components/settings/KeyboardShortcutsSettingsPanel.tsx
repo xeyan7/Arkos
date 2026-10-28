@@ -4,11 +4,12 @@
 // Layer: Settings UI components
 // Depends on: the shortcut editor model, the recorder dialog, server keybindings config, and the Kbd pill.
 
-import type {
-  ResolvedKeybindingsConfig,
-  ServerConfig,
-  ServerKeybindingEdit,
-} from "@arkos/contracts";
+// FILE: KeyboardShortcutsSettingsPanel.tsx
+// Purpose: Settings → Keybindings: every built-in command with its shortcuts, each one
+//          changed, added, or removed in place, plus the reset back to what ships.
+// Layer: Settings UI components
+// Depends on: the shortcut editor model, the recorder dialog, server keybindings config, and the Kbd pill.
+import type { ResolvedKeybindingsConfig, ServerConfig, ServerKeybindingEdit } from "@arkos/contracts";
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -18,24 +19,13 @@ import { SearchInput } from "~/components/ui/search-input";
 import { ShortcutKbd } from "~/components/ui/kbd";
 import { toastManager } from "~/components/ui/toast";
 import { showConfirmDialogFallback } from "~/confirmDialogFallback";
-import {
-  buildShortcutEditorRows,
-  filterShortcutEditorRows,
-  shortcutRemoveEdits,
-  type ShortcutEditorBinding,
-  type ShortcutEditorRow,
-  type ShortcutEditorSource,
-} from "~/keybindingEditor";
+import { buildShortcutEditorRows, filterShortcutEditorRows, shortcutRemoveEdits, type ShortcutEditorBinding, type ShortcutEditorRow, type ShortcutEditorSource } from "~/keybindingEditor";
 import { CentralIcon } from "~/lib/central-icons";
 import { AddPlusIcon, PencilIcon, ResetIcon, TrashCanIcon } from "~/lib/icons";
 import { ensureNativeApi, readNativeApi } from "~/nativeApi";
 import { serverConfigQueryOptions, serverQueryKeys } from "~/lib/serverReactQuery";
 import { cn, getNavigatorPlatform } from "~/lib/utils";
-import {
-  SETTINGS_CARD_ROW_CLASS_NAME,
-  SETTINGS_CARD_ROW_DESCRIPTION_CLASS_NAME,
-  SETTINGS_CARD_ROW_TITLE_CLASS_NAME,
-} from "~/settingsPanelStyles";
+import { SETTINGS_CARD_ROW_CLASS_NAME, SETTINGS_CARD_ROW_DESCRIPTION_CLASS_NAME, SETTINGS_CARD_ROW_TITLE_CLASS_NAME } from "~/settingsPanelStyles";
 import { SettingsCard, SettingsEmptyState } from "./SettingsPanelPrimitives";
 import { ShortcutRecorderDialog, type ShortcutRecorderTarget } from "./ShortcutRecorderDialog";
 

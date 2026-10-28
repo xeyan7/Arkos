@@ -3,29 +3,41 @@
 // Layer: Release/build helper
 // Exports: finalizeMacUpdateZip for build scripts and smoke checks.
 
+// FILE: mac-update-zip-finalize.ts
+// Purpose: Rebuilds and validates macOS Squirrel update zip artifacts before publishing.
+// Layer: Release/build helper
+// Exports: finalizeMacUpdateZip for build scripts and smoke checks.
+// FILE: mac-update-zip-finalize.ts
+// Purpose: Rebuilds and validates macOS Squirrel update zip artifacts before publishing.
+// Layer: Release/build helper
+// Exports: finalizeMacUpdateZip for build scripts and smoke checks.
+// FILE: mac-update-zip-finalize.ts
+// Purpose: Rebuilds and validates macOS Squirrel update zip artifacts before publishing.
+// Layer: Release/build helper
+// Exports: finalizeMacUpdateZip for build scripts and smoke checks.
+// FILE: mac-update-zip-finalize.ts
+// Purpose: Rebuilds and validates macOS Squirrel update zip artifacts before publishing.
+// Layer: Release/build helper
+// Exports: finalizeMacUpdateZip for build scripts and smoke checks.
+// FILE: mac-update-zip-finalize.ts
+// Purpose: Rebuilds and validates macOS Squirrel update zip artifacts before publishing.
+// Layer: Release/build helper
+// Exports: finalizeMacUpdateZip for build scripts and smoke checks.
+// FILE: mac-update-zip-finalize.ts
+// Purpose: Rebuilds and validates macOS Squirrel update zip artifacts before publishing.
+// Layer: Release/build helper
+// Exports: finalizeMacUpdateZip for build scripts and smoke checks.
+// FILE: mac-update-zip-finalize.ts
+// Purpose: Rebuilds and validates macOS Squirrel update zip artifacts before publishing.
+// Layer: Release/build helper
+// Exports: finalizeMacUpdateZip for build scripts and smoke checks.
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import {
-  createReadStream,
-  existsSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { createReadStream, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 
-import {
-  buildMacUpdateZipSymlinkEntries,
-  isZipInfoSymlink,
-  resolveMacUpdateManifestFileNames,
-  resolveSingleMacUpdateZipFileName,
-  resolveSingleTopLevelMacAppBundle,
-  updateMacUpdateManifestZipEntry,
-} from "./mac-update-zip.ts";
+import { buildMacUpdateZipSymlinkEntries, isZipInfoSymlink, resolveMacUpdateManifestFileNames, resolveSingleMacUpdateZipFileName, resolveSingleTopLevelMacAppBundle, updateMacUpdateManifestZipEntry } from "./mac-update-zip.ts";
 
 export interface FinalizeMacUpdateZipOptions {
   readonly stageDistDir: string;

@@ -3,6 +3,10 @@
 // Layer: Chat composer UI
 // Depends on: the same Command primitives used by ComposerCommandMenu so both pickers share chrome.
 
+// FILE: ComposerLocalDirectoryMenu.tsx
+// Purpose: Render the inline composer popup used for browsing local files and folders after `@local`.
+// Layer: Chat composer UI
+// Depends on: the same Command primitives used by ComposerCommandMenu so both pickers share chrome.
 import type { ProjectFileSystemEntry, ProjectLocalSearchEntry } from "@arkos/contracts";
 import type { Ref } from "react";
 import { useEffect, useImperativeHandle, useRef, useState } from "react";
@@ -13,22 +17,9 @@ import { expandLocalFolderPath } from "~/lib/localFolderMentions";
 import { projectSearchLocalEntriesQueryOptions } from "~/lib/projectReactQuery";
 import { readNativeApi } from "~/nativeApi";
 import { cn } from "~/lib/utils";
-import {
-  ELEVATED_HOVER_SURFACE_CLASS_NAME,
-  ELEVATED_HOVER_SURFACE_RAISED_TEXT_CLASS_NAME,
-} from "~/surfaceStyles";
-import {
-  Command,
-  CommandGroup,
-  CommandGroupLabel,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "../ui/command";
-import {
-  COMPOSER_COMMAND_MENU_SURFACE_CLASS_NAME,
-  COMPOSER_PICKER_MENU_POPUP_BODY_CLASS_NAME,
-} from "./composerPickerStyles";
+import { ELEVATED_HOVER_SURFACE_CLASS_NAME, ELEVATED_HOVER_SURFACE_RAISED_TEXT_CLASS_NAME } from "~/surfaceStyles";
+import { Command, CommandGroup, CommandGroupLabel, CommandItem, CommandList, CommandSeparator } from "../ui/command";
+import { COMPOSER_COMMAND_MENU_SURFACE_CLASS_NAME, COMPOSER_PICKER_MENU_POPUP_BODY_CLASS_NAME } from "./composerPickerStyles";
 
 type EntriesByPath = Record<string, readonly ProjectFileSystemEntry[] | undefined>;
 

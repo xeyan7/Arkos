@@ -1,66 +1,43 @@
-import {
-  DEFAULT_MODEL_BY_PROVIDER,
-  ArkosCreateThreadsInput,
-  ArkosWaitForThreadsInput,
-  type ModelSelection,
-  type ProviderKind,
-} from "@arkos/contracts";
+import { DEFAULT_MODEL_BY_PROVIDER, ArkosCreateThreadsInput, ArkosWaitForThreadsInput, type ModelSelection, type ProviderKind } from "@arkos/contracts";
 import { Schema } from "effect";
-
 import { AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION } from "./targetResolver.ts";
-
 export const PROVIDER_KINDS: ReadonlyArray<ProviderKind> = [
-  "codex",
-  "claudeAgent",
-  "cursor",
-  "antigravity",
-  "grok",
-  "droid",
-  "opencode",
-  "pi",
-  "devin",
-  "omp",
+    "arkos"
 ];
-
 export const MODEL_SELECTION_INPUT_SCHEMA = {
-  type: "object",
-  description: AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION,
-  properties: {
-    provider: { type: "string", enum: [...PROVIDER_KINDS] },
-    model: {
-      type: "string",
-      description: "Exact model slug from arkos_capabilities providers[].models[].slug.",
+    type: "object",
+    description: AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION,
+    properties: {
+        provider: { type: "string", enum: [...PROVIDER_KINDS] },
+        model: {
+            type: "string",
+            description: "Exact model slug from arkos_capabilities providers[].models[].slug.",
+        },
+        options: {
+            type: "object",
+            description: AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION,
+        },
     },
-    options: {
-      type: "object",
-      description: AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION,
-    },
-  },
-  required: ["provider", "model"],
-  additionalProperties: false,
+    required: ["provider", "model"],
+    additionalProperties: false,
 } as const;
-
-export class ToolInputError extends Error {}
-
-export const errorText = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
-export function readStringArg(
-  args: Record<string, unknown>,
-  name: string,
-  options?: { readonly required?: boolean },
-): string | undefined {
-  const value = args[name];
-  if (value === undefined || value === null) {
-    if (options?.required) throw new ToolInputError(`Missing required argument "${name}".`);
-    return undefined;
-  }
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new ToolInputError(`Argument "${name}" must be a non-empty string.`);
-  }
-  return value.trim();
+export class ToolInputError extends Error {
 }
-
+export const errorText = (error: unknown): string => error instanceof Error ? error.message : String(error);
+export function readStringArg(args: Record<string, unknown>, name: string, options?: {
+    readonly required?: boolean;
+}): string | undefined {
+    const value = args[name];
+    if (value === undefined || value === null) {
+        if (options?.required)
+            throw new ToolInputError(`Missing required argument "${name}".`);
+        return undefined;
+    }
+    if (typeof value !== "string" || value.trim().length === 0) {
+        throw new ToolInputError(`Argument "${name}" must be a non-empty string.`);
+    }
+    return value.trim();
+}
 /**
  * A string argument taken exactly as written, with no trimming.
  *
@@ -73,140 +50,113 @@ export function readStringArg(
  * Still refuses a blank string: a label made only of spaces names nothing, and
  * passing it on would match everything in scope.
  */
-export function readVerbatimStringArg(
-  args: Record<string, unknown>,
-  name: string,
-): string | undefined {
-  const value = args[name];
-  if (value === undefined || value === null) return undefined;
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new ToolInputError(`Argument "${name}" must be a non-empty string.`);
-  }
-  return value;
+export function readVerbatimStringArg(args: Record<string, unknown>, name: string): string | undefined {
+    const value = args[name];
+    if (value === undefined || value === null)
+        return undefined;
+    if (typeof value !== "string" || value.trim().length === 0) {
+        throw new ToolInputError(`Argument "${name}" must be a non-empty string.`);
+    }
+    return value;
 }
-
 export function readNumberArg(args: Record<string, unknown>, name: string): number | undefined {
-  const value = args[name];
-  if (value === undefined || value === null) return undefined;
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new ToolInputError(`Argument "${name}" must be a number.`);
-  }
-  return value;
+    const value = args[name];
+    if (value === undefined || value === null)
+        return undefined;
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+        throw new ToolInputError(`Argument "${name}" must be a number.`);
+    }
+    return value;
 }
-
 export function readBooleanArg(args: Record<string, unknown>, name: string): boolean | undefined {
-  const value = args[name];
-  if (value === undefined || value === null) return undefined;
-  if (typeof value !== "boolean") {
-    throw new ToolInputError(`Argument "${name}" must be a boolean.`);
-  }
-  return value;
+    const value = args[name];
+    if (value === undefined || value === null)
+        return undefined;
+    if (typeof value !== "boolean") {
+        throw new ToolInputError(`Argument "${name}" must be a boolean.`);
+    }
+    return value;
 }
-
-export function readIsoTimestampArg(
-  args: Record<string, unknown>,
-  name: string,
-): string | undefined {
-  const value = readStringArg(args, name);
-  if (value === undefined) return undefined;
-  const timestamp = Date.parse(value);
-  if (!Number.isFinite(timestamp)) {
-    throw new ToolInputError(`Argument "${name}" must be a valid ISO timestamp.`);
-  }
-  return new Date(timestamp).toISOString();
+export function readIsoTimestampArg(args: Record<string, unknown>, name: string): string | undefined {
+    const value = readStringArg(args, name);
+    if (value === undefined)
+        return undefined;
+    const timestamp = Date.parse(value);
+    if (!Number.isFinite(timestamp)) {
+        throw new ToolInputError(`Argument "${name}" must be a valid ISO timestamp.`);
+    }
+    return new Date(timestamp).toISOString();
 }
-
-export function readRecordArg(
-  args: Record<string, unknown>,
-  name: string,
-): Record<string, unknown> | undefined {
-  const value = args[name];
-  if (value === undefined || value === null) return undefined;
-  if (typeof value !== "object" || Array.isArray(value)) {
-    throw new ToolInputError(`Argument "${name}" must be an object.`);
-  }
-  return value as Record<string, unknown>;
+export function readRecordArg(args: Record<string, unknown>, name: string): Record<string, unknown> | undefined {
+    const value = args[name];
+    if (value === undefined || value === null)
+        return undefined;
+    if (typeof value !== "object" || Array.isArray(value)) {
+        throw new ToolInputError(`Argument "${name}" must be an object.`);
+    }
+    return value as Record<string, unknown>;
 }
-
-export function readStringArrayArg(
-  args: Record<string, unknown>,
-  name: string,
-): ReadonlyArray<string> | undefined {
-  const value = args[name];
-  if (value === undefined || value === null) return undefined;
-  if (
-    !Array.isArray(value) ||
-    value.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
-  ) {
-    throw new ToolInputError(`Argument "${name}" must be an array of non-empty strings.`);
-  }
-  return value.map((entry) => (entry as string).trim());
+export function readStringArrayArg(args: Record<string, unknown>, name: string): ReadonlyArray<string> | undefined {
+    const value = args[name];
+    if (value === undefined || value === null)
+        return undefined;
+    if (!Array.isArray(value) ||
+        value.some((entry) => typeof entry !== "string" || entry.trim().length === 0)) {
+        throw new ToolInputError(`Argument "${name}" must be an array of non-empty strings.`);
+    }
+    return value.map((entry) => (entry as string).trim());
 }
-
 export function parseProviderKind(raw: string): ProviderKind {
-  if ((PROVIDER_KINDS as ReadonlyArray<string>).includes(raw)) {
-    return raw as ProviderKind;
-  }
-  throw new ToolInputError(
-    `Unknown provider "${raw}". Supported providers: ${PROVIDER_KINDS.join(", ")}.`,
-  );
+    if ((PROVIDER_KINDS as ReadonlyArray<string>).includes(raw)) {
+        return raw as ProviderKind;
+    }
+    throw new ToolInputError(`Unknown provider "${raw}". Supported providers: ${PROVIDER_KINDS.join(", ")}.`);
 }
-
 /**
  * Read an exact `{ provider, model, options? }` target argument. Unknown option
  * keys are preserved so `resolveAgentGatewayTarget` rejects them instead of the
  * decoder silently dropping a typo.
  */
-export function readModelSelectionArg(
-  args: Record<string, unknown>,
-  name: string,
-): ModelSelection | undefined {
-  const raw = readRecordArg(args, name);
-  if (raw === undefined) return undefined;
-  const provider = parseProviderKind(readStringArg(raw, "provider", { required: true })!);
-  const model = readStringArg(raw, "model", { required: true })!;
-  const options = readRecordArg(raw, "options");
-  return { provider, model, ...(options !== undefined ? { options } : {}) } as ModelSelection;
+export function readModelSelectionArg(args: Record<string, unknown>, name: string): ModelSelection | undefined {
+    const raw = readRecordArg(args, name);
+    if (raw === undefined)
+        return undefined;
+    const provider = parseProviderKind(readStringArg(raw, "provider", { required: true })!);
+    const model = readStringArg(raw, "model", { required: true })!;
+    const options = readRecordArg(raw, "options");
+    return { provider, model, ...(options !== undefined ? { options } : {}) } as ModelSelection;
 }
-
-export function buildModelSelection(
-  provider: ProviderKind,
-  model: string | undefined,
-  fallbackSelection?: ModelSelection,
-): ModelSelection {
-  // Explicit argument wins, then the caller's own thread model, and only then
-  // the provider default — an agent on a non-default model must not silently
-  // spawn work on that provider's default model.
-  const inherited = fallbackSelection?.provider === provider ? fallbackSelection : undefined;
-  const effectiveModel =
-    model ??
-    inherited?.model ??
-    (provider === "pi" || provider === "omp" ? undefined : DEFAULT_MODEL_BY_PROVIDER[provider]);
-  if (!effectiveModel) {
-    throw new ToolInputError(
-      `Provider "${provider}" has no default model; pass an explicit "model" argument.`,
-    );
-  }
-  return {
-    ...inherited,
-    provider,
-    model: effectiveModel,
-    ...(model !== undefined && model !== inherited?.model ? { options: undefined } : {}),
-  } as ModelSelection;
+export function buildModelSelection(provider: ProviderKind, model: string | undefined, fallbackSelection?: ModelSelection): ModelSelection {
+    // Explicit argument wins, then the caller's own thread model, and only then
+    // the provider default — an agent on a non-default model must not silently
+    // spawn work on that provider's default model.
+    const inherited = fallbackSelection?.provider === provider ? fallbackSelection : undefined;
+    const effectiveModel = model ??
+        inherited?.model ??
+        (DEFAULT_MODEL_BY_PROVIDER[provider]);
+    if (!effectiveModel) {
+        throw new ToolInputError(`Provider "${provider}" has no default model; pass an explicit "model" argument.`);
+    }
+    return {
+        ...inherited,
+        provider,
+        model: effectiveModel,
+        ...(model !== undefined && model !== inherited?.model ? { options: undefined } : {}),
+    } as ModelSelection;
 }
-
 export function decodeCreateThreadsInput(value: unknown) {
-  try {
-    return Schema.decodeUnknownSync(ArkosCreateThreadsInput)(value);
-  } catch (error) {
-    throw new ToolInputError(`Invalid Arkos creation plan: ${errorText(error)}`);
-  }
+    try {
+        return Schema.decodeUnknownSync(ArkosCreateThreadsInput)(value);
+    }
+    catch (error) {
+        throw new ToolInputError(`Invalid Arkos creation plan: ${errorText(error)}`);
+    }
 }
-
 export function decodeWaitForThreadsInput(value: unknown) {
-  try {
-    return Schema.decodeUnknownSync(ArkosWaitForThreadsInput)(value);
-  } catch (error) {
-    throw new ToolInputError(`Invalid Arkos wait request: ${errorText(error)}`);
-  }
+    try {
+        return Schema.decodeUnknownSync(ArkosWaitForThreadsInput)(value);
+    }
+    catch (error) {
+        throw new ToolInputError(`Invalid Arkos wait request: ${errorText(error)}`);
+    }
 }

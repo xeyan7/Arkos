@@ -6,6 +6,13 @@
 // Layer: Tasks UI component
 // Exports: TaskListItem
 
+// FILE: TaskListItem.tsx
+// Purpose: One row of the floating Tasks list: the status circle (tap to finish), the title,
+//          one quiet word for its due day or what its agent is doing, and the agent's mark.
+//          Clicking the row opens the task card; right-click has the rest (rename, open or
+//          unlink the chat, delegate, delete).
+// Layer: Tasks UI component
+// Exports: TaskListItem
 import type { TodoUpdateInput } from "@arkos/contracts";
 import { formatModelDisplayName } from "@arkos/shared/model";
 import type { MouseEvent } from "react";
@@ -19,12 +26,7 @@ import { TASK_META_TONE_CLASS } from "./TaskCardPrimitives";
 import { TaskPriorityGlyph, TaskStatusGlyph } from "./TaskGlyphs";
 import { TaskRowTitle, useTaskRename } from "./TaskRowTitle";
 import { buildTaskRowContextMenu } from "./taskRowContextMenu";
-import {
-  describeTaskMeta,
-  formatDueLabel,
-  type TaskRowModel,
-  unlinkChatInput,
-} from "./tasks.logic";
+import { describeTaskMeta, formatDueLabel, type TaskRowModel, unlinkChatInput } from "./tasks.logic";
 import { useTaskCanUnlink } from "./taskDelegationState";
 import { useOpenChat } from "./useOpenChat";
 

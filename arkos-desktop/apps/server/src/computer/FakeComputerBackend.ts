@@ -1,47 +1,6 @@
-import type {
-  ComputerAccessibilityTreeApp,
-  ComputerAccessibilityTreeWindow,
-  ComputerApp,
-  ComputerAvailability,
-  ComputerBuildSignature,
-  ComputerCapabilities,
-  ComputerCursorPosition,
-  ComputerHealth,
-  ComputerId,
-  ComputerInputModifier,
-  ComputerLaunchAppResult,
-  ComputerPermission,
-  ComputerPoint,
-  ComputerRect,
-  ComputerScreenSize,
-  ComputerScreenshot,
-  ComputerState,
-  ComputerUiNode,
-  ComputerVerifyStateResult,
-  ComputerWindow,
-  ComputerZoomResult,
-} from "@arkos/contracts";
+import type { ComputerAccessibilityTreeApp, ComputerAccessibilityTreeWindow, ComputerApp, ComputerAvailability, ComputerBuildSignature, ComputerCapabilities, ComputerCursorPosition, ComputerHealth, ComputerId, ComputerInputModifier, ComputerLaunchAppResult, ComputerPermission, ComputerPoint, ComputerRect, ComputerScreenSize, ComputerScreenshot, ComputerState, ComputerUiNode, ComputerVerifyStateResult, ComputerWindow, ComputerZoomResult } from "@arkos/contracts";
 
-import {
-  ComputerBackendError,
-  DEFAULT_COMPUTER_CAPTURE_MAX_DIMENSION,
-  intersectComputerRects,
-  type ComputerAgentDialect,
-  type ComputerBackend,
-  type ComputerBackendActionResult,
-  type ComputerBackendEvent,
-  type ComputerBackendEventListener,
-  type ComputerBrowserBackend,
-  type ComputerBrowserCall,
-  type ComputerBrowserCallResult,
-  type ComputerCaptureRequest,
-  type ComputerFrameListener,
-  type ComputerMenuBackendTarget,
-  type ComputerResolvedTarget,
-  type ComputerShieldTarget,
-  type ComputerStreamFrame,
-  type ComputerTextRange,
-} from "./ComputerBackend.ts";
+import { ComputerBackendError, DEFAULT_COMPUTER_CAPTURE_MAX_DIMENSION, intersectComputerRects, type ComputerAgentDialect, type ComputerBackend, type ComputerBackendActionResult, type ComputerBackendEvent, type ComputerBackendEventListener, type ComputerBrowserBackend, type ComputerBrowserCall, type ComputerBrowserCallResult, type ComputerCaptureRequest, type ComputerFrameListener, type ComputerMenuBackendTarget, type ComputerResolvedTarget, type ComputerShieldTarget, type ComputerStreamFrame, type ComputerTextRange } from "./ComputerBackend.ts";
 import { requireWindowBounds } from "./computerGeometry.ts";
 import { ComputerTargetError } from "./uiTreeTargeting.ts";
 

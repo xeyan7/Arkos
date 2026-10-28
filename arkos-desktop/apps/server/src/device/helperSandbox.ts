@@ -15,6 +15,23 @@
  *
  * @module device/helperSandbox
  */
+/**
+ * Seatbelt confinement for the native device helper.
+ *
+ * The helper dlopens private CoreSimulator/SimulatorKit frameworks and injects
+ * HID events driven by a model, with no need for the user's files or the
+ * network. `device-helper.sb` takes those away; this module is the single place
+ * that knows how to apply it, so the long-lived RPC process and the one-shot
+ * `--probe` run are confined identically. Preflighting under different
+ * privileges than the real run would let a broken rule pass the checklist and
+ * then hang on attach.
+ *
+ * Every profile parameter is resolved at spawn time rather than hard-coded,
+ * because the ones that matter move per machine: Xcode can be a beta or live
+ * outside /Applications, and the helper cache is keyed per toolchain.
+ *
+ * @module device/helperSandbox
+ */
 import { access, realpath } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { homedir, tmpdir } from "node:os";

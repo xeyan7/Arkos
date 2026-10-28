@@ -2,24 +2,11 @@
 // Purpose: Implements low-level Git operations used by server orchestration and UI status.
 // Layer: Server Git service
 // Exports: GitCoreLive plus makeGitCore test factory.
-import {
-  Cache,
-  Data,
-  Duration,
-  Effect,
-  Exit,
-  FileSystem,
-  Layer,
-  Option,
-  Path,
-  PlatformError,
-  Ref,
-  Result,
-  Schema,
-  Scope,
-  Semaphore,
-  Stream,
-} from "effect";
+// FILE: GitCore.ts
+// Purpose: Implements low-level Git operations used by server orchestration and UI status.
+// Layer: Server Git service
+// Exports: GitCoreLive plus makeGitCore test factory.
+import { Cache, Data, Duration, Effect, Exit, FileSystem, Layer, Option, Path, PlatformError, Ref, Result, Schema, Scope, Semaphore, Stream } from "effect";
 import { ChildProcessSpawner } from "effect/unstable/process";
 import { makeEffectProcessCommand } from "../../platform/effectProcessRuntime.ts";
 import { createHash, randomUUID } from "node:crypto";
@@ -27,12 +14,7 @@ import { createReadStream } from "node:fs";
 import * as nodeFs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as nodePath from "node:path";
-import {
-  DEFAULT_GIT_RECENT_COMMIT_LIMIT,
-  GIT_READ_FILE_AT_REV_MAX_BYTES,
-  type GitBlameLineResult,
-  type GitRecentCommit,
-} from "@arkos/contracts";
+import { DEFAULT_GIT_RECENT_COMMIT_LIMIT, GIT_READ_FILE_AT_REV_MAX_BYTES, type GitBlameLineResult, type GitRecentCommit } from "@arkos/contracts";
 import { isTemporaryWorktreeBranch } from "@arkos/shared/git";
 import { parseGitHubRepositoryNameWithOwnerFromRemoteUrl } from "@arkos/shared/githubRepository";
 import { isWorkspaceRelativePathSafe } from "@arkos/shared/path";
@@ -40,27 +22,10 @@ import { decodeJsonResult } from "@arkos/shared/schemaJson";
 
 import { GitCheckoutDirtyWorktreeError, GitCommandError } from "../Errors.ts";
 import { parseGitBlamePorcelain } from "../gitBlameParsing.ts";
-import {
-  countTextFileLines,
-  normalizeConfiguredMergeBranch,
-  parseGitStatusPorcelain,
-  summarizeGitNumstatOutputs,
-} from "../gitStatusParsing.ts";
-import {
-  GitCore,
-  type ExecuteGitProgress,
-  type GitCommitOptions,
-  type GitCoreShape,
-  type ExecuteGitInput,
-  type ExecuteGitResult,
-  type GitWorkingTreePatch,
-} from "../Services/GitCore.ts";
+import { countTextFileLines, normalizeConfiguredMergeBranch, parseGitStatusPorcelain, summarizeGitNumstatOutputs } from "../gitStatusParsing.ts";
+import { GitCore, type ExecuteGitProgress, type GitCommitOptions, type GitCoreShape, type ExecuteGitInput, type ExecuteGitResult, type GitWorkingTreePatch } from "../Services/GitCore.ts";
 import { ServerConfig } from "../../config.ts";
-import {
-  gitSubcommand,
-  tryWithGitCommandAdmission,
-  withGitCommandAdmission,
-} from "./GitCommandAdmission.ts";
+import { gitSubcommand, tryWithGitCommandAdmission, withGitCommandAdmission } from "./GitCommandAdmission.ts";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_OUTPUT_BYTES = 1_000_000;

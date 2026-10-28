@@ -1,40 +1,11 @@
-import {
-  BROWSER_TOOL_NAMES,
-  type BrowserBackInput,
-  type BrowserCloseOutput,
-  type BrowserRunInput,
-  type BrowserForwardInput,
-  type BrowserLogsInput,
-  type BrowserNavigateOutput,
-  type BrowserOpenOutput,
-  type BrowserReloadInput,
-  type BrowserResizeInput,
-  type BrowserResizeOutput,
-  type BrowserScreenshotInput,
-  type BrowserStatusOutput,
-  type BrowserTabId,
-  type BrowserTabsOutput,
-  type BrowserToolName,
-  type BrowserToolNavigateInput,
-  type BrowserToolOpenInput,
-  type BrowserUploadInput,
-  type ThreadBrowserState,
-  type ThreadId,
-} from "@arkos/contracts";
+import { BROWSER_TOOL_NAMES, type BrowserBackInput, type BrowserCloseOutput, type BrowserRunInput, type BrowserForwardInput, type BrowserLogsInput, type BrowserNavigateOutput, type BrowserOpenOutput, type BrowserReloadInput, type BrowserResizeInput, type BrowserResizeOutput, type BrowserScreenshotInput, type BrowserStatusOutput, type BrowserTabId, type BrowserTabsOutput, type BrowserToolName, type BrowserToolNavigateInput, type BrowserToolOpenInput, type BrowserUploadInput, type ThreadBrowserState, type ThreadId } from "@arkos/contracts";
 import { app } from "electron";
 import { join } from "node:path";
-import {
-  BROWSER_TOOL_DEFINITIONS_BY_NAME,
-  stableJsonStringify,
-} from "@arkos/shared/browserAutomationCatalogue";
+import { BROWSER_TOOL_DEFINITIONS_BY_NAME, stableJsonStringify } from "@arkos/shared/browserAutomationCatalogue";
 import { Schema } from "effect";
 import { browserInputErrorCode } from "@arkos/shared/browserAutomationErrors";
 
-import type {
-  BrowserAutomationWindowOpenEvent,
-  BrowserAutomationVisibleRuntime,
-  DesktopBrowserManager,
-} from "../browserManager";
+import type { BrowserAutomationWindowOpenEvent, BrowserAutomationVisibleRuntime, DesktopBrowserManager } from "../browserManager";
 import { abortReason, observePage, sendCdpCommand, throwIfAborted } from "./cdpRuntime";
 import { BrowserAutomationHostError, browserHostError } from "./hostErrors";
 import { BrowserDiagnosticsStore } from "./browserDiagnostics";
@@ -43,13 +14,7 @@ import { captureBrowserScreenshot } from "./screenshotCapture";
 import { withDialogHandling } from "./dialogHandling";
 import { uploadBrowserFiles } from "./workspaceUpload";
 import { browserEvaluationOutput, waitForLoadMilestone } from "./waitAndEvaluate";
-import {
-  beginBrowserNavigation,
-  getBrowserNavigationTracker,
-  stopBrowserNavigation,
-  type BrowserNavigationMark,
-  type BrowserNavigationObservation,
-} from "./navigationTracker";
+import { beginBrowserNavigation, getBrowserNavigationTracker, stopBrowserNavigation, type BrowserNavigationMark, type BrowserNavigationObservation } from "./navigationTracker";
 import { runBetterwright } from "./betterwrightRuntime";
 import type { BrowserVault } from "./browserVault";
 import type { BrowserVaultCapture } from "./browserVaultCapture";

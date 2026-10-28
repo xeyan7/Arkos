@@ -5,40 +5,19 @@ import { createHash, randomUUID } from "node:crypto";
 
 import { Effect } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
-import {
-  MIGRATION_RECOVERY_MAX_RESUME_ATTEMPTS,
-  migrationBackupDirectory,
-  migrationBackupProvenancePath,
-  migrationRecoveryMarkerPath,
-  parseMigrationRecoveryResumeState,
-  type MigrationSchemaTooNewRecovery,
-} from "@arkos/shared/migrationRecovery";
+import { MIGRATION_RECOVERY_MAX_RESUME_ATTEMPTS, migrationBackupDirectory, migrationBackupProvenancePath, migrationRecoveryMarkerPath, parseMigrationRecoveryResumeState, type MigrationSchemaTooNewRecovery } from "@arkos/shared/migrationRecovery";
 export {
   migrationBackupDirectory,
   migrationBackupProvenancePath,
   migrationRecoveryMarkerPath,
 } from "@arkos/shared/migrationRecovery";
 
-import {
-  sameFileIdentity,
-  syncDirectoryEntry,
-  syncRegularFile,
-} from "@arkos/shared/filesystemPlatform";
+import { sameFileIdentity, syncDirectoryEntry, syncRegularFile } from "@arkos/shared/filesystemPlatform";
 import { ensurePrivateDirectorySync, repairPrivateFile } from "../privatePathPermissions.ts";
 import { withDatabaseLifecycleLock } from "./DatabaseLifecycleLock.ts";
-import {
-  createMigrationDivergenceConsentChallenge,
-  MigrationDivergenceConsentRequiredError,
-  type MigrationDivergencePlan,
-} from "./MigrationDivergenceConsent.ts";
+import { createMigrationDivergenceConsentChallenge, MigrationDivergenceConsentRequiredError, type MigrationDivergencePlan } from "./MigrationDivergenceConsent.ts";
 export { MigrationDivergenceConsentRequiredError } from "./MigrationDivergenceConsent.ts";
-import {
-  findFirstMigrationLineageDivergence,
-  LAST_SHARED_LINEAGE_MIGRATION_ID,
-  migrationEntries,
-  planLegacyMigration32Rename,
-  planMigrationLineageAliasRepairs,
-} from "./Migrations.ts";
+import { findFirstMigrationLineageDivergence, LAST_SHARED_LINEAGE_MIGRATION_ID, migrationEntries, planLegacyMigration32Rename, planMigrationLineageAliasRepairs } from "./Migrations.ts";
 
 /** Keep at most this many finished pre-migration SQLite backups (issue #618). */
 export const MIGRATION_BACKUP_RETENTION = 5;

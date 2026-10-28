@@ -1,20 +1,7 @@
 import { isBuiltInComposerSlashCommand, type ComposerSlashCommand } from "./composerSlashCommands";
-import {
-  INLINE_TERMINAL_CONTEXT_PLACEHOLDER,
-  type TerminalContextDraft,
-} from "./lib/terminalContext";
-import {
-  createComposerMentionTokenRegex,
-  extractComposerMentionPath,
-  findThreadProviderMentionReferenceForToken,
-  isPluginProviderMentionReference,
-  providerMentionMatchesToken,
-} from "./lib/composerMentions";
-import {
-  LINK_TOKEN_SOURCE,
-  normalizeComposerLinkUrl,
-  trimTrailingLinkPunctuation,
-} from "./lib/linkChips";
+import { INLINE_TERMINAL_CONTEXT_PLACEHOLDER, type TerminalContextDraft } from "./lib/terminalContext";
+import { createComposerMentionTokenRegex, extractComposerMentionPath, findThreadProviderMentionReferenceForToken, isPluginProviderMentionReference, providerMentionMatchesToken } from "./lib/composerMentions";
+import { LINK_TOKEN_SOURCE, normalizeComposerLinkUrl, trimTrailingLinkPunctuation } from "./lib/linkChips";
 import { resolveAgentAlias } from "@arkos/contracts";
 import type { ProviderMentionReference } from "@arkos/contracts";
 import { threadIdFromThreadMentionPath } from "@arkos/shared/threadMentions";

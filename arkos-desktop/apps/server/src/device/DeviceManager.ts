@@ -20,49 +20,34 @@
  *
  * @module device/DeviceManager
  */
-import {
-  NULL_BOOT_OWNERSHIP,
-  orphanedBootUdids,
-  processIsAlive,
-  type BootOwnershipStore,
-} from "./bootOwnership.ts";
-import {
-  DEVICE_ARKOS_BOOT_LIMIT,
-  ThreadId,
-  type DeviceAttachPhase,
-  type DeviceAvailability,
-  type DeviceBootResult,
-  type DeviceDescribeUiResult,
-  type DeviceDescriptor,
-  type DeviceEvent,
-  type DeviceHardwareButton,
-  type DeviceInstallAppResult,
-  type DeviceLaunchAppResult,
-  type DeviceListResult,
-  type DeviceOpenPaneReason,
-  type DeviceScreenshotResult,
-  type DeviceStartRecordingResult,
-  type DeviceStopRecordingResult,
-  type DeviceUiNode,
-  type ThreadDeviceState,
-} from "@arkos/contracts";
+/**
+ * DeviceManager - thread-scoped device attachment and boot ownership.
+ *
+ * State the manager owns, and why it owns it rather than the backend:
+ *
+ * - Attachment is per thread (one device per thread, mirroring
+ *   `ThreadBrowserState`). A thread's `ThreadDeviceState` is versioned and
+ *   pushed on `device.event` so panes can drop stale snapshots.
+ * - Boot source. The backend cannot tell who booted a device, so the manager
+ *   records the devices it booted itself. Only those are ever auto-shut-down;
+ *   anything the user started (pane picker, Simulator.app) outlives us.
+ * - The Arkos boot cap (`DEVICE_ARKOS_BOOT_LIMIT`). Boot past the cap is
+ *   refusable rather than fatal: the caller is handed the shutdown candidates
+ *   so the pane can prompt.
+ * - Shutdown triggers: app quit (`dispose`), thread removal
+ *   (`handleThreadRemoved`), and an idle timeout after the last detach.
+ *
+ * Everything the manager does to the device itself goes through DeviceBackend,
+ * so the whole state machine is testable against `FakeDeviceBackend`.
+ *
+ * @module device/DeviceManager
+ */
+import { NULL_BOOT_OWNERSHIP, orphanedBootUdids, processIsAlive, type BootOwnershipStore } from "./bootOwnership.ts";
+import { DEVICE_ARKOS_BOOT_LIMIT, ThreadId, type DeviceAttachPhase, type DeviceAvailability, type DeviceBootResult, type DeviceDescribeUiResult, type DeviceDescriptor, type DeviceEvent, type DeviceHardwareButton, type DeviceInstallAppResult, type DeviceLaunchAppResult, type DeviceListResult, type DeviceOpenPaneReason, type DeviceScreenshotResult, type DeviceStartRecordingResult, type DeviceStopRecordingResult, type DeviceUiNode, type ThreadDeviceState } from "@arkos/contracts";
 
-import {
-  DeviceBackendError,
-  type DeviceBackend,
-  type DeviceKeyEvent,
-  type DeviceSwipeGesture,
-} from "./DeviceBackend.ts";
+import { DeviceBackendError, type DeviceBackend, type DeviceKeyEvent, type DeviceSwipeGesture } from "./DeviceBackend.ts";
 import { DeviceFrameTransport, type DeviceFrameSink } from "./deviceFrameTransport.ts";
-import {
-  DeviceUiTargetError,
-  SCROLL_SWIPE_DURATION_MS,
-  findTarget,
-  planScrollStep,
-  visibleLabels,
-  type DeviceUiTarget,
-  type DeviceUiTargetMatch,
-} from "./uiTreeTargeting.ts";
+import { DeviceUiTargetError, SCROLL_SWIPE_DURATION_MS, findTarget, planScrollStep, visibleLabels, type DeviceUiTarget, type DeviceUiTargetMatch } from "./uiTreeTargeting.ts";
 
 /** How long a Arkos-booted device stays up with no thread attached. */
 export const DEVICE_IDLE_SHUTDOWN_MS = 10 * 60 * 1000;

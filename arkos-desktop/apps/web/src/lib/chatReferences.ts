@@ -3,6 +3,10 @@
 //          thread's composer draft so panels outside ChatView can talk to the chatbox.
 // Layer: Web UI utility
 
+// FILE: chatReferences.ts
+// Purpose: Build file/line references and canned prompts, and append them to a
+//          thread's composer draft so panels outside ChatView can talk to the chatbox.
+// Layer: Web UI utility
 import { CHAT_ASSISTANT_SELECTION_TEXT_MAX_CHARS, type ThreadId } from "@arkos/contracts";
 
 import { useComposerDraftStore } from "../composerDraftStore";

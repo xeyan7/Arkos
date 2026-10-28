@@ -5,6 +5,12 @@
 //          the composer Lexical link node and read-only message chips.
 // Layer: UI utilities
 
+// FILE: linkChips.ts
+// Purpose: Single source of truth for turning URLs/domains into inline link
+//          chips — normalizing bare domains, GitHub-aware shortening, the icon
+//          variant (github vs favicon), and opening links externally. Shared by
+//          the composer Lexical link node and read-only message chips.
+// Layer: UI utilities
 import { readNativeApi } from "~/nativeApi";
 
 const LINK_BODY_SOURCE = String.raw`[^\s<>()\[\]]+`;

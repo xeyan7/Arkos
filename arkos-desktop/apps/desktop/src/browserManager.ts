@@ -5,62 +5,14 @@
 
 import * as Crypto from "node:crypto";
 
-import {
-  BrowserWindow,
-  clipboard,
-  nativeImage,
-  nativeTheme,
-  session as electronSession,
-  webContents as electronWebContents,
-  WebContentsView,
-} from "electron";
+import { BrowserWindow, clipboard, nativeImage, nativeTheme, session as electronSession, webContents as electronWebContents, WebContentsView } from "electron";
 import type { WebContents } from "electron";
-import type {
-  BrowserAnnotationCancelInput,
-  BrowserAnnotationEvent,
-  BrowserAnnotationSession,
-  BrowserAnnotationStartInput,
-  BrowserAnnotationSyncMarkersInput,
-  BrowserAttachWebviewInput,
-  BrowserCaptureScreenshotResult,
-  BrowserCopyLinkEvent,
-  BrowserDetachWebviewInput,
-  BrowserNavigateInput,
-  BrowserNewTabInput,
-  BrowserOpenInput,
-  BrowserPanelBounds,
-  BrowserSetPanelBoundsInput,
-  BrowserTabInput,
-  BrowserTabState,
-  BrowserThreadInput,
-  ThreadBrowserState,
-  ThreadId,
-} from "@arkos/contracts";
+import type { BrowserAnnotationCancelInput, BrowserAnnotationEvent, BrowserAnnotationSession, BrowserAnnotationStartInput, BrowserAnnotationSyncMarkersInput, BrowserAttachWebviewInput, BrowserCaptureScreenshotResult, BrowserCopyLinkEvent, BrowserDetachWebviewInput, BrowserNavigateInput, BrowserNewTabInput, BrowserOpenInput, BrowserPanelBounds, BrowserSetPanelBoundsInput, BrowserTabInput, BrowserTabState, BrowserThreadInput, ThreadBrowserState, ThreadId } from "@arkos/contracts";
 import { isBrowserCopyLinkChord } from "@arkos/shared/browserShortcuts";
-import {
-  BROWSER_BLANK_URL as ABOUT_BLANK_URL,
-  BROWSER_AUTOMATION_VIEWPORT_HEIGHT,
-  BROWSER_AUTOMATION_VIEWPORT_WIDTH,
-  classifyBrowserWindowOpen,
-  isBlankBrowserTabUrl,
-  normalizeBrowserPageZoomFactor,
-  normalizeBrowserUrlInput as normalizeUrlInput,
-  resolveCopyableBrowserTabUrl,
-} from "@arkos/shared/browserSession";
-import {
-  BROWSER_SESSION_PARTITION,
-  BrowserSessionPolicy,
-  type BrowserSessionDownloadEvent,
-} from "./browserSessionPolicy";
-import {
-  BrowserAnnotationCoordinator,
-  type BrowserAnnotationRuntime,
-} from "./browserAnnotations/coordinator";
-import {
-  isLocalFileUrl,
-  isLocalHtmlPreviewUrl,
-  isSameLocalHtmlPreviewGrant,
-} from "./localHtmlPreviewProtocol";
+import { BROWSER_BLANK_URL as ABOUT_BLANK_URL, BROWSER_AUTOMATION_VIEWPORT_HEIGHT, BROWSER_AUTOMATION_VIEWPORT_WIDTH, classifyBrowserWindowOpen, isBlankBrowserTabUrl, normalizeBrowserPageZoomFactor, normalizeBrowserUrlInput as normalizeUrlInput, resolveCopyableBrowserTabUrl } from "@arkos/shared/browserSession";
+import { BROWSER_SESSION_PARTITION, BrowserSessionPolicy, type BrowserSessionDownloadEvent } from "./browserSessionPolicy";
+import { BrowserAnnotationCoordinator, type BrowserAnnotationRuntime } from "./browserAnnotations/coordinator";
+import { isLocalFileUrl, isLocalHtmlPreviewUrl, isSameLocalHtmlPreviewGrant } from "./localHtmlPreviewProtocol";
 
 export { BROWSER_SESSION_PARTITION } from "./browserSessionPolicy";
 const BROWSER_INACTIVE_TAB_SUSPEND_DELAY_MS = 1_500;

@@ -4,19 +4,15 @@
 // Exports: ProjectAppearancePicker
 // Depends on: projectAppearance (icon set, palette) and projectEmoji (bundled emoji).
 
+// FILE: ProjectAppearancePicker.tsx
+// Purpose: Popover body for choosing a project's emoji, or its icon and color.
+// Layer: UI component
+// Exports: ProjectAppearancePicker
+// Depends on: projectAppearance (icon set, palette) and projectEmoji (bundled emoji).
 import { useId, useMemo, useState, type KeyboardEvent, type RefObject } from "react";
 
 import { CentralIcon } from "~/lib/central-icons";
-import {
-  DEFAULT_PROJECT_ICON,
-  PROJECT_COLOR_LABELS,
-  PROJECT_COLORS,
-  PROJECT_ICON_OPTIONS,
-  firstEmoji,
-  projectColorValue,
-  type ProjectAppearance,
-  type ProjectColor,
-} from "~/lib/projectAppearance";
+import { DEFAULT_PROJECT_ICON, PROJECT_COLOR_LABELS, PROJECT_COLORS, PROJECT_ICON_OPTIONS, firstEmoji, projectColorValue, type ProjectAppearance, type ProjectColor } from "~/lib/projectAppearance";
 import { PROJECT_EMOJI_OPTIONS } from "~/lib/projectEmoji";
 import { handleRadioGridKeyDown } from "~/lib/radioGridKeyboard";
 import { cn } from "~/lib/utils";

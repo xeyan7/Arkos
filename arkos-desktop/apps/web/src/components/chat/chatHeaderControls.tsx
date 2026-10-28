@@ -11,18 +11,20 @@
 //      the chrome here keeps the row visually coherent and lets new controls opt in
 //      with one import instead of re-deriving the magic classes.
 
+// FILE: chatHeaderControls.tsx
+// Purpose: Single source of truth for chat-header toolbar control sizing, radius,
+//          and tone so text buttons, icon-only buttons, and toggles line up on one
+//          baseline regardless of the underlying Button/Toggle variant.
+// Layer: Chat header UI primitive
+// Exports: ChatHeaderButton, ChatHeaderIconButton, tone helper, and the raw class
+//          tokens for call sites that can't use the wrappers (e.g. Toggle, segmented
+//          groups, render-prop triggers, right-dock tabs).
+// Why: The header previously mixed three heights (24/28/32px) and two radii because
+//      each control leaned on a different Button size + variant compound. Centralizing
+//      the chrome here keeps the row visually coherent and lets new controls opt in
+//      with one import instead of re-deriving the magic classes.
 import type { DraggableSyntheticListeners } from "@dnd-kit/core";
-import {
-  forwardRef,
-  type ComponentProps,
-  type CSSProperties,
-  type MouseEvent,
-  type RefObject,
-  type ReactNode,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { forwardRef, type ComponentProps, type CSSProperties, type MouseEvent, type RefObject, type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 
 import { CHAT_SURFACE_HEADER_HEIGHT_PX } from "@arkos/shared/desktopChrome";
 

@@ -7,6 +7,14 @@
 // Layer: Pull request presentation
 // Exports: PullRequestCommentComposer, GitHubCommentTarget, GitHubCommentMutation
 
+// FILE: PullRequestCommentComposer.tsx
+// Purpose: Inline "Leave a comment" pill at the bottom of a GitHub item's Comments section. Posts
+//          through the comment mutation its host passes in (pull request or issue), as the
+//          authenticated GitHub user (hence the GitHub glyph in the leading slot); the mutation
+//          owns revalidating the detail and the lists. Enter submits; Shift+Enter breaks a line
+//          (comments accept markdown).
+// Layer: Pull request presentation
+// Exports: PullRequestCommentComposer, GitHubCommentTarget, GitHubCommentMutation
 import { GLASS_RAISED_SURFACE_CLASS_NAME } from "~/surfaceStyles";
 import type { PullRequestDetailInput } from "@arkos/contracts";
 import { useRef, useState } from "react";

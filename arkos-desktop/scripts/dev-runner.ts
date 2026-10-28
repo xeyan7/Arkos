@@ -6,12 +6,7 @@ import { delimiter as pathDelimiter, join as pathJoin } from "node:path";
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { NetService } from "@arkos/shared/Net";
-import {
-  getBooleanFlagValue,
-  optionalBooleanEnvironmentConfig,
-  optionalBooleanFlag,
-  type BooleanFlagInput,
-} from "@arkos/shared/cli";
+import { getBooleanFlagValue, optionalBooleanEnvironmentConfig, optionalBooleanFlag, type BooleanFlagInput } from "@arkos/shared/cli";
 import { resolveArkosDesktopFlavor, arkosDesktopIdentity } from "@arkos/shared/desktopIdentity";
 import { applyShellEnvironmentHydrationMarker } from "@arkos/shared/shell";
 import { Config, Data, Effect, Hash, Layer, Logger, Option, Path, Schema } from "effect";

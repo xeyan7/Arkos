@@ -5,10 +5,13 @@
 // Depends on: wsHttpUrl (so desktop requests carry the legacy startup token used by attachments)
 //             and @arkos/shared/localPreviewFiles for the canonical route + extension allowlist.
 
-import {
-  LOCAL_IMAGE_ROUTE_PATH,
-  SUPPORTED_LOCAL_IMAGE_EXTENSION_REGEX,
-} from "@arkos/shared/localPreviewFiles";
+// FILE: localImageUrls.ts
+// Purpose: Builds authenticated local-image URLs for markdown image previews and downloads.
+// Layer: Web utility
+// Exports: local image URL detection and builders
+// Depends on: wsHttpUrl (so desktop requests carry the legacy startup token used by attachments)
+//             and @arkos/shared/localPreviewFiles for the canonical route + extension allowlist.
+import { LOCAL_IMAGE_ROUTE_PATH, SUPPORTED_LOCAL_IMAGE_EXTENSION_REGEX } from "@arkos/shared/localPreviewFiles";
 import { isLocalAbsolutePath, isWindowsAbsolutePath } from "@arkos/shared/path";
 
 import { resolveWsHttpUrl } from "./wsHttpUrl";

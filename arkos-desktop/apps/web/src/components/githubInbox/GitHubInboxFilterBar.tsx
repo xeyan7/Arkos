@@ -6,64 +6,31 @@
 // Layer: GitHub inbox presentation
 // Exports: GitHubInboxFilterBar
 
+// FILE: GitHubInboxFilterBar.tsx
+// Purpose: The head of the code review list: the panel title with refresh and one Filter menu,
+//          the search field, the kind tabs with a count each, and, only while something is
+//          filtered, a row of removable chips naming each active filter. Controlled; the page
+//          owns persistence and URL overrides.
+// Layer: GitHub inbox presentation
+// Exports: GitHubInboxFilterBar
 import type { GitHubInboxSort, ProjectId } from "@arkos/contracts";
 import type { ReactNode } from "react";
 
-import type {
-  GitHubInboxInvolvementFilter,
-  GitHubInboxKindFilter,
-  GitHubInboxStateFilter,
-} from "~/appSettings";
-import {
-  CHAT_SURFACE_CONTROL_ACTIVE_CLASS_NAME,
-  CHAT_SURFACE_CONTROL_HOVER_CLASS_NAME,
-  CHAT_SURFACE_CONTROL_IDLE_TEXT_CLASS_NAME,
-} from "~/components/chat/chatHeaderControls";
-import {
-  ComposerPickerMenuPopup,
-  ComposerPickerMenuSubPopup,
-} from "~/components/chat/ComposerPickerMenuPopup";
+import type { GitHubInboxInvolvementFilter, GitHubInboxKindFilter, GitHubInboxStateFilter } from "~/appSettings";
+import { CHAT_SURFACE_CONTROL_ACTIVE_CLASS_NAME, CHAT_SURFACE_CONTROL_HOVER_CLASS_NAME, CHAT_SURFACE_CONTROL_IDLE_TEXT_CLASS_NAME } from "~/components/chat/chatHeaderControls";
+import { ComposerPickerMenuPopup, ComposerPickerMenuSubPopup } from "~/components/chat/ComposerPickerMenuPopup";
 import { MENU_ICON_CLASS_NAME } from "~/components/chat/composerPickerStyles";
 import type { ProjectMenuPickerOption } from "~/components/ProjectMenuPicker";
 import { GitHubLabelDot } from "~/components/pullRequest/GitHubLabelChips";
 import { SidebarPanelTitle } from "~/components/SidebarPanelTitle";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Menu,
-  MenuCheckboxItem,
-  MenuGroup,
-  MenuGroupLabel,
-  MenuItem,
-  MenuRadioGroup,
-  MenuRadioItem,
-  MenuSeparator,
-  MenuSub,
-  MenuSubTrigger,
-  MenuTrigger,
-} from "~/components/ui/menu";
+import { Menu, MenuCheckboxItem, MenuGroup, MenuGroupLabel, MenuItem, MenuRadioGroup, MenuRadioItem, MenuSeparator, MenuSub, MenuSubTrigger, MenuTrigger } from "~/components/ui/menu";
 import { SearchInput } from "~/components/ui/search-input";
 import { useRadioGroupKeyboardNav } from "~/hooks/useRadioGroupKeyboardNav";
-import {
-  EllipsisIcon,
-  FilterIcon,
-  FoldersIcon,
-  GitMergedSimpleIcon,
-  IssueClosedIcon,
-  IssueOpenedIcon,
-  RefreshCwIcon,
-  SortIcon,
-  TagIcon,
-  XIcon,
-} from "~/lib/icons";
+import { EllipsisIcon, FilterIcon, FoldersIcon, GitMergedSimpleIcon, IssueClosedIcon, IssueOpenedIcon, RefreshCwIcon, SortIcon, TagIcon, XIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
-import {
-  isGitHubInboxLabelSelected,
-  toggleGitHubInboxLabel,
-  type GitHubInboxFilters,
-  type GitHubInboxKindCounts,
-  type GitHubInboxLabelOption,
-} from "./githubInbox.logic";
+import { isGitHubInboxLabelSelected, toggleGitHubInboxLabel, type GitHubInboxFilters, type GitHubInboxKindCounts, type GitHubInboxLabelOption } from "./githubInbox.logic";
 
 const STATE_OPTIONS: ReadonlyArray<{
   value: GitHubInboxStateFilter;

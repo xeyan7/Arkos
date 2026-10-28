@@ -5,6 +5,12 @@
 // Layer: UI component (read-only; drag & drop lives in the project board)
 // Exports: KanbanOverview
 
+// FILE: KanbanOverview.tsx
+// Purpose: Top kanban layer — one column per project (In Progress → Draft → Done cards);
+//          clicking a project drills into its full 3-column board. v2 mode threads the
+//          attention-first flatten order and the needs-review filter.
+// Layer: UI component (read-only; drag & drop lives in the project board)
+// Exports: KanbanOverview
 import type { ProjectId } from "@arkos/contracts";
 import { Button } from "~/components/ui/button";
 import { ChevronRightIcon, PlusIcon } from "~/lib/icons";
@@ -12,12 +18,7 @@ import { cn } from "~/lib/utils";
 import type { KanbanViewMode } from "../../kanbanUiStore";
 import { KanbanCardView, type KanbanCardPrLookup } from "./KanbanCardView";
 import { NeedsReviewFilter } from "./NeedsReviewFilter";
-import {
-  overviewVisibleKanbanCards,
-  type KanbanBoard,
-  type KanbanCard,
-  type KanbanProjectBoard,
-} from "./kanban.logic";
+import { overviewVisibleKanbanCards, type KanbanBoard, type KanbanCard, type KanbanProjectBoard } from "./kanban.logic";
 
 const OverviewProjectColumn = function OverviewProjectColumn({
   projectBoard,

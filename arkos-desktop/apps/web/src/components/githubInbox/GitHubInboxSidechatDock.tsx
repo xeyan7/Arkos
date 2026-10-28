@@ -5,13 +5,16 @@
 // Layer: GitHub inbox presentation
 // Exports: GitHubInboxSidechatDock
 
+// FILE: GitHubInboxSidechatDock.tsx
+// Purpose: The inbox page's right dock: the selected item's side chat (Ask), rendered by the
+//          same side chat pane the chat thread's dock uses. With no side chat for the item yet,
+//          an open dock offers "Ask about …" instead.
+// Layer: GitHub inbox presentation
+// Exports: GitHubInboxSidechatDock
 import { useMemo } from "react";
 
 import { RightDock } from "~/components/chat/RightDock";
-import {
-  buildRightDockPaneLabelOverrides,
-  type RightDockLauncherItem,
-} from "~/components/chat/rightDockPaneMeta";
+import { buildRightDockPaneLabelOverrides, type RightDockLauncherItem } from "~/components/chat/rightDockPaneMeta";
 import { SidechatDockPane, useSidechatDockPanePruning } from "~/components/chat/SidechatDockPane";
 import { ChatBubbleIcon } from "~/lib/icons";
 import { useRightDockStore } from "~/rightDockStore";

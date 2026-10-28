@@ -3,6 +3,10 @@
 // Layer: Chat composer presentation
 // Depends on: shared button styling and caller-owned voice recording state callbacks.
 
+// FILE: ComposerVoiceButton.tsx
+// Purpose: Renders the composer mic control for recording and transcribing a voice note.
+// Layer: Chat composer presentation
+// Depends on: shared button styling and caller-owned voice recording state callbacks.
 import { Loader2Icon, MicIcon } from "~/lib/icons";
 import { Button } from "../ui/button";
 

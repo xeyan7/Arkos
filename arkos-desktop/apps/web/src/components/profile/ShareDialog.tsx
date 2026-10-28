@@ -4,6 +4,11 @@
 // file. Mirrors the reference share sheet (Copy / X / LinkedIn / Reddit / Save).
 // Layer: web profile feature.
 
+// FILE: ShareDialog.tsx
+// Purpose: "Share your activity" dialog — previews the virality card and exports it to
+// PNG fully on-device, then copies to clipboard + opens a social composer, or saves the
+// file. Mirrors the reference share sheet (Copy / X / LinkedIn / Reddit / Save).
+// Layer: web profile feature.
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { SiX } from "react-icons/si";
 import type { ProfileStats, ProfileTokenStats } from "@arkos/contracts";
@@ -11,14 +16,7 @@ import { Dialog, DialogPopup, DialogTitle } from "~/components/ui/dialog";
 import { CopyIcon, DownloadIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { SHARE_CARD_HEIGHT, SHARE_CARD_WIDTH, ShareCard } from "./ShareCard";
-import {
-  copyImageToClipboard,
-  downloadBlob,
-  openExternalUrl,
-  renderNodeToPngBlob,
-  type ShareTarget,
-  shareIntentUrl,
-} from "./shareCardExport";
+import { copyImageToClipboard, downloadBlob, openExternalUrl, renderNodeToPngBlob, type ShareTarget, shareIntentUrl } from "./shareCardExport";
 
 const PREVIEW_WIDTH = 480;
 const CARD_EXPORT_SIZE = { width: SHARE_CARD_WIDTH, height: SHARE_CARD_HEIGHT } as const;

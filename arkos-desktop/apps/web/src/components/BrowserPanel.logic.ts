@@ -4,19 +4,13 @@
 // Exports: address helpers, panel hide scheduling, and one-shot renderer-loss recovery
 // Depends on: shared browser URL rules, browser tab metadata, and thread-local browser history
 
-import {
-  BROWSER_BLANK_URL,
-  BROWSER_SEARCH_URL_PREFIX,
-  normalizeBrowserUrlInput,
-  resolveFloatingBrowserGuestLayout,
-} from "@arkos/shared/browserSession";
-import type {
-  BrowserAnnotationEvent,
-  BrowserAnnotationMarker,
-  BrowserAnnotationTheme,
-  BrowserTabState,
-  ThreadId,
-} from "@arkos/contracts";
+// FILE: BrowserPanel.logic.ts
+// Purpose: Holds address-bar rules plus renderer lifecycle guards for the in-app browser panel.
+// Layer: Component logic helper
+// Exports: address helpers, panel hide scheduling, and one-shot renderer-loss recovery
+// Depends on: shared browser URL rules, browser tab metadata, and thread-local browser history
+import { BROWSER_BLANK_URL, BROWSER_SEARCH_URL_PREFIX, normalizeBrowserUrlInput, resolveFloatingBrowserGuestLayout } from "@arkos/shared/browserSession";
+import type { BrowserAnnotationEvent, BrowserAnnotationMarker, BrowserAnnotationTheme, BrowserTabState, ThreadId } from "@arkos/contracts";
 import type { BrowserHistoryEntry } from "../browserStateStore";
 import type { BrowserAnnotationDraft } from "../lib/browserAnnotations";
 import { resolveDesktopDipRectFromCssRect } from "@arkos/shared/desktopChrome";

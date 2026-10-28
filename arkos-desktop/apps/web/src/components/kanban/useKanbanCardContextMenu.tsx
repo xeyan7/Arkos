@@ -6,26 +6,24 @@
 // Layer: Kanban UI hook
 // Exports: useKanbanCardContextMenu
 
+// FILE: useKanbanCardContextMenu.tsx
+// Purpose: Right-click context menu for kanban cards, mirroring the sidebar thread
+//          menu (rename / pin / copy path / copy id / archive / delete). Reuses the
+//          same shared primitives the sidebar uses (native contextMenu, clipboard,
+//          worktree cleanup, rename flow) instead of duplicating its action logic.
+// Layer: Kanban UI hook
+// Exports: useKanbanCardContextMenu
 import { THREAD_GOAL_MAX_CHARS, type ThreadId } from "@arkos/contracts";
 import { resolveThreadWorkspaceCwd } from "@arkos/shared/threadEnvironment";
 import { KANBAN_COLUMN_V2_LABELS } from "@arkos/shared/kanban";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type MouseEvent, useState } from "react";
 
-import {
-  useAppSettings,
-  getProviderStartOptions,
-  getProviderInstanceOptions,
-  resolveAssistantDeliveryMode,
-} from "~/appSettings";
+import { useAppSettings, getProviderStartOptions, getProviderInstanceOptions, resolveAssistantDeliveryMode } from "~/appSettings";
 import { RenameThreadDialog } from "~/components/RenameThreadDialog";
 import { useCopyPathToClipboard, useCopyThreadIdToClipboard } from "~/hooks/useCopyToClipboard";
 import { deleteActiveThreadFromClient } from "~/lib/activeThreadDelete";
-import {
-  dispatchKanbanDraftCardAsGoal,
-  kanbanDispatchFailureToast,
-  resolveKanbanDraftDispatchTarget,
-} from "~/lib/kanbanDispatch";
+import { dispatchKanbanDraftCardAsGoal, kanbanDispatchFailureToast, resolveKanbanDraftDispatchTarget } from "~/lib/kanbanDispatch";
 import { gitRemoveWorktreeMutationOptions } from "~/lib/gitReactQuery";
 import { contextMenuGroup } from "~/lib/contextMenuGroup";
 import { THREAD_CONTEXT_MENU_ICONS } from "~/lib/contextMenuIcons";
@@ -42,12 +40,7 @@ import { useStore } from "../../store";
 import { useTerminalStateStore } from "../../terminalStateStore";
 import { getThreadFromState } from "../../threadDerivation";
 import { toastManager } from "../ui/toast";
-import {
-  isKanbanDraftOnlyCard,
-  resolveDraftDropAction,
-  type KanbanCard,
-  type KanbanColumnKey,
-} from "./kanban.logic";
+import { isKanbanDraftOnlyCard, resolveDraftDropAction, type KanbanCard, type KanbanColumnKey } from "./kanban.logic";
 
 interface RenameTarget {
   threadId: ThreadId;

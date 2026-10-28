@@ -12,6 +12,19 @@
 // blurred desktop remain. Paint-only: it never changes layout, hit-testing of the overlay, or
 // scroll position.
 
+// FILE: glassOverlayCutout.ts
+// Purpose: On a translucent window, cuts the page out from under floating overlays so a
+//          translucent menu, picker, or toast shows the window's glass rather than
+//          the text it covers.
+// Layer: Desktop window material helper
+// Exports: installGlassOverlayCutout, registerInPageGlassOverlay, computedColorAlpha
+//
+// A backdrop blur cannot hide what sits behind an element over a see-through region:
+// Chromium composites the blurred copy over the sharp original, so text stays readable
+// through a thin fill. Overlays are portaled next to the app root, so the root can instead be
+// clipped with one hole per overlay; behind each hole only the window's coat and the natively
+// blurred desktop remain. Paint-only: it never changes layout, hit-testing of the overlay, or
+// scroll position.
 import { FLOATING_OVERLAY_SURFACE_CLASS_NAME } from "~/surfaceStyles";
 
 // Hover cards appear on every row crossing. Re-clipping the entire app for each one

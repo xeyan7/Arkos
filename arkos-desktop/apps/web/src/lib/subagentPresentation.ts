@@ -2,12 +2,10 @@
 // Purpose: Normalizes subagent identity, nickname colors, and status labels for sidebar/chat UI.
 // Exports: Shared presentation helpers consumed by sidebar rows, chat cards, and thread hydration.
 
-import {
-  buildSubagentIdentityDirectory,
-  extractSubagentIdentityHints as extractParsedSubagentIdentityHints,
-  isWorkerTierSubagentRole,
-  resolveSubagentIdentityFromDirectory,
-} from "@arkos/shared/subagents";
+// FILE: subagentPresentation.ts
+// Purpose: Normalizes subagent identity, nickname colors, and status labels for sidebar/chat UI.
+// Exports: Shared presentation helpers consumed by sidebar rows, chat cards, and thread hydration.
+import { buildSubagentIdentityDirectory, extractSubagentIdentityHints as extractParsedSubagentIdentityHints, isWorkerTierSubagentRole, resolveSubagentIdentityFromDirectory } from "@arkos/shared/subagents";
 import { formatModelDisplayName } from "@arkos/shared/model";
 
 const SUBAGENT_ACCENT_PALETTE = [

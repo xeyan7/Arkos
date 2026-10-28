@@ -3,84 +3,23 @@
 // Layer: Web transport
 // Exports: WsTransport plus stream-selection helpers used by tests.
 
+// FILE: wsTransport.ts
+// Purpose: Browser-side Effect RPC transport over the Arkos WebSocket endpoint.
+// Layer: Web transport
+// Exports: WsTransport plus stream-selection helpers used by tests.
+// FILE: wsTransport.ts
+// Purpose: Browser-side Effect RPC transport over the Arkos WebSocket endpoint.
+// Layer: Web transport
+// Exports: WsTransport plus stream-selection helpers used by tests.
+// FILE: wsTransport.ts
+// Purpose: Browser-side Effect RPC transport over the Arkos WebSocket endpoint.
+// Layer: Web transport
+// Exports: WsTransport plus stream-selection helpers used by tests.
 import { ServerBusyController, publishServerBusySnapshot } from "./serverBusyState";
 import { recordRendererActivity, rendererRpcActivity } from "./lib/rendererErrorDiagnostics";
 
-import {
-  ORCHESTRATION_STREAM_OVERFLOW_CODE,
-  ORCHESTRATION_WS_CHANNELS,
-  ORCHESTRATION_WS_METHODS,
-  WS_BOOTSTRAP_METHOD,
-  WS_BOOTSTRAP_PATH,
-  WS_CHANNELS,
-  WS_CLIENT_REQUIRED_CAPABILITIES,
-  WS_COMPATIBILITY_QUERY,
-  WS_FEATURE_PATH,
-  WS_NEGOTIATE_HTTP_PATH,
-  WS_NEGOTIATE_QUERY,
-  WS_PROTOCOL_EPOCH,
-  WS_PROTOCOL_MAX_REVISION,
-  WS_PROTOCOL_MIN_REVISION,
-  WS_PROJECT_FILE_WATCH_CAPABILITY,
-  WS_TURN_DISPATCH_SETTLEMENT_CAPABILITY,
-  WS_GIT_ACTION_RECOVERY_CAPABILITY,
-  WS_SERVER_RUNTIME_STATUS_CAPABILITY,
-  type ServerRuntimeStatus,
-  type ClientOrchestrationCommand,
-  type OrchestrationSettleTurnDispatchResult,
-  DEVICE_WS_CHANNELS,
-  DEVICE_WS_METHODS,
-  COMPUTER_WS_CHANNELS,
-  COMPUTER_WS_METHODS,
-  WsBootstrapNegotiateResult,
-  WsBootstrapRpcGroup,
-  WsDeviceRpcGroup,
-  WsComputerRpcGroup,
-  WS_METHODS,
-  WsCompatibilityError,
-  WsFeatureRpcGroup,
-  WsProjectAgentRpcGroup,
-  type AutomationStreamEvent,
-  type TodoStreamEvent,
-  type GitActionProgressEvent,
-  type GitCreateDetachedWorktreeResult,
-  type GitRunStackedActionResult,
-  type GitWorktreeSetupProgressEvent,
-  type GitHubProjectProvisionProgressEvent,
-  type GitHubProjectProvisionResult,
-  type OrchestrationEvent,
-  type OrchestrationShellStreamItem,
-  type OrchestrationThreadStreamItem,
-  type ProjectAgentStreamEvent,
-  type ProjectDevServerEvent,
-  type ProjectFileChangeEvent,
-  type ProjectWatchFileInput,
-  type ServerConfigStreamEvent,
-  type ServerLifecycleStreamEvent,
-  type ServerProviderStatusesUpdatedPayload,
-  type ServerKeepAwakeUpdatedPayload,
-  type ServerSettingsUpdatedPayload,
-  type DeviceEvent,
-  type ComputerEvent,
-  type TerminalEvent,
-  type WsPush,
-  type WsPushChannel,
-  type WsPushMessage,
-  TASKS_UNAVAILABLE_ERROR_CODE,
-  ThreadId,
-} from "@arkos/contracts";
-import {
-  Cause,
-  Data,
-  Effect,
-  Exit,
-  Layer,
-  ManagedRuntime,
-  Option,
-  Schema,
-  Scope,
-  Stream,
-} from "effect";
+import { ORCHESTRATION_STREAM_OVERFLOW_CODE, ORCHESTRATION_WS_CHANNELS, ORCHESTRATION_WS_METHODS, WS_BOOTSTRAP_METHOD, WS_BOOTSTRAP_PATH, WS_CHANNELS, WS_CLIENT_REQUIRED_CAPABILITIES, WS_COMPATIBILITY_QUERY, WS_FEATURE_PATH, WS_NEGOTIATE_HTTP_PATH, WS_NEGOTIATE_QUERY, WS_PROTOCOL_EPOCH, WS_PROTOCOL_MAX_REVISION, WS_PROTOCOL_MIN_REVISION, WS_PROJECT_FILE_WATCH_CAPABILITY, WS_TURN_DISPATCH_SETTLEMENT_CAPABILITY, WS_GIT_ACTION_RECOVERY_CAPABILITY, WS_SERVER_RUNTIME_STATUS_CAPABILITY, type ServerRuntimeStatus, type ClientOrchestrationCommand, type OrchestrationSettleTurnDispatchResult, DEVICE_WS_CHANNELS, DEVICE_WS_METHODS, COMPUTER_WS_CHANNELS, COMPUTER_WS_METHODS, WsBootstrapNegotiateResult, WsBootstrapRpcGroup, WsDeviceRpcGroup, WsComputerRpcGroup, WS_METHODS, WsCompatibilityError, WsFeatureRpcGroup, WsProjectAgentRpcGroup, type AutomationStreamEvent, type TodoStreamEvent, type GitActionProgressEvent, type GitCreateDetachedWorktreeResult, type GitRunStackedActionResult, type GitWorktreeSetupProgressEvent, type GitHubProjectProvisionProgressEvent, type GitHubProjectProvisionResult, type OrchestrationEvent, type OrchestrationShellStreamItem, type OrchestrationThreadStreamItem, type ProjectAgentStreamEvent, type ProjectDevServerEvent, type ProjectFileChangeEvent, type ProjectWatchFileInput, type ServerConfigStreamEvent, type ServerLifecycleStreamEvent, type ServerProviderStatusesUpdatedPayload, type ServerKeepAwakeUpdatedPayload, type ServerSettingsUpdatedPayload, type DeviceEvent, type ComputerEvent, type TerminalEvent, type WsPush, type WsPushChannel, type WsPushMessage, TASKS_UNAVAILABLE_ERROR_CODE, ThreadId } from "@arkos/contracts";
+import { Cause, Data, Effect, Exit, Layer, ManagedRuntime, Option, Schema, Scope, Stream } from "effect";
 import { RpcClient, RpcClientError, RpcSerialization } from "effect/unstable/rpc";
 import * as Socket from "effect/unstable/socket/Socket";
 
@@ -88,15 +27,8 @@ import { APP_VERSION } from "./branding";
 import { isRequestOutcomeUnknown } from "./lib/requestOutcome";
 import { useDeviceStateStore } from "./deviceStateStore";
 import { useComputerStateStore } from "./computerStateStore";
-import {
-  getUnaryRpcCapacityRetryDelayMs,
-  MAX_UNARY_RPC_CAPACITY_RETRY_ATTEMPTS,
-} from "./lib/expensiveReadRetry";
-import {
-  buildThreadSubscribeInput,
-  clearThreadDetailResumeCursor,
-  resetThreadDetailResumeCursors,
-} from "./threadDetailResumeCursors";
+import { getUnaryRpcCapacityRetryDelayMs, MAX_UNARY_RPC_CAPACITY_RETRY_ATTEMPTS } from "./lib/expensiveReadRetry";
+import { buildThreadSubscribeInput, clearThreadDetailResumeCursor, resetThreadDetailResumeCursors } from "./threadDetailResumeCursors";
 import { trackWsTurnSettlement, type WsTransportState } from "./wsTransportEvents";
 
 type PushListener<C extends WsPushChannel> = (message: WsPushMessage<C>) => void;

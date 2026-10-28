@@ -9,39 +9,26 @@
  * - ComposerTerminalContextNode: Terminal context blocks
  */
 
-import {
-  $applyNodeReplacement,
-  DecoratorNode,
-  TextNode,
-  type EditorConfig,
-  type NodeKey,
-  type SerializedLexicalNode,
-  type SerializedTextNode,
-  type Spread,
-} from "lexical";
+/**
+ * Composer Lexical Nodes
+ *
+ * Custom nodes for the composer editor:
+ * - ComposerMentionNode: File/path mentions (@path)
+ * - ComposerSkillNode: Skill mentions ($skill or /skill)
+ * - ComposerSlashCommandNode: app-level slash commands (/automation, /goal, /computer-use)
+ * - ComposerAgentMentionNode: Agent mentions (@alias(task))
+ * - ComposerTerminalContextNode: Terminal context blocks
+ */
+import { $applyNodeReplacement, DecoratorNode, TextNode, type EditorConfig, type NodeKey, type SerializedLexicalNode, type SerializedTextNode, type Spread } from "lexical";
 import type { ProviderKind } from "@arkos/contracts";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import {
-  INLINE_TERMINAL_CONTEXT_PLACEHOLDER,
-  type TerminalContextDraft,
-} from "~/lib/terminalContext";
+import { INLINE_TERMINAL_CONTEXT_PLACEHOLDER, type TerminalContextDraft } from "~/lib/terminalContext";
 import { formatComposerMentionToken } from "~/lib/composerMentions";
 import { basenameOfPath } from "~/file-icons";
 import { createCentralIconElement } from "~/lib/central-icons";
-import {
-  COMPOSER_INLINE_DECORATOR_HOST_CLASS_NAME,
-  COMPOSER_EDITOR_INLINE_CHIP_CLASS_NAME,
-  COMPOSER_INLINE_AGENT_CHIP_CLASS_NAME,
-  COMPOSER_INLINE_AGENT_CHIP_ICON_CLASS_NAME,
-  COMPOSER_INLINE_CHIP_LABEL_CLASS_NAME,
-  COMPOSER_INLINE_CHIP_INLINE_ICON_CLASS_NAME,
-  COMPOSER_INLINE_SKILL_CHIP_ICON_NAME,
-  formatComposerSlashCommandChipLabel,
-  formatComposerSkillChipLabel,
-  resolveAgentChipColor,
-} from "../composerInlineChip";
+import { COMPOSER_INLINE_DECORATOR_HOST_CLASS_NAME, COMPOSER_EDITOR_INLINE_CHIP_CLASS_NAME, COMPOSER_INLINE_AGENT_CHIP_CLASS_NAME, COMPOSER_INLINE_AGENT_CHIP_ICON_CLASS_NAME, COMPOSER_INLINE_CHIP_LABEL_CLASS_NAME, COMPOSER_INLINE_CHIP_INLINE_ICON_CLASS_NAME, COMPOSER_INLINE_SKILL_CHIP_ICON_NAME, formatComposerSlashCommandChipLabel, formatComposerSkillChipLabel, resolveAgentChipColor } from "../composerInlineChip";
 import { AGENT_ROBOT_ICON_NAME, MessageCircleIcon } from "~/lib/icons";
 import { slashCommandIcon } from "~/lib/slashCommandIcons";
 import type { ComposerSlashCommand } from "~/composerSlashCommands";

@@ -9,6 +9,16 @@
 // Exports: deriveWorkflowRunState, WorkflowRunState, WorkflowAgentRow,
 // workflowElapsedMs, and buildWorkflowResumePrompt
 
+// FILE: WorkflowRunCard.logic.ts
+// Purpose: Derives the workflow run panel (Claude dynamic workflows) from task
+// activities: the workflow header plus one row per member agent with status and
+// elapsed-time snapshots. Workflow agents surface through the workflow task's own
+// progress descriptions ("<phase>: <label>"); phases parsed from the script meta
+// build the phase rail, and the persisted runId/scriptPath from the launch result
+// drive pause/resume on settled runs.
+// Layer: Chat composer logic
+// Exports: deriveWorkflowRunState, WorkflowRunState, WorkflowAgentRow,
+// workflowElapsedMs, and buildWorkflowResumePrompt
 import { ThreadId, type OrchestrationThreadActivity } from "@arkos/contracts";
 
 import { orderedActivities } from "../../session-logic";

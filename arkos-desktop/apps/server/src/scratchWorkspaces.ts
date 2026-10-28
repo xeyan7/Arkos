@@ -6,6 +6,13 @@
 // Layer: Server filesystem utility
 // Exports: ensureIsolatedScratchWorkspace
 
+// FILE: scratchWorkspaces.ts
+// Purpose: Per-thread scratch working directories for provider sessions that
+//          start before any project workspace exists (e.g. a chat's first
+//          turn). The root stays in the user's cache so it is outside project
+//          ancestry and outside temporary directories writable by agents.
+// Layer: Server filesystem utility
+// Exports: ensureIsolatedScratchWorkspace
 import { createHash } from "node:crypto";
 import { closeSync, constants, fchmodSync, fstatSync, lstatSync, openSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";

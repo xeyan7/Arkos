@@ -7,6 +7,14 @@
 // Layer: Web diff utilities
 // Depends on: diffRendering path helpers.
 
+// FILE: fileDiffTree.ts
+// Purpose: Build a nested, path-compressed folder/file tree from a flat list of
+//          parsed file diffs so review surfaces can render a compact explorer
+//          without each one re-implementing flat-to-tree conversion. The editor
+//          explorer lazy-fetches one directory level at a time from the backend,
+//          so it never needed this; in-memory diff lists do.
+// Layer: Web diff utilities
+// Depends on: diffRendering path helpers.
 import type { FileDiffMetadata } from "@pierre/diffs/react";
 
 import { compareDiffPaths, resolveFileDiffPath } from "./diffRendering";

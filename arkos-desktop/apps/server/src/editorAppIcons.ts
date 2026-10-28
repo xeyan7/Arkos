@@ -5,6 +5,12 @@
 // Exports: editor icon route constant plus cached icon resolver.
 // Depends on: editor metadata, platform app discovery, filesystem, and OS icon tools.
 
+// FILE: editorAppIcons.ts
+// Purpose: Extract native installed-app icons for editor integrations and cache
+//          the normalized image files on disk for cheap repeat HTTP requests.
+// Layer: Server HTTP utility
+// Exports: editor icon route constant plus cached icon resolver.
+// Depends on: editor metadata, platform app discovery, filesystem, and OS icon tools.
 import { execFile } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
@@ -16,13 +22,7 @@ import { EDITORS, type EditorId } from "@arkos/contracts";
 import { EDITOR_ICON_ROUTE_PATH } from "@arkos/shared/editorIcons";
 import { execProcessFile } from "@arkos/shared/processRuntime";
 
-import {
-  getEditorMacApplications,
-  getEditorWindowsStorePackages,
-  resolveMacApplicationBundlePath,
-  resolveWindowsStorePackageInstallLocation,
-  type EditorDefinition,
-} from "./editorAppDiscovery";
+import { getEditorMacApplications, getEditorWindowsStorePackages, resolveMacApplicationBundlePath, resolveWindowsStorePackageInstallLocation, type EditorDefinition } from "./editorAppDiscovery";
 
 export { EDITOR_ICON_ROUTE_PATH };
 

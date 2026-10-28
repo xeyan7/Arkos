@@ -29,9 +29,8 @@ function makeThread(input: {
     projectId: ProjectId.makeUnsafe("project-archive"),
     title: `Thread ${input.id}`,
     modelSelection: {
-      provider: "claudeAgent",
+      provider: "arkos",
       model: "claude-opus-4-6",
-      supportsAutoMode: true,
     },
     interactionMode: DEFAULT_PROVIDER_INTERACTION_MODE,
     runtimeMode: "auto",

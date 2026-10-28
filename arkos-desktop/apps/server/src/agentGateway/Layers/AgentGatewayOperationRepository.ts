@@ -3,12 +3,7 @@ import { Effect, Layer } from "effect";
 import { withCommitNotifications } from "../../persistence/commitNotifications.ts";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
-import {
-  AgentGatewayOperationRepository,
-  type AgentGatewayOperationRecord,
-  type AgentGatewayOperationRepositoryShape,
-  type ReserveAgentGatewayOperationResult,
-} from "../Services/AgentGatewayOperationRepository.ts";
+import { AgentGatewayOperationRepository, type AgentGatewayOperationRecord, type AgentGatewayOperationRepositoryShape, type ReserveAgentGatewayOperationResult } from "../Services/AgentGatewayOperationRepository.ts";
 import { recordCreatedWorktreeInPlan } from "../operationPlan.ts";
 
 interface OperationRow {

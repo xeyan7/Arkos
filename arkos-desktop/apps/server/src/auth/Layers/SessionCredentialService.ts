@@ -1,41 +1,13 @@
 import { AuthSessionId, type AuthClientMetadata, type AuthClientSession } from "@arkos/contracts";
 import * as Crypto from "node:crypto";
-import {
-  Clock,
-  DateTime,
-  Deferred,
-  Duration,
-  Effect,
-  Fiber,
-  Layer,
-  Option,
-  PubSub,
-  Ref,
-  Schema,
-  Semaphore,
-  Stream,
-} from "effect";
+import { Clock, DateTime, Deferred, Duration, Effect, Fiber, Layer, Option, PubSub, Ref, Schema, Semaphore, Stream } from "effect";
 
 import { AuthSessionRepositoryLive } from "../../persistence/Layers/AuthSessions";
 import { AuthSessionRepository } from "../../persistence/Services/AuthSessions";
 import { ServerConfig } from "../../config";
 import { ServerSecretStore } from "../Services/ServerSecretStore";
-import {
-  SessionCapacityError,
-  SessionCredentialError,
-  SessionCredentialService,
-  type IssuedSession,
-  type SessionCredentialChange,
-  type SessionCredentialServiceShape,
-  type VerifiedSession,
-} from "../Services/SessionCredentialService";
-import {
-  base64UrlDecodeUtf8,
-  base64UrlEncode,
-  resolveSessionCookieName,
-  signPayload,
-  timingSafeEqualBase64Url,
-} from "../utils";
+import { SessionCapacityError, SessionCredentialError, SessionCredentialService, type IssuedSession, type SessionCredentialChange, type SessionCredentialServiceShape, type VerifiedSession } from "../Services/SessionCredentialService";
+import { base64UrlDecodeUtf8, base64UrlEncode, resolveSessionCookieName, signPayload, timingSafeEqualBase64Url } from "../utils";
 
 const SIGNING_SECRET_NAME = "server-signing-key";
 const DEFAULT_SESSION_TTL = Duration.days(30);

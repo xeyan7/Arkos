@@ -2,10 +2,7 @@ import * as path from "node:path";
 
 import { Effect } from "effect";
 
-import {
-  restoreMarkedMigrationBackup,
-  type RestoreMarkedMigrationBackupOptions,
-} from "./persistence/MigrationBackup.ts";
+import { restoreMarkedMigrationBackup, type RestoreMarkedMigrationBackupOptions } from "./persistence/MigrationBackup.ts";
 
 const USAGE =
   "Usage: arkos-restore-migration-backup <absolute-database-path> " +

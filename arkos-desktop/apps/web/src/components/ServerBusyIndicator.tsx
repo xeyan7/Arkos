@@ -1,9 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
-import {
-  getServerBusySnapshot,
-  subscribeServerBusy,
-  type ServerBusySnapshot,
-} from "../serverBusyState";
+import { getServerBusySnapshot, subscribeServerBusy, type ServerBusySnapshot } from "../serverBusyState";
 import { addWsTransportStateListener, type WsTransportState } from "../wsTransportEvents";
 import { StatusChip } from "./ui/status-chip";
 

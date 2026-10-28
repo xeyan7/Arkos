@@ -3,13 +3,11 @@
 // Layer: Settings UI components
 // Exports: NotificationsSettingsPanel, AppSnapSettingsPanel, BetaChannelSettingsPanel
 
-import {
-  type DesktopAppSnapSettingsPane,
-  type DesktopAppSnapState,
-  type DesktopBetaActionResult,
-  type DesktopBetaChannelState,
-  type ResolvedKeybindingsConfig,
-} from "@arkos/contracts";
+// FILE: DesktopSettingsPanels.tsx
+// Purpose: Own settings panels whose behavior depends on browser or desktop-native lifecycles.
+// Layer: Settings UI components
+// Exports: NotificationsSettingsPanel, AppSnapSettingsPanel, BetaChannelSettingsPanel
+import { type DesktopAppSnapSettingsPane, type DesktopAppSnapState, type DesktopBetaActionResult, type DesktopBetaChannelState, type ResolvedKeybindingsConfig } from "@arkos/contracts";
 import { appSnapShortcutLabels } from "@arkos/shared/appSnapShortcut";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
@@ -21,32 +19,13 @@ import { playAppSnapCaptureSound } from "~/lib/appSnapSound";
 import { CentralIcon } from "~/lib/central-icons";
 import { cn } from "~/lib/utils";
 import { isElectron } from "~/env";
-import {
-  buildNotificationSettingsSupportText,
-  readBrowserNotificationPermissionState,
-  requestBrowserNotificationPermission,
-} from "~/notifications/taskCompletion";
-import {
-  SETTINGS_CARD_ROW_DESCRIPTION_CLASS_NAME,
-  SETTINGS_CARD_ROW_TITLE_CLASS_NAME,
-} from "~/settingsPanelStyles";
-import {
-  APP_SNAP_PERMISSION_PANES,
-  AppSnapPermissionSection,
-  useAppSnapPermissionGuideBridge,
-} from "./AppSnapPermissionSection";
+import { buildNotificationSettingsSupportText, readBrowserNotificationPermissionState, requestBrowserNotificationPermission } from "~/notifications/taskCompletion";
+import { SETTINGS_CARD_ROW_DESCRIPTION_CLASS_NAME, SETTINGS_CARD_ROW_TITLE_CLASS_NAME } from "~/settingsPanelStyles";
+import { APP_SNAP_PERMISSION_PANES, AppSnapPermissionSection, useAppSnapPermissionGuideBridge } from "./AppSnapPermissionSection";
 import { AppSnapShortcutControl } from "./AppSnapShortcutControl";
 import { SettingResetButton } from "./SettingControls";
 import { SettingsCard, SettingsRow, SettingsSection } from "./SettingsPanelPrimitives";
-import {
-  AlertDialog,
-  AlertDialogClose,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogPopup,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogClose, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { DisclosureChevron } from "~/components/ui/DisclosureChevron";

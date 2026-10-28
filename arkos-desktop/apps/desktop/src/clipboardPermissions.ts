@@ -1,10 +1,5 @@
 import type { WebContents } from "electron";
-import {
-  ARKOS_BETA_DESKTOP_SCHEME,
-  ARKOS_CANARY_DESKTOP_SCHEME,
-  ARKOS_CUA_DESKTOP_SCHEME,
-  ARKOS_DESKTOP_SCHEME,
-} from "@arkos/shared/desktopIdentity";
+import { ARKOS_BETA_DESKTOP_SCHEME, ARKOS_CANARY_DESKTOP_SCHEME, ARKOS_CUA_DESKTOP_SCHEME, ARKOS_DESKTOP_SCHEME } from "@arkos/shared/desktopIdentity";
 
 /** Copy buttons share the OS clipboard; background reads remain denied. */
 export function isClipboardWritePermission(

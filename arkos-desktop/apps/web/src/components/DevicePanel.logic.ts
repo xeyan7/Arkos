@@ -4,21 +4,12 @@
 // Exports: frame-gate state machine, canvas/device coordinate mapping, hardware-button and key translation, picker + availability view models
 // Depends on: device contracts and the shared frame envelope header only — no DOM, no React.
 
-import type {
-  DeviceAvailability,
-  DeviceCapabilityId,
-  DeviceCapabilityStatus,
-  DeviceDescriptor,
-  DeviceFrameHeader,
-  DeviceGeometry,
-  DeviceHardwareButton,
-  DeviceKeyModifier,
-  DeviceSetupStep,
-  DeviceSetupStepId,
-  DeviceToolchain,
-  DeviceUdid,
-  ThreadDeviceState,
-} from "@arkos/contracts";
+// FILE: DevicePanel.logic.ts
+// Purpose: Pure decision logic for the iOS Simulator dock pane (video gating, input mapping, picker/availability views).
+// Layer: Component logic helper
+// Exports: frame-gate state machine, canvas/device coordinate mapping, hardware-button and key translation, picker + availability view models
+// Depends on: device contracts and the shared frame envelope header only — no DOM, no React.
+import type { DeviceAvailability, DeviceCapabilityId, DeviceCapabilityStatus, DeviceDescriptor, DeviceFrameHeader, DeviceGeometry, DeviceHardwareButton, DeviceKeyModifier, DeviceSetupStep, DeviceSetupStepId, DeviceToolchain, DeviceUdid, ThreadDeviceState } from "@arkos/contracts";
 
 import { DEVICE_CAPABILITY_LABELS } from "@arkos/contracts";
 

@@ -3,48 +3,17 @@ import { getDefaultModel } from "@arkos/shared/model";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { startTransition, useMemo } from "react";
-import {
-  getProviderInstanceOptions,
-  resolveSelectableProviderInstanceId,
-  useAppSettings,
-} from "../appSettings";
+import { getProviderInstanceOptions, resolveSelectableProviderInstanceId, useAppSettings } from "../appSettings";
 import { prefetchModelsForNewThread } from "../lib/providerModelPrefetch";
 import { hasActiveComposerSend } from "../lib/composerSendOwnership";
 import { useProviderStatusesForLocalConfig } from "../hooks/useProviderStatusesForLocalConfig";
-import {
-  hasReconciledServerProviderStatuses,
-  serverConfigQueryOptions,
-} from "../lib/serverReactQuery";
-import {
-  type ComposerThreadDraftState,
-  type DraftThreadState,
-  resolvePreferredComposerModelSelection,
-  useComposerDraftStore,
-} from "../composerDraftStore";
-import {
-  applyGroupWorkerRoutingDefaults,
-  resolveGroupContainerThreadDefaults,
-} from "../lib/groupWorkerRouting";
-import {
-  findProviderStatus,
-  isProviderUsable,
-  resolveAvailableProviderPreference,
-} from "../lib/providerAvailability";
-import {
-  buildDraftThreadContextPatch,
-  createActiveDraftThreadSnapshot,
-  createActiveThreadSnapshot,
-  createFreshDraftThreadSeed,
-  resolveTerminalThreadCreationState,
-  resolveThreadBootstrapPlan,
-  type NewThreadOptions,
-} from "../lib/threadBootstrap";
+import { hasReconciledServerProviderStatuses, serverConfigQueryOptions } from "../lib/serverReactQuery";
+import { type ComposerThreadDraftState, type DraftThreadState, resolvePreferredComposerModelSelection, useComposerDraftStore } from "../composerDraftStore";
+import { applyGroupWorkerRoutingDefaults, resolveGroupContainerThreadDefaults } from "../lib/groupWorkerRouting";
+import { findProviderStatus, isProviderUsable, resolveAvailableProviderPreference } from "../lib/providerAvailability";
+import { buildDraftThreadContextPatch, createActiveDraftThreadSnapshot, createActiveThreadSnapshot, createFreshDraftThreadSeed, resolveTerminalThreadCreationState, resolveThreadBootstrapPlan, type NewThreadOptions } from "../lib/threadBootstrap";
 import { promoteThreadCreate } from "../lib/threadCreatePromotion";
-import {
-  draftNavigationSlotKey,
-  runDraftNavigationOnce,
-  stageDraftNavigation,
-} from "../lib/stagedDraftNavigation";
+import { draftNavigationSlotKey, runDraftNavigationOnce, stageDraftNavigation } from "../lib/stagedDraftNavigation";
 import { newCommandId, newThreadId } from "../lib/utils";
 import { readNativeApi } from "../nativeApi";
 import { useFocusedChatContext } from "../focusedChatContext";

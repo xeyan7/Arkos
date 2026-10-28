@@ -10,12 +10,91 @@
  *
  * @module computerGrants
  */
-import type {
-  ComputerBuildSignature,
-  ComputerPermission,
-  DesktopAppSnapPermissionKind,
-  DesktopAppSnapState,
-} from "@arkos/contracts";
+/**
+ * The macOS privacy grants desktop control needs, in the words the user reads.
+ *
+ * Three surfaces have to agree on this copy — the server backend's availability
+ * message, the desktop app's send-time preflight, and the web card and settings
+ * panel — and they used to spell it out separately, which is how "Screen
+ * Recording and Accessibility" and "Accessibility and Screen Recording" ended up
+ * describing the same state in the same session. One ordering, one label per
+ * grant, one place that knows what to say about a stale ad-hoc grant.
+ *
+ * @module computerGrants
+ */
+/**
+ * The macOS privacy grants desktop control needs, in the words the user reads.
+ *
+ * Three surfaces have to agree on this copy — the server backend's availability
+ * message, the desktop app's send-time preflight, and the web card and settings
+ * panel — and they used to spell it out separately, which is how "Screen
+ * Recording and Accessibility" and "Accessibility and Screen Recording" ended up
+ * describing the same state in the same session. One ordering, one label per
+ * grant, one place that knows what to say about a stale ad-hoc grant.
+ *
+ * @module computerGrants
+ */
+/**
+ * The macOS privacy grants desktop control needs, in the words the user reads.
+ *
+ * Three surfaces have to agree on this copy — the server backend's availability
+ * message, the desktop app's send-time preflight, and the web card and settings
+ * panel — and they used to spell it out separately, which is how "Screen
+ * Recording and Accessibility" and "Accessibility and Screen Recording" ended up
+ * describing the same state in the same session. One ordering, one label per
+ * grant, one place that knows what to say about a stale ad-hoc grant.
+ *
+ * @module computerGrants
+ */
+/**
+ * The macOS privacy grants desktop control needs, in the words the user reads.
+ *
+ * Three surfaces have to agree on this copy — the server backend's availability
+ * message, the desktop app's send-time preflight, and the web card and settings
+ * panel — and they used to spell it out separately, which is how "Screen
+ * Recording and Accessibility" and "Accessibility and Screen Recording" ended up
+ * describing the same state in the same session. One ordering, one label per
+ * grant, one place that knows what to say about a stale ad-hoc grant.
+ *
+ * @module computerGrants
+ */
+/**
+ * The macOS privacy grants desktop control needs, in the words the user reads.
+ *
+ * Three surfaces have to agree on this copy — the server backend's availability
+ * message, the desktop app's send-time preflight, and the web card and settings
+ * panel — and they used to spell it out separately, which is how "Screen
+ * Recording and Accessibility" and "Accessibility and Screen Recording" ended up
+ * describing the same state in the same session. One ordering, one label per
+ * grant, one place that knows what to say about a stale ad-hoc grant.
+ *
+ * @module computerGrants
+ */
+/**
+ * The macOS privacy grants desktop control needs, in the words the user reads.
+ *
+ * Three surfaces have to agree on this copy — the server backend's availability
+ * message, the desktop app's send-time preflight, and the web card and settings
+ * panel — and they used to spell it out separately, which is how "Screen
+ * Recording and Accessibility" and "Accessibility and Screen Recording" ended up
+ * describing the same state in the same session. One ordering, one label per
+ * grant, one place that knows what to say about a stale ad-hoc grant.
+ *
+ * @module computerGrants
+ */
+/**
+ * The macOS privacy grants desktop control needs, in the words the user reads.
+ *
+ * Three surfaces have to agree on this copy — the server backend's availability
+ * message, the desktop app's send-time preflight, and the web card and settings
+ * panel — and they used to spell it out separately, which is how "Screen
+ * Recording and Accessibility" and "Accessibility and Screen Recording" ended up
+ * describing the same state in the same session. One ordering, one label per
+ * grant, one place that knows what to say about a stale ad-hoc grant.
+ *
+ * @module computerGrants
+ */
+import type { ComputerBuildSignature, ComputerPermission, DesktopAppSnapPermissionKind, DesktopAppSnapState } from "@arkos/contracts";
 
 /**
  * Fixed setup order, shared with the native permission guide.

@@ -1,9 +1,4 @@
-import {
-  isLocalAbsolutePath,
-  isWorkspaceRelativePathSafe,
-  localPathsEqual,
-  workspaceRelativePathOf,
-} from "@arkos/shared/path";
+import { isLocalAbsolutePath, isWorkspaceRelativePathSafe, localPathsEqual, workspaceRelativePathOf } from "@arkos/shared/path";
 
 import { resolvePathLinkTarget } from "./terminal-links";
 

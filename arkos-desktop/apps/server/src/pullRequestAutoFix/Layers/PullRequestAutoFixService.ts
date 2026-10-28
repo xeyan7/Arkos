@@ -6,16 +6,14 @@
 //          `pullRequestAutoFixDecision.ts`.
 // Layer: Server background service (Stable and Beta; each PR watch is opt-in)
 
-import {
-  CommandId,
-  EventId,
-  MessageId,
-  PULL_REQUEST_AUTO_FIX_MAX_ATTEMPTS,
-  type OrchestrationThreadShell,
-  type PullRequestAutoFixPauseReason,
-  type PullRequestAutoFixState,
-  type ThreadId,
-} from "@arkos/contracts";
+// FILE: PullRequestAutoFixService.ts (layer)
+// Purpose: Auto-fix CI. Stores which pull requests each chat watches and, every minute,
+//          polls their checks; when one settles red on a new commit it starts a fix turn in
+//          that chat, one fix per chat at a time (like Claude Code's CI monitor, which wakes
+//          the one session for every bound PR). All decisions live in
+//          `pullRequestAutoFixDecision.ts`.
+// Layer: Server background service (Stable and Beta; each PR watch is opt-in)
+import { CommandId, EventId, MessageId, PULL_REQUEST_AUTO_FIX_MAX_ATTEMPTS, type OrchestrationThreadShell, type PullRequestAutoFixPauseReason, type PullRequestAutoFixState, type ThreadId } from "@arkos/contracts";
 import { PULL_REQUEST_AUTO_FIX_BETA_FEATURE } from "@arkos/shared/betaFeatures";
 import { normalizeGitHubPullRequestUrl } from "@arkos/shared/githubRepository";
 import { Cause, Clock, Duration, Effect, Layer, Option, Schedule } from "effect";
@@ -30,17 +28,8 @@ import { GitHubCli } from "../../git/Services/GitHubCli.ts";
 import { OrchestrationEngineService } from "../../orchestration/Services/OrchestrationEngine.ts";
 import { ProjectionSnapshotQuery } from "../../orchestration/Services/ProjectionSnapshotQuery.ts";
 import { PullRequestAutoFixRepository } from "../../persistence/Services/PullRequestAutoFixRepository.ts";
-import {
-  buildPullRequestAutoFixPrompt,
-  decidePullRequestAutoFix,
-  isThreadBusyForAutoFix,
-  type PullRequestAutoFixDecision,
-} from "../pullRequestAutoFixDecision.ts";
-import {
-  PullRequestAutoFixError,
-  PullRequestAutoFixService,
-  type PullRequestAutoFixServiceShape,
-} from "../Services/PullRequestAutoFixService.ts";
+import { buildPullRequestAutoFixPrompt, decidePullRequestAutoFix, isThreadBusyForAutoFix, type PullRequestAutoFixDecision } from "../pullRequestAutoFixDecision.ts";
+import { PullRequestAutoFixError, PullRequestAutoFixService, type PullRequestAutoFixServiceShape } from "../Services/PullRequestAutoFixService.ts";
 
 /** Matches the Environment panel's own PR poll, so auto-fix adds no extra GitHub cadence. */
 const PULL_REQUEST_AUTO_FIX_POLL_INTERVAL = Duration.seconds(60);

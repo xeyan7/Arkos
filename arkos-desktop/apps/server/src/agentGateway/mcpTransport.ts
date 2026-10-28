@@ -6,26 +6,9 @@ import type { AgentGatewayShape } from "./Services/AgentGateway.ts";
 import type { AgentGatewayCredentialsShape } from "./Services/AgentGatewayCredentials.ts";
 import type { AgentGatewayCapability } from "./Services/AgentGatewaySessionRegistry.ts";
 import { extractBearerToken } from "./bearerToken.ts";
-import {
-  buildMcpInitializeResult,
-  jsonRpcError,
-  jsonRpcResult,
-  JSON_RPC_INVALID_PARAMS,
-  JSON_RPC_INVALID_REQUEST,
-  JSON_RPC_METHOD_NOT_FOUND,
-  mcpToolResultError,
-  parseMcpMessage,
-  type JsonRpcId,
-  type JsonRpcRequest,
-} from "./protocol.ts";
+import { buildMcpInitializeResult, jsonRpcError, jsonRpcResult, JSON_RPC_INVALID_PARAMS, JSON_RPC_INVALID_REQUEST, JSON_RPC_METHOD_NOT_FOUND, mcpToolResultError, parseMcpMessage, type JsonRpcId, type JsonRpcRequest } from "./protocol.ts";
 import { sanitizeToolInputSchema } from "./sanitizeToolInputSchema.ts";
-import {
-  filterToolsByCapability,
-  GatewayToolError,
-  gatewayToolErrorResult,
-  type ToolContext,
-  type ToolEntry,
-} from "./toolRuntime.ts";
+import { filterToolsByCapability, GatewayToolError, gatewayToolErrorResult, type ToolContext, type ToolEntry } from "./toolRuntime.ts";
 import { errorText } from "./toolInput.ts";
 
 const MCP_MAX_BATCH_MESSAGES = 50;

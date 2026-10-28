@@ -1,52 +1,16 @@
-import {
-  ARKOS_GATEWAY_MAX_THREADS_PER_OPERATION,
-  ThreadId,
-  TurnId,
-  type OrchestrationThreadShell,
-  type ProviderKind,
-} from "@arkos/contracts";
+import { ARKOS_GATEWAY_MAX_THREADS_PER_OPERATION, ThreadId, TurnId, type OrchestrationThreadShell, type ProviderKind } from "@arkos/contracts";
 import { Effect, Option } from "effect";
 
-import {
-  isOrdinaryProjectRow,
-  type SpaceAssignmentWorkspacePaths,
-} from "../orchestration/commandInvariants.ts";
+import { isOrdinaryProjectRow, type SpaceAssignmentWorkspacePaths } from "../orchestration/commandInvariants.ts";
 import type { ProjectionSnapshotQueryShape } from "../orchestration/Services/ProjectionSnapshotQuery.ts";
 import type { ProjectionTurnRepositoryShape } from "../persistence/Services/ProjectionTurns.ts";
 import type { ProviderDiscoveryServiceShape } from "../provider/Services/ProviderDiscoveryService.ts";
 import { ARKOS_HARNESS_POLICY_VERSION } from "./harnessPolicy.ts";
 import { mcpToolResultError, mcpToolResultJson } from "./protocol.ts";
-import {
-  AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION,
-  agentGatewayTargetOptionGuidance,
-  loadAgentGatewayProviderCatalog,
-  type AgentGatewayProviderAvailability,
-} from "./targetResolver.ts";
-import {
-  deriveAgentThreadStatus,
-  READ_THREAD_MAX_MESSAGE_CHARS,
-  READ_THREAD_MAX_MESSAGE_LIMIT,
-  summarizeThreadDetail,
-  summarizeThreadShell,
-  summarizeWaitThreadText,
-  WAIT_THREAD_SUMMARY_MAX_CHARS,
-} from "./threadSummary.ts";
-import {
-  decodeWaitForThreadsInput,
-  errorText,
-  PROVIDER_KINDS,
-  readBooleanArg,
-  readIsoTimestampArg,
-  readNumberArg,
-  readStringArg,
-  ToolInputError,
-} from "./toolInput.ts";
-import {
-  gatewayToolErrorResult,
-  GatewayToolError,
-  READ_ONLY_TOOL_ANNOTATIONS,
-  type ToolEntry,
-} from "./toolRuntime.ts";
+import { AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION, agentGatewayTargetOptionGuidance, loadAgentGatewayProviderCatalog, type AgentGatewayProviderAvailability } from "./targetResolver.ts";
+import { deriveAgentThreadStatus, READ_THREAD_MAX_MESSAGE_CHARS, READ_THREAD_MAX_MESSAGE_LIMIT, summarizeThreadDetail, summarizeThreadShell, summarizeWaitThreadText, WAIT_THREAD_SUMMARY_MAX_CHARS } from "./threadSummary.ts";
+import { decodeWaitForThreadsInput, errorText, PROVIDER_KINDS, readBooleanArg, readIsoTimestampArg, readNumberArg, readStringArg, ToolInputError } from "./toolInput.ts";
+import { gatewayToolErrorResult, GatewayToolError, READ_ONLY_TOOL_ANNOTATIONS, type ToolEntry } from "./toolRuntime.ts";
 
 const LIST_THREADS_DEFAULT_LIMIT = 50;
 const LIST_THREADS_MAX_LIMIT = 200;

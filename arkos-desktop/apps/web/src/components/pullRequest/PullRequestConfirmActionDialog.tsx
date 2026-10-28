@@ -5,18 +5,16 @@
 // Layer: Pull request UI
 // Depends on: the shared alert dialog, toast manager, and clipboard helper.
 
+// FILE: PullRequestConfirmActionDialog.tsx
+// Purpose: The one confirmation dialog for the irreversible pull request actions (merge,
+//          close), shared by the PR detail panel and the Environment panel's PR menu, plus the
+//          "copy PR link" helper both surfaces expose next to those actions.
+// Layer: Pull request UI
+// Depends on: the shared alert dialog, toast manager, and clipboard helper.
 import type { PullRequestMergeMethod, PullRequestStack } from "@arkos/contracts";
 import { useState } from "react";
 
-import {
-  AlertDialog,
-  AlertDialogClose,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogPopup,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogClose, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { toastManager } from "~/components/ui/toast";
 import { copyTextToClipboard } from "~/hooks/useCopyToClipboard";

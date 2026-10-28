@@ -3,71 +3,32 @@
 //          file search, file/diff preview, and chat.
 // Layer: Chat route presentation
 
+// FILE: EditorWorkspaceView.tsx
+// Purpose: Read-only editor-style thread surface with file explorer, workspace
+//          file search, file/diff preview, and chat.
+// Layer: Chat route presentation
 import type { ProjectId } from "@arkos/contracts";
 import type { FileDiffMetadata } from "@pierre/diffs/react";
-import {
-  type CSSProperties,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-  type RefObject,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 
-import {
-  ChangesIcon,
-  ChatBubbleIcon,
-  ChevronDownIcon,
-  DiffIcon,
-  FoldersIcon,
-  PanelRightCloseIcon,
-  SearchIcon,
-} from "~/lib/icons";
-import {
-  useDesktopTopBarTrafficLightGutterClassName,
-  useDesktopTopBarWindowControlsGutterClassName,
-} from "~/hooks/useDesktopTopBarGutter";
-import {
-  buildFileDiffRenderKey,
-  resolveFileDiffPath,
-  splitRepoRelativePath,
-  summarizeFileDiffStats,
-} from "~/lib/diffRendering";
+import { ChangesIcon, ChatBubbleIcon, ChevronDownIcon, DiffIcon, FoldersIcon, PanelRightCloseIcon, SearchIcon } from "~/lib/icons";
+import { useDesktopTopBarTrafficLightGutterClassName, useDesktopTopBarWindowControlsGutterClassName } from "~/hooks/useDesktopTopBarGutter";
+import { buildFileDiffRenderKey, resolveFileDiffPath, splitRepoRelativePath, summarizeFileDiffStats } from "~/lib/diffRendering";
 import { showFileReferenceContextMenu } from "~/lib/fileReferenceContextMenu";
 import type { ChatFileReference } from "~/lib/chatReferences";
 import type { DiffEditBaseRev } from "~/lib/diffEditBaseRev";
-import {
-  editorActivityBarSelectionLeavesEditor,
-  isEditorActivityBarItemActive,
-  type EditorActivityBarItem,
-  editorCenterModeFamily,
-  type EditorCenterMode,
-} from "~/lib/editorCenterMode";
+import { editorActivityBarSelectionLeavesEditor, isEditorActivityBarItemActive, type EditorActivityBarItem, editorCenterModeFamily, type EditorCenterMode } from "~/lib/editorCenterMode";
 import type { FileCommentSelection } from "~/lib/fileComments";
 import { cn } from "~/lib/utils";
 import { useTheme } from "~/hooks/useTheme";
 import { Skeleton } from "./ui/skeleton";
-import {
-  ChatHeaderButton,
-  ChatHeaderIconButton,
-  CHAT_SURFACE_HEADER_DIVIDER_CLASS_NAME,
-  CHAT_SURFACE_HEADER_HEIGHT_CLASS,
-} from "./chat/chatHeaderControls";
+import { ChatHeaderButton, ChatHeaderIconButton, CHAT_SURFACE_HEADER_DIVIDER_CLASS_NAME, CHAT_SURFACE_HEADER_HEIGHT_CLASS } from "./chat/chatHeaderControls";
 import { EXPLORER_ROW_PROPS, useExplorerListNavigation } from "./chat/explorerListNavigation";
 import { FileEntryIcon } from "./chat/FileEntryIcon";
 import { fileRowClassName } from "./chat/fileRowStyles";
 import { DiffStat } from "./chat/DiffStatLabel";
 import { PanelStateMessage } from "./chat/PanelStateMessage";
-import {
-  ExplorerActivityBarButton,
-  setFileReferenceDragData,
-  WorkspaceFilesSidebar,
-  WorkspaceSearchSidebar,
-} from "./chat/workspaceExplorer";
+import { ExplorerActivityBarButton, setFileReferenceDragData, WorkspaceFilesSidebar, WorkspaceSearchSidebar } from "./chat/workspaceExplorer";
 import { ProjectMenuPicker, type ProjectMenuPickerOption } from "./ProjectMenuPicker";
 import { WorkspaceFileDiffEditorPane } from "./chat/WorkspaceFileDiffEditorPane";
 import { useQueryClient } from "@tanstack/react-query";

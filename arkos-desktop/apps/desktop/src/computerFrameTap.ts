@@ -5,11 +5,7 @@ import { createServer, type Server, type Socket } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createInterface, type Interface } from "node:readline";
-import {
-  cuaComputerTaskKey,
-  type CuaComputerTask,
-  type CuaPreviewTarget,
-} from "@arkos/shared/cuaDriverProtocol";
+import { cuaComputerTaskKey, type CuaComputerTask, type CuaPreviewTarget } from "@arkos/shared/cuaDriverProtocol";
 import { DESKTOP_IPC_CHANNELS } from "./ipcChannels";
 import { stopNativeHelper } from "./stopNativeHelper";
 

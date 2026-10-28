@@ -4,6 +4,11 @@
 // Exports: useVoiceRecorder, formatVoiceRecordingDuration, isVoiceRecordingCancelledError
 // Depends on: browser media devices, Web Audio API, the streaming WAV encoder, and FileReader.
 
+// FILE: voiceRecorder.ts
+// Purpose: Captures microphone audio in the browser and normalizes it to Remodex-style WAV clips.
+// Layer: Client utility hook
+// Exports: useVoiceRecorder, formatVoiceRecordingDuration, isVoiceRecordingCancelledError
+// Depends on: browser media devices, Web Audio API, the streaming WAV encoder, and FileReader.
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { encodeVoiceRecordingWav } from "./voiceRecorderEncoding";

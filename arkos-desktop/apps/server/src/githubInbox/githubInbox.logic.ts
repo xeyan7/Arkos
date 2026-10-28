@@ -1,27 +1,14 @@
 // Pure helpers for the GitHub inbox: row building from repository snapshots, viewer involvement,
 // failure backoff, and error summaries. No Effect services here so each rule is unit-testable.
 
-import type {
-  GitHubInboxItem,
-  GitHubInboxState,
-  GitHubIssueListEntry,
-  GitHubViewerInvolvement,
-  OrchestrationProject,
-  PullRequestActor,
-} from "@arkos/contracts";
+// Pure helpers for the GitHub inbox: row building from repository snapshots, viewer involvement,
+// failure backoff, and error summaries. No Effect services here so each rule is unit-testable.
+import type { GitHubInboxItem, GitHubInboxState, GitHubIssueListEntry, GitHubViewerInvolvement, OrchestrationProject, PullRequestActor } from "@arkos/contracts";
 import { coalescePullRequestListEntries } from "@arkos/shared/githubRepository";
 
 import type { GitHubCliError } from "../git/Errors";
-import type {
-  GitHubInboxIssue,
-  GitHubInboxPullRequest,
-  GitHubInboxRemoteItem,
-} from "../git/Services/GitHubCli";
-import {
-  buildPullRequestListEntry,
-  isViewerReviewRequested,
-  projectPullRequestIdentityKey,
-} from "../pullRequests.logic";
+import type { GitHubInboxIssue, GitHubInboxPullRequest, GitHubInboxRemoteItem } from "../git/Services/GitHubCli";
+import { buildPullRequestListEntry, isViewerReviewRequested, projectPullRequestIdentityKey } from "../pullRequests.logic";
 
 /** A repository snapshot is served without asking GitHub for this long. Just under the 5 minute
  * client poll, so each poll refreshes while focus refetches and the sidebar badge share it. */

@@ -1,8 +1,5 @@
 import type { GitBranch } from "@arkos/contracts";
-import {
-  deriveAssociatedWorktreeMetadata,
-  type AssociatedWorktreeMetadata,
-} from "@arkos/shared/threadWorkspace";
+import { deriveAssociatedWorktreeMetadata, type AssociatedWorktreeMetadata } from "@arkos/shared/threadWorkspace";
 import { Schema } from "effect";
 import type { ThreadWorkspacePatch } from "../types";
 

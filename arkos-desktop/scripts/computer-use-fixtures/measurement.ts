@@ -1,6 +1,27 @@
 /** Bounded, read-only measurement through Arkos's existing diagnostic tools.
  * No live SQLite access and no transcript or tool-argument payloads in reports.
  */
+/** Bounded, read-only measurement through Arkos's existing diagnostic tools.
+ * No live SQLite access and no transcript or tool-argument payloads in reports.
+ */
+/** Bounded, read-only measurement through Arkos's existing diagnostic tools.
+ * No live SQLite access and no transcript or tool-argument payloads in reports.
+ */
+/** Bounded, read-only measurement through Arkos's existing diagnostic tools.
+ * No live SQLite access and no transcript or tool-argument payloads in reports.
+ */
+/** Bounded, read-only measurement through Arkos's existing diagnostic tools.
+ * No live SQLite access and no transcript or tool-argument payloads in reports.
+ */
+/** Bounded, read-only measurement through Arkos's existing diagnostic tools.
+ * No live SQLite access and no transcript or tool-argument payloads in reports.
+ */
+/** Bounded, read-only measurement through Arkos's existing diagnostic tools.
+ * No live SQLite access and no transcript or tool-argument payloads in reports.
+ */
+/** Bounded, read-only measurement through Arkos's existing diagnostic tools.
+ * No live SQLite access and no transcript or tool-argument payloads in reports.
+ */
 import { isToolLifecycleItemType } from "@arkos/contracts";
 
 export type DiagnosticToolCaller = (

@@ -3,20 +3,16 @@
 // Layer: Chat composer state helpers
 // Depends on: composer trait resolution and the starred model storage shape.
 
+// FILE: ComposerModelPicker.logic.ts
+// Purpose: Pure helpers turning composer trait state into starred presets and back.
+// Layer: Chat composer state helpers
+// Depends on: composer trait resolution and the starred model storage shape.
 import type { ModelSlug, ProviderInstanceId, ProviderKind } from "@arkos/contracts";
 import { resolveSelectableModel } from "@arkos/shared/model";
 
 import { type StarredModel, starredModelInstanceId, starredModelKey } from "~/lib/starredModels";
-import {
-  formatProviderModelOptionName,
-  groupProviderModelOptions,
-  type ProviderModelOption,
-} from "../../providerModelOptions";
-import {
-  type getComposerTraitSelection,
-  planComposerEffortChange,
-  supportsComposerFastModeControl,
-} from "./composerTraits";
+import { formatProviderModelOptionName, groupProviderModelOptions, type ProviderModelOption } from "../../providerModelOptions";
+import { type getComposerTraitSelection, planComposerEffortChange, supportsComposerFastModeControl } from "./composerTraits";
 
 type ComposerTraitSelection = ReturnType<typeof getComposerTraitSelection>;
 

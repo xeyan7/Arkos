@@ -8,12 +8,70 @@
 // takes a screenshot. Any simulator this script booted is shut down again; one
 // that was already running is left alone.
 
-import {
-  execFile,
-  execFileSync,
-  spawn,
-  type ChildProcessWithoutNullStreams,
-} from "node:child_process";
+// FILE: device-helper-smoke.ts
+// Purpose: End-to-end smoke test for the native device helper against a real iOS Simulator.
+// Layer: Release/CI smoke check (macOS + Xcode only; not part of normal CI).
+// Depends on: apps/server/native/device-helper/build.sh and `xcrun simctl`.
+//
+// Compiles the helper with the user's toolchain, boots (or reuses) a simulator,
+// attaches, streams frames, injects input, dumps the accessibility tree and
+// takes a screenshot. Any simulator this script booted is shut down again; one
+// that was already running is left alone.
+// FILE: device-helper-smoke.ts
+// Purpose: End-to-end smoke test for the native device helper against a real iOS Simulator.
+// Layer: Release/CI smoke check (macOS + Xcode only; not part of normal CI).
+// Depends on: apps/server/native/device-helper/build.sh and `xcrun simctl`.
+//
+// Compiles the helper with the user's toolchain, boots (or reuses) a simulator,
+// attaches, streams frames, injects input, dumps the accessibility tree and
+// takes a screenshot. Any simulator this script booted is shut down again; one
+// that was already running is left alone.
+// FILE: device-helper-smoke.ts
+// Purpose: End-to-end smoke test for the native device helper against a real iOS Simulator.
+// Layer: Release/CI smoke check (macOS + Xcode only; not part of normal CI).
+// Depends on: apps/server/native/device-helper/build.sh and `xcrun simctl`.
+//
+// Compiles the helper with the user's toolchain, boots (or reuses) a simulator,
+// attaches, streams frames, injects input, dumps the accessibility tree and
+// takes a screenshot. Any simulator this script booted is shut down again; one
+// that was already running is left alone.
+// FILE: device-helper-smoke.ts
+// Purpose: End-to-end smoke test for the native device helper against a real iOS Simulator.
+// Layer: Release/CI smoke check (macOS + Xcode only; not part of normal CI).
+// Depends on: apps/server/native/device-helper/build.sh and `xcrun simctl`.
+//
+// Compiles the helper with the user's toolchain, boots (or reuses) a simulator,
+// attaches, streams frames, injects input, dumps the accessibility tree and
+// takes a screenshot. Any simulator this script booted is shut down again; one
+// that was already running is left alone.
+// FILE: device-helper-smoke.ts
+// Purpose: End-to-end smoke test for the native device helper against a real iOS Simulator.
+// Layer: Release/CI smoke check (macOS + Xcode only; not part of normal CI).
+// Depends on: apps/server/native/device-helper/build.sh and `xcrun simctl`.
+//
+// Compiles the helper with the user's toolchain, boots (or reuses) a simulator,
+// attaches, streams frames, injects input, dumps the accessibility tree and
+// takes a screenshot. Any simulator this script booted is shut down again; one
+// that was already running is left alone.
+// FILE: device-helper-smoke.ts
+// Purpose: End-to-end smoke test for the native device helper against a real iOS Simulator.
+// Layer: Release/CI smoke check (macOS + Xcode only; not part of normal CI).
+// Depends on: apps/server/native/device-helper/build.sh and `xcrun simctl`.
+//
+// Compiles the helper with the user's toolchain, boots (or reuses) a simulator,
+// attaches, streams frames, injects input, dumps the accessibility tree and
+// takes a screenshot. Any simulator this script booted is shut down again; one
+// that was already running is left alone.
+// FILE: device-helper-smoke.ts
+// Purpose: End-to-end smoke test for the native device helper against a real iOS Simulator.
+// Layer: Release/CI smoke check (macOS + Xcode only; not part of normal CI).
+// Depends on: apps/server/native/device-helper/build.sh and `xcrun simctl`.
+//
+// Compiles the helper with the user's toolchain, boots (or reuses) a simulator,
+// attaches, streams frames, injects input, dumps the accessibility tree and
+// takes a screenshot. Any simulator this script booted is shut down again; one
+// that was already running is left alone.
+import { execFile, execFileSync, spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createServer, type Server, type Socket } from "node:net";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
@@ -23,11 +81,7 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import { decodeDeviceFrame } from "@arkos/shared/deviceFrame";
-import {
-  DEVICE_HELPER_CACHE_SEGMENTS,
-  deviceHelperCacheKey,
-  readDeviceHelperSourceRevision,
-} from "@arkos/shared/deviceHelperCache";
+import { DEVICE_HELPER_CACHE_SEGMENTS, deviceHelperCacheKey, readDeviceHelperSourceRevision } from "@arkos/shared/deviceHelperCache";
 import { sandboxedHelperCommand } from "../apps/server/src/device/helperSandbox.ts";
 
 const execFileAsync = promisify(execFile);

@@ -1,17 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import {
-  WS_COMPATIBILITY_QUERY,
-  WS_NEGOTIATE_QUERY,
-  WS_PROTOCOL_EPOCH,
-  WS_PROTOCOL_MAX_REVISION,
-  WS_PROTOCOL_MIN_REVISION,
-  WS_SERVER_CAPABILITIES,
-  WsCompatibilityError,
-  type WsBootstrapNegotiateInput,
-  type WsBootstrapNegotiateResult,
-  type WsCompatibilityAction,
-} from "@arkos/contracts";
+import { WS_COMPATIBILITY_QUERY, WS_NEGOTIATE_QUERY, WS_PROTOCOL_EPOCH, WS_PROTOCOL_MAX_REVISION, WS_PROTOCOL_MIN_REVISION, WS_SERVER_CAPABILITIES, WsCompatibilityError, type WsBootstrapNegotiateInput, type WsBootstrapNegotiateResult, type WsCompatibilityAction } from "@arkos/contracts";
 import { Effect } from "effect";
 
 import { version as serverBuild } from "../package.json" with { type: "json" };

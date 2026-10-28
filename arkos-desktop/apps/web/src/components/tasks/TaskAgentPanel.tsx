@@ -6,6 +6,13 @@
 // Layer: Tasks UI component
 // Exports: TaskAgentPanel
 
+// FILE: TaskAgentPanel.tsx
+// Purpose: What the task card shows once a to-do is with an agent: one soft block per state
+//          — working (with its last steps), needs your OK (Allow / Deny), a question to
+//          answer in the chat, ready for you (the reply), or stopped — headed by the agent's
+//          icon and one line, then the one or two things to do next on a right-aligned row.
+// Layer: Tasks UI component
+// Exports: TaskAgentPanel
 import { PROVIDER_DISPLAY_NAMES, type ThreadId, type TodoUpdateInput } from "@arkos/contracts";
 import { formatModelDisplayName } from "@arkos/shared/model";
 
@@ -15,12 +22,7 @@ import { ProviderIcon } from "~/components/ProviderIcon";
 import { cn } from "~/lib/utils";
 import type { PendingApproval } from "../../session-logic";
 import { TaskActionButton, TaskActionRow, TaskPillButton, TaskWell } from "./TaskCardPrimitives";
-import {
-  describeAgentLocation,
-  formatAgentActivity,
-  NEEDS_ANSWER_DETAIL,
-  type TaskRowModel,
-} from "./tasks.logic";
+import { describeAgentLocation, formatAgentActivity, NEEDS_ANSWER_DETAIL, type TaskRowModel } from "./tasks.logic";
 import { useOpenChat } from "./useOpenChat";
 import { useTaskAgentActions, useTaskAgentThread } from "./useTaskAgent";
 

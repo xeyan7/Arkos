@@ -43,7 +43,7 @@ layer("119_ProviderSessionRuntimeInstanceId", (it) => {
           NULL,
           ${JSON.stringify({
             modelSelection: {
-              provider: "codex",
+              provider: "arkos",
               model: "gpt-5.4",
               options: { reasoningEffort: "high" },
             },
@@ -62,19 +62,19 @@ layer("119_ProviderSessionRuntimeInstanceId", (it) => {
         WHERE thread_id = 'thread-legacy-selection'
       `;
       assert.equal(rows.length, 1);
-      assert.equal(rows[0]?.provider_instance_id, "codex");
+      assert.equal(rows[0]?.provider_instance_id, "arkos");
 
       const payload = JSON.parse(rows[0]?.runtime_payload_json ?? "{}") as {
         modelSelection?: Record<string, unknown>;
       };
-      assert.equal(payload.modelSelection?.instanceId, "codex");
+      assert.equal(payload.modelSelection?.instanceId, "arkos");
       assert.equal(payload.modelSelection?.provider, undefined);
       assert.equal(payload.modelSelection?.model, "gpt-5.4");
       // Recovery decodes the compact persisted form back into the canonical
       // provider-and-instance selection used by the runtime.
       assert.deepStrictEqual(decodeModelSelection(payload.modelSelection), {
-        provider: "codex",
-        instanceId: "codex",
+        provider: "arkos",
+        instanceId: "arkos",
         model: "gpt-5.4",
         options: { reasoningEffort: "high" },
       });

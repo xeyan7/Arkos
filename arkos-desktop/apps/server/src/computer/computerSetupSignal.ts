@@ -24,11 +24,33 @@
  *
  * @module computerSetupSignal
  */
-import type {
-  ComputerAvailability,
-  ComputerBuildSignature,
-  ComputerPermission,
-} from "@arkos/contracts";
+/**
+ * The one place that decides "this is the OS withholding a grant", and which
+ * grants those are.
+ *
+ * The same fact reaches the tool surface three different ways, and before this
+ * module only the first of them raised the chat's setup card:
+ *
+ *   1. A **thrown** `ComputerBackendError` marked `setupRequired` — the helper
+ *      refused an action with its permission-denied code.
+ *   2. A **successful** result whose availability is `permission-required` — a
+ *      perception read that completed and reported the desktop cannot be driven.
+ *      This is the shape the user hit: the agent received a well-formed answer
+ *      saying "Arkos needs Accessibility", no card appeared, and the model was
+ *      left to explain TCC in prose.
+ *   3. A grant the backend knows is missing while nothing has failed yet —
+ *      Screen Recording, which leaves the desktop driveable but unseeable, so
+ *      the availability stays `available` and no call has to fail for the user
+ *      to be owed the card.
+ *
+ * Classifying in one place is what keeps those three answering identically, and
+ * what keeps an ordinary action failure — a window that moved, an undelivered
+ * keystroke, arguments the desktop refused — from raising a card the user cannot
+ * act on.
+ *
+ * @module computerSetupSignal
+ */
+import type { ComputerAvailability, ComputerBuildSignature, ComputerPermission } from "@arkos/contracts";
 import { computerGrantsBlockControl, listComputerPermissions } from "@arkos/shared/computerGrants";
 import { ARKOS_DESKTOP_BUNDLE_ID_ENV } from "@arkos/shared/desktopIdentity";
 

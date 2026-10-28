@@ -5,59 +5,11 @@ import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
-import {
-  $createRangeSelection,
-  $getSelection,
-  $setSelection,
-  $isElementNode,
-  $isLineBreakNode,
-  $isRangeSelection,
-  $isTextNode,
-  $createLineBreakNode,
-  $createParagraphNode,
-  $createTextNode,
-  KEY_ARROW_DOWN_COMMAND,
-  KEY_ARROW_LEFT_COMMAND,
-  KEY_ARROW_RIGHT_COMMAND,
-  KEY_ARROW_UP_COMMAND,
-  KEY_DOWN_COMMAND,
-  KEY_ENTER_COMMAND,
-  KEY_TAB_COMMAND,
-  COMMAND_PRIORITY_HIGH,
-  KEY_BACKSPACE_COMMAND,
-  PASTE_COMMAND,
-  TextNode,
-  $getRoot,
-  $nodesOfType,
-  type ElementNode,
-  type LexicalNode,
-  type EditorState,
-} from "lexical";
-import {
-  createContext,
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  type ClipboardEventHandler,
-  type Ref,
-} from "react";
+import { $createRangeSelection, $getSelection, $setSelection, $isElementNode, $isLineBreakNode, $isRangeSelection, $isTextNode, $createLineBreakNode, $createParagraphNode, $createTextNode, KEY_ARROW_DOWN_COMMAND, KEY_ARROW_LEFT_COMMAND, KEY_ARROW_RIGHT_COMMAND, KEY_ARROW_UP_COMMAND, KEY_DOWN_COMMAND, KEY_ENTER_COMMAND, KEY_TAB_COMMAND, COMMAND_PRIORITY_HIGH, KEY_BACKSPACE_COMMAND, PASTE_COMMAND, TextNode, $getRoot, $nodesOfType, type ElementNode, type LexicalNode, type EditorState } from "lexical";
+import { createContext, forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, type ClipboardEventHandler, type Ref } from "react";
 
-import {
-  clampCollapsedComposerCursor,
-  collapseExpandedComposerCursor,
-  expandCollapsedComposerCursor,
-  isCollapsedCursorAdjacentToInlineToken,
-} from "~/composer-logic";
-import {
-  matchComposerLinkToken,
-  matchComposerSlashCommandChipToken,
-  splitPromptIntoComposerSegments,
-} from "~/composer-editor-mentions";
+import { clampCollapsedComposerCursor, collapseExpandedComposerCursor, expandCollapsedComposerCursor, isCollapsedCursorAdjacentToInlineToken } from "~/composer-logic";
+import { matchComposerLinkToken, matchComposerSlashCommandChipToken, splitPromptIntoComposerSegments } from "~/composer-editor-mentions";
 import { parseBareComposerLink } from "~/lib/linkChips";
 import { type TerminalContextDraft } from "~/lib/terminalContext";
 import { shouldCollapsePastedText } from "~/lib/composerPastedText";
@@ -66,29 +18,8 @@ import { useStore } from "~/store";
 import { createComposerThreadMentionSourcesSelector } from "~/storeSelectors";
 import { resolveThreadDisplayProvider } from "~/lib/threadDisplayProvider";
 import { cn } from "~/lib/utils";
-import {
-  COMPOSER_EDITOR_CONTENT_RESET_CLASS_NAME,
-  COMPOSER_EDITOR_MIN_HEIGHT_CLASS_NAME,
-  COMPOSER_PLACEHOLDER_TEXT_CLASS_NAME,
-  COMPOSER_EDITOR_TYPOGRAPHY_CLASS_NAME,
-} from "./chat/composerPickerStyles";
-import {
-  ComposerMentionNode,
-  ComposerSkillNode,
-  ComposerSlashCommandNode,
-  ComposerAgentMentionNode,
-  ComposerTerminalContextNode,
-  ComposerLinkNode,
-  $createComposerMentionNode,
-  $createComposerSkillNode,
-  $createComposerSlashCommandNode,
-  $createComposerAgentMentionNode,
-  $createComposerTerminalContextNode,
-  $createComposerLinkNode,
-  isComposerInlineTokenNode,
-  COMPOSER_NODE_CLASSES,
-  type ComposerInlineTokenNode,
-} from "./composer-nodes";
+import { COMPOSER_EDITOR_CONTENT_RESET_CLASS_NAME, COMPOSER_EDITOR_MIN_HEIGHT_CLASS_NAME, COMPOSER_PLACEHOLDER_TEXT_CLASS_NAME, COMPOSER_EDITOR_TYPOGRAPHY_CLASS_NAME } from "./chat/composerPickerStyles";
+import { ComposerMentionNode, ComposerSkillNode, ComposerSlashCommandNode, ComposerAgentMentionNode, ComposerTerminalContextNode, ComposerLinkNode, $createComposerMentionNode, $createComposerSkillNode, $createComposerSlashCommandNode, $createComposerAgentMentionNode, $createComposerTerminalContextNode, $createComposerLinkNode, isComposerInlineTokenNode, COMPOSER_NODE_CLASSES, type ComposerInlineTokenNode } from "./composer-nodes";
 
 const COMPOSER_EDITOR_HMR_KEY = `composer-editor-${Math.random().toString(36).slice(2)}`;
 

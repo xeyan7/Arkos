@@ -3,6 +3,10 @@
 // Layer: UI styling helper
 // Exports: notification surface class names/tones used by toast and status banners.
 
+// FILE: notificationSurface.ts
+// Purpose: Shared visual tokens for transient and inline notification surfaces.
+// Layer: UI styling helper
+// Exports: notification surface class names/tones used by toast and status banners.
 import { FLOATING_OVERLAY_SURFACE_CLASS_NAME } from "~/surfaceStyles";
 import { cn } from "~/lib/utils";
 

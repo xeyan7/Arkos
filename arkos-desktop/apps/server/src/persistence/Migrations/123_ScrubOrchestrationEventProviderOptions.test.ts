@@ -31,7 +31,7 @@ layer("123_ScrubOrchestrationEventProviderOptions", (it) => {
             messageId: "message-historical-queued",
             modelSelection: { instanceId: "droid_work", model: "droid/auto" },
             providerOptions: {
-              droid: {
+              arkos: {
                 binaryPath: "/usr/local/bin/droid",
                 environment: { DROID_TOKEN: "droid-env-secret" },
               },
@@ -50,11 +50,11 @@ layer("123_ScrubOrchestrationEventProviderOptions", (it) => {
             messageId: "message-historical-start",
             modelSelection: { instanceId: "opencode_work", model: "openai/gpt-5" },
             providerOptions: {
-              codex: {
+              arkos: {
                 homePath: "/tmp/codex-work",
                 environment: { CODEX_API_KEY: "codex-secret" },
               },
-              opencode: {
+              arkos: {
                 serverUrl: "https://opencode.example.test",
                 serverPassword: "opencode-secret",
                 environment: { OPENCODE_TOKEN: "opencode-env-secret" },
@@ -77,7 +77,7 @@ layer("123_ScrubOrchestrationEventProviderOptions", (it) => {
             // Simulates a partially scrubbed row: the password is already gone,
             // while an environment secret still needs removal.
             providerOptions: {
-              opencode: {
+              arkos: {
                 serverUrl: "https://opencode.example.test",
                 environment: { OPENCODE_TOKEN: "remaining-secret" },
               },
@@ -145,7 +145,7 @@ layer("123_ScrubOrchestrationEventProviderOptions", (it) => {
         readonly providerOptions?: unknown;
       };
       assert.deepStrictEqual(queuedPayload.providerOptions, {
-        droid: {
+        arkos: {
           binaryPath: "/usr/local/bin/droid",
           environment: {},
         },
@@ -154,8 +154,8 @@ layer("123_ScrubOrchestrationEventProviderOptions", (it) => {
         readonly providerOptions?: unknown;
       };
       assert.deepStrictEqual(startedPayload.providerOptions, {
-        codex: { homePath: "/tmp/codex-work", environment: {} },
-        opencode: { serverUrl: "https://opencode.example.test", environment: {} },
+        arkos: { homePath: "/tmp/codex-work", environment: {} },
+        arkos: { serverUrl: "https://opencode.example.test", environment: {} },
       });
 
       const replayed = yield* Stream.runCollect(eventStore.readFromSequence(0, 10)).pipe(
@@ -172,16 +172,16 @@ layer("123_ScrubOrchestrationEventProviderOptions", (it) => {
         ),
         [
           {
-            droid: {
+            arkos: {
               binaryPath: "/usr/local/bin/droid",
               environment: {},
             },
           },
           {
-            codex: { homePath: "/tmp/codex-work", environment: {} },
-            opencode: { serverUrl: "https://opencode.example.test", environment: {} },
+            arkos: { homePath: "/tmp/codex-work", environment: {} },
+            arkos: { serverUrl: "https://opencode.example.test", environment: {} },
           },
-          { opencode: { serverUrl: "https://opencode.example.test", environment: {} } },
+          { arkos: { serverUrl: "https://opencode.example.test", environment: {} } },
         ],
       );
     }),

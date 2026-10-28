@@ -5,20 +5,16 @@
 //   file and pasted-text attachments beside them.
 // Layer: Chat composer/transcript presentation
 
+// FILE: PullRequestContextCard.tsx
+// Purpose: Attachment-style cards for GitHub item context (the "Repair" / "Add to chat"
+//   bubbles, and the inbox's Send to agent / Ask cards for pull requests and issues): the composer card (remove) and the transcript card (click to reveal the
+//   prompt the card carried). Both share the AttachmentCard shell so they read like the
+//   file and pasted-text attachments beside them.
+// Layer: Chat composer/transcript presentation
 import { useState, type ComponentType } from "react";
 
-import {
-  ChatBubbleIcon,
-  CircleAlertIcon,
-  GitMergeConflictIcon,
-  GitPullRequestIcon,
-  HammerIcon,
-  IssueOpenedIcon,
-} from "~/lib/icons";
-import {
-  type PullRequestContextItemKind,
-  type PullRequestContextScope,
-} from "~/lib/pullRequestContext";
+import { ChatBubbleIcon, CircleAlertIcon, GitMergeConflictIcon, GitPullRequestIcon, HammerIcon, IssueOpenedIcon } from "~/lib/icons";
+import { type PullRequestContextItemKind, type PullRequestContextScope } from "~/lib/pullRequestContext";
 import { cn } from "~/lib/utils";
 import { AttachmentCard } from "./AttachmentCard";
 

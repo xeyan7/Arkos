@@ -4,14 +4,12 @@
 // Layer: Sidebar UI primitive (the rail's customize popover)
 // Exports: SidebarCustomizeHeader, SidebarCustomizeList, SidebarCustomizeItem
 
-import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+// FILE: SidebarCustomizeList.tsx
+// Purpose: The "Customize" editor for sidebar navigation: a header with Done, and sortable
+//          rows with a visibility checkbox, label, and drag handle.
+// Layer: Sidebar UI primitive (the rail's customize popover)
+// Exports: SidebarCustomizeHeader, SidebarCustomizeList, SidebarCustomizeItem
+import { closestCenter, DndContext, type DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { restrictToFirstScrollableAncestor, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -19,11 +17,7 @@ import type { ComponentType } from "react";
 
 import { DragHandleIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
-import {
-  SIDEBAR_HEADER_ROW_CLASS_NAME,
-  SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME,
-  SIDEBAR_SECTION_LABEL_CLASS_NAME,
-} from "~/sidebarRowStyles";
+import { SIDEBAR_HEADER_ROW_CLASS_NAME, SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME, SIDEBAR_SECTION_LABEL_CLASS_NAME } from "~/sidebarRowStyles";
 import { SidebarGlyph } from "./sidebarGlyphs";
 import { SidebarLeadingIcon } from "./SidebarLeadingIcon";
 import { Button } from "./ui/button";

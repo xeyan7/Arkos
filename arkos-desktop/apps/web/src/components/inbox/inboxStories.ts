@@ -5,24 +5,20 @@
 // Layer: Web inbox logic
 // Exports: buildInboxDigest, buildTaskDigest, buildInboxTiles, digest and tile types
 
-import {
-  PROVIDER_DISPLAY_NAMES,
-  type ProviderKind,
-  type StatsGetRecapResult,
-} from "@arkos/contracts";
+// FILE: inboxStories.ts
+// Purpose: Words for the Inbox recap: a short digest paragraph that tells the day, and
+//          compact tiles (a lead, one value, a short detail) for a glance at each part of it.
+//          A sentence or tile exists only when its data does.
+// Layer: Web inbox logic
+// Exports: buildInboxDigest, buildTaskDigest, buildInboxTiles, digest and tile types
+import { PROVIDER_DISPLAY_NAMES, type ProviderKind, type StatsGetRecapResult } from "@arkos/contracts";
 import { formatModelDisplayName } from "@arkos/shared/model";
 import { pluralize } from "@arkos/shared/text";
 
 import type { ProviderUsageProgressTrackProps } from "~/lib/providerUsageDisplay";
 import { formatClockDuration } from "../../session-logic";
 import { formatCompact, formatNumber } from "../profile/profileFormatting";
-import {
-  compareWithYesterday,
-  modelIconProvider,
-  recapTokens,
-  type InboxSlotSummary,
-  type RecapTotals,
-} from "./inbox.logic";
+import { compareWithYesterday, modelIconProvider, recapTokens, type InboxSlotSummary, type RecapTotals } from "./inbox.logic";
 
 export type InboxIcon =
   | { readonly kind: "provider"; readonly provider: ProviderKind }

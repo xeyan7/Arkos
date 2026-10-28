@@ -35,33 +35,51 @@
  *
  * @module quitResume
  */
-import type {
-  OrchestrationCommand,
-  OrchestrationPrepareQuitResumeInput,
-  OrchestrationPrepareQuitResumeResult,
-  OrchestrationProject,
-  OrchestrationThread,
-} from "@arkos/contracts";
-import {
-  CommandId,
-  IsoDateTime,
-  MessageId,
-  QUIT_RESUME_MAX_PROMPT_CHARS,
-  QUIT_RESUME_MAX_THREADS,
-  ThreadId,
-  TrimmedNonEmptyString,
-  TurnId,
-} from "@arkos/contracts";
+/**
+ * quitResume - "Resume chats automatically" after a desktop quit.
+ *
+ * When the user quits the desktop app while chats are running and leaves the
+ * "Resume chats automatically" box checked, the renderer calls the
+ * `orchestration.prepareQuitResume` RPC *before* answering the quit request.
+ * `prepareQuitResume` durably records the listed threads that are genuinely
+ * in flight (with the turn that was running at that moment, or none while the
+ * provider was still connecting) in a small JSON file next to the other server
+ * state, then interrupts those turns. Because the record is written before the
+ * renderer replies `allow`, it survives the renderer and the backend being torn
+ * down mid-flight; a failed write fails the RPC and the renderer falls back to a
+ * plain interrupt-and-quit.
+ *
+ * A quit can still be cancelled after the record exists (renderer crash, desktop
+ * refusing to quit). If this process is still alive `QUIT_RESUME_ABANDON_AFTER_MS`
+ * after writing it, the quit evidently did not happen and the record is removed
+ * so an unrelated later restart never resumes those chats.
+ *
+ * At the next server start `claimQuitResumeRecordAtStartup` consumes the record
+ * before commands are admitted (so no new quit can race it; atomic rename then
+ * delete — a crash in between loses the resume rather than doubling it), then
+ * `resumeQuitInterruptedChats` filters out threads that moved on since the record
+ * was written and dispatches one ordinary user turn per remaining thread with the
+ * recorded continuation prompt. Each turn carries a `resumePrecondition` so the
+ * decider re-checks the same conditions atomically inside the serialized
+ * dispatch — a client command landing between the plan and the dispatch cannot
+ * slip a stale continuation through. No record → one `exists` check and nothing
+ * else.
+ *
+ * Accepted residual windows (all require a second quit or a new turn to land
+ * within microseconds of the first): a turn that replaces the recorded one inside
+ * the prepare RPC is interrupted and not resumed; a second quit prepared exactly
+ * when the first one's abandon sweep fires loses its record.
+ *
+ * @module quitResume
+ */
+import type { OrchestrationCommand, OrchestrationPrepareQuitResumeInput, OrchestrationPrepareQuitResumeResult, OrchestrationProject, OrchestrationThread } from "@arkos/contracts";
+import { CommandId, IsoDateTime, MessageId, QUIT_RESUME_MAX_PROMPT_CHARS, QUIT_RESUME_MAX_THREADS, ThreadId, TrimmedNonEmptyString, TurnId } from "@arkos/contracts";
 import { Duration, Effect, FileSystem, Schema } from "effect";
 import { randomUUID } from "node:crypto";
 
 import { writeFileStringAtomically } from "../atomicWrite";
 import { ServerConfig } from "../config";
-import {
-  threadHasInFlightTurn,
-  threadResumePreconditionViolation,
-  type ThreadResumePreconditionViolation,
-} from "./commandInvariants.ts";
+import { threadHasInFlightTurn, threadResumePreconditionViolation, type ThreadResumePreconditionViolation } from "./commandInvariants.ts";
 import { OrchestrationEngineService } from "./Services/OrchestrationEngine.ts";
 
 /**

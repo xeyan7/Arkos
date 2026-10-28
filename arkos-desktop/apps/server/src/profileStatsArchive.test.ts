@@ -3,84 +3,50 @@
 // free its rows while leaving every Profile stat unchanged.
 // Layer: Server stats tests
 // Exports: Vitest coverage for ProfileStatsArchive.
-
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { MessageId, ThreadId, TurnId } from "@arkos/contracts";
 import { Effect, Layer } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 import { beforeEach, describe, expect, it } from "vitest";
-
-import {
-  CheckpointStore,
-  type CheckpointStoreShape,
-} from "./checkpointing/Services/CheckpointStore";
-import {
-  checkpointRefForThreadMessageStart,
-  checkpointRefForThreadTurnStart,
-} from "./checkpointing/Utils";
+import { CheckpointStore, type CheckpointStoreShape, } from "./checkpointing/Services/CheckpointStore";
+import { checkpointRefForThreadMessageStart, checkpointRefForThreadTurnStart, } from "./checkpointing/Utils";
 import { ServerConfig } from "./config";
 import { SqlitePersistenceMemory } from "./persistence/Layers/Sqlite";
 import { PROVIDER_COMMAND_REACTOR_CONSUMER } from "./persistence/Services/OrchestrationEventDeliveries";
 import { ProfileStatsQuery, ProfileStatsQueryLive } from "./profileStats";
-import {
-  aggregateThreadTurnSnapshotRows,
-  aggregateThreadTokenRows,
-  ProfileStatsArchive,
-  ProfileStatsArchiveLive,
-} from "./profileStatsArchive";
-
+import { aggregateThreadTurnSnapshotRows, aggregateThreadTokenRows, ProfileStatsArchive, ProfileStatsArchiveLive, } from "./profileStatsArchive";
 interface DeletedCheckpointRefCall {
-  readonly cwd: string;
-  readonly checkpointRefs: ReadonlyArray<string>;
+    readonly cwd: string;
+    readonly checkpointRefs: ReadonlyArray<string>;
 }
-
 const deletedCheckpointRefCalls: DeletedCheckpointRefCall[] = [];
-
-function recordDeletedCheckpointRefs(
-  input: Parameters<CheckpointStoreShape["deleteCheckpointRefs"]>[0],
-) {
-  deletedCheckpointRefCalls.push({
-    cwd: input.cwd,
-    checkpointRefs: input.checkpointRefs.map((checkpointRef) => String(checkpointRef)),
-  });
+function recordDeletedCheckpointRefs(input: Parameters<CheckpointStoreShape["deleteCheckpointRefs"]>[0]) {
+    deletedCheckpointRefCalls.push({
+        cwd: input.cwd,
+        checkpointRefs: input.checkpointRefs.map((checkpointRef) => String(checkpointRef)),
+    });
 }
-
 let isGitRepositoryImpl: CheckpointStoreShape["isGitRepository"] = () => Effect.succeed(true);
-let deleteCheckpointRefsImpl: CheckpointStoreShape["deleteCheckpointRefs"] = (input) =>
-  Effect.sync(() => recordDeletedCheckpointRefs(input));
-
+let deleteCheckpointRefsImpl: CheckpointStoreShape["deleteCheckpointRefs"] = (input) => Effect.sync(() => recordDeletedCheckpointRefs(input));
 const checkpointStoreTestLayer = Layer.succeed(CheckpointStore, {
-  isGitRepository: (cwd) => isGitRepositoryImpl(cwd),
-  captureCheckpoint: () => Effect.die("unused checkpoint store test method"),
-  copyCheckpointRef: () => Effect.die("unused checkpoint store test method"),
-  hasCheckpointRef: () => Effect.die("unused checkpoint store test method"),
-  restoreCheckpoint: () => Effect.die("unused checkpoint store test method"),
-  reverseCheckpointDiff: () => Effect.die("unused checkpoint store test method"),
-  diffCheckpoints: () => Effect.die("unused checkpoint store test method"),
-  deleteCheckpointRefs: (input) => deleteCheckpointRefsImpl(input),
+    isGitRepository: (cwd) => isGitRepositoryImpl(cwd),
+    captureCheckpoint: () => Effect.die("unused checkpoint store test method"),
+    copyCheckpointRef: () => Effect.die("unused checkpoint store test method"),
+    hasCheckpointRef: () => Effect.die("unused checkpoint store test method"),
+    restoreCheckpoint: () => Effect.die("unused checkpoint store test method"),
+    reverseCheckpointDiff: () => Effect.die("unused checkpoint store test method"),
+    diffCheckpoints: () => Effect.die("unused checkpoint store test method"),
+    deleteCheckpointRefs: (input) => deleteCheckpointRefsImpl(input),
 } satisfies CheckpointStoreShape);
-
-const testLayer = Layer.mergeAll(ProfileStatsQueryLive, ProfileStatsArchiveLive).pipe(
-  Layer.provideMerge(checkpointStoreTestLayer),
-  Layer.provideMerge(SqlitePersistenceMemory),
-  Layer.provide(
-    ServerConfig.layerTest(process.cwd(), {
-      prefix: "arkos-profile-stats-archive-test-",
-    }),
-  ),
-  Layer.provide(NodeServices.layer),
-);
-
-function runArchiveTest<A, E>(
-  effect: Effect.Effect<A, E, ProfileStatsQuery | ProfileStatsArchive | SqlClient.SqlClient>,
-) {
-  return effect.pipe(Effect.provide(testLayer), Effect.scoped, Effect.runPromise);
+const testLayer = Layer.mergeAll(ProfileStatsQueryLive, ProfileStatsArchiveLive).pipe(Layer.provideMerge(checkpointStoreTestLayer), Layer.provideMerge(SqlitePersistenceMemory), Layer.provide(ServerConfig.layerTest(process.cwd(), {
+    prefix: "arkos-profile-stats-archive-test-",
+})), Layer.provide(NodeServices.layer));
+function runArchiveTest<A, E>(effect: Effect.Effect<A, E, ProfileStatsQuery | ProfileStatsArchive | SqlClient.SqlClient>) {
+    return effect.pipe(Effect.provide(testLayer), Effect.scoped, Effect.runPromise);
 }
-
 const seedTwoThreadsWithActivity = Effect.gen(function* () {
-  const sql = yield* SqlClient.SqlClient;
-
-  yield* sql`
+    const sql = yield* SqlClient.SqlClient;
+    yield* sql `
     INSERT INTO projection_projects (
       project_id, title, workspace_root, scripts_json, created_at, updated_at, deleted_at
     )
@@ -94,8 +60,7 @@ const seedTwoThreadsWithActivity = Effect.gen(function* () {
       NULL
     )
   `;
-
-  yield* sql`
+    yield* sql `
     INSERT INTO projection_threads (
       thread_id, project_id, title, model_selection_json, runtime_mode,
       interaction_mode, env_mode, created_at, updated_at, deleted_at
@@ -118,8 +83,7 @@ const seedTwoThreadsWithActivity = Effect.gen(function* () {
         '2026-06-13T09:00:00.000Z', '2026-06-13T09:00:00.000Z', NULL
       )
   `;
-
-  yield* sql`
+    yield* sql `
     INSERT INTO projection_thread_messages (
       message_id, thread_id, turn_id, role, text, skills_json, mentions_json,
       is_streaming, source, dispatch_origin, created_at, updated_at
@@ -142,8 +106,7 @@ const seedTwoThreadsWithActivity = Effect.gen(function* () {
         0, 'native', 'agent', '2026-06-14T10:05:00.000Z', '2026-06-14T10:05:00.000Z'
       )
   `;
-
-  yield* sql`
+    yield* sql `
     INSERT INTO orchestration_events (
       event_id, aggregate_kind, stream_id, stream_version, event_type,
       occurred_at, command_id, actor_kind, payload_json, metadata_json
@@ -180,8 +143,7 @@ const seedTwoThreadsWithActivity = Effect.gen(function* () {
         '{}'
       )
   `;
-
-  yield* sql`
+    yield* sql `
     INSERT INTO orchestration_command_receipts (
       command_id, aggregate_kind, aggregate_id, accepted_at, result_sequence, status, error
     )
@@ -203,8 +165,7 @@ const seedTwoThreadsWithActivity = Effect.gen(function* () {
         '2026-06-14T10:10:00.000Z', 3, 'accepted', NULL
       )
   `;
-
-  yield* sql`
+    yield* sql `
     INSERT INTO projection_thread_activities (
       activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at
     )
@@ -225,8 +186,7 @@ const seedTwoThreadsWithActivity = Effect.gen(function* () {
         '{"totalProcessedTokens":5000}', 2, '2026-06-13T18:45:00.000Z'
       )
   `;
-
-  yield* sql`
+    yield* sql `
     INSERT INTO projection_turns (
       thread_id, turn_id, pending_message_id, assistant_message_id, state,
       requested_at, started_at, completed_at, checkpoint_turn_count,
@@ -253,9 +213,7 @@ const seedTwoThreadsWithActivity = Effect.gen(function* () {
       )
   `;
 });
-
-const acknowledgeProviderCommandJournal = (sql: SqlClient.SqlClient) =>
-  sql`
+const acknowledgeProviderCommandJournal = (sql: SqlClient.SqlClient) => sql `
     UPDATE orchestration_consumer_state
     SET last_acked_sequence = (
       SELECT COALESCE(MAX(sequence), 0) FROM orchestration_events
@@ -263,328 +221,298 @@ const acknowledgeProviderCommandJournal = (sql: SqlClient.SqlClient) =>
     updated_at = '2026-07-14T00:00:00.000Z'
     WHERE consumer_name = ${PROVIDER_COMMAND_REACTOR_CONSUMER}
   `;
-
 describe("ProfileStatsArchive", () => {
-  it("snapshots reasoning from canonical model option rows", () => {
-    expect(
-      aggregateThreadTurnSnapshotRows(
-        [
-          {
-            payloadJson:
-              '{"modelSelection":{"provider":"codex","instanceId":"codex_work","model":"gpt-5-codex","options":[{"id":"reasoningEffort","value":"high"}]}}',
-          },
-        ],
-        null,
-      ),
-    ).toEqual([
-      {
-        provider: "codex",
-        instanceId: "codex_work",
-        model: "gpt-5-codex",
-        reasoning: "high",
-        turnCount: 1,
-      },
-    ]);
-  });
-
-  beforeEach(() => {
-    deletedCheckpointRefCalls.length = 0;
-    isGitRepositoryImpl = () => Effect.succeed(true);
-    deleteCheckpointRefsImpl = (input) => Effect.sync(() => recordDeletedCheckpointRefs(input));
-  });
-
-  it("takes cumulative deltas per counter provider when a thread switches providers and back", () => {
-    const rows = aggregateThreadTokenRows([
-      {
-        totalProcessedTokens: 100_000,
-        usedTokens: null,
-        provider: "codex",
-        model: "gpt-5-codex",
-        createdAt: "2026-06-13T12:00:00.000Z",
-      },
-      {
-        totalProcessedTokens: 5_000,
-        usedTokens: null,
-        provider: "opencode",
-        model: "sonnet",
-        createdAt: "2026-06-13T12:10:00.000Z",
-      },
-      {
-        totalProcessedTokens: 110_000,
-        usedTokens: null,
-        provider: "codex",
-        model: "gpt-5-codex",
-        createdAt: "2026-06-13T12:20:00.000Z",
-      },
-    ]);
-
-    expect(rows.map((row) => row.tokens)).toEqual([100_000, 5_000, 10_000]);
-  });
-
-  it("archives usedTokens-only model groups even when another group has cumulative telemetry", () => {
-    const rows = aggregateThreadTokenRows([
-      {
-        totalProcessedTokens: 2000,
-        usedTokens: 1200,
-        provider: "codex",
-        model: "gpt-5-codex",
-        createdAt: "2026-06-13T12:02:00.000Z",
-      },
-      {
-        totalProcessedTokens: null,
-        usedTokens: 300,
-        provider: "codex",
-        model: "gpt-5-codex",
-        createdAt: "2026-06-13T12:03:00.000Z",
-      },
-      {
-        totalProcessedTokens: 2500,
-        usedTokens: 1500,
-        provider: "codex",
-        model: "gpt-5-codex",
-        createdAt: "2026-06-13T12:04:00.000Z",
-      },
-      {
-        totalProcessedTokens: null,
-        usedTokens: 700,
-        provider: "pi",
-        model: "claude-haiku-4-5",
-        createdAt: "2026-06-13T12:11:00.000Z",
-      },
-      {
-        totalProcessedTokens: null,
-        usedTokens: 1700,
-        provider: "pi",
-        model: "claude-haiku-4-5",
-        createdAt: "2026-06-13T12:12:00.000Z",
-      },
-    ]);
-
-    expect(rows).toEqual([
-      {
-        createdAt: "2026-06-13T12:02:00.000Z",
-        provider: "codex",
-        instanceId: "codex",
-        model: "gpt-5-codex",
-        tokens: 2000,
-      },
-      {
-        createdAt: "2026-06-13T12:04:00.000Z",
-        provider: "codex",
-        instanceId: "codex",
-        model: "gpt-5-codex",
-        tokens: 500,
-      },
-      {
-        createdAt: "2026-06-13T12:11:00.000Z",
-        provider: "pi",
-        instanceId: "pi",
-        model: "claude-haiku-4-5",
-        tokens: 700,
-      },
-      {
-        createdAt: "2026-06-13T12:12:00.000Z",
-        provider: "pi",
-        instanceId: "pi",
-        model: "claude-haiku-4-5",
-        tokens: 1000,
-      },
-    ]);
-  });
-
-  it("computes cumulative deltas across agent turns before excluding their usage", () => {
-    const rows = aggregateThreadTokenRows([
-      {
-        totalProcessedTokens: 1_000,
-        usedTokens: null,
-        provider: "codex",
-        model: "gpt-5.5",
-        dispatchOrigin: "user",
-        createdAt: "2026-06-13T12:00:00.000Z",
-      },
-      {
-        totalProcessedTokens: 2_500,
-        usedTokens: null,
-        provider: "codex",
-        model: "gpt-5.5",
-        dispatchOrigin: "agent",
-        createdAt: "2026-06-13T12:01:00.000Z",
-      },
-      {
-        totalProcessedTokens: 3_000,
-        usedTokens: null,
-        provider: "codex",
-        model: "gpt-5.5",
-        dispatchOrigin: "user",
-        createdAt: "2026-06-13T12:02:00.000Z",
-      },
-    ]);
-
-    expect(rows.map(({ createdAt, tokens }) => ({ createdAt, tokens }))).toEqual([
-      { createdAt: "2026-06-13T12:00:00.000Z", tokens: 1_000 },
-      { createdAt: "2026-06-13T12:02:00.000Z", tokens: 500 },
-    ]);
-  });
-
-  it("removes legacy Claude rows before computing other providers' archive deltas", () => {
-    const rows = aggregateThreadTokenRows([
-      {
-        totalProcessedTokens: 1_000,
-        usedTokens: null,
-        provider: "codex",
-        model: "gpt-5.5",
-        createdAt: "2026-06-13T12:00:00.000Z",
-      },
-      {
-        totalProcessedTokens: 99_000,
-        usedTokens: null,
-        provider: "claudeAgent",
-        model: "claude-fable-5",
-        createdAt: "2026-06-13T12:01:00.000Z",
-      },
-      {
-        totalProcessedTokens: 1_500,
-        usedTokens: null,
-        provider: "codex",
-        model: "gpt-5.5",
-        createdAt: "2026-06-13T12:02:00.000Z",
-      },
-      {
-        totalProcessedTokens: null,
-        usedTokens: 100,
-        provider: "pi",
-        model: "pi",
-        createdAt: "2026-06-13T12:03:00.000Z",
-      },
-      {
-        totalProcessedTokens: null,
-        usedTokens: 9_000,
-        provider: "claudeAgent",
-        model: "claude-opus-4-8",
-        createdAt: "2026-06-13T12:04:00.000Z",
-      },
-      {
-        totalProcessedTokens: null,
-        usedTokens: 150,
-        provider: "pi",
-        model: "pi",
-        createdAt: "2026-06-13T12:05:00.000Z",
-      },
-    ]);
-
-    expect(
-      rows.map(({ provider, createdAt, tokens }) => ({ provider, createdAt, tokens })),
-    ).toEqual([
-      { provider: "codex", createdAt: "2026-06-13T12:00:00.000Z", tokens: 1_000 },
-      { provider: "codex", createdAt: "2026-06-13T12:02:00.000Z", tokens: 500 },
-      { provider: "pi", createdAt: "2026-06-13T12:03:00.000Z", tokens: 100 },
-      { provider: "pi", createdAt: "2026-06-13T12:05:00.000Z", tokens: 50 },
-    ]);
-  });
-
-  it("keeps a stamped activity provider instead of a mismatched thread fallback", () => {
-    const rows = aggregateThreadTokenRows(
-      [
-        {
-          totalProcessedTokens: 1_500,
-          usedTokens: null,
-          provider: "pi",
-          model: null,
-          createdAt: "2026-06-13T12:00:00.000Z",
-        },
-      ],
-      { provider: "codex", model: "gpt-5.5" },
-    );
-
-    expect(rows).toEqual([
-      {
-        createdAt: "2026-06-13T12:00:00.000Z",
-        provider: "pi",
-        instanceId: "pi",
-        model: null,
-        tokens: 1_500,
-      },
-    ]);
-  });
-
-  it("archives verified Claude results and legacy evidence without reintroducing block totals", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const stats = yield* ProfileStatsQuery;
-        const archive = yield* ProfileStatsArchive;
-        yield* seedTwoThreadsWithActivity;
-        yield* acknowledgeProviderCommandJournal(sql);
-        // Independent child threads are real work. Only provider-native mirrors
-        // are excluded from Claude result accounting.
-        yield* sql`
+    it("snapshots reasoning from canonical model option rows", () => {
+        expect(aggregateThreadTurnSnapshotRows([
+            {
+                payloadJson: '{"modelSelection":{"provider":"codex","instanceId":"codex_work","model":"gpt-5-codex","options":[{"id":"reasoningEffort","value":"high"}]}}',
+            },
+        ], null)).toEqual([
+            {
+                provider: "arkos",
+                instanceId: "codex_work",
+                model: "gpt-5-codex",
+                reasoning: "high",
+                turnCount: 1,
+            },
+        ]);
+    });
+    beforeEach(() => {
+        deletedCheckpointRefCalls.length = 0;
+        isGitRepositoryImpl = () => Effect.succeed(true);
+        deleteCheckpointRefsImpl = (input) => Effect.sync(() => recordDeletedCheckpointRefs(input));
+    });
+    it("takes cumulative deltas per counter provider when a thread switches providers and back", () => {
+        const rows = aggregateThreadTokenRows([
+            {
+                totalProcessedTokens: 100000,
+                usedTokens: null,
+                provider: "arkos",
+                model: "gpt-5-codex",
+                createdAt: "2026-06-13T12:00:00.000Z",
+            },
+            {
+                totalProcessedTokens: 5000,
+                usedTokens: null,
+                provider: "opencode",
+                model: "sonnet",
+                createdAt: "2026-06-13T12:10:00.000Z",
+            },
+            {
+                totalProcessedTokens: 110000,
+                usedTokens: null,
+                provider: "arkos",
+                model: "gpt-5-codex",
+                createdAt: "2026-06-13T12:20:00.000Z",
+            },
+        ]);
+        expect(rows.map((row) => row.tokens)).toEqual([100000, 5000, 10000]);
+    });
+    it("archives usedTokens-only model groups even when another group has cumulative telemetry", () => {
+        const rows = aggregateThreadTokenRows([
+            {
+                totalProcessedTokens: 2000,
+                usedTokens: 1200,
+                provider: "arkos",
+                model: "gpt-5-codex",
+                createdAt: "2026-06-13T12:02:00.000Z",
+            },
+            {
+                totalProcessedTokens: null,
+                usedTokens: 300,
+                provider: "arkos",
+                model: "gpt-5-codex",
+                createdAt: "2026-06-13T12:03:00.000Z",
+            },
+            {
+                totalProcessedTokens: 2500,
+                usedTokens: 1500,
+                provider: "arkos",
+                model: "gpt-5-codex",
+                createdAt: "2026-06-13T12:04:00.000Z",
+            },
+            {
+                totalProcessedTokens: null,
+                usedTokens: 700,
+                provider: "pi",
+                model: "claude-haiku-4-5",
+                createdAt: "2026-06-13T12:11:00.000Z",
+            },
+            {
+                totalProcessedTokens: null,
+                usedTokens: 1700,
+                provider: "pi",
+                model: "claude-haiku-4-5",
+                createdAt: "2026-06-13T12:12:00.000Z",
+            },
+        ]);
+        expect(rows).toEqual([
+            {
+                createdAt: "2026-06-13T12:02:00.000Z",
+                provider: "arkos",
+                instanceId: "arkos",
+                model: "gpt-5-codex",
+                tokens: 2000,
+            },
+            {
+                createdAt: "2026-06-13T12:04:00.000Z",
+                provider: "arkos",
+                instanceId: "arkos",
+                model: "gpt-5-codex",
+                tokens: 500,
+            },
+            {
+                createdAt: "2026-06-13T12:11:00.000Z",
+                provider: "pi",
+                instanceId: "pi",
+                model: "claude-haiku-4-5",
+                tokens: 700,
+            },
+            {
+                createdAt: "2026-06-13T12:12:00.000Z",
+                provider: "pi",
+                instanceId: "pi",
+                model: "claude-haiku-4-5",
+                tokens: 1000,
+            },
+        ]);
+    });
+    it("computes cumulative deltas across agent turns before excluding their usage", () => {
+        const rows = aggregateThreadTokenRows([
+            {
+                totalProcessedTokens: 1000,
+                usedTokens: null,
+                provider: "arkos",
+                model: "gpt-5.5",
+                dispatchOrigin: "user",
+                createdAt: "2026-06-13T12:00:00.000Z",
+            },
+            {
+                totalProcessedTokens: 2500,
+                usedTokens: null,
+                provider: "arkos",
+                model: "gpt-5.5",
+                dispatchOrigin: "agent",
+                createdAt: "2026-06-13T12:01:00.000Z",
+            },
+            {
+                totalProcessedTokens: 3000,
+                usedTokens: null,
+                provider: "arkos",
+                model: "gpt-5.5",
+                dispatchOrigin: "user",
+                createdAt: "2026-06-13T12:02:00.000Z",
+            },
+        ]);
+        expect(rows.map(({ createdAt, tokens }) => ({ createdAt, tokens }))).toEqual([
+            { createdAt: "2026-06-13T12:00:00.000Z", tokens: 1000 },
+            { createdAt: "2026-06-13T12:02:00.000Z", tokens: 500 },
+        ]);
+    });
+    it("removes legacy Claude rows before computing other providers' archive deltas", () => {
+        const rows = aggregateThreadTokenRows([
+            {
+                totalProcessedTokens: 1000,
+                usedTokens: null,
+                provider: "arkos",
+                model: "gpt-5.5",
+                createdAt: "2026-06-13T12:00:00.000Z",
+            },
+            {
+                totalProcessedTokens: 99000,
+                usedTokens: null,
+                provider: "claudeAgent",
+                model: "claude-fable-5",
+                createdAt: "2026-06-13T12:01:00.000Z",
+            },
+            {
+                totalProcessedTokens: 1500,
+                usedTokens: null,
+                provider: "arkos",
+                model: "gpt-5.5",
+                createdAt: "2026-06-13T12:02:00.000Z",
+            },
+            {
+                totalProcessedTokens: null,
+                usedTokens: 100,
+                provider: "pi",
+                model: "pi",
+                createdAt: "2026-06-13T12:03:00.000Z",
+            },
+            {
+                totalProcessedTokens: null,
+                usedTokens: 9000,
+                provider: "claudeAgent",
+                model: "claude-opus-4-8",
+                createdAt: "2026-06-13T12:04:00.000Z",
+            },
+            {
+                totalProcessedTokens: null,
+                usedTokens: 150,
+                provider: "pi",
+                model: "pi",
+                createdAt: "2026-06-13T12:05:00.000Z",
+            },
+        ]);
+        expect(rows.map(({ provider, createdAt, tokens }) => ({ provider, createdAt, tokens }))).toEqual([
+            { provider: "arkos", createdAt: "2026-06-13T12:00:00.000Z", tokens: 1000 },
+            { provider: "arkos", createdAt: "2026-06-13T12:02:00.000Z", tokens: 500 },
+            { provider: "pi", createdAt: "2026-06-13T12:03:00.000Z", tokens: 100 },
+            { provider: "pi", createdAt: "2026-06-13T12:05:00.000Z", tokens: 50 },
+        ]);
+    });
+    it("keeps a stamped activity provider instead of a mismatched thread fallback", () => {
+        const rows = aggregateThreadTokenRows([
+            {
+                totalProcessedTokens: 1500,
+                usedTokens: null,
+                provider: "pi",
+                model: null,
+                createdAt: "2026-06-13T12:00:00.000Z",
+            },
+        ], { provider: "arkos", model: "gpt-5.5" });
+        expect(rows).toEqual([
+            {
+                createdAt: "2026-06-13T12:00:00.000Z",
+                provider: "pi",
+                instanceId: "pi",
+                model: null,
+                tokens: 1500,
+            },
+        ]);
+    });
+    it("archives verified Claude results and legacy evidence without reintroducing block totals", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const stats = yield* ProfileStatsQuery;
+            const archive = yield* ProfileStatsArchive;
+            yield* seedTwoThreadsWithActivity;
+            yield* acknowledgeProviderCommandJournal(sql);
+            // Independent child threads are real work. Only provider-native mirrors
+            // are excluded from Claude result accounting.
+            yield* sql `
           UPDATE projection_threads
           SET parent_thread_id = 'thread-keep', creation_source = 'arkos_mcp'
           WHERE thread_id = 'thread-purge'
         `;
-        yield* sql`
+            yield* sql `
         UPDATE projection_thread_activities SET payload_json = '{"provider":"claudeAgent","totalProcessedTokens":999999}'
         WHERE thread_id = 'thread-purge'
       `;
-        for (const [turnId, payload] of [
-          [
-            "verified",
-            {
-              provider: "claudeAgent",
-              tokenAccountingVersion: 1,
-              modelUsage: {
-                "claude-fable-5": {
-                  inputTokens: 100,
-                  outputTokens: 40,
-                  cacheReadInputTokens: 800,
-                  cacheCreationInputTokens: 60,
-                  costUSD: 0.01,
-                  contextWindow: 200_000,
-                  maxOutputTokens: 32_000,
-                },
-              },
-            },
-          ],
-          ["legacy", { provider: "claudeAgent" }],
-        ] as const) {
-          yield* sql`
+            for (const [turnId, payload] of [
+                [
+                    "verified",
+                    {
+                        provider: "claudeAgent",
+                        tokenAccountingVersion: 1,
+                        modelUsage: {
+                            "claude-fable-5": {
+                                inputTokens: 100,
+                                outputTokens: 40,
+                                cacheReadInputTokens: 800,
+                                cacheCreationInputTokens: 60,
+                                costUSD: 0.01,
+                                contextWindow: 200000,
+                                maxOutputTokens: 32000,
+                            },
+                        },
+                    },
+                ],
+                ["legacy", { provider: "claudeAgent" }],
+            ] as const) {
+                yield* sql `
           INSERT INTO projection_thread_activities
             (activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at)
           VALUES (${turnId}, 'thread-purge', ${turnId}, 'info', 'turn.completed', 'done',
             ${JSON.stringify(payload)}, 100, '2026-06-13T18:45:00Z')
         `;
-        }
-        yield* sql`
+            }
+            yield* sql `
         INSERT INTO profile_stats_claude_legacy_usage VALUES ('thread-purge', 'legacy', 500)
       `;
-        const before = yield* stats.getProfileTokenStats({ utcOffsetMinutes: 330 });
-        yield* archive.purgeThreadWithStatsSnapshot({
-          threadId: ThreadId.makeUnsafe("thread-purge"),
-        });
-        expect(yield* stats.getProfileTokenStats({ utcOffsetMinutes: 330 })).toEqual(before);
-        expect(
-          yield* sql`
+            const before = yield* stats.getProfileTokenStats({ utcOffsetMinutes: 330 });
+            yield* archive.purgeThreadWithStatsSnapshot({
+                threadId: ThreadId.makeUnsafe("thread-purge"),
+            });
+            expect(yield* stats.getProfileTokenStats({ utcOffsetMinutes: 330 })).toEqual(before);
+            expect(yield* sql `
         SELECT tokens, token_accounting_version AS version FROM profile_stats_deleted_tokens
         WHERE provider = 'claudeAgent' ORDER BY tokens
-      `,
-        ).toEqual([
-          { tokens: 500, version: 1 },
-          { tokens: 1000, version: 1 },
-        ]);
-        expect(yield* sql`SELECT * FROM profile_stats_claude_legacy_usage`).toEqual([]);
-      }),
-    );
-  });
-
-  it("leaves Claude results of automation dispatches out of the archive", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const stats = yield* ProfileStatsQuery;
-        const archive = yield* ProfileStatsArchive;
-        yield* seedTwoThreadsWithActivity;
-        yield* acknowledgeProviderCommandJournal(sql);
-        yield* sql`
+      `).toEqual([
+                { tokens: 500, version: 1 },
+                { tokens: 1000, version: 1 },
+            ]);
+            expect(yield* sql `SELECT * FROM profile_stats_claude_legacy_usage`).toEqual([]);
+        }));
+    });
+    it("leaves Claude results of automation dispatches out of the archive", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const stats = yield* ProfileStatsQuery;
+            const archive = yield* ProfileStatsArchive;
+            yield* seedTwoThreadsWithActivity;
+            yield* acknowledgeProviderCommandJournal(sql);
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id, thread_id, turn_id, role, text, is_streaming, source, dispatch_origin,
             created_at, updated_at
@@ -592,7 +520,7 @@ describe("ProfileStatsArchive", () => {
           VALUES ('m-auto', 'thread-purge', 'turn-auto', 'user', 'run', 0, 'native', 'automation',
             '2026-06-13T18:40:00.000Z', '2026-06-13T18:40:00.000Z')
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_turns (
             thread_id, turn_id, pending_message_id, state, requested_at, started_at, completed_at,
             checkpoint_files_json
@@ -600,41 +528,33 @@ describe("ProfileStatsArchive", () => {
           VALUES ('thread-purge', 'turn-auto', 'm-auto', 'completed', '2026-06-13T18:40:00.000Z',
             '2026-06-13T18:40:00.000Z', '2026-06-13T18:45:00.000Z', '[]')
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_activities
             (activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at)
           VALUES ('auto-result', 'thread-purge', 'turn-auto', 'info', 'turn.completed', 'done',
             '{"provider":"claudeAgent","tokenAccountingVersion":1,"mainLoopTokens":7000}',
             100, '2026-06-13T18:45:00Z')
         `;
-
-        const before = yield* stats.getProfileTokenStats({ utcOffsetMinutes: 330 });
-        yield* archive.purgeThreadWithStatsSnapshot({
-          threadId: ThreadId.makeUnsafe("thread-purge"),
-        });
-
-        expect(yield* stats.getProfileTokenStats({ utcOffsetMinutes: 330 })).toEqual(before);
-        expect(
-          yield* sql`SELECT tokens FROM profile_stats_deleted_tokens WHERE tokens = 7000`,
-        ).toEqual([]);
-      }),
-    );
-  });
-
-  it("purges a thread's rows while keeping every profile stat unchanged", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-        const archive = yield* ProfileStatsArchive;
-
-        yield* seedTwoThreadsWithActivity;
-        yield* sql`
+            const before = yield* stats.getProfileTokenStats({ utcOffsetMinutes: 330 });
+            yield* archive.purgeThreadWithStatsSnapshot({
+                threadId: ThreadId.makeUnsafe("thread-purge"),
+            });
+            expect(yield* stats.getProfileTokenStats({ utcOffsetMinutes: 330 })).toEqual(before);
+            expect(yield* sql `SELECT tokens FROM profile_stats_deleted_tokens WHERE tokens = 7000`).toEqual([]);
+        }));
+    });
+    it("purges a thread's rows while keeping every profile stat unchanged", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            const archive = yield* ProfileStatsArchive;
+            yield* seedTwoThreadsWithActivity;
+            yield* sql `
           INSERT INTO project_import_history (thread_id, revision, state_json)
           VALUES ('thread-purge', 1, '{"messages":["cached imported text"]}')
         `;
-        yield* acknowledgeProviderCommandJournal(sql);
-        yield* sql`
+            yield* acknowledgeProviderCommandJournal(sql);
+            yield* sql `
           INSERT INTO external_mcp_integrations (
             integration_id, name, audience, client_kind, credential_hash,
             capabilities_json, created_at, expires_at, rate_limit_per_minute,
@@ -645,7 +565,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T17:00:00.000Z', '2027-06-13T17:00:00.000Z', 60, 1
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO external_mcp_operations (
             operation_id, integration_id, request_id, fingerprint, requested_count,
             plan_json, status, result_json, created_at, updated_at
@@ -655,7 +575,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T17:01:00.000Z'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO external_mcp_tasks (
             integration_id, operation_id, request_id, thread_id, project_id,
             status, created_at, updated_at
@@ -665,40 +585,33 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T17:01:00.000Z'
           )
         `;
-
-        const statsBefore = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        const tokenStatsBefore = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-        expect(statsBefore.providerModels).toContainEqual(
-          expect.objectContaining({
-            provider: "opencode",
-            instanceId: "work",
-            model: "anthropic/claude-sonnet-4-6",
-          }),
-        );
-        expect(tokenStatsBefore.models).toContainEqual(
-          expect.objectContaining({
-            provider: "opencode",
-            instanceId: "work",
-            model: "anthropic/claude-sonnet-4-6",
-          }),
-        );
-        // Half-hour offset: the 18:45Z token activity lands on the NEXT local
-        // day for +05:30, so this catches any archive-side day re-bucketing drift.
-        const statsBeforeIst = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 330 });
-        const tokenStatsBeforeIst = yield* statsQuery.getProfileTokenStats({
-          utcOffsetMinutes: 330,
-        });
-
-        const purged = yield* archive.purgeThreadWithStatsSnapshot({ threadId: "thread-purge" });
-        expect(purged).toBe(true);
-
-        // Every row the purged thread owned is gone.
-        const remaining = yield* sql<{
-          readonly threads: number;
-          readonly messages: number;
-          readonly turns: number;
-          readonly importedHistory: number;
-        }>`
+            const statsBefore = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            const tokenStatsBefore = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(statsBefore.providerModels).toContainEqual(expect.objectContaining({
+                provider: "opencode",
+                instanceId: "work",
+                model: "anthropic/claude-sonnet-4-6",
+            }));
+            expect(tokenStatsBefore.models).toContainEqual(expect.objectContaining({
+                provider: "opencode",
+                instanceId: "work",
+                model: "anthropic/claude-sonnet-4-6",
+            }));
+            // Half-hour offset: the 18:45Z token activity lands on the NEXT local
+            // day for +05:30, so this catches any archive-side day re-bucketing drift.
+            const statsBeforeIst = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 330 });
+            const tokenStatsBeforeIst = yield* statsQuery.getProfileTokenStats({
+                utcOffsetMinutes: 330,
+            });
+            const purged = yield* archive.purgeThreadWithStatsSnapshot({ threadId: "thread-purge" });
+            expect(purged).toBe(true);
+            // Every row the purged thread owned is gone.
+            const remaining = yield* sql<{
+                readonly threads: number;
+                readonly messages: number;
+                readonly turns: number;
+                readonly importedHistory: number;
+            }> `
           SELECT
             (SELECT COUNT(*) FROM projection_threads WHERE thread_id = 'thread-purge') AS threads,
             (
@@ -709,14 +622,16 @@ describe("ProfileStatsArchive", () => {
             (SELECT COUNT(*) FROM projection_turns WHERE thread_id = 'thread-purge') AS turns,
             (SELECT COUNT(*) FROM project_import_history WHERE thread_id = 'thread-purge') AS "importedHistory"
         `;
-        expect(remaining[0]).toMatchObject({
-          threads: 0,
-          messages: 0,
-          turns: 0,
-          importedHistory: 0,
-        });
-        expect(
-          yield* sql<{ readonly status: string; readonly activeClaims: number }>`
+            expect(remaining[0]).toMatchObject({
+                threads: 0,
+                messages: 0,
+                turns: 0,
+                importedHistory: 0,
+            });
+            expect(yield* sql<{
+                readonly status: string;
+                readonly activeClaims: number;
+            }> `
             SELECT
               tasks.status,
               (
@@ -726,45 +641,28 @@ describe("ProfileStatsArchive", () => {
               ) AS activeClaims
             FROM external_mcp_tasks AS tasks
             WHERE tasks.thread_id = 'thread-purge'
-          `,
-        ).toEqual([{ status: "failed", activeClaims: 0 }]);
-        expect(deletedCheckpointRefCalls).toEqual([
-          {
-            cwd: "/work/archive",
-            checkpointRefs: [
-              "refs/historical/checkpoints/dGhyZWFkLXB1cmdl/turn/1",
-              String(
-                checkpointRefForThreadTurnStart(
-                  ThreadId.makeUnsafe("thread-purge"),
-                  TurnId.makeUnsafe("turn-purge-1"),
-                ),
-              ),
-              String(
-                checkpointRefForThreadTurnStart(
-                  ThreadId.makeUnsafe("thread-purge"),
-                  TurnId.makeUnsafe("turn-purge-2"),
-                ),
-              ),
-              String(
-                checkpointRefForThreadMessageStart(
-                  ThreadId.makeUnsafe("thread-purge"),
-                  MessageId.makeUnsafe("message-purge-1"),
-                ),
-              ),
-              String(
-                checkpointRefForThreadMessageStart(
-                  ThreadId.makeUnsafe("thread-purge"),
-                  MessageId.makeUnsafe("message-purge-2"),
-                ),
-              ),
-            ],
-          },
-        ]);
-        const remainingEvents = yield* sql<{ readonly count: number }>`
+          `).toEqual([{ status: "failed", activeClaims: 0 }]);
+            expect(deletedCheckpointRefCalls).toEqual([
+                {
+                    cwd: "/work/archive",
+                    checkpointRefs: [
+                        "refs/historical/checkpoints/dGhyZWFkLXB1cmdl/turn/1",
+                        String(checkpointRefForThreadTurnStart(ThreadId.makeUnsafe("thread-purge"), TurnId.makeUnsafe("turn-purge-1"))),
+                        String(checkpointRefForThreadTurnStart(ThreadId.makeUnsafe("thread-purge"), TurnId.makeUnsafe("turn-purge-2"))),
+                        String(checkpointRefForThreadMessageStart(ThreadId.makeUnsafe("thread-purge"), MessageId.makeUnsafe("message-purge-1"))),
+                        String(checkpointRefForThreadMessageStart(ThreadId.makeUnsafe("thread-purge"), MessageId.makeUnsafe("message-purge-2"))),
+                    ],
+                },
+            ]);
+            const remainingEvents = yield* sql<{
+                readonly count: number;
+            }> `
           SELECT COUNT(*) AS count FROM orchestration_events WHERE stream_id = 'thread-purge'
         `;
-        expect(remainingEvents[0]?.count).toBe(0);
-        const remainingReceipts = yield* sql<{ readonly commandId: string }>`
+            expect(remainingEvents[0]?.count).toBe(0);
+            const remainingReceipts = yield* sql<{
+                readonly commandId: string;
+            }> `
           SELECT command_id AS commandId
           FROM orchestration_command_receipts
           WHERE command_id IN (
@@ -775,85 +673,80 @@ describe("ProfileStatsArchive", () => {
           )
           ORDER BY command_id ASC
         `;
-        expect(remainingReceipts.map((row) => row.commandId)).toEqual([
-          "cmd-keep-turn",
-          "cmd-purge-create",
-          "cmd-purge-delete",
-          "cmd-purge-turn",
-        ]);
-        const remainingActivities = yield* sql<{ readonly count: number }>`
+            expect(remainingReceipts.map((row) => row.commandId)).toEqual([
+                "cmd-keep-turn",
+                "cmd-purge-create",
+                "cmd-purge-delete",
+                "cmd-purge-turn",
+            ]);
+            const remainingActivities = yield* sql<{
+                readonly count: number;
+            }> `
           SELECT COUNT(*) AS count
           FROM projection_thread_activities
           WHERE thread_id = 'thread-purge'
         `;
-        expect(remainingActivities[0]?.count).toBe(0);
-
-        // The Profile numbers do not move: the archive snapshot replaces the rows.
-        const statsAfter = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        const tokenStatsAfter = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-        expect(statsAfter.activity).toEqual(statsBefore.activity);
-        expect(statsAfter.activeHours).toEqual(statsBefore.activeHours);
-        expect(statsAfter.insights).toEqual(statsBefore.insights);
-        expect(statsAfter.providerModels).toEqual(statsBefore.providerModels);
-        expect(statsAfter.skills).toEqual(statsBefore.skills);
-        expect(statsAfter.mostWorkedProject).toEqual(statsBefore.mostWorkedProject);
-        expect(tokenStatsAfter).toEqual(tokenStatsBefore);
-
-        const statsAfterIst = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 330 });
-        const tokenStatsAfterIst = yield* statsQuery.getProfileTokenStats({
-          utcOffsetMinutes: 330,
-        });
-        expect(statsAfterIst.activity).toEqual(statsBeforeIst.activity);
-        expect(statsAfterIst.activeHours).toEqual(statsBeforeIst.activeHours);
-        expect(tokenStatsAfterIst).toEqual(tokenStatsBeforeIst);
-
-        // Re-purging an already purged thread is a no-op.
-        const purgedAgain = yield* archive.purgeThreadWithStatsSnapshot({
-          threadId: "thread-purge",
-        });
-        expect(purgedAgain).toBe(false);
-        const statsAfterRepurge = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        expect(statsAfterRepurge.activity).toEqual(statsBefore.activity);
-      }),
-    );
-  });
-
-  it("deletes terminal gateway plans and redacts live recovery plans with a purged caller", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const archive = yield* ProfileStatsArchive;
-        yield* seedTwoThreadsWithActivity;
-        yield* acknowledgeProviderCommandJournal(sql);
-
-        const livePlan = JSON.stringify([
-          {
-            index: 0,
-            spec: { prompt: "private live prompt", branchName: "agent/private" },
-            projectId: "project-archive",
-            workspaceRoot: "/work/archive",
-            environment: "worktree",
-            runtimeMode: "full-access",
-            baseBranch: "main",
-            newBranch: "agent/private",
-            plannedWorktreePath: "/worktrees/private",
-            ownershipPreflightPassed: true,
-            worktreeOwnership: {
-              operationId: "operation-live",
-              path: "/worktrees/private",
-              branch: "agent/private",
-              token: "private-owner-token",
-              gitDir: "/repo/.git/worktrees/private",
-              head: "0123456789abcdef",
-              recordedAt: "2026-06-14T10:06:00.000Z",
-            },
-            ids: {
-              threadId: "agent-private-child",
-              compensateCommandId: "delete-agent-private-child",
-            },
-          },
-        ]);
-        yield* sql`
+            expect(remainingActivities[0]?.count).toBe(0);
+            // The Profile numbers do not move: the archive snapshot replaces the rows.
+            const statsAfter = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            const tokenStatsAfter = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(statsAfter.activity).toEqual(statsBefore.activity);
+            expect(statsAfter.activeHours).toEqual(statsBefore.activeHours);
+            expect(statsAfter.insights).toEqual(statsBefore.insights);
+            expect(statsAfter.providerModels).toEqual(statsBefore.providerModels);
+            expect(statsAfter.skills).toEqual(statsBefore.skills);
+            expect(statsAfter.mostWorkedProject).toEqual(statsBefore.mostWorkedProject);
+            expect(tokenStatsAfter).toEqual(tokenStatsBefore);
+            const statsAfterIst = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 330 });
+            const tokenStatsAfterIst = yield* statsQuery.getProfileTokenStats({
+                utcOffsetMinutes: 330,
+            });
+            expect(statsAfterIst.activity).toEqual(statsBeforeIst.activity);
+            expect(statsAfterIst.activeHours).toEqual(statsBeforeIst.activeHours);
+            expect(tokenStatsAfterIst).toEqual(tokenStatsBeforeIst);
+            // Re-purging an already purged thread is a no-op.
+            const purgedAgain = yield* archive.purgeThreadWithStatsSnapshot({
+                threadId: "thread-purge",
+            });
+            expect(purgedAgain).toBe(false);
+            const statsAfterRepurge = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(statsAfterRepurge.activity).toEqual(statsBefore.activity);
+        }));
+    });
+    it("deletes terminal gateway plans and redacts live recovery plans with a purged caller", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const archive = yield* ProfileStatsArchive;
+            yield* seedTwoThreadsWithActivity;
+            yield* acknowledgeProviderCommandJournal(sql);
+            const livePlan = JSON.stringify([
+                {
+                    index: 0,
+                    spec: { prompt: "private live prompt", branchName: "agent/private" },
+                    projectId: "project-archive",
+                    workspaceRoot: "/work/archive",
+                    environment: "worktree",
+                    runtimeMode: "full-access",
+                    baseBranch: "main",
+                    newBranch: "agent/private",
+                    plannedWorktreePath: "/worktrees/private",
+                    ownershipPreflightPassed: true,
+                    worktreeOwnership: {
+                        operationId: "operation-live",
+                        path: "/worktrees/private",
+                        branch: "agent/private",
+                        token: "private-owner-token",
+                        gitDir: "/repo/.git/worktrees/private",
+                        head: "0123456789abcdef",
+                        recordedAt: "2026-06-14T10:06:00.000Z",
+                    },
+                    ids: {
+                        threadId: "agent-private-child",
+                        compensateCommandId: "delete-agent-private-child",
+                    },
+                },
+            ]);
+            yield* sql `
           INSERT INTO agent_gateway_operations (
             operation_id, caller_thread_id, caller_turn_id, operation_kind,
             request_id, fingerprint, requested_count, plan_json, status,
@@ -873,22 +766,19 @@ describe("ProfileStatsArchive", () => {
               '2026-06-14T10:06:00.000Z', '2026-06-14T10:06:00.000Z'
             )
         `;
-
-        expect(yield* archive.purgeThreadWithStatsSnapshot({ threadId: "thread-purge" })).toBe(
-          true,
-        );
-        const rows = yield* sql<{
-          readonly operationId: string;
-          readonly callerThreadId: string;
-          readonly callerTurnId: string;
-          readonly requestId: string;
-          readonly fingerprint: string;
-          readonly planJson: string;
-          readonly status: string;
-          readonly resultJson: string | null;
-          readonly errorJson: string | null;
-          readonly callerPurgedAt: string | null;
-        }>`
+            expect(yield* archive.purgeThreadWithStatsSnapshot({ threadId: "thread-purge" })).toBe(true);
+            const rows = yield* sql<{
+                readonly operationId: string;
+                readonly callerThreadId: string;
+                readonly callerTurnId: string;
+                readonly requestId: string;
+                readonly fingerprint: string;
+                readonly planJson: string;
+                readonly status: string;
+                readonly resultJson: string | null;
+                readonly errorJson: string | null;
+                readonly callerPurgedAt: string | null;
+            }> `
           SELECT
             operation_id AS "operationId", caller_thread_id AS "callerThreadId",
             caller_turn_id AS "callerTurnId", request_id AS "requestId", fingerprint,
@@ -897,68 +787,68 @@ describe("ProfileStatsArchive", () => {
           FROM agent_gateway_operations
           WHERE operation_id = 'operation-live'
         `;
-        expect(rows).toHaveLength(1);
-        expect(rows[0]).toMatchObject({
-          operationId: "operation-live",
-          callerThreadId: "purged-thread:operation-live",
-          callerTurnId: "purged-turn:operation-live",
-          requestId: "operation-live",
-          fingerprint: "operation-live",
-          status: "dispatching",
-          resultJson: null,
-          errorJson: null,
-          callerPurgedAt: expect.any(String),
-        });
-        const retainedCallerIds = yield* sql<{ readonly count: number }>`
+            expect(rows).toHaveLength(1);
+            expect(rows[0]).toMatchObject({
+                operationId: "operation-live",
+                callerThreadId: "purged-thread:operation-live",
+                callerTurnId: "purged-turn:operation-live",
+                requestId: "operation-live",
+                fingerprint: "operation-live",
+                status: "dispatching",
+                resultJson: null,
+                errorJson: null,
+                callerPurgedAt: expect.any(String),
+            });
+            const retainedCallerIds = yield* sql<{
+                readonly count: number;
+            }> `
           SELECT COUNT(*) AS count
           FROM agent_gateway_operations
           WHERE caller_thread_id = 'thread-purge'
              OR caller_turn_id IN ('turn-purge-terminal', 'turn-purge-live')
         `;
-        expect(retainedCallerIds[0]?.count).toBe(0);
-        expect(rows[0]!.planJson).not.toContain("private live prompt");
-        expect(rows[0]!.planJson).not.toContain("project-archive");
-        expect(JSON.parse(rows[0]!.planJson)[0]).toEqual({
-          workspaceRoot: "/work/archive",
-          environment: "worktree",
-          newBranch: "agent/private",
-          plannedWorktreePath: "/worktrees/private",
-          ownershipPreflightPassed: true,
-          worktreeOwnership: {
-            operationId: "operation-live",
-            path: "/worktrees/private",
-            branch: "agent/private",
-            token: "private-owner-token",
-            gitDir: "/repo/.git/worktrees/private",
-            head: "0123456789abcdef",
-            recordedAt: "2026-06-14T10:06:00.000Z",
-          },
-          ids: {
-            threadId: "agent-private-child",
-            compensateCommandId: "delete-agent-private-child",
-          },
-        });
-      }),
-    );
-  });
-
-  it("retains unresolved delivery evidence and purges only after explicit settlement", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const archive = yield* ProfileStatsArchive;
-
-        yield* seedTwoThreadsWithActivity;
-        yield* acknowledgeProviderCommandJournal(sql);
-        const sourceRows = yield* sql<{ readonly sequence: number }>`
+            expect(retainedCallerIds[0]?.count).toBe(0);
+            expect(rows[0]!.planJson).not.toContain("private live prompt");
+            expect(rows[0]!.planJson).not.toContain("project-archive");
+            expect(JSON.parse(rows[0]!.planJson)[0]).toEqual({
+                workspaceRoot: "/work/archive",
+                environment: "worktree",
+                newBranch: "agent/private",
+                plannedWorktreePath: "/worktrees/private",
+                ownershipPreflightPassed: true,
+                worktreeOwnership: {
+                    operationId: "operation-live",
+                    path: "/worktrees/private",
+                    branch: "agent/private",
+                    token: "private-owner-token",
+                    gitDir: "/repo/.git/worktrees/private",
+                    head: "0123456789abcdef",
+                    recordedAt: "2026-06-14T10:06:00.000Z",
+                },
+                ids: {
+                    threadId: "agent-private-child",
+                    compensateCommandId: "delete-agent-private-child",
+                },
+            });
+        }));
+    });
+    it("retains unresolved delivery evidence and purges only after explicit settlement", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const archive = yield* ProfileStatsArchive;
+            yield* seedTwoThreadsWithActivity;
+            yield* acknowledgeProviderCommandJournal(sql);
+            const sourceRows = yield* sql<{
+                readonly sequence: number;
+            }> `
           SELECT sequence
           FROM orchestration_events
           WHERE stream_id = 'thread-purge'
           ORDER BY sequence ASC
           LIMIT 1
         `;
-        const sourceSequence = sourceRows[0]!.sequence;
-        yield* sql`
+            const sourceSequence = sourceRows[0]!.sequence;
+            yield* sql `
           INSERT INTO orchestration_event_deliveries (
             consumer_name, event_sequence, thread_id, state,
             claim_owner, claimed_at, claim_expires_at, attempt_count,
@@ -969,12 +859,12 @@ describe("ProfileStatsArchive", () => {
             'Provider outcome requires reconciliation.', NULL, '2026-07-14T00:00:00.000Z'
           )
         `;
-
-        expect(yield* archive.hasThreadPurgeFence({ threadId: "thread-purge" })).toBe(true);
-        expect(yield* archive.purgeThreadWithStatsSnapshot({ threadId: "thread-purge" })).toBe(
-          false,
-        );
-        const retained = yield* sql<{ readonly threads: number; readonly deliveries: number }>`
+            expect(yield* archive.hasThreadPurgeFence({ threadId: "thread-purge" })).toBe(true);
+            expect(yield* archive.purgeThreadWithStatsSnapshot({ threadId: "thread-purge" })).toBe(false);
+            const retained = yield* sql<{
+                readonly threads: number;
+                readonly deliveries: number;
+            }> `
           SELECT
             (SELECT COUNT(*) FROM projection_threads WHERE thread_id = 'thread-purge') AS threads,
             (
@@ -982,16 +872,15 @@ describe("ProfileStatsArchive", () => {
               WHERE thread_id = 'thread-purge' AND state = 'uncertain'
             ) AS deliveries
         `;
-        expect(retained[0]).toEqual({ threads: 1, deliveries: 1 });
-
-        yield* sql`
+            expect(retained[0]).toEqual({ threads: 1, deliveries: 1 });
+            yield* sql `
           UPDATE orchestration_event_deliveries
           SET state = 'succeeded', completed_at = '2026-07-14T00:00:01.000Z',
               updated_at = '2026-07-14T00:00:01.000Z'
           WHERE consumer_name = ${PROVIDER_COMMAND_REACTOR_CONSUMER}
             AND event_sequence = ${sourceSequence}
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO queued_turn_promotions (
             queued_event_sequence, thread_id, message_id, dispatch_mode, state,
             claim_owner, claimed_at, claim_expires_at, attempt_count,
@@ -1003,15 +892,12 @@ describe("ProfileStatsArchive", () => {
             '2026-07-14T00:00:01.000Z'
           )
         `;
-
-        expect(yield* archive.hasThreadPurgeFence({ threadId: "thread-purge" })).toBe(false);
-        expect(yield* archive.purgeThreadWithStatsSnapshot({ threadId: "thread-purge" })).toBe(
-          true,
-        );
-        const purgedEvidence = yield* sql<{
-          readonly deliveries: number;
-          readonly promotions: number;
-        }>`
+            expect(yield* archive.hasThreadPurgeFence({ threadId: "thread-purge" })).toBe(false);
+            expect(yield* archive.purgeThreadWithStatsSnapshot({ threadId: "thread-purge" })).toBe(true);
+            const purgedEvidence = yield* sql<{
+                readonly deliveries: number;
+                readonly promotions: number;
+            }> `
           SELECT
             (
               SELECT COUNT(*) FROM orchestration_event_deliveries
@@ -1022,19 +908,15 @@ describe("ProfileStatsArchive", () => {
               WHERE thread_id = 'thread-purge'
             ) AS promotions
         `;
-        expect(purgedEvidence[0]).toEqual({ deliveries: 0, promotions: 0 });
-      }),
-    );
-  });
-
-  it("hard-deletes empty cleanup threads without archiving a lifetime tombstone", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-        const archive = yield* ProfileStatsArchive;
-
-        yield* sql`
+            expect(purgedEvidence[0]).toEqual({ deliveries: 0, promotions: 0 });
+        }));
+    });
+    it("hard-deletes empty cleanup threads without archiving a lifetime tombstone", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            const archive = yield* ProfileStatsArchive;
+            yield* sql `
           INSERT INTO projection_projects (
             project_id, title, workspace_root, scripts_json, created_at, updated_at, deleted_at
           )
@@ -1048,7 +930,7 @@ describe("ProfileStatsArchive", () => {
             NULL
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
@@ -1064,7 +946,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:05:00.000Z'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO profile_stats_deleted_threads (thread_id, project_id, deleted_at)
           VALUES (
             'thread-empty-cleanup',
@@ -1072,16 +954,16 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:05:00.000Z'
           )
         `;
-
-        const statsBefore = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        expect(statsBefore.activity.totalThreads).toBe(2);
-
-        const purged = yield* archive.purgeThreadWithStatsSnapshot({
-          threadId: "thread-empty-cleanup",
-        });
-        expect(purged).toBe(true);
-
-        const rows = yield* sql<{ readonly threads: number; readonly tombstones: number }>`
+            const statsBefore = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(statsBefore.activity.totalThreads).toBe(2);
+            const purged = yield* archive.purgeThreadWithStatsSnapshot({
+                threadId: "thread-empty-cleanup",
+            });
+            expect(purged).toBe(true);
+            const rows = yield* sql<{
+                readonly threads: number;
+                readonly tombstones: number;
+            }> `
           SELECT
             (
               SELECT COUNT(*)
@@ -1094,22 +976,17 @@ describe("ProfileStatsArchive", () => {
               WHERE thread_id = 'thread-empty-cleanup'
             ) AS tombstones
         `;
-        expect(rows[0]).toEqual({ threads: 0, tombstones: 0 });
-
-        const statsAfter = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        expect(statsAfter.activity.totalThreads).toBe(0);
-        expect(deletedCheckpointRefCalls).toEqual([]);
-      }),
-    );
-  });
-
-  it("deletes message-start checkpoint refs when no turn checkpoint row exists yet", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const archive = yield* ProfileStatsArchive;
-
-        yield* sql`
+            expect(rows[0]).toEqual({ threads: 0, tombstones: 0 });
+            const statsAfter = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(statsAfter.activity.totalThreads).toBe(0);
+            expect(deletedCheckpointRefCalls).toEqual([]);
+        }));
+    });
+    it("deletes message-start checkpoint refs when no turn checkpoint row exists yet", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const archive = yield* ProfileStatsArchive;
+            yield* sql `
           INSERT INTO projection_projects (
             project_id, title, workspace_root, scripts_json, created_at, updated_at, deleted_at
           )
@@ -1123,7 +1000,7 @@ describe("ProfileStatsArchive", () => {
             NULL
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
@@ -1139,7 +1016,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:05:00.000Z'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id, thread_id, turn_id, role, text, is_streaming, source,
             created_at, updated_at
@@ -1156,7 +1033,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:01:00.000Z'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_turns (
             thread_id, turn_id, pending_message_id, assistant_message_id, state,
             requested_at, started_at, completed_at, checkpoint_turn_count,
@@ -1168,26 +1045,22 @@ describe("ProfileStatsArchive", () => {
             NULL, NULL, '[]'
           )
         `;
-
-        const purged = yield* archive.purgeThreadWithStatsSnapshot({
-          threadId: "thread-message-checkpoint",
-        });
-
-        expect(purged).toBe(true);
-        expect(deletedCheckpointRefCalls).toEqual([
-          {
-            cwd: "/work/message-checkpoint",
-            checkpointRefs: [
-              String(
-                checkpointRefForThreadMessageStart(
-                  ThreadId.makeUnsafe("thread-message-checkpoint"),
-                  MessageId.makeUnsafe("message-pending-checkpoint"),
-                ),
-              ),
-            ],
-          },
-        ]);
-        const remainingRows = yield* sql<{ readonly messages: number; readonly turns: number }>`
+            const purged = yield* archive.purgeThreadWithStatsSnapshot({
+                threadId: "thread-message-checkpoint",
+            });
+            expect(purged).toBe(true);
+            expect(deletedCheckpointRefCalls).toEqual([
+                {
+                    cwd: "/work/message-checkpoint",
+                    checkpointRefs: [
+                        String(checkpointRefForThreadMessageStart(ThreadId.makeUnsafe("thread-message-checkpoint"), MessageId.makeUnsafe("message-pending-checkpoint"))),
+                    ],
+                },
+            ]);
+            const remainingRows = yield* sql<{
+                readonly messages: number;
+                readonly turns: number;
+            }> `
           SELECT
             (
               SELECT COUNT(*)
@@ -1200,19 +1073,15 @@ describe("ProfileStatsArchive", () => {
               WHERE thread_id = 'thread-message-checkpoint'
             ) AS turns
         `;
-        expect(remainingRows[0]).toEqual({ messages: 0, turns: 0 });
-      }),
-    );
-  });
-
-  it("purges thread rows when checkpoint cleanup workspace is stale", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const archive = yield* ProfileStatsArchive;
-        isGitRepositoryImpl = () => Effect.succeed(false);
-
-        yield* sql`
+            expect(remainingRows[0]).toEqual({ messages: 0, turns: 0 });
+        }));
+    });
+    it("purges thread rows when checkpoint cleanup workspace is stale", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const archive = yield* ProfileStatsArchive;
+            isGitRepositoryImpl = () => Effect.succeed(false);
+            yield* sql `
           INSERT INTO projection_projects (
             project_id, title, workspace_root, scripts_json, created_at, updated_at, deleted_at
           )
@@ -1226,7 +1095,7 @@ describe("ProfileStatsArchive", () => {
             NULL
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
@@ -1242,7 +1111,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:05:00.000Z'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id, thread_id, turn_id, role, text, is_streaming, source,
             created_at, updated_at
@@ -1259,7 +1128,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:01:00.000Z'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_turns (
             thread_id, turn_id, pending_message_id, assistant_message_id, state,
             requested_at, started_at, completed_at, checkpoint_turn_count,
@@ -1280,7 +1149,7 @@ describe("ProfileStatsArchive", () => {
             '[]'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO checkpoint_diff_blobs (
             thread_id, from_turn_count, to_turn_count, diff, created_at
           )
@@ -1292,19 +1161,17 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:02:00.000Z'
           )
         `;
-
-        const purged = yield* archive.purgeThreadWithStatsSnapshot({
-          threadId: "thread-stale-checkpoint",
-        });
-
-        expect(purged).toBe(true);
-        expect(deletedCheckpointRefCalls).toEqual([]);
-        const rows = yield* sql<{
-          readonly threads: number;
-          readonly messages: number;
-          readonly turns: number;
-          readonly diffBlobs: number;
-        }>`
+            const purged = yield* archive.purgeThreadWithStatsSnapshot({
+                threadId: "thread-stale-checkpoint",
+            });
+            expect(purged).toBe(true);
+            expect(deletedCheckpointRefCalls).toEqual([]);
+            const rows = yield* sql<{
+                readonly threads: number;
+                readonly messages: number;
+                readonly turns: number;
+                readonly diffBlobs: number;
+            }> `
           SELECT
             (
               SELECT COUNT(*)
@@ -1327,18 +1194,14 @@ describe("ProfileStatsArchive", () => {
               WHERE thread_id = 'thread-stale-checkpoint'
             ) AS diffBlobs
         `;
-        expect(rows[0]).toEqual({ threads: 0, messages: 0, turns: 0, diffBlobs: 0 });
-      }),
-    );
-  });
-
-  it("keeps checkpoint refs when the database purge transaction fails", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const archive = yield* ProfileStatsArchive;
-
-        yield* sql`
+            expect(rows[0]).toEqual({ threads: 0, messages: 0, turns: 0, diffBlobs: 0 });
+        }));
+    });
+    it("keeps checkpoint refs when the database purge transaction fails", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const archive = yield* ProfileStatsArchive;
+            yield* sql `
           INSERT INTO projection_projects (
             project_id, title, workspace_root, scripts_json, created_at, updated_at, deleted_at
           )
@@ -1352,7 +1215,7 @@ describe("ProfileStatsArchive", () => {
             NULL
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
@@ -1368,7 +1231,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:05:00.000Z'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_turns (
             thread_id, turn_id, pending_message_id, assistant_message_id, state,
             requested_at, started_at, completed_at, checkpoint_turn_count,
@@ -1389,15 +1252,14 @@ describe("ProfileStatsArchive", () => {
             '[]'
           )
         `;
-
-        yield* sql`DROP TABLE profile_stats_deleted_threads`;
-        const exit = yield* Effect.exit(
-          archive.purgeThreadWithStatsSnapshot({ threadId: "thread-failed-purge" }),
-        );
-
-        expect(exit._tag).toBe("Failure");
-        expect(deletedCheckpointRefCalls).toEqual([]);
-        const rows = yield* sql<{ readonly threads: number; readonly turns: number }>`
+            yield* sql `DROP TABLE profile_stats_deleted_threads`;
+            const exit = yield* Effect.exit(archive.purgeThreadWithStatsSnapshot({ threadId: "thread-failed-purge" }));
+            expect(exit._tag).toBe("Failure");
+            expect(deletedCheckpointRefCalls).toEqual([]);
+            const rows = yield* sql<{
+                readonly threads: number;
+                readonly turns: number;
+            }> `
           SELECT
             (
               SELECT COUNT(*)
@@ -1410,18 +1272,14 @@ describe("ProfileStatsArchive", () => {
               WHERE thread_id = 'thread-failed-purge'
             ) AS turns
         `;
-        expect(rows[0]).toEqual({ threads: 1, turns: 1 });
-      }),
-    );
-  });
-
-  it("interrupts active automation runs before deleting the thread shell", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const archive = yield* ProfileStatsArchive;
-
-        yield* sql`
+            expect(rows[0]).toEqual({ threads: 1, turns: 1 });
+        }));
+    });
+    it("interrupts active automation runs before deleting the thread shell", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const archive = yield* ProfileStatsArchive;
+            yield* sql `
           INSERT INTO projection_projects (
             project_id, title, workspace_root, scripts_json, created_at, updated_at, deleted_at
           )
@@ -1435,7 +1293,7 @@ describe("ProfileStatsArchive", () => {
             NULL
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
@@ -1451,7 +1309,7 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:05:00.000Z'
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO automation_definitions (
             automation_id, project_id, source_thread_id, name, prompt, schedule_json,
             enabled, next_run_at, model_selection_json, provider_options_json, runtime_mode,
@@ -1493,7 +1351,7 @@ describe("ProfileStatsArchive", () => {
             NULL
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO automation_runs (
             run_id, automation_id, project_id, thread_id, turn_id, trigger_type, status,
             scheduled_for, claimed_by, claimed_at, lease_expires_at, started_at, finished_at,
@@ -1524,21 +1382,19 @@ describe("ProfileStatsArchive", () => {
             '2026-06-13T09:00:10.000Z'
           )
         `;
-
-        const purged = yield* archive.purgeThreadWithStatsSnapshot({
-          threadId: "thread-automation-purge",
-        });
-
-        expect(purged).toBe(true);
-        const rows = yield* sql<{
-          readonly threads: number;
-          readonly runStatus: string;
-          readonly error: string | null;
-          readonly resultJson: string | null;
-          readonly finishedAt: string | null;
-          readonly claimedBy: string | null;
-          readonly leaseExpiresAt: string | null;
-        }>`
+            const purged = yield* archive.purgeThreadWithStatsSnapshot({
+                threadId: "thread-automation-purge",
+            });
+            expect(purged).toBe(true);
+            const rows = yield* sql<{
+                readonly threads: number;
+                readonly runStatus: string;
+                readonly error: string | null;
+                readonly resultJson: string | null;
+                readonly finishedAt: string | null;
+                readonly claimedBy: string | null;
+                readonly leaseExpiresAt: string | null;
+            }> `
           SELECT
             (
               SELECT COUNT(*)
@@ -1554,36 +1410,32 @@ describe("ProfileStatsArchive", () => {
           FROM automation_runs
           WHERE run_id = 'run-automation-purge'
         `;
-        const result = JSON.parse(rows[0]?.resultJson ?? "null") as {
-          readonly outcome?: string;
-          readonly severity?: string;
-          readonly summary?: string;
-        } | null;
-        expect(rows[0]).toMatchObject({
-          threads: 0,
-          runStatus: "interrupted",
-          error: "Automation run was interrupted because its thread was deleted.",
-          finishedAt: "2026-06-13T09:05:00.000Z",
-          claimedBy: null,
-          leaseExpiresAt: null,
-        });
-        expect(result).toMatchObject({
-          outcome: "needs-attention",
-          severity: "warning",
-          summary: "Automation run was interrupted because its thread was deleted.",
-        });
-      }),
-    );
-  });
-
-  it("sweeps manually soft-deleted threads but leaves retention-hidden ones in place", async () => {
-    await runArchiveTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-        const archive = yield* ProfileStatsArchive;
-
-        yield* sql`
+            const result = JSON.parse(rows[0]?.resultJson ?? "null") as {
+                readonly outcome?: string;
+                readonly severity?: string;
+                readonly summary?: string;
+            } | null;
+            expect(rows[0]).toMatchObject({
+                threads: 0,
+                runStatus: "interrupted",
+                error: "Automation run was interrupted because its thread was deleted.",
+                finishedAt: "2026-06-13T09:05:00.000Z",
+                claimedBy: null,
+                leaseExpiresAt: null,
+            });
+            expect(result).toMatchObject({
+                outcome: "needs-attention",
+                severity: "warning",
+                summary: "Automation run was interrupted because its thread was deleted.",
+            });
+        }));
+    });
+    it("sweeps manually soft-deleted threads but leaves retention-hidden ones in place", async () => {
+        await runArchiveTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            const archive = yield* ProfileStatsArchive;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
@@ -1607,8 +1459,7 @@ describe("ProfileStatsArchive", () => {
               '2026-06-08T09:00:00.000Z', '2026-06-08T09:00:00.000Z', '2026-06-15T09:00:00.000Z'
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id, thread_id, turn_id, role, text, is_streaming, source,
             created_at, updated_at
@@ -1624,8 +1475,7 @@ describe("ProfileStatsArchive", () => {
               0, 'native', '2026-06-08T09:05:00.000Z', '2026-06-08T09:05:00.000Z'
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id, aggregate_kind, stream_id, stream_version, event_type,
             occurred_at, command_id, actor_kind, payload_json, metadata_json
@@ -1642,52 +1492,50 @@ describe("ProfileStatsArchive", () => {
               '{"threadId":"thread-retention","deletedAt":"2026-06-15T09:00:00.000Z"}', '{}'
             )
         `;
-        // The purge fence blocks while provider-intent events (thread.deleted
-        // included) are still unconsumed; a real sweep only runs after the
-        // reactor has acked them.
-        yield* acknowledgeProviderCommandJournal(sql);
-
-        const statsBefore = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        expect(statsBefore.activity.totalPromptsSent).toBe(2);
-        expect(statsBefore.activity.totalThreads).toBe(3);
-
-        const deferredThreadIds: string[] = [];
-        const deferredCount = yield* archive.purgeSoftDeletedManualThreads({
-          beforePurge: (threadId) =>
-            Effect.sync(() => {
-              deferredThreadIds.push(threadId);
-              return false;
-            }),
-        });
-        expect(deferredCount).toBe(0);
-        expect(deferredThreadIds).toEqual(["thread-manual"]);
-
-        const threadsAfterDeferred = yield* sql<{ readonly threadId: string }>`
+            // The purge fence blocks while provider-intent events (thread.deleted
+            // included) are still unconsumed; a real sweep only runs after the
+            // reactor has acked them.
+            yield* acknowledgeProviderCommandJournal(sql);
+            const statsBefore = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(statsBefore.activity.totalPromptsSent).toBe(2);
+            expect(statsBefore.activity.totalThreads).toBe(3);
+            const deferredThreadIds: string[] = [];
+            const deferredCount = yield* archive.purgeSoftDeletedManualThreads({
+                beforePurge: (threadId) => Effect.sync(() => {
+                    deferredThreadIds.push(threadId);
+                    return false;
+                }),
+            });
+            expect(deferredCount).toBe(0);
+            expect(deferredThreadIds).toEqual(["thread-manual"]);
+            const threadsAfterDeferred = yield* sql<{
+                readonly threadId: string;
+            }> `
           SELECT thread_id AS threadId FROM projection_threads ORDER BY thread_id ASC
         `;
-        expect(threadsAfterDeferred.map((row) => row.threadId)).toEqual([
-          "thread-live",
-          "thread-manual",
-          "thread-retention",
-        ]);
-
-        const purgedCount = yield* archive.purgeSoftDeletedManualThreads();
-        expect(purgedCount).toBe(1);
-
-        const threadRows = yield* sql<{ readonly threadId: string }>`
+            expect(threadsAfterDeferred.map((row) => row.threadId)).toEqual([
+                "thread-live",
+                "thread-manual",
+                "thread-retention",
+            ]);
+            const purgedCount = yield* archive.purgeSoftDeletedManualThreads();
+            expect(purgedCount).toBe(1);
+            const threadRows = yield* sql<{
+                readonly threadId: string;
+            }> `
           SELECT thread_id AS threadId FROM projection_threads ORDER BY thread_id ASC
         `;
-        expect(threadRows.map((row) => row.threadId)).toEqual(["thread-live", "thread-retention"]);
-        const tombstones = yield* sql<{ readonly threadId: string }>`
+            expect(threadRows.map((row) => row.threadId)).toEqual(["thread-live", "thread-retention"]);
+            const tombstones = yield* sql<{
+                readonly threadId: string;
+            }> `
           SELECT thread_id AS threadId FROM profile_stats_deleted_threads
         `;
-        expect(tombstones.map((row) => row.threadId)).toEqual(["thread-manual"]);
-
-        // Lifetime totals survive: retention rows stay live, manual work is archived.
-        const statsAfter = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        expect(statsAfter.activity.totalPromptsSent).toBe(2);
-        expect(statsAfter.activity.totalThreads).toBe(3);
-      }),
-    );
-  });
+            expect(tombstones.map((row) => row.threadId)).toEqual(["thread-manual"]);
+            // Lifetime totals survive: retention rows stay live, manual work is archived.
+            const statsAfter = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(statsAfter.activity.totalPromptsSent).toBe(2);
+            expect(statsAfter.activity.totalThreads).toBe(3);
+        }));
+    });
 });

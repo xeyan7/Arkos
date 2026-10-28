@@ -1,10 +1,4 @@
-import type {
-  GitHubViewerInvolvement,
-  PullRequestActor,
-  PullRequestListEntry,
-  PullRequestMergeCapabilities,
-  PullRequestMergeMethod,
-} from "@arkos/contracts";
+import type { GitHubViewerInvolvement, PullRequestActor, PullRequestListEntry, PullRequestMergeCapabilities, PullRequestMergeMethod } from "@arkos/contracts";
 
 import type { GitHubInboxPullRequest } from "./git/Services/GitHubCli.ts";
 export { isValidGitHubRepositoryNameWithOwner } from "@arkos/shared/githubRepository";

@@ -7,41 +7,22 @@
 // `apps/server/src/betaImport.ts`) and reports back through
 // `<betaHome>/import-result.json`, which this module reads for the UI.
 
+// FILE: betaChannel.ts
+// Purpose: Stable-side probe + handoff into a parallel Arkos Beta install.
+// Layer: Desktop platform adapter (no Electron imports; every path is injectable for tests).
+//
+// Flow: stable writes `<betaHome>/import-requested.json` and launches the beta
+// app; the beta server consumes the marker at startup (see
+// `apps/server/src/betaImport.ts`) and reports back through
+// `<betaHome>/import-result.json`, which this module reads for the UI.
 import { spawn, execFileSync } from "node:child_process";
-import {
-  existsSync,
-  readFileSync,
-  mkdirSync,
-  renameSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, readFileSync, mkdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { delimiter, isAbsolute, join, resolve } from "node:path";
 
-import {
-  BETA_IMPORT_REQUEST_FILE_NAME,
-  BETA_IMPORT_RESULT_FILE_NAME,
-  ARKOS_BETA_HOME_DIR_NAME,
-  ARKOS_BETA_HOME_ENV,
-  ARKOS_BETA_INSTALL_DIR_ENV,
-  ARKOS_BETA_RELEASES_URL_ENV,
-  ARKOS_BETA_USER_DATA_ENV,
-  ARKOS_BETA_WINDOWS_INSTALLER_GUID,
-  ARKOS_STABLE_EXECUTABLE_ENV,
-  ARKOS_STABLE_HOME_ENV,
-  ARKOS_STABLE_RELEASES_URL_ENV,
-  ARKOS_STABLE_WINDOWS_INSTALLER_GUID,
-  type BetaImportResult,
-} from "@arkos/shared/betaChannel";
+import { BETA_IMPORT_REQUEST_FILE_NAME, BETA_IMPORT_RESULT_FILE_NAME, ARKOS_BETA_HOME_DIR_NAME, ARKOS_BETA_HOME_ENV, ARKOS_BETA_INSTALL_DIR_ENV, ARKOS_BETA_RELEASES_URL_ENV, ARKOS_BETA_USER_DATA_ENV, ARKOS_BETA_WINDOWS_INSTALLER_GUID, ARKOS_STABLE_EXECUTABLE_ENV, ARKOS_STABLE_HOME_ENV, ARKOS_STABLE_RELEASES_URL_ENV, ARKOS_STABLE_WINDOWS_INSTALLER_GUID, type BetaImportResult } from "@arkos/shared/betaChannel";
 import { ARKOS_DESKTOP_SMOKE_USER_DATA_ENV } from "@arkos/shared/desktopIdentity";
-import type {
-  DesktopBetaActionError,
-  DesktopBetaActionResult,
-  DesktopBetaChannelState,
-  DesktopBetaInstallProgress,
-} from "@arkos/contracts";
+import type { DesktopBetaActionError, DesktopBetaActionResult, DesktopBetaChannelState, DesktopBetaInstallProgress } from "@arkos/contracts";
 
 import { installBetaFromFeed, type BetaInstallDeps, type ExpectedTeamId } from "./betaInstaller";
 

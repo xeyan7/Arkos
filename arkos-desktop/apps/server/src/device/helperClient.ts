@@ -24,6 +24,32 @@
  *
  * @module device/helperClient
  */
+/**
+ * HelperClient - the only module that knows the native device-helper's wire
+ * protocol.
+ *
+ * The helper is a Swift process compiled on demand against the user's Xcode
+ * (private CoreSimulator/SimulatorKit frameworks, so it cannot ship prebuilt).
+ * It speaks two channels:
+ *
+ * - Control: newline-delimited JSON-RPC 2.0 over stdin/stdout. Requests carry
+ *   an integer id; responses carry `result` or `error`. It also emits a `ready`
+ *   notification at startup.
+ * - Frames: the server listens on a unix socket and passes its path to
+ *   `stream.start`; the helper connects as a client and writes
+ *   `u32 little-endian length` followed by that many bytes. Those bytes are
+ *   already the `@arkos/contracts` device-frame envelope, so this module only
+ *   removes the length prefix and hands the envelope on untouched.
+ *
+ * Two protocol facts that shape callers:
+ *
+ * - The helper attaches to one simulator at a time (`attach`), and every input,
+ *   read, and stream method acts on that attachment rather than taking a udid.
+ * - Input coordinates are normalized to 0..1, not device points. Conversion
+ *   uses the geometry `attach` returns.
+ *
+ * @module device/helperClient
+ */
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { createServer, type Server, type Socket } from "node:net";
@@ -31,17 +57,8 @@ import { tmpdir } from "node:os";
 import * as path from "node:path";
 
 import { decodeDeviceFrame } from "@arkos/shared/deviceFrame";
-import {
-  encodeLengthPrefixedRecord,
-  LengthPrefixedRecordError,
-  LengthPrefixedRecordParser,
-} from "@arkos/shared/lengthPrefixedRecords";
-import {
-  JsonRpcStdioFramer,
-  JsonRpcStdioRequestRegistry,
-  JsonRpcStdioTransportError,
-  JsonRpcStdioWriter,
-} from "@arkos/shared/jsonrpc-stdio";
+import { encodeLengthPrefixedRecord, LengthPrefixedRecordError, LengthPrefixedRecordParser } from "@arkos/shared/lengthPrefixedRecords";
+import { JsonRpcStdioFramer, JsonRpcStdioRequestRegistry, JsonRpcStdioTransportError, JsonRpcStdioWriter } from "@arkos/shared/jsonrpc-stdio";
 
 import type { DeviceStreamFrame } from "./DeviceBackend.ts";
 import { describeSandboxSuspicion, type HelperSandboxCommand } from "./helperSandbox.ts";

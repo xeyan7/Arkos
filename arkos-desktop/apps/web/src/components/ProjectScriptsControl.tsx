@@ -1,59 +1,16 @@
-import type {
-  ProjectScript,
-  ProjectScriptIcon,
-  ResolvedKeybindingsConfig,
-} from "@arkos/contracts";
-import {
-  BugIcon,
-  ChevronDownIcon,
-  FlaskConicalIcon,
-  HammerIcon,
-  ListChecksIcon,
-  PlayIcon,
-  PlusIcon,
-  PlusSignIcon,
-  SettingsIcon,
-} from "~/lib/icons";
+import type { ProjectScript, ProjectScriptIcon, ResolvedKeybindingsConfig } from "@arkos/contracts";
+import { BugIcon, ChevronDownIcon, FlaskConicalIcon, HammerIcon, ListChecksIcon, PlayIcon, PlusIcon, PlusSignIcon, SettingsIcon } from "~/lib/icons";
 import React, { type FormEvent, type KeyboardEvent, useCallback, useMemo, useState } from "react";
 
-import {
-  keybindingValueForCommand,
-  decodeProjectScriptKeybindingRule,
-} from "~/lib/projectScriptKeybindings";
-import {
-  commandForProjectScript,
-  nextProjectScriptId,
-  primaryProjectScript,
-} from "~/projectScripts";
+import { keybindingValueForCommand, decodeProjectScriptKeybindingRule } from "~/lib/projectScriptKeybindings";
+import { commandForProjectScript, nextProjectScriptId, primaryProjectScript } from "~/projectScripts";
 import { shortcutLabelForCommand } from "~/keybindings";
 import { keybindingFromKeyboardEvent } from "~/lib/keybindingCapture";
-import {
-  AlertDialog,
-  AlertDialogClose,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogPopup,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
+import { AlertDialog, AlertDialogClose, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
-import {
-  CHAT_HEADER_SPLIT_LEADING_CLASS_NAME,
-  CHAT_HEADER_SPLIT_TRAILING_CLASS_NAME,
-  ChatHeaderIconButton,
-  ChatHeaderSplitDivider,
-  ChatHeaderSplitGroup,
-} from "./chat/chatHeaderControls";
+import { CHAT_HEADER_SPLIT_LEADING_CLASS_NAME, CHAT_HEADER_SPLIT_TRAILING_CLASS_NAME, ChatHeaderIconButton, ChatHeaderSplitDivider, ChatHeaderSplitGroup } from "./chat/chatHeaderControls";
 import { ComposerPickerMenuPopup } from "./chat/ComposerPickerMenuPopup";
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-} from "./ui/dialog";
+import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogPopup, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Menu, MenuItem, MenuShortcut, MenuTrigger } from "./ui/menu";

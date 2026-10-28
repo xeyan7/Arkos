@@ -3,6 +3,10 @@
 //          control denied): status tile, title, description, and one action button.
 // Layer: Chat transcript UI
 
+// FILE: ComputerActionCard.tsx
+// Purpose: Shared transcript card shell for Computer control notices (setup required,
+//          control denied): status tile, title, description, and one action button.
+// Layer: Chat transcript UI
 import type { ReactNode } from "react";
 
 import { Button } from "~/components/ui/button";

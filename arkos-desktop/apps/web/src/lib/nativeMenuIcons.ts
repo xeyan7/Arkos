@@ -4,6 +4,11 @@
 // Exports: withNativeMenuIcons, isInlineSvgMenuIcon
 // Depends on: Central icon asset URLs and DOM canvas rasterization.
 
+// FILE: nativeMenuIcons.ts
+// Purpose: Rasterize Central icons or inline SVG into PNG template images for native context menus.
+// Layer: web platform utility
+// Exports: withNativeMenuIcons, isInlineSvgMenuIcon
+// Depends on: Central icon asset URLs and DOM canvas rasterization.
 import type { ContextMenuItem, DesktopContextMenuItem } from "@arkos/contracts";
 import { getCentralIconUrl } from "./central-icons";
 

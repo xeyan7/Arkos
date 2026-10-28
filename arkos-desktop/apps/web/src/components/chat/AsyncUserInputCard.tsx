@@ -1,13 +1,7 @@
 import type { AsyncUserInput, MessageId, UserInputQuestion } from "@arkos/contracts";
 import { useMemo, useRef, useState } from "react";
 import { CircleQuestionIcon, CheckIcon } from "~/lib/icons";
-import {
-  buildPendingUserInputAnswers,
-  derivePendingUserInputProgress,
-  setPendingUserInputCustomAnswer,
-  togglePendingUserInputOptionSelection,
-  type PendingUserInputDraftAnswer,
-} from "../../pendingUserInput";
+import { buildPendingUserInputAnswers, derivePendingUserInputProgress, setPendingUserInputCustomAnswer, togglePendingUserInputOptionSelection, type PendingUserInputDraftAnswer } from "../../pendingUserInput";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "../ui/collapsible";
 import { Textarea } from "../ui/textarea";

@@ -8,20 +8,21 @@
 // Layer: Pull request presentation
 // Exports: PullRequestList
 
+// FILE: PullRequestList.tsx
+// Purpose: The GitHub inbox list body — Pinned, then All (or the involvement sections), built
+//          from the sidebar's own list sections: each shows its first page of rows with "Show
+//          more" / "Show less". Pinned and All stay open; involvement sections fold behind their
+//          label. All shows its label only under Pinned, so an unpinned list reads like GitHub's. Rows use repository + number identity because the
+//          list has one row per remote item; selection still retains project context for the
+//          detail.
+// Layer: Pull request presentation
+// Exports: PullRequestList
 import type { GitHubInboxItem, GitHubInboxSort, ProjectId } from "@arkos/contracts";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { resolveSidebarThreadListPaging } from "~/components/Sidebar.logic";
-import {
-  SidebarCollapsibleSection,
-  SidebarSectionLabel,
-  SidebarShowMoreRow,
-} from "~/components/SidebarListSection";
-import {
-  pullRequestListEntryKey,
-  type PullRequestListGroup,
-  type PullRequestListGroupKey,
-} from "./pullRequestList.logic";
+import { SidebarCollapsibleSection, SidebarSectionLabel, SidebarShowMoreRow } from "~/components/SidebarListSection";
+import { pullRequestListEntryKey, type PullRequestListGroup, type PullRequestListGroupKey } from "./pullRequestList.logic";
 import { PullRequestRow } from "./PullRequestRow";
 
 /** Rows a section shows first, and how many each "Show more" adds. */

@@ -5,19 +5,19 @@
 // Layer: Inbox UI
 // Exports: InboxTaskList, Group
 
+// FILE: InboxTaskList.tsx
+// Purpose: The Inbox's task column: Needs you, In progress, Ready for review, and Failed
+//          groups of threads (plus pull requests and automation runs waiting on the user).
+//          Empty groups never render; the column is left out entirely when all are empty.
+// Layer: Inbox UI
+// Exports: InboxTaskList, Group
 import type { ThreadId } from "@arkos/contracts";
 import { pluralize } from "@arkos/shared/text";
 import { useId, type DragEvent, type ReactNode } from "react";
 
 import { Spinner } from "~/components/ui/spinner";
 import { beginThreadDrag, endThreadDrag } from "~/lib/threadDrag";
-import {
-  CircleAlertIcon,
-  CircleCheckIcon,
-  ClockIcon,
-  GitPullRequestIcon,
-  XIcon,
-} from "~/lib/icons";
+import { CircleAlertIcon, CircleCheckIcon, ClockIcon, GitPullRequestIcon, XIcon } from "~/lib/icons";
 import { formatRelativeTime } from "~/lib/relativeTime";
 import { resolveThreadDisplayProvider } from "~/lib/threadDisplayProvider";
 import { cn } from "~/lib/utils";

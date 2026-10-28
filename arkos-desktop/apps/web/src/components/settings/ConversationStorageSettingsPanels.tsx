@@ -3,6 +3,10 @@
 // Layer: Settings UI components
 // Exports: WorktreesSettingsPanel, ArchivedSettingsPanel
 
+// FILE: ConversationStorageSettingsPanels.tsx
+// Purpose: Own settings panels for managed worktrees and archived conversations.
+// Layer: Settings UI components
+// Exports: WorktreesSettingsPanel, ArchivedSettingsPanel
 import type { ThreadId } from "@arkos/contracts";
 import { pluralize } from "@arkos/shared/text";
 import { collectSubagentDescendants } from "@arkos/shared/threadHierarchy";

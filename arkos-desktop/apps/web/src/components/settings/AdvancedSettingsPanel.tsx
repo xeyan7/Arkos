@@ -3,6 +3,10 @@
 // Layer: Settings UI components
 // Exports: AdvancedSettingsPanel
 
+// FILE: AdvancedSettingsPanel.tsx
+// Purpose: Own advanced settings state and workflows for auth, keybindings, and recovery.
+// Layer: Settings UI components
+// Exports: AdvancedSettingsPanel
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 

@@ -1,18 +1,8 @@
 import { PROVIDER_SEND_TURN_MAX_ATTACHMENTS } from "@arkos/contracts";
 import { readNativeApi } from "~/nativeApi";
-import {
-  type ComposerAssistantSelectionAttachment,
-  type ComposerFileAttachment,
-  type ComposerImageAttachment,
-} from "../../composerDraftStore";
-import {
-  maybeResolveBrowserPromptAttachment,
-  type BrowserPromptAttachmentResolution,
-} from "../../lib/browserPromptContext";
-import {
-  maybeResolveDevicePromptAttachment,
-  type DevicePromptAttachmentResolution,
-} from "../../lib/devicePromptContext";
+import { type ComposerAssistantSelectionAttachment, type ComposerFileAttachment, type ComposerImageAttachment } from "../../composerDraftStore";
+import { maybeResolveBrowserPromptAttachment, type BrowserPromptAttachmentResolution } from "../../lib/browserPromptContext";
+import { maybeResolveDevicePromptAttachment, type DevicePromptAttachmentResolution } from "../../lib/devicePromptContext";
 import { type Thread } from "../../types";
 import { toastManager } from "../ui/toast";
 interface Input {

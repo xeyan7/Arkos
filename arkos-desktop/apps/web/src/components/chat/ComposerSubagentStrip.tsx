@@ -5,42 +5,26 @@
 // Layer: Chat composer UI
 // Exports: ComposerSubagentStrip
 
+// FILE: ComposerSubagentStrip.tsx
+// Purpose: Compact subagent rows stacked above the composer input (status dot,
+// nickname, role/model, live status); clicking a row switches to that subagent's
+// thread. Wraps the shared stacked-header frame like the active task list.
+// Layer: Chat composer UI
+// Exports: ComposerSubagentStrip
 import type { ThreadId } from "@arkos/contracts";
 import { pluralize } from "@arkos/shared/text";
 
-import {
-  BackgroundTrayIcon,
-  BackToParentIcon,
-  BotIcon,
-  PanelCollapseIcon,
-  PanelExpandIcon,
-  StopIcon,
-} from "~/lib/icons";
-import {
-  subagentStatusDotClassName,
-  subagentStatusTextToneClassName,
-} from "~/lib/subagentPresentation";
+import { BackgroundTrayIcon, BackToParentIcon, BotIcon, PanelCollapseIcon, PanelExpandIcon, StopIcon } from "~/lib/icons";
+import { subagentStatusDotClassName, subagentStatusTextToneClassName } from "~/lib/subagentPresentation";
 import { StatusDot } from "~/components/ui/status-chip";
 import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 import { LiveStatusSpinner } from "../ui/spinner";
 import { DisclosureRegion } from "../ui/DisclosureRegion";
-import type {
-  ComposerSubagentStripItem,
-  ComposerSubagentStripRow,
-} from "./ComposerSubagentStrip.logic";
-import {
-  ComposerStackedPanelHeaderRow,
-  ComposerStackedPanelRowLabel,
-  ComposerStackedPanelRowMain,
-} from "./ComposerStackedPanelContent";
+import type { ComposerSubagentStripItem, ComposerSubagentStripRow } from "./ComposerSubagentStrip.logic";
+import { ComposerStackedPanelHeaderRow, ComposerStackedPanelRowLabel, ComposerStackedPanelRowMain } from "./ComposerStackedPanelContent";
 import { ComposerStackedPanel } from "./ComposerStackedPanel";
-import {
-  COMPOSER_STACKED_PANEL_BODY_PADDING_CLASS_NAME,
-  COMPOSER_STACKED_PANEL_ICON_BUTTON_CLASS_NAME,
-  COMPOSER_STACKED_PANEL_ICON_CLASS_NAME,
-  COMPOSER_STACKED_PANEL_SCROLL_REGION_CLASS_NAME,
-} from "./composerStackedPanelStyles";
+import { COMPOSER_STACKED_PANEL_BODY_PADDING_CLASS_NAME, COMPOSER_STACKED_PANEL_ICON_BUTTON_CLASS_NAME, COMPOSER_STACKED_PANEL_ICON_CLASS_NAME, COMPOSER_STACKED_PANEL_SCROLL_REGION_CLASS_NAME } from "./composerStackedPanelStyles";
 
 interface ComposerSubagentStripProps {
   items: ReadonlyArray<ComposerSubagentStripRow>;

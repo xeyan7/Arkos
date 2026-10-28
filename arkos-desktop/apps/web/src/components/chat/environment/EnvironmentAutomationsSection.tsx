@@ -4,17 +4,18 @@
 // Exports: EnvironmentAutomationsSection, EnvironmentAutomationPanelItem
 // Depends on: automation shared formatters and Environment panel row primitives.
 
+// FILE: EnvironmentAutomationsSection.tsx
+// Purpose: Shows heartbeat automations attached to the active thread inside the Environment panel.
+// Layer: Environment panel section
+// Exports: EnvironmentAutomationsSection, EnvironmentAutomationPanelItem
+// Depends on: automation shared formatters and Environment panel row primitives.
 import type { AutomationDefinition } from "@arkos/contracts";
 
 import { formatCadence } from "~/routes/-automations.shared";
 import { ClockIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
-import {
-  ENVIRONMENT_ROW_ICON_CLASS_NAME,
-  EnvironmentRow,
-  EnvironmentSectionLabel,
-} from "./EnvironmentRow";
+import { ENVIRONMENT_ROW_ICON_CLASS_NAME, EnvironmentRow, EnvironmentSectionLabel } from "./EnvironmentRow";
 
 export interface EnvironmentAutomationPanelItem {
   readonly definition: AutomationDefinition;

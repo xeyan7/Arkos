@@ -2,27 +2,16 @@
 // Purpose: Multi-file diff list for the review panel, including per-file actions and previews.
 // Layer: Diff panel UI
 
+// FILE: DiffPanelFileList.tsx
+// Purpose: Multi-file diff list for the review panel, including per-file actions and previews.
+// Layer: Diff panel UI
 import type { FileDiffMetadata } from "@pierre/diffs/react";
-import {
-  isSupportedLocalImagePath,
-  isSupportedLocalPreviewFilePath,
-} from "@arkos/shared/localPreviewFiles";
+import { isSupportedLocalImagePath, isSupportedLocalPreviewFilePath } from "@arkos/shared/localPreviewFiles";
 import { type MouseEvent as ReactMouseEvent } from "react";
 import { useCopyPathToClipboard } from "~/hooks/useCopyToClipboard";
-import {
-  ChevronDownIcon,
-  CopyIcon,
-  EllipsisIcon,
-  MessageCircleIcon,
-  PencilIcon,
-} from "~/lib/icons";
+import { ChevronDownIcon, CopyIcon, EllipsisIcon, MessageCircleIcon, PencilIcon } from "~/lib/icons";
 
-import {
-  buildFileDiffRenderKey,
-  resolveFileDiffPath,
-  hasUneditableGitMode,
-  resolveFileDiffPrevPath,
-} from "~/lib/diffRendering";
+import { buildFileDiffRenderKey, resolveFileDiffPath, hasUneditableGitMode, resolveFileDiffPrevPath } from "~/lib/diffRendering";
 import { FileDiffCard, FileDiffSurface, type DiffLineClickProps } from "./chat/FileDiffView";
 import { resolveDiffLineBlameTarget, type DiffLineBlameTarget } from "./DiffLineBlamePopover";
 import { LocalImagePreview } from "./LocalImagePreview";

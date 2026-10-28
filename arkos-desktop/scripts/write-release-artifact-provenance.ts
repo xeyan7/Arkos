@@ -3,10 +3,28 @@
 // Purpose: CLI entrypoint for post-build release asset trust proof.
 // Layer: Release verification script
 
-import {
-  type ReleaseArtifactPlatform,
-  writeReleaseArtifactProvenance,
-} from "./lib/release-artifact-provenance.ts";
+// FILE: write-release-artifact-provenance.ts
+// Purpose: CLI entrypoint for post-build release asset trust proof.
+// Layer: Release verification script
+// FILE: write-release-artifact-provenance.ts
+// Purpose: CLI entrypoint for post-build release asset trust proof.
+// Layer: Release verification script
+// FILE: write-release-artifact-provenance.ts
+// Purpose: CLI entrypoint for post-build release asset trust proof.
+// Layer: Release verification script
+// FILE: write-release-artifact-provenance.ts
+// Purpose: CLI entrypoint for post-build release asset trust proof.
+// Layer: Release verification script
+// FILE: write-release-artifact-provenance.ts
+// Purpose: CLI entrypoint for post-build release asset trust proof.
+// Layer: Release verification script
+// FILE: write-release-artifact-provenance.ts
+// Purpose: CLI entrypoint for post-build release asset trust proof.
+// Layer: Release verification script
+// FILE: write-release-artifact-provenance.ts
+// Purpose: CLI entrypoint for post-build release asset trust proof.
+// Layer: Release verification script
+import { type ReleaseArtifactPlatform, writeReleaseArtifactProvenance } from "./lib/release-artifact-provenance.ts";
 
 interface CliOptions {
   readonly assetsDirectory: string;

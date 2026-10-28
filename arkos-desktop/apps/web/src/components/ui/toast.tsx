@@ -7,41 +7,18 @@ import { ThreadId, type DesktopDiagnosticIssue } from "@arkos/contracts";
 import { reportHandledIssue } from "~/lib/rendererErrorDiagnostics";
 import { DiagnosticReportAction } from "../DiagnosticReportAction";
 import { CopyTextButton } from "./copyTextButton";
-import {
-  CircleAlertIcon,
-  CircleCheckIcon,
-  CheckIcon,
-  CopyIcon,
-  InfoIcon,
-  LoaderCircleIcon,
-  TriangleAlertIcon,
-  XIcon,
-} from "~/lib/icons";
+import { CircleAlertIcon, CircleCheckIcon, CheckIcon, CopyIcon, InfoIcon, LoaderCircleIcon, TriangleAlertIcon, XIcon } from "~/lib/icons";
 
 import { cn } from "~/lib/utils";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { APP_TOOLTIP_SURFACE_CLASS_NAME } from "~/components/chat/composerPickerStyles";
 import { useCopyToClipboard } from "~/hooks/useCopyToClipboard";
-import {
-  buildVisibleToastLayout,
-  DEFAULT_TOAST_TIMEOUT_MS,
-  shouldHideCollapsedToastContent,
-  shouldRunVisibleToastAutoDismiss,
-  shouldUseCompactToast,
-  type ToastCopyItem,
-} from "./toast.logic";
-import {
-  NOTIFICATION_ICON_CLASS_NAME,
-  notificationSurfaceClassName,
-  type NotificationTone,
-} from "./notificationSurface";
+import { buildVisibleToastLayout, DEFAULT_TOAST_TIMEOUT_MS, shouldHideCollapsedToastContent, shouldRunVisibleToastAutoDismiss, shouldUseCompactToast, type ToastCopyItem } from "./toast.logic";
+import { NOTIFICATION_ICON_CLASS_NAME, notificationSurfaceClassName, type NotificationTone } from "./notificationSurface";
 import { useDiffRouteSearch } from "../../hooks/useDiffRouteSearch";
 import { selectSplitView, useSplitViewStore } from "../../splitViewStore";
 import { selectRightDockState, useRightDockStore } from "../../rightDockStore";
-import {
-  resolveVisibleToastThreadIds,
-  shouldRenderToastForVisibleThreads,
-} from "./toastRouteVisibility";
+import { resolveVisibleToastThreadIds, shouldRenderToastForVisibleThreads } from "./toastRouteVisibility";
 
 type ThreadToastData = {
   allowCrossThreadVisibility?: boolean;

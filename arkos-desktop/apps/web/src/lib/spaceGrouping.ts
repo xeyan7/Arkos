@@ -5,12 +5,13 @@
 //      rebuilt "active space first, then Void, then the rest" plus the `Name · Active` label by
 //      hand. Three copies drift; this is the single source they all read from.
 
-import {
-  RESERVED_VOID_SPACE_ID,
-  SPACE_ICON_NAMES,
-  type SpaceIconName,
-  type SpaceId,
-} from "@arkos/contracts";
+// FILE: spaceGrouping.ts
+// Purpose: One ordering, naming, and labelling rule for every list that groups projects by Space.
+// Layer: Spaces presentation utility
+// Why: The composer project picker, the sidebar project menu, and the bulk move dialog each
+//      rebuilt "active space first, then Void, then the rest" plus the `Name · Active` label by
+//      hand. Three copies drift; this is the single source they all read from.
+import { RESERVED_VOID_SPACE_ID, SPACE_ICON_NAMES, type SpaceIconName, type SpaceId } from "@arkos/contracts";
 
 import type { Space } from "~/types";
 

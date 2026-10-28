@@ -4,17 +4,7 @@ import type { ProjectId, ResolvedKeybindingsConfig, ThreadId, TurnId } from "@ar
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { flushWorkspaceEditors } from "~/lib/workspaceEditorSession";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  lazy,
-  type ReactNode,
-  startTransition,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { lazy, type ReactNode, startTransition, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorLeaveGuard } from "../EditorWorkspaceView";
 
 import { closeTerminalSurface } from "../../hooks/useTerminalSurfaceController";
@@ -30,13 +20,7 @@ import { useHandleNewThread } from "../../hooks/useHandleNewThread";
 import { useDevicePaneOpenRequests } from "../../hooks/useDeviceEventBridge";
 import { useDeviceSupport } from "../../hooks/useDeviceSupport";
 import { useRepoDiffTotals } from "../../hooks/useRepoDiffTotals";
-import {
-  addChatFileComment,
-  appendChatFileReference,
-  appendComposerPromptText,
-  buildWhyLinesPrompt,
-  type ChatFileReference,
-} from "../../lib/chatReferences";
+import { addChatFileComment, appendChatFileReference, appendComposerPromptText, buildWhyLinesPrompt, type ChatFileReference } from "../../lib/chatReferences";
 import { EDITOR_CHAT_PANE_SCOPE_ID, SINGLE_CHAT_PANE_SCOPE_ID } from "../../lib/chatPaneScope";
 import type { DockPaneRuntimeMode } from "../../lib/dockPaneActivation";
 import type { FileCommentSelection } from "../../lib/fileComments";
@@ -49,80 +33,32 @@ import { serverConfigQueryOptions } from "../../lib/serverReactQuery";
 import { useSidechatShortcut } from "./useSidechatShortcut";
 import { waitForSidechatCreator } from "../../lib/sidechatCreatorRegistry";
 import { requestComposerFocus } from "../../composerFocusRequestStore";
-import {
-  prefetchWorkspaceFile,
-  resolveDockFileOpenTarget,
-  resolveWorkspaceDirectoryOpenTarget,
-  resolveWorkspaceFileOpenTarget,
-  WorkspaceFileOpenerContext,
-  type WorkspaceFileOpener,
-} from "../../lib/workspaceFileOpener";
+import { prefetchWorkspaceFile, resolveDockFileOpenTarget, resolveWorkspaceDirectoryOpenTarget, resolveWorkspaceFileOpenTarget, WorkspaceFileOpenerContext, type WorkspaceFileOpener } from "../../lib/workspaceFileOpener";
 import { requestExplorerReveal } from "../../explorerRevealRequestStore";
 import { selectRightDockState, useRightDockStore } from "../../rightDockStore";
-import {
-  resolveActivePane,
-  type RightDockPane,
-  type RightDockPaneKind,
-} from "../../rightDockStore.logic";
-import {
-  type SplitDirection,
-  type SplitDropSide,
-  type SplitViewPanePanelState,
-  useSplitViewStore,
-} from "../../splitViewStore";
+import { resolveActivePane, type RightDockPane, type RightDockPaneKind } from "../../rightDockStore.logic";
+import { type SplitDirection, type SplitDropSide, type SplitViewPanePanelState, useSplitViewStore } from "../../splitViewStore";
 import { useStore } from "../../store";
 import { useWorkspacePathsStore } from "../../workspacePathsStore";
-import {
-  createProjectSelector,
-  createSidebarThreadSummariesSelector,
-  createSidechatSummariesForSourceSelector,
-  createThreadWorkspaceMetadataSelector,
-} from "../../storeSelectors";
+import { createProjectSelector, createSidebarThreadSummariesSelector, createSidechatSummariesForSourceSelector, createThreadWorkspaceMetadataSelector } from "../../storeSelectors";
 import { sortThreadsForSidebar } from "../Sidebar.logic";
-import {
-  ChatMountLoader,
-  DeferredChatView,
-  LazyBrowserPanel,
-  LazyDevicePanel,
-  LazyDiffPanel,
-  noopChatSurfaceAction,
-} from "./ChatThreadSurfacePrimitives";
+import { ChatMountLoader, DeferredChatView, LazyBrowserPanel, LazyDevicePanel, LazyDiffPanel, noopChatSurfaceAction } from "./ChatThreadSurfacePrimitives";
 import { FloatingBrowserPanel } from "./FloatingBrowserPanel";
 import { shouldRenderFloatingBrowserPanel } from "./floatingBrowserPanel.logic";
 import { PanelStateMessage } from "./PanelStateMessage";
 import { RightDock } from "./RightDock";
 import { SidechatDockPane, useSidechatDockPanePruning } from "./SidechatDockPane";
-import {
-  buildRightDockPaneLabelOverrides,
-  getRightDockPaneMeta,
-  resolveRightDockLauncherItems,
-} from "./rightDockPaneMeta";
-import {
-  CHAT_BACKGROUND_CLASS_NAME,
-  CHAT_MAIN_CONTENT_SURFACE_CLASS_NAME,
-  CHAT_MAIN_VIEWPORT_SHELL_CLASS_NAME,
-  CHAT_ROUTE_INSET_SHELL_CLASS_NAME,
-} from "./composerPickerStyles";
+import { buildRightDockPaneLabelOverrides, getRightDockPaneMeta, resolveRightDockLauncherItems } from "./rightDockPaneMeta";
+import { CHAT_BACKGROUND_CLASS_NAME, CHAT_MAIN_CONTENT_SURFACE_CLASS_NAME, CHAT_MAIN_VIEWPORT_SHELL_CLASS_NAME, CHAT_ROUTE_INSET_SHELL_CLASS_NAME } from "./composerPickerStyles";
 import { routeSingleDockPaneOpenRequest } from "./dockPaneOpenRequest";
-import {
-  selectFloatingBrowserRequested,
-  useFloatingBrowserRequestStore,
-} from "./floatingBrowserRequestStore";
-import {
-  pullRequestDetailInputFromPane,
-  pullRequestPaneTabLabel,
-} from "../pullRequest/pullRequestDetail.logic";
+import { selectFloatingBrowserRequested, useFloatingBrowserRequestStore } from "./floatingBrowserRequestStore";
+import { pullRequestDetailInputFromPane } from "../pullRequest/pullRequestDetail.logic";
 import { usePullRequestPaneStateIcon } from "../pullRequest/usePullRequestPaneStateIcon";
 import { ChatPaneBody, KeptChatPane } from "./ChatPaneKeepAlive";
 import { SidebarInset } from "../ui/sidebar";
 import { toastManager } from "../ui/toast";
 import { WorkspaceSearchPalette, type WorkspaceSearchPaletteMode } from "../WorkspaceSearchPalette";
-import {
-  collectParentDirectoryPaths,
-  resolveFilePreviewWorkspaceRoot,
-  resolveRoutePanelBootstrap,
-  stripEditorViewSearchParams,
-} from "../../routes/-chatThreadRoute.logic";
+import { collectParentDirectoryPaths, resolveFilePreviewWorkspaceRoot, resolveRoutePanelBootstrap, stripEditorViewSearchParams } from "../../routes/-chatThreadRoute.logic";
 import { isShortcutDispatchSuspended, resolveShortcutCommand } from "~/keybindings";
 import { isTerminalFocused } from "~/lib/terminalFocus";
 import { cn } from "~/lib/utils";

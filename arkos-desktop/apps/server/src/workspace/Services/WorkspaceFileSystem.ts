@@ -1,11 +1,6 @@
 import { Effect, Schema, ServiceMap } from "effect";
 
-import type {
-  ProjectReadFileInput,
-  ProjectReadFileResult,
-  ProjectWriteFileInput,
-  ProjectWriteFileResult,
-} from "@arkos/contracts";
+import type { ProjectReadFileInput, ProjectReadFileResult, ProjectWriteFileInput, ProjectWriteFileResult } from "@arkos/contracts";
 import { WorkspacePathOutsideRootError } from "./WorkspacePaths";
 
 export class WorkspaceFileSystemError extends Schema.TaggedErrorClass<WorkspaceFileSystemError>()(

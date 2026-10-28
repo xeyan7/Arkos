@@ -6,6 +6,13 @@
 // Layer: Web PDF rendering utility
 // Exports: PdfLink, extractPageLinks
 
+// FILE: pdfLinks.ts
+// Purpose: Extract clickable link annotations from a pdf.js page and project them
+//          into viewport-space rectangles the link layer can position. Handles
+//          both external URLs (opened in the browser) and internal destinations
+//          (scroll to another page).
+// Layer: Web PDF rendering utility
+// Exports: PdfLink, extractPageLinks
 import type { PDFDocumentProxy, PDFPageProxy, PageViewport } from "./pdfEngine";
 
 export interface PdfLink {

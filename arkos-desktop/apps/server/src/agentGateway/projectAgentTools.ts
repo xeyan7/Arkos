@@ -1,29 +1,12 @@
 import { randomUUID } from "node:crypto";
 
-import {
-  ProjectAgentForgetInput,
-  ProjectAgentGetOverviewInput,
-  ProjectAgentLibraryAddInput,
-  ProjectAgentLibraryListInput,
-  ProjectAgentLinkRepositoryInput,
-  ProjectAgentListTasksInput,
-  ProjectAgentListThreadsInput,
-  ProjectAgentReadDocumentInput,
-  ProjectAgentRememberInput,
-  ProjectAgentReportResultInput,
-  ProjectAgentWriteDocumentInput,
-  ThreadId,
-} from "@arkos/contracts";
+import { ProjectAgentForgetInput, ProjectAgentGetOverviewInput, ProjectAgentLibraryAddInput, ProjectAgentLibraryListInput, ProjectAgentLinkRepositoryInput, ProjectAgentListTasksInput, ProjectAgentListThreadsInput, ProjectAgentReadDocumentInput, ProjectAgentRememberInput, ProjectAgentReportResultInput, ProjectAgentWriteDocumentInput, ThreadId } from "@arkos/contracts";
 import { Effect, Schema } from "effect";
 
 import type { ProjectAgentServiceShape } from "../projectAgent/Services/ProjectAgentService.ts";
 import { mcpToolResultError, mcpToolResultJson } from "./protocol.ts";
 import { ToolInputError, errorText } from "./toolInput.ts";
-import {
-  READ_ONLY_TOOL_ANNOTATIONS,
-  WRITE_TOOL_ANNOTATIONS,
-  type ToolEntry,
-} from "./toolRuntime.ts";
+import { READ_ONLY_TOOL_ANNOTATIONS, WRITE_TOOL_ANNOTATIONS, type ToolEntry } from "./toolRuntime.ts";
 
 interface ProjectAgentToolDependencies {
   readonly projectAgent: ProjectAgentServiceShape;

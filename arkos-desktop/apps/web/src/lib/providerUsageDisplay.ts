@@ -2,13 +2,10 @@
 // Purpose: Single source of truth for provider usage rows shown in Settings,
 // the chat header usage chip, and compact environment/Local popovers.
 
-import {
-  deriveVisibleRateLimitRows,
-  formatRateLimitRemainingPercent,
-  formatRateLimitResetCountdown,
-  type ProviderRateLimit,
-  type VisibleRateLimitRow,
-} from "~/lib/rateLimits";
+// FILE: providerUsageDisplay.ts
+// Purpose: Single source of truth for provider usage rows shown in Settings,
+// the chat header usage chip, and compact environment/Local popovers.
+import { deriveVisibleRateLimitRows, formatRateLimitRemainingPercent, formatRateLimitResetCountdown, type ProviderRateLimit, type VisibleRateLimitRow } from "~/lib/rateLimits";
 import { deriveUsagePace, type UsagePaceSummary } from "~/lib/usagePace";
 
 export type ProviderUsageTone = "healthy" | "warning" | "danger";

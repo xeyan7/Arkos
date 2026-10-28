@@ -2,11 +2,7 @@ import { HubWorkRecord, ProjectId } from "@arkos/contracts";
 import { Effect, Layer, Schema } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
-import {
-  HubWorkRepository,
-  HubWorkRepositoryError,
-  type HubWorkRepositoryShape,
-} from "../Services/HubWorkRepository";
+import { HubWorkRepository, HubWorkRepositoryError, type HubWorkRepositoryShape } from "../Services/HubWorkRepository";
 
 type RecordRow = { readonly recordJson: string };
 const decodeRecord = Schema.decodeUnknownEffect(Schema.fromJsonString(HubWorkRecord));

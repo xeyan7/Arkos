@@ -1,28 +1,14 @@
 import { createHash } from "node:crypto";
 import * as fs from "node:fs/promises";
 
-import {
-  PROVIDER_SEND_TURN_MAX_ATTACHMENTS,
-  PROVIDER_SEND_TURN_MAX_FILE_BYTES,
-  PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
-  type ChatAttachment,
-  type HubWorkSourceMessage,
-} from "@arkos/contracts";
+import { PROVIDER_SEND_TURN_MAX_ATTACHMENTS, PROVIDER_SEND_TURN_MAX_FILE_BYTES, PROVIDER_SEND_TURN_MAX_IMAGE_BYTES, type ChatAttachment, type HubWorkSourceMessage } from "@arkos/contracts";
 import { Effect, Option } from "effect";
 
 import { resolveAttachmentRelativePath } from "../attachmentPaths.ts";
 import { resolveAttachmentPath } from "../attachmentStore.ts";
 import type { ManagedAttachmentPrincipal } from "../managedAttachmentPrincipal.ts";
-import {
-  ManagedAttachmentStoreError,
-  persistReservedManagedAttachment,
-  reserveManagedAttachmentUpload,
-  type BinaryChatAttachment,
-} from "../managedAttachmentStore.ts";
-import type {
-  ManagedAttachmentBlob,
-  ManagedAttachmentRepositoryShape,
-} from "../persistence/Services/ManagedAttachments.ts";
+import { ManagedAttachmentStoreError, persistReservedManagedAttachment, reserveManagedAttachmentUpload, type BinaryChatAttachment } from "../managedAttachmentStore.ts";
+import type { ManagedAttachmentBlob, ManagedAttachmentRepositoryShape } from "../persistence/Services/ManagedAttachments.ts";
 import { resolveRealPathWithinRoot } from "../workspace/realPathContainment.ts";
 
 interface CloneInput {

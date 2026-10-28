@@ -7,17 +7,20 @@
 // Depends on: open-thread tab hooks/store, the shared SurfaceContentTabs, and the sidebar's
 //             thread context menu.
 
+// FILE: OpenThreadTabStrip.tsx
+// Purpose: Browser-style tabs for the open threads, shown in the chat header in place of
+//          the thread title. Owns what is specific to threads: which tabs exist, the close
+//          queue, the optimistic selection, renaming the active thread, and the tab's
+//          context menu (the sidebar's thread menu plus the tab's own close actions).
+// Layer: Chat header UI
+// Depends on: open-thread tab hooks/store, the shared SurfaceContentTabs, and the sidebar's
+//             thread context menu.
 import type { ProjectId, ResolvedKeybindingsConfig, ThreadId } from "@arkos/contracts";
 import { useEffect, useState } from "react";
 
 import { useComposerDraftStore } from "~/composerDraftStore";
 import { useHandleNewThread } from "~/hooks/useHandleNewThread";
-import {
-  useActivateThreadTab,
-  useOpenThreadTabs,
-  useReadRouteThreadId,
-  useRecordOpenThreadTab,
-} from "~/hooks/useOpenThreadTabs";
+import { useActivateThreadTab, useOpenThreadTabs, useReadRouteThreadId, useRecordOpenThreadTab } from "~/hooks/useOpenThreadTabs";
 import { useOptimisticTabSelection } from "~/hooks/useOptimisticTabSelection";
 import { useStableCallback } from "~/hooks/useStableCallback";
 import { resolveShortcutCommand } from "~/keybindings";
@@ -25,15 +28,7 @@ import { TerminalIcon } from "~/lib/icons";
 import { isTerminalFocused } from "~/lib/terminalFocus";
 import { showThreadContextMenu } from "~/lib/threadContextMenu";
 import { readNativeApi } from "~/nativeApi";
-import {
-  closeOpenThreadTab,
-  closeOpenThreadTabs,
-  createOpenThreadTabCloseQueue,
-  type OpenThreadTab,
-  type OpenThreadTabCloseScope,
-  replaceLastTabWithFreshChat,
-  resolveOpenThreadTabsInCloseScope,
-} from "~/openThreadTabs.logic";
+import { closeOpenThreadTab, closeOpenThreadTabs, createOpenThreadTabCloseQueue, type OpenThreadTab, type OpenThreadTabCloseScope, replaceLastTabWithFreshChat, resolveOpenThreadTabsInCloseScope } from "~/openThreadTabs.logic";
 import { useOpenThreadTabsStore } from "~/openThreadTabsStore";
 
 import { ProviderIcon } from "../ProviderIcon";

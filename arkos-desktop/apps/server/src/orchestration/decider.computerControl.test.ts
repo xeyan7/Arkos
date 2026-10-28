@@ -55,7 +55,7 @@ function makeReadModel(
         projectId: PROJECT_ID,
         title: "Computer control",
         modelSelection: {
-          provider: "claudeAgent",
+          provider: "arkos",
           model: "claude-opus-4-6",
         },
         interactionMode: DEFAULT_PROVIDER_INTERACTION_MODE,
@@ -81,7 +81,7 @@ function makeReadModel(
 function runningSession(): OrchestrationSession {
   return {
     threadId: THREAD_ID,
-    providerName: "claudeAgent",
+    providerName: "arkos",
     runtimeMode: "full-access",
     status: "running",
     activeTurnId: TURN_ID,

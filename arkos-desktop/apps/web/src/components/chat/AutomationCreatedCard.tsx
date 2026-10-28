@@ -4,10 +4,12 @@
 //          the automations view: clock glyph, automation name, cadence, and an Open action.
 // Layer: Chat transcript UI
 
-import {
-  AutomationProposalActions,
-  automationProposalListQueryKey,
-} from "~/components/automation/AutomationProposalActions";
+// FILE: AutomationCreatedCard.tsx
+// Purpose: Transcript card shown when an automation is created from a thread. Replaces the
+//          plain "Created automation: …" tool-call line with a glanceable box that mirrors
+//          the automations view: clock glyph, automation name, cadence, and an Open action.
+// Layer: Chat transcript UI
+import { AutomationProposalActions, automationProposalListQueryKey } from "~/components/automation/AutomationProposalActions";
 import { Button } from "~/components/ui/button";
 import { ClockIcon } from "~/lib/icons";
 import { ensureNativeApi } from "~/nativeApi";

@@ -4,35 +4,19 @@
 // Layer: UI helper
 // Depends on: the shortcut definitions, the keybinding matcher, and key capture.
 
-import {
-  type KeybindingCommand,
-  type KeybindingRule,
-  type KeybindingShortcut,
-  type KeybindingWhenNode,
-  type ResolvedKeybindingRule,
-  type ResolvedKeybindingsConfig,
-  type ServerKeybindingEdit,
-} from "@arkos/contracts";
-import {
-  encodeKeybindingRule,
-  encodeKeybindingWhen,
-  resolvedKeybindingRuleIdentity,
-} from "@arkos/shared/keybindingRules";
+// FILE: keybindingEditor.ts
+// Purpose: Model behind Settings → Keybindings: the rows it lists, what a recorded
+//          shortcut would collide with, and the server edits each action sends.
+// Layer: UI helper
+// Depends on: the shortcut definitions, the keybinding matcher, and key capture.
+import { type KeybindingCommand, type KeybindingRule, type KeybindingShortcut, type KeybindingWhenNode, type ResolvedKeybindingRule, type ResolvedKeybindingsConfig, type ServerKeybindingEdit } from "@arkos/contracts";
+import { encodeKeybindingRule, encodeKeybindingWhen, resolvedKeybindingRuleIdentity } from "@arkos/shared/keybindingRules";
 
 import { fixedShortcutsForPlatform } from "./fixedShortcuts";
-import {
-  evaluateWhenNode,
-  formatShortcutLabel,
-  isUnassignedKeybinding,
-  shortcutConflictKey,
-} from "./keybindings";
+import { evaluateWhenNode, formatShortcutLabel, isUnassignedKeybinding, shortcutConflictKey } from "./keybindings";
 import { keybindingValueFromShortcut } from "./lib/keybindingCapture";
 import { isMacPlatform } from "./lib/utils";
-import {
-  listShortcutEditorDefinitions,
-  shortcutSheetCommandLabel,
-  type ShortcutEditorDefinition,
-} from "./shortcutsSheet";
+import { listShortcutEditorDefinitions, shortcutSheetCommandLabel, type ShortcutEditorDefinition } from "./shortcutsSheet";
 
 export interface ShortcutEditorSource {
   keybindings: ResolvedKeybindingsConfig;

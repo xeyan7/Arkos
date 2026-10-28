@@ -1,42 +1,16 @@
-import {
-  type ProjectEntry,
-  type ModelSlug,
-  type ProviderNativeCommandDescriptor,
-  type ProviderMentionReference,
-  type ProviderInstanceId,
-  type ProviderKind,
-  type ProviderPluginDescriptor,
-  type ProviderSkillDescriptor,
-} from "@arkos/contracts";
+interface ProviderCommandNotice {readonly summary:string;readonly detail:string;}
+import { type ProjectEntry, type ModelSlug, type ProviderNativeCommandDescriptor, type ProviderMentionReference, type ProviderInstanceId, type ProviderKind, type ProviderPluginDescriptor, type ProviderSkillDescriptor } from "@arkos/contracts";
 import { type ReactNode } from "react";
 import { type ComposerTriggerKind } from "../../composer-logic";
 import { type ComposerSlashCommand } from "../../composerSlashCommands";
-import {
-  BotIcon,
-  BrainIcon,
-  ChangesIcon,
-  CircleAlertIcon,
-  DeviceLaptopIcon,
-  GitBranchIcon,
-  type LucideIcon,
-  PluginIcon,
-  SkillCubeIcon,
-  TerminalIcon,
-  WorktreeIcon,
-} from "~/lib/icons";
-import { type ProviderCommandNotice } from "~/lib/claudeArtifactCommands";
+import { BotIcon, BrainIcon, ChangesIcon, CircleAlertIcon, DeviceLaptopIcon, GitBranchIcon, type LucideIcon, PluginIcon, SkillCubeIcon, TerminalIcon, WorktreeIcon } from "~/lib/icons";
 import { slashCommandIcon } from "~/lib/slashCommandIcons";
 import { formatSkillScope } from "~/lib/providerDiscovery";
 import { cn } from "~/lib/utils";
 import { FileEntryIcon } from "./FileEntryIcon";
 import { ProviderIcon } from "../ProviderIcon";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
-import {
-  COMPOSER_MENU_PANEL_GLYPH_CLASS_NAME,
-  COMPOSER_MENU_PANEL_GROUP_LABEL_CLASS_NAME,
-  ComposerMenuPanel,
-  type ComposerMenuPanelGroup,
-} from "./ComposerMenuPanel";
+import { COMPOSER_MENU_PANEL_GLYPH_CLASS_NAME, COMPOSER_MENU_PANEL_GROUP_LABEL_CLASS_NAME, ComposerMenuPanel, type ComposerMenuPanelGroup } from "./ComposerMenuPanel";
 
 function humanizeProviderCommandName(command: string): string {
   return command

@@ -4,12 +4,7 @@ import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 
 import { toPersistenceSqlOrDecodeError } from "../Errors.ts";
-import {
-  SaveTodoInput,
-  TodoByIdInput,
-  TodoRepository,
-  type TodoRepositoryShape,
-} from "../Services/TodoRepository.ts";
+import { SaveTodoInput, TodoByIdInput, TodoRepository, type TodoRepositoryShape } from "../Services/TodoRepository.ts";
 
 const makeTodoRepository = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;

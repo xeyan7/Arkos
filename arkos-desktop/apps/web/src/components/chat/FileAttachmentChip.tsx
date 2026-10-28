@@ -3,6 +3,10 @@
 // Layer: Chat attachment presentation
 // Depends on: shared byte formatting, chat attachment types, and compact chip styles.
 
+// FILE: FileAttachmentChip.tsx
+// Purpose: Renders generic file attachments as compact pills or composer cards.
+// Layer: Chat attachment presentation
+// Depends on: shared byte formatting, chat attachment types, and compact chip styles.
 import { formatBytes } from "@arkos/shared/formatBytes";
 
 import { basenameOfPath } from "~/file-icons";
@@ -13,10 +17,7 @@ import { COMPOSER_ATTACHMENT_CHIP_CLASS_NAME } from "../composerInlineChip";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { AttachmentCard } from "./AttachmentCard";
 import { AttachmentRemoveButton } from "./AttachmentRemoveButton";
-import {
-  DRAFT_ATTACHMENT_WARNING_DESCRIPTION,
-  DraftAttachmentWarningIcon,
-} from "./DraftAttachmentWarning";
+import { DRAFT_ATTACHMENT_WARNING_DESCRIPTION, DraftAttachmentWarningIcon } from "./DraftAttachmentWarning";
 import { FileEntryIcon } from "./FileEntryIcon";
 
 type FileAttachmentChipVariant = "pill" | "card";

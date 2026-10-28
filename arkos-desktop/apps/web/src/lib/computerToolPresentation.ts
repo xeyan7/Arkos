@@ -12,6 +12,19 @@
 // assembled here: verb, where, and which window, resolved from the window list
 // the pane already receives rather than left as an opaque id.
 
+// FILE: computerToolPresentation.ts
+// Purpose: Say what a desktop tool call actually does, in the words a person would use,
+//          for the approval card and the transcript.
+// Layer: Web UI logic
+// Exports: COMPUTER_TOOL_TITLES, isComputerToolName, describeComputerToolCall
+//
+// Every browser tool has a curated presentation and every computer tool had
+// none, so an approval for the most consequential thing Arkos can do — moving a
+// pointer on the user's own machine — read
+// `mcp__arkos__computer_click  x 812  y 344`, which is the raw wire call. The
+// decision the user is being asked to make is "click *what*", and the answer is
+// assembled here: verb, where, and which window, resolved from the window list
+// the pane already receives rather than left as an opaque id.
 import type { ComputerWindow } from "@arkos/contracts";
 
 /** The gateway's Computer tools, and the verb each one performs. */

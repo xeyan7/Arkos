@@ -1,53 +1,15 @@
-import {
-  AutomationId,
-  AutomationSchedule,
-  DEFAULT_AUTOMATION_FAST_INTERVAL_MAX_ITERATIONS,
-  DEFAULT_AUTOMATION_HEARTBEAT_COOLDOWN_SECONDS,
-  DEFAULT_AUTOMATION_STOP_AFTER_CONSECUTIVE_FAILURES,
-  DEFAULT_AUTOMATION_STOP_CONFIDENCE_THRESHOLD,
-  ProjectId,
-  ThreadId,
-  TurnId,
-  type AutomationCompletionPolicy,
-  type AutomationDefinition,
-  type AutomationNotificationPolicy,
-  type AutomationSchedule as AutomationScheduleType,
-  type AutomationWorktreeMode,
-  type ModelSelection,
-  type OrchestrationThreadShell,
-} from "@arkos/contracts";
-import {
-  automationContinuesThread,
-  automationRequiresTargetThread,
-} from "@arkos/shared/automationMode";
+import { AutomationId, AutomationSchedule, DEFAULT_AUTOMATION_FAST_INTERVAL_MAX_ITERATIONS, DEFAULT_AUTOMATION_HEARTBEAT_COOLDOWN_SECONDS, DEFAULT_AUTOMATION_STOP_AFTER_CONSECUTIVE_FAILURES, DEFAULT_AUTOMATION_STOP_CONFIDENCE_THRESHOLD, ProjectId, ThreadId, TurnId, type AutomationCompletionPolicy, type AutomationDefinition, type AutomationNotificationPolicy, type AutomationSchedule as AutomationScheduleType, type AutomationWorktreeMode, type ModelSelection, type OrchestrationThreadShell } from "@arkos/contracts";
+import { automationContinuesThread, automationRequiresTargetThread } from "@arkos/shared/automationMode";
 import { Effect, Option, Schema } from "effect";
 
 import type { AutomationServiceShape } from "../automation/Services/AutomationService.ts";
 import { automationMemoryForEnvelope } from "../automation/runEnvelope.ts";
 import { computeAutomationScheduleSpacingSeconds } from "../automation/schedule.ts";
-import {
-  AUTOMATION_AUTHORING_GUIDANCE,
-  AUTOMATION_NAME_AUTHORING_GUIDANCE,
-  AUTOMATION_PROMPT_AUTHORING_GUIDANCE,
-} from "./automationAuthoringGuidance.ts";
+import { AUTOMATION_AUTHORING_GUIDANCE, AUTOMATION_NAME_AUTHORING_GUIDANCE, AUTOMATION_PROMPT_AUTHORING_GUIDANCE } from "./automationAuthoringGuidance.ts";
 import { mcpToolResultError, mcpToolResultJson } from "./protocol.ts";
 import { AgentGatewayTargetError } from "./targetResolver.ts";
-import {
-  MODEL_SELECTION_INPUT_SCHEMA,
-  ToolInputError,
-  errorText,
-  readBooleanArg,
-  readModelSelectionArg,
-  readNumberArg,
-  readRecordArg,
-  readStringArg,
-} from "./toolInput.ts";
-import {
-  READ_ONLY_TOOL_ANNOTATIONS,
-  WRITE_TOOL_ANNOTATIONS,
-  gatewayToolErrorResult,
-  type ToolEntry,
-} from "./toolRuntime.ts";
+import { MODEL_SELECTION_INPUT_SCHEMA, ToolInputError, errorText, readBooleanArg, readModelSelectionArg, readNumberArg, readRecordArg, readStringArg } from "./toolInput.ts";
+import { READ_ONLY_TOOL_ANNOTATIONS, WRITE_TOOL_ANNOTATIONS, gatewayToolErrorResult, type ToolEntry } from "./toolRuntime.ts";
 
 // Target resolution failures keep their structured { code, details } envelope;
 // every other tool failure keeps the established plain-text result.

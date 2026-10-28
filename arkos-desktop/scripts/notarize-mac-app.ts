@@ -1,20 +1,8 @@
-import {
-  existsSync,
-  mkdirSync,
-  lstatSync,
-  readdirSync,
-  readFileSync,
-  readlinkSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, lstatSync, readdirSync, readFileSync, readlinkSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { hashFile } from "./lib/file-digest.ts";
 import { join } from "node:path";
-import {
-  appNotaryStateDirectory,
-  notarizeMacPayload,
-  runMacCommand,
-} from "./lib/mac-notarization.ts";
+import { appNotaryStateDirectory, notarizeMacPayload, runMacCommand } from "./lib/mac-notarization.ts";
 
 const app = process.argv[2];
 if (process.platform !== "darwin" || !app?.endsWith(".app"))

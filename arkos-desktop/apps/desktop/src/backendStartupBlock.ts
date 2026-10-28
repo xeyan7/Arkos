@@ -1,16 +1,11 @@
 // FILE: backendStartupBlock.ts
 // Purpose: Classifies expected backend startup blocks that need user action, not crash retries.
 
+// FILE: backendStartupBlock.ts
+// Purpose: Classifies expected backend startup blocks that need user action, not crash retries.
 import { StringDecoder } from "node:string_decoder";
 
-import {
-  MIGRATION_DIVERGENCE_CONSENT_REQUIRED_PREFIX,
-  MIGRATION_SCHEMA_TOO_NEW_BLOCK_PREFIX,
-  parseMigrationDivergenceConsentChallenge,
-  parseMigrationSchemaTooNewStartupBlock,
-  type MigrationDivergenceConsentChallenge,
-  type MigrationSchemaTooNewStartupBlock,
-} from "@arkos/shared/migrationRecovery";
+import { MIGRATION_DIVERGENCE_CONSENT_REQUIRED_PREFIX, MIGRATION_SCHEMA_TOO_NEW_BLOCK_PREFIX, parseMigrationDivergenceConsentChallenge, parseMigrationSchemaTooNewStartupBlock, type MigrationDivergenceConsentChallenge, type MigrationSchemaTooNewStartupBlock } from "@arkos/shared/migrationRecovery";
 
 const MAX_GENERIC_STARTUP_OUTPUT_CHARS = 16_384;
 const MAX_STRUCTURED_STARTUP_BLOCK_CHARS = 1_048_576;

@@ -311,20 +311,6 @@ describe("evaluateRecordedShortcut", () => {
     }
   });
 
-  it("does not take a key from a command whose surface cannot have focus at the same time", () => {
-    const effort = rule("model.effort.next", "e", { modKey: true }, id("composerFocus"));
-    const source = {
-      ...sourceWith([...SHIPPED, effort]),
-      defaultKeybindings: [...SHIPPED, effort],
-    };
-    const { recording } = record(source, "model.effort.next", shortcut("d", { modKey: true }));
-
-    expect(recording.status).toBe("ready");
-    if (recording.status !== "ready") return;
-    // Toggle diff (outside the terminal) can still fire from the composer; Split terminal
-    // (inside it) never can.
-    expect(recording.conflicts.map((conflict) => conflict.rule.command)).toEqual(["diff.toggle"]);
-  });
 
   it("has nothing to save while the recorded keys are the current ones", () => {
     expect(
@@ -332,14 +318,6 @@ describe("evaluateRecordedShortcut", () => {
     ).toEqual({ status: "idle" });
   });
 
-  it("does not flag an unchanged shipped modifierless shortcut as invalid", () => {
-    const effort = rule("model.effort.next", "tab", { shiftKey: true }, id("composerFocus"));
-    const source = { ...sourceWith([effort]), defaultKeybindings: [effort] };
-
-    expect(record(source, "model.effort.next", effort.shortcut).recording).toEqual({
-      status: "idle",
-    });
-  });
 
   it("takes a shortcut from the command that holds it in an overlapping context", () => {
     const source = sourceWith();

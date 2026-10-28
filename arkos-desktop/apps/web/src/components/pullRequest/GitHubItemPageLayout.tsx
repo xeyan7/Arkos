@@ -11,14 +11,23 @@
 //          GitHubItemPageIconActions, GitHubItemAskComposer, GitHubItemPageHost,
 //          PullRequestDetailSkeleton
 
+// FILE: GitHubItemPageLayout.tsx
+// Purpose: The shell of a GitHub item's detail on the code review page, one for pull requests and
+//          issues: a top bar (back on a narrow window, the tabs, then the actions at the right),
+//          the loading / unavailable / not found states, and the tab bodies. The Summary body
+//          scrolls with the info either in a right-hand column or folded into rows under the
+//          header; the switch is a container query on the detail pane itself, so a narrow window
+//          and an open side chat dock fold it the same way. Every tab floats the question
+//          composer over its bottom.
+// Layer: Pull request presentation
+// Exports: GitHubItemDetailPage, GitHubItemTabs, GitHubItemPageBody, GitHubItemTabBody,
+//          GitHubItemPageIconActions, GitHubItemAskComposer, GitHubItemPageHost,
+//          PullRequestDetailSkeleton
 import { useInPageGlassOverlay } from "~/hooks/useInPageGlassOverlay";
 import type { ProjectId, ThreadId } from "@arkos/contracts";
 import { useState, type ReactNode } from "react";
 
-import {
-  CHAT_SURFACE_CHIP_CLASS_NAME,
-  CHAT_SURFACE_CONTROL_ACTIVE_CLASS_NAME,
-} from "~/components/chat/chatHeaderControls";
+import { CHAT_SURFACE_CHIP_CLASS_NAME, CHAT_SURFACE_CONTROL_ACTIVE_CLASS_NAME } from "~/components/chat/chatHeaderControls";
 import { MENU_ICON_CLASS_NAME } from "~/components/chat/composerPickerStyles";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "~/components/ui/empty";
 import { IconButton } from "~/components/ui/icon-button";

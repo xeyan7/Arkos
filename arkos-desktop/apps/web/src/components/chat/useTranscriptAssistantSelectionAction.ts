@@ -2,28 +2,15 @@
 // Purpose: Own the assistant highlight -> floating action -> composer insertion flow for transcript selections.
 // Layer: Chat transcript interaction controller
 
+// FILE: useTranscriptAssistantSelectionAction.ts
+// Purpose: Own the assistant highlight -> floating action -> composer insertion flow for transcript selections.
+// Layer: Chat transcript interaction controller
 import { PROVIDER_SEND_TURN_MAX_ATTACHMENTS } from "@arkos/contracts";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type MutableRefObject,
-  type MouseEventHandler,
-  type PointerEventHandler,
-  type TouchEventHandler,
-  type WheelEventHandler,
-} from "react";
+import { useEffect, useRef, useState, type MutableRefObject, type MouseEventHandler, type PointerEventHandler, type TouchEventHandler, type WheelEventHandler } from "react";
 import { toastManager } from "../ui/toast";
 import { type ComposerAssistantSelectionAttachment } from "../../composerDraftStore";
-import {
-  createAssistantSelectionAttachment,
-  getAssistantSelectionValidationError,
-} from "../../lib/assistantSelections";
-import {
-  readTranscriptAssistantSelection,
-  resolveTranscriptSelectionActionLayout,
-  type TranscriptAssistantSelection,
-} from "./chatSelectionActions";
+import { createAssistantSelectionAttachment, getAssistantSelectionValidationError } from "../../lib/assistantSelections";
+import { readTranscriptAssistantSelection, resolveTranscriptSelectionActionLayout, type TranscriptAssistantSelection } from "./chatSelectionActions";
 
 export interface PendingTranscriptSelectionAction {
   selection: TranscriptAssistantSelection;

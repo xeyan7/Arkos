@@ -1,10 +1,5 @@
 import { Effect, Schema } from "effect";
-import {
-  DEFAULT_AUTOMATION_STOP_CONFIDENCE_THRESHOLD,
-  ServerGenerateAutomationIntentResult,
-  type AutomationMode,
-  type ChatAttachment,
-} from "@arkos/contracts";
+import { DEFAULT_AUTOMATION_STOP_CONFIDENCE_THRESHOLD, ServerGenerateAutomationIntentResult, type AutomationMode, type ChatAttachment } from "@arkos/contracts";
 import { MAX_CHAT_THREAD_TITLE_WORDS } from "@arkos/shared/chatThreads";
 
 import { TextGenerationError } from "./Errors.ts";

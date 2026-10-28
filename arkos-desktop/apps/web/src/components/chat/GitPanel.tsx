@@ -8,26 +8,23 @@
 // staged/unstaged patches, parsing them into file lists. Stage/unstage are index mutations routed
 // through GitCore; on settle we invalidate the per-cwd git caches so both lists stay in sync.
 
+// FILE: GitPanel.tsx
+// Purpose: Source-control staging pane for the right dock (staged/unstaged lists + per-file diff).
+// Layer: Chat right-dock UI
+// Depends on: gitReactQuery (diff queries + stage/unstage mutations), diffRendering (patch parsing),
+//             @pierre/diffs FileDiff for the per-file viewer.
+//
+// The pane derives its cwd like DockTerminalPane (thread worktree or project cwd) and reads the
+// staged/unstaged patches, parsing them into file lists. Stage/unstage are index mutations routed
+// through GitCore; on settle we invalidate the per-cwd git caches so both lists stay in sync.
 import { type FileDiffMetadata } from "@pierre/diffs/react";
 import { type ProjectId, type ThreadId } from "@arkos/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
 import { useTheme } from "~/hooks/useTheme";
-import {
-  buildFileDiffRenderKey,
-  getRenderablePatch,
-  resolveFileDiffPath,
-  sortFileDiffsByPath,
-  splitRepoRelativePath,
-  summarizeFileDiffStats,
-} from "~/lib/diffRendering";
-import {
-  gitQueryKeys,
-  gitStageFilesMutationOptions,
-  gitUnstageFilesMutationOptions,
-  gitWorkingTreeDiffQueryOptions,
-} from "~/lib/gitReactQuery";
+import { buildFileDiffRenderKey, getRenderablePatch, resolveFileDiffPath, sortFileDiffsByPath, splitRepoRelativePath, summarizeFileDiffStats } from "~/lib/diffRendering";
+import { gitQueryKeys, gitStageFilesMutationOptions, gitUnstageFilesMutationOptions, gitWorkingTreeDiffQueryOptions } from "~/lib/gitReactQuery";
 import { PlusIcon, RefreshCwIcon, ResetIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { useStore } from "~/store";

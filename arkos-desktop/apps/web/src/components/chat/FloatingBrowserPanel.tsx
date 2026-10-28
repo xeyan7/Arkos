@@ -3,41 +3,21 @@
 // Layer: Chat surface UI
 // Depends on: the shared browser panel and panel-resize pointer overlay.
 
-import {
-  type PointerEvent as ReactPointerEvent,
-  Suspense,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+// FILE: FloatingBrowserPanel.tsx
+// Purpose: Draggable, resizable browser host that overlays one chat surface.
+// Layer: Chat surface UI
+// Depends on: the shared browser panel and panel-resize pointer overlay.
+import { type PointerEvent as ReactPointerEvent, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ThreadId } from "@arkos/contracts";
 import { CHAT_SURFACE_HEADER_HEIGHT_PX } from "@arkos/shared/desktopChrome";
 
 import { EllipsisIcon, PanelRightCloseIcon, XIcon } from "../../lib/icons";
 import { requestBrowserPanelBoundsSync } from "../../lib/browserPanelBoundsSync";
 import { DISCLOSURE_INNER_CLASS, disclosureWidthClassName } from "../../lib/disclosureMotion";
-import {
-  attachPanelPointerOverlaySession,
-  createPanelResizeOverlay,
-  removePanelResizeOverlay,
-} from "../../lib/panelResize";
+import { attachPanelPointerOverlaySession, createPanelResizeOverlay, removePanelResizeOverlay } from "../../lib/panelResize";
 import { cn } from "../../lib/utils";
 import { IconButton } from "../ui/icon-button";
-import {
-  clampFloatingBrowserPanelRect,
-  FLOATING_BROWSER_PANEL_DEFAULT_SIZE,
-  FLOATING_BROWSER_PANEL_MARGIN_PX,
-  floatingBrowserResizeCursor,
-  initialFloatingBrowserPanelRect,
-  isFloatingBrowserDragGesture,
-  moveFloatingBrowserPanelRect,
-  resizeFloatingBrowserPanelRect,
-  type FloatingBrowserPanelHostSize,
-  type FloatingBrowserPanelRect,
-  type FloatingBrowserResizeEdge,
-} from "./floatingBrowserPanel.logic";
+import { clampFloatingBrowserPanelRect, FLOATING_BROWSER_PANEL_DEFAULT_SIZE, FLOATING_BROWSER_PANEL_MARGIN_PX, floatingBrowserResizeCursor, initialFloatingBrowserPanelRect, isFloatingBrowserDragGesture, moveFloatingBrowserPanelRect, resizeFloatingBrowserPanelRect, type FloatingBrowserPanelHostSize, type FloatingBrowserPanelRect, type FloatingBrowserResizeEdge } from "./floatingBrowserPanel.logic";
 import { LazyBrowserPanel } from "./ChatThreadSurfacePrimitives";
 import { PanelStateMessage } from "./PanelStateMessage";
 

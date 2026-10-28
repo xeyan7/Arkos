@@ -9,6 +9,76 @@
  * duplicate the codec that owns that job.
  */
 
+/**
+ * Splitting `u32 little-endian length` + payload records out of a byte stream.
+ *
+ * A native helper that pushes binary payloads at the server — the iOS device
+ * helper over a unix socket today — frames them this way, because a pipe or
+ * socket delivers arbitrary chunks and the envelope inside is not
+ * self-delimiting. The payload is passed through
+ * untouched: it is already a frame envelope, and decoding it here would
+ * duplicate the codec that owns that job.
+ */
+/**
+ * Splitting `u32 little-endian length` + payload records out of a byte stream.
+ *
+ * A native helper that pushes binary payloads at the server — the iOS device
+ * helper over a unix socket today — frames them this way, because a pipe or
+ * socket delivers arbitrary chunks and the envelope inside is not
+ * self-delimiting. The payload is passed through
+ * untouched: it is already a frame envelope, and decoding it here would
+ * duplicate the codec that owns that job.
+ */
+/**
+ * Splitting `u32 little-endian length` + payload records out of a byte stream.
+ *
+ * A native helper that pushes binary payloads at the server — the iOS device
+ * helper over a unix socket today — frames them this way, because a pipe or
+ * socket delivers arbitrary chunks and the envelope inside is not
+ * self-delimiting. The payload is passed through
+ * untouched: it is already a frame envelope, and decoding it here would
+ * duplicate the codec that owns that job.
+ */
+/**
+ * Splitting `u32 little-endian length` + payload records out of a byte stream.
+ *
+ * A native helper that pushes binary payloads at the server — the iOS device
+ * helper over a unix socket today — frames them this way, because a pipe or
+ * socket delivers arbitrary chunks and the envelope inside is not
+ * self-delimiting. The payload is passed through
+ * untouched: it is already a frame envelope, and decoding it here would
+ * duplicate the codec that owns that job.
+ */
+/**
+ * Splitting `u32 little-endian length` + payload records out of a byte stream.
+ *
+ * A native helper that pushes binary payloads at the server — the iOS device
+ * helper over a unix socket today — frames them this way, because a pipe or
+ * socket delivers arbitrary chunks and the envelope inside is not
+ * self-delimiting. The payload is passed through
+ * untouched: it is already a frame envelope, and decoding it here would
+ * duplicate the codec that owns that job.
+ */
+/**
+ * Splitting `u32 little-endian length` + payload records out of a byte stream.
+ *
+ * A native helper that pushes binary payloads at the server — the iOS device
+ * helper over a unix socket today — frames them this way, because a pipe or
+ * socket delivers arbitrary chunks and the envelope inside is not
+ * self-delimiting. The payload is passed through
+ * untouched: it is already a frame envelope, and decoding it here would
+ * duplicate the codec that owns that job.
+ */
+/**
+ * Splitting `u32 little-endian length` + payload records out of a byte stream.
+ *
+ * A native helper that pushes binary payloads at the server — the iOS device
+ * helper over a unix socket today — frames them this way, because a pipe or
+ * socket delivers arbitrary chunks and the envelope inside is not
+ * self-delimiting. The payload is passed through
+ * untouched: it is already a frame envelope, and decoding it here would
+ * duplicate the codec that owns that job.
+ */
 import { ByteAccumulator } from "./byteAccumulator";
 
 export const LENGTH_PREFIX_BYTES = 4;

@@ -1,33 +1,4 @@
-import {
-  BrowserBackInput,
-  BrowserBackOutput,
-  BrowserCloseInput,
-  BrowserCloseOutput,
-  BrowserRunInput,
-  BrowserRunOutput,
-  BrowserForwardInput,
-  BrowserForwardOutput,
-  BrowserLogsInput,
-  BrowserLogsOutput,
-  BrowserNavigateOutput,
-  BrowserOpenOutput,
-  BrowserReloadInput,
-  BrowserReloadOutput,
-  BrowserResizeInput,
-  BrowserResizeOutput,
-  BrowserScreenshotHostOutput,
-  BrowserScreenshotInput,
-  BrowserScreenshotOutput,
-  BrowserStatusInput,
-  BrowserStatusOutput,
-  BrowserTabsInput,
-  BrowserTabsOutput,
-  BrowserToolNavigateInput,
-  BrowserToolOpenInput,
-  BrowserUploadInput,
-  BrowserUploadOutput,
-  type BrowserToolName,
-} from "@arkos/contracts";
+import { BrowserBackInput, BrowserBackOutput, BrowserCloseInput, BrowserCloseOutput, BrowserRunInput, BrowserRunOutput, BrowserForwardInput, BrowserForwardOutput, BrowserLogsInput, BrowserLogsOutput, BrowserNavigateOutput, BrowserOpenOutput, BrowserReloadInput, BrowserReloadOutput, BrowserResizeInput, BrowserResizeOutput, BrowserScreenshotHostOutput, BrowserScreenshotInput, BrowserScreenshotOutput, BrowserStatusInput, BrowserStatusOutput, BrowserTabsInput, BrowserTabsOutput, BrowserToolNavigateInput, BrowserToolOpenInput, BrowserUploadInput, BrowserUploadOutput, type BrowserToolName } from "@arkos/contracts";
 import { Schema } from "effect";
 
 import { BROWSER_TOOL_TITLES } from "./browserAutomationPresentation";

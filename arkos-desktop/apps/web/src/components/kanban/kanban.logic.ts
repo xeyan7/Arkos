@@ -4,31 +4,18 @@
 // Layer: UI logic (no React, no stores) so the board math stays unit-testable.
 // Exports: deriveKanbanColumn, buildKanbanBoard, ordering + drop-action helpers.
 
-import type {
-  ProjectId,
-  ProviderInstanceId,
-  ProviderKind,
-  ThreadEnvironmentMode,
-  ThreadId,
-} from "@arkos/contracts";
+// FILE: kanban.logic.ts
+// Purpose: Pure derivation of the kanban control-center board (columns, cards, ordering)
+//          from sidebar thread summaries and composer draft snapshots.
+// Layer: UI logic (no React, no stores) so the board math stays unit-testable.
+// Exports: deriveKanbanColumn, buildKanbanBoard, ordering + drop-action helpers.
+import type { ProjectId, ProviderInstanceId, ProviderKind, ThreadEnvironmentMode, ThreadId } from "@arkos/contracts";
 import { buildPromptThreadTitleFallback } from "@arkos/shared/chatThreads";
-import {
-  KANBAN_COLUMN_V2_LABELS,
-  deriveKanbanAttention as deriveKanbanAttentionShared,
-  deriveKanbanColumnV2 as deriveKanbanColumnV2Shared,
-  hasKanbanLiveWork as hasKanbanLiveWorkShared,
-  type KanbanAttentionFlag,
-  type KanbanColumnV2Key,
-  type KanbanThreadDerivationInput,
-} from "@arkos/shared/kanban";
+import { deriveKanbanAttention as deriveKanbanAttentionShared, deriveKanbanColumnV2 as deriveKanbanColumnV2Shared, hasKanbanLiveWork as hasKanbanLiveWorkShared, type KanbanAttentionFlag, type KanbanColumnV2Key, type KanbanThreadDerivationInput } from "@arkos/shared/kanban";
 import { isPendingThreadWorktree } from "@arkos/shared/threadEnvironment";
 import { composerDraftHasAttachments } from "../../composerDraftDomain";
 import type { ComposerThreadDraftState } from "../../composerDraftStore";
-import {
-  canSessionAnswerPendingRequests,
-  deriveActiveWorkStartedAt,
-  hasLiveLatestTurn,
-} from "../../session-logic";
+import { canSessionAnswerPendingRequests, deriveActiveWorkStartedAt, hasLiveLatestTurn } from "../../session-logic";
 import type { Project, SidebarThreadSummary } from "../../types";
 
 /**

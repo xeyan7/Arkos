@@ -3,6 +3,41 @@
  * Example: bun scripts/computer-use-fixtures/collect-measurement.ts
  * --thread-id ID --turn-id ID --started-at ISO --out /private/tmp/run.json
  */
+/** Run only against an isolated benchmark instance using an existing
+ * diagnostics-capable gateway session. Credentials stay in the environment.
+ * Example: bun scripts/computer-use-fixtures/collect-measurement.ts
+ * --thread-id ID --turn-id ID --started-at ISO --out /private/tmp/run.json
+ */
+/** Run only against an isolated benchmark instance using an existing
+ * diagnostics-capable gateway session. Credentials stay in the environment.
+ * Example: bun scripts/computer-use-fixtures/collect-measurement.ts
+ * --thread-id ID --turn-id ID --started-at ISO --out /private/tmp/run.json
+ */
+/** Run only against an isolated benchmark instance using an existing
+ * diagnostics-capable gateway session. Credentials stay in the environment.
+ * Example: bun scripts/computer-use-fixtures/collect-measurement.ts
+ * --thread-id ID --turn-id ID --started-at ISO --out /private/tmp/run.json
+ */
+/** Run only against an isolated benchmark instance using an existing
+ * diagnostics-capable gateway session. Credentials stay in the environment.
+ * Example: bun scripts/computer-use-fixtures/collect-measurement.ts
+ * --thread-id ID --turn-id ID --started-at ISO --out /private/tmp/run.json
+ */
+/** Run only against an isolated benchmark instance using an existing
+ * diagnostics-capable gateway session. Credentials stay in the environment.
+ * Example: bun scripts/computer-use-fixtures/collect-measurement.ts
+ * --thread-id ID --turn-id ID --started-at ISO --out /private/tmp/run.json
+ */
+/** Run only against an isolated benchmark instance using an existing
+ * diagnostics-capable gateway session. Credentials stay in the environment.
+ * Example: bun scripts/computer-use-fixtures/collect-measurement.ts
+ * --thread-id ID --turn-id ID --started-at ISO --out /private/tmp/run.json
+ */
+/** Run only against an isolated benchmark instance using an existing
+ * diagnostics-capable gateway session. Credentials stay in the environment.
+ * Example: bun scripts/computer-use-fixtures/collect-measurement.ts
+ * --thread-id ID --turn-id ID --started-at ISO --out /private/tmp/run.json
+ */
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import { collectComputerRun, type DiagnosticToolCaller } from "./measurement.ts";

@@ -2,11 +2,11 @@
 // Purpose: Pure, platform-aware path decisions for reconnecting a moved project.
 // Layer: Server orchestration
 
+// FILE: projectRelocationPaths.ts
+// Purpose: Pure, platform-aware path decisions for reconnecting a moved project.
+// Layer: Server orchestration
 import { posix, win32 } from "node:path";
-import {
-  normalizeWorkspaceRootForComparison,
-  workspaceRootsEqual,
-} from "@arkos/shared/threadWorkspace";
+import { normalizeWorkspaceRootForComparison, workspaceRootsEqual } from "@arkos/shared/threadWorkspace";
 
 export function relocateProjectPath(
   value: string | null | undefined,

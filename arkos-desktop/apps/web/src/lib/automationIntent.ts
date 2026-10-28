@@ -4,12 +4,12 @@
 // Exports: automation intent parsers, resolver, and cadence/name formatters.
 // Depends on: AutomationSchedule contract shared with the automation API.
 
-import type {
-  AutomationCompletionPolicy,
-  AutomationMode,
-  AutomationSchedule,
-  ServerGenerateAutomationIntentResult,
-} from "@arkos/contracts";
+// FILE: automationIntent.ts
+// Purpose: Detects when a normal chat prompt is actually asking Arkos to create an automation.
+// Layer: Web composer helper
+// Exports: automation intent parsers, resolver, and cadence/name formatters.
+// Depends on: AutomationSchedule contract shared with the automation API.
+import type { AutomationCompletionPolicy, AutomationMode, AutomationSchedule, ServerGenerateAutomationIntentResult } from "@arkos/contracts";
 
 import { completionPolicyFromStopWhen } from "@arkos/shared/automationCompletionPolicy";
 import { automationRequiresTargetThread } from "@arkos/shared/automationMode";

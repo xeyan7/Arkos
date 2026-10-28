@@ -2,24 +2,16 @@
 // Purpose: Resolves local preview-file (image/PDF) requests without exposing arbitrary files.
 // Layer: Server HTTP utility
 // Exports: local image route constants and allowlisted path resolver
-// Depends on: fs realpath/stat, Codex generated image roots, safe preview extensions
+// Depends on: fs realpath/stat, safe preview extensions
 
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import {
-  LOCAL_IMAGE_ROUTE_PATH,
-  isSupportedLocalImagePath,
-  isSupportedLocalPreviewFilePath,
-} from "@arkos/shared/localPreviewFiles";
+import { LOCAL_IMAGE_ROUTE_PATH, isSupportedLocalImagePath, isSupportedLocalPreviewFilePath } from "@arkos/shared/localPreviewFiles";
 import { SCRATCH_WORKSPACES_DIRNAME } from "@arkos/shared/threadWorkspace";
 
-import {
-  type CodexGeneratedImageHomeCandidate,
-  resolveCodexGeneratedImageHomes,
-} from "./codexGeneratedImages.ts";
 
 export { LOCAL_IMAGE_ROUTE_PATH };
 
@@ -130,11 +122,7 @@ async function resolveWorkspaceRoot(cwd: string | null): Promise<string | null> 
 export async function resolveAllowedLocalPreviewFile(input: {
   readonly requestedPath: string | null;
   readonly cwd: string | null;
-  readonly codexHomePath?: CodexGeneratedImageHomeCandidate;
-  /** Additional configured Codex homes (per-instance dedicated homes). */
-  readonly codexHomePaths?: readonly CodexGeneratedImageHomeCandidate[];
-  readonly scratchWorkspacesRoot?: string;
-  readonly allowAbsoluteLocalPreviewFile?: boolean;
+  readonly scratchWorkspacesRoot?: string | null;  readonly allowAbsoluteLocalPreviewFile?: boolean;
   readonly previewGrant?: string | null;
 }): Promise<ResolvedLocalPreviewFile | null> {
   const requestedPath = input.requestedPath?.trim();
@@ -176,7 +164,7 @@ export async function resolveAllowedLocalPreviewFile(input: {
   // so every preview type is servable from the configured private root. Keep
   // the former temp roots readable for threads created before this migration.
   const tempRoots = await temporaryDirectoryRoots();
-  const configuredScratchRoot = await realpathOrNull(input.scratchWorkspacesRoot);
+  const configuredScratchRoot = await realpathOrNull(input.scratchWorkspacesRoot ?? undefined);
   const scratchWorkspaceRoots = [
     ...(configuredScratchRoot ? [configuredScratchRoot] : []),
     ...tempRoots.map((root) => path.join(root, SCRATCH_WORKSPACES_DIRNAME)),
@@ -201,32 +189,7 @@ export async function resolveAllowedLocalPreviewFile(input: {
   if (!isSupportedLocalImagePath(realFilePath)) {
     return null;
   }
-  // A provided empty array means settings/live sessions intentionally allow no Codex homes.
-  // Only fall back to the ambient CODEX_HOME when callers do not provide an allowlist at all.
-  const codexHomeCandidates =
-    input.codexHomePaths === undefined
-      ? [input.codexHomePath]
-      : input.codexHomePath === undefined
-        ? input.codexHomePaths
-        : [input.codexHomePath, ...input.codexHomePaths];
-  const generatedImagesRoots = await Promise.all(
-    [...new Set(codexHomeCandidates.flatMap((home) => resolveCodexGeneratedImageHomes(home)))].map(
-      async (home) => {
-        const [realHome, realRoot] = await Promise.all([
-          realpathOrNull(home),
-          realpathOrNull(path.join(home, "generated_images")),
-        ]);
-        // A generated_images symlink must not turn a configured Codex home into
-        // an allowlist for an unrelated directory.
-        return realHome !== null && realRoot !== null && isPathInside(realRoot, realHome)
-          ? realRoot
-          : null;
-      },
-    ),
-  ).then((roots) => roots.filter((root): root is string => root !== null));
-  const allowed =
-    generatedImagesRoots.some((root) => isPathInside(realFilePath, root)) ||
-    tempRoots.some((root) => isPathInside(realFilePath, root));
+  const allowed = tempRoots.some((root) => isPathInside(realFilePath, root));
   return allowed ? resolved : null;
 }
 

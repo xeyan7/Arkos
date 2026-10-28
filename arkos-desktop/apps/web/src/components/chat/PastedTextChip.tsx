@@ -4,6 +4,11 @@
 //   (click-to-expand echo of a sent paste).
 // Layer: Chat composer/transcript presentation
 
+// FILE: PastedTextChip.tsx
+// Purpose: Attachment-style "pasted text" cards for the collapsed big-paste feature
+//   - the composer card (insert-into-field / remove) and the transcript card
+//   (click-to-expand echo of a sent paste).
+// Layer: Chat composer/transcript presentation
 import { type ButtonHTMLAttributes, type ReactNode, useState } from "react";
 
 import { ChevronRightIcon, FileIcon } from "~/lib/icons";

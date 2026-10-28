@@ -1,11 +1,4 @@
-import type {
-  BrowserConsoleLogEntry,
-  BrowserLogEntry,
-  BrowserLogsInput,
-  BrowserLogsOutput,
-  BrowserNetworkLogEntry,
-  BrowserTabId,
-} from "@arkos/contracts";
+import type { BrowserConsoleLogEntry, BrowserLogEntry, BrowserLogsInput, BrowserLogsOutput, BrowserNetworkLogEntry, BrowserTabId } from "@arkos/contracts";
 import type { WebContents } from "electron";
 
 import type { BrowserAutomationVisibleRuntime } from "../browserManager";

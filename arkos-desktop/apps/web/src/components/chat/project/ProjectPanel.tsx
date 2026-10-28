@@ -1,10 +1,4 @@
-import {
-  type AutomationDefinition,
-  type ModelSelection,
-  type ProjectId,
-  type ProjectTask,
-  type ThreadId,
-} from "@arkos/contracts";
+import { type AutomationDefinition, type ModelSelection, type ProjectId, type ProjectTask, type ThreadId } from "@arkos/contracts";
 import { SidePanelOverlay } from "~/components/chat/SidePanelOverlay";
 import { PROJECT_CONTEXT_PREVIEW_DOCUMENTS } from "@arkos/shared/projectAgent";
 import { resolveGroupCoordinatorStatus } from "@arkos/shared/groupThreadState";
@@ -28,36 +22,15 @@ import { SOFT_SURFACE_FILL_CLASS_NAME } from "~/surfaceStyles";
 import { createSidebarThreadSummariesSelector } from "~/storeSelectors";
 import type { SidebarThreadSummary } from "~/types";
 
-import {
-  ENVIRONMENT_ROW_ICON_CLASS_NAME,
-  EnvironmentPanelTitle,
-  EnvironmentRow,
-} from "../environment/EnvironmentRow";
+import { ENVIRONMENT_ROW_ICON_CLASS_NAME, EnvironmentPanelTitle, EnvironmentRow } from "../environment/EnvironmentRow";
 import { HubWorkItemCards } from "../group/HubWorkItemCard";
 import { GroupSettingsDialog } from "../group/GroupSettingsDialog";
 import type { GroupSettingsSection } from "../group/groupSettingsDialog.logic";
-import {
-  GroupAutomationsSection,
-  GroupPullRequestsSection,
-  GroupThreadsSection,
-} from "./GroupOverview";
+import { GroupAutomationsSection, GroupPullRequestsSection, GroupThreadsSection } from "./GroupOverview";
 import { GROUP_PANEL_SECTIONS, type GroupPanelSectionId } from "./groupPanelSections";
 import { projectAgentOverviewConfigured } from "./projectAgentOverview.logic";
-import {
-  buildGroupThreadRows,
-  collectGroupAutomations,
-  collectGroupPullRequestRows,
-  collectGroupThreadSummaries,
-  groupThreadNeedsAttention,
-  partitionGroupThreadRows,
-  type GroupPullRequestRow,
-  type GroupThreadRow as GroupThreadRowData,
-} from "./groupOverview.logic";
-import {
-  projectDigestFocusRows,
-  sanitizeProjectDigestSummary,
-  type ProjectFocusRow,
-} from "./projectPanel.logic";
+import { buildGroupThreadRows, collectGroupAutomations, collectGroupPullRequestRows, collectGroupThreadSummaries, groupThreadNeedsAttention, partitionGroupThreadRows, type GroupPullRequestRow, type GroupThreadRow as GroupThreadRowData } from "./groupOverview.logic";
+import { projectDigestFocusRows, sanitizeProjectDigestSummary, type ProjectFocusRow } from "./projectPanel.logic";
 import { useProjectAgent } from "./useProjectAgent";
 import { useProjectAgentSummaries } from "./useProjectAgentSummaries";
 

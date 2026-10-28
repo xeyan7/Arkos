@@ -3,6 +3,10 @@
 // Layer: Web UI lifecycle helper
 // Depends on: rightDockStore pane kind taxonomy
 
+// FILE: dockPaneActivation.ts
+// Purpose: Decide when a persisted right-dock pane should hydrate its expensive runtime.
+// Layer: Web UI lifecycle helper
+// Depends on: rightDockStore pane kind taxonomy
 import type { ThreadId } from "@arkos/contracts";
 
 import type { RightDockPaneKind } from "~/rightDockStore.logic";

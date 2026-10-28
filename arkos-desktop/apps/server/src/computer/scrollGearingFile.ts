@@ -14,15 +14,26 @@
  * never been measured — and never to a failure, because wrong gearing at
  * worst means an off-target scroll, not a refused one.
  */
+/**
+ * The durable half of scroll gearing: per-app travel-per-pixel ratios that
+ * outlive a window.
+ *
+ * The in-memory `ScrollGearingStore` is the hot path keyed by exact window —
+ * the strongest signal, because an inner scroller's gearing belongs to the
+ * surface, not the process. But windows churn while toolkits persist: the
+ * same Chromium build gears every window it opens the same way, so a window
+ * nobody has measured yet can inherit what its app already taught us instead
+ * of starting at pixel-true 1 and paying a probe scroll to find out.
+ *
+ * Nothing here is a security boundary. A corrupt or hand-edited file degrades
+ * to no entries — planning then assumes gearing 1, exactly as if the app had
+ * never been measured — and never to a failure, because wrong gearing at
+ * worst means an off-target scroll, not a refused one.
+ */
 import { readFileSync } from "node:fs";
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import {
-  MAX_SCROLL_GEARING,
-  MIN_LEARNABLE_SCROLL_INJECTION,
-  MIN_SCROLL_GEARING,
-  SCROLL_GEARING_SMOOTHING,
-} from "./scrollCalibration.ts";
+import { MAX_SCROLL_GEARING, MIN_LEARNABLE_SCROLL_INJECTION, MIN_SCROLL_GEARING, SCROLL_GEARING_SMOOTHING } from "./scrollCalibration.ts";
 
 /** How many apps keep a durable gearing before the stalest is forgotten. */
 const MAX_APP_ENTRIES = 64;

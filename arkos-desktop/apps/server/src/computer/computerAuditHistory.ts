@@ -1,12 +1,6 @@
 import { createHash } from "node:crypto";
 
-import {
-  COMPUTER_AUDIT_HISTORY_MAX_LIMIT,
-  ComputerAuditEffect,
-  type ComputerAuditHistoryEntry,
-  type ComputerGetAuditHistoryInput,
-  type ComputerGetAuditHistoryResult,
-} from "@arkos/contracts";
+import { COMPUTER_AUDIT_HISTORY_MAX_LIMIT, ComputerAuditEffect, type ComputerAuditHistoryEntry, type ComputerGetAuditHistoryInput, type ComputerGetAuditHistoryResult } from "@arkos/contracts";
 import { Schema } from "effect";
 import { computerAuditTailLines, readComputerAuditFileTail } from "./computerAuditFile.ts";
 

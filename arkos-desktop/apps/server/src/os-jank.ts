@@ -2,19 +2,13 @@
 // Purpose: Smooths over shell/path differences between packaged app launches and login shells.
 // Exports: PATH hydration plus base-dir helpers used by server startup.
 
+// FILE: os-jank.ts
+// Purpose: Smooths over shell/path differences between packaged app launches and login shells.
+// Exports: PATH hydration plus base-dir helpers used by server startup.
 import { Effect } from "effect";
-import {
-  isShellEnvironmentHydrated,
-  listLoginShellCandidates,
-  mergePathEntries,
-  readPathFromLaunchctl,
-  readPathFromLoginShell,
-} from "@arkos/shared/shell";
+import { isShellEnvironmentHydrated, listLoginShellCandidates, mergePathEntries, readPathFromLaunchctl, readPathFromLoginShell } from "@arkos/shared/shell";
 import { createCachedLoginShellPathReader } from "@arkos/shared/loginShellEnvironment";
-import {
-  expandHomePath as expandHomePathSync,
-  resolveArkosHomeDirectory,
-} from "@arkos/shared/arkosHome";
+import { expandHomePath as expandHomePathSync, resolveArkosHomeDirectory } from "@arkos/shared/arkosHome";
 
 function logPathHydrationWarning(message: string, error?: unknown): void {
   console.warn(`[server] ${message}`, error instanceof Error ? error.message : (error ?? ""));

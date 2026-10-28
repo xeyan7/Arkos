@@ -2,17 +2,8 @@ import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  BrowserAutomationErrorMessages,
-  BrowserVaultSettings,
-  type BrowserVaultSavePrompt,
-  type BrowserVaultSnapshot,
-} from "@arkos/contracts";
-import {
-  createLocalCredentialVault,
-  type CredentialVault,
-  type LocalCredentialVault,
-} from "betterwright";
+import { BrowserAutomationErrorMessages, BrowserVaultSettings, type BrowserVaultSavePrompt, type BrowserVaultSnapshot } from "@arkos/contracts";
+import { createLocalCredentialVault, type CredentialVault, type LocalCredentialVault } from "betterwright";
 import { Schema } from "effect";
 import { VaultKeyProtection, type VaultKeyStore } from "./vaultKeyProtection";
 

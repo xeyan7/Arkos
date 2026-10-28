@@ -1,25 +1,12 @@
-import {
-  CommandId,
-  ThreadId,
-  type OrchestrationEvent,
-  type OrchestrationThread,
-} from "@arkos/contracts";
-import {
-  SIDECHAT_VISIBLE_ACTIVITY_HEARTBEAT_MS,
-  createSidechatExpiryTimer,
-  sidechatExpiryMs,
-  type SidechatExpiryTimerClock,
-} from "@arkos/shared/sidechatExpiry";
+import { CommandId, ThreadId, type OrchestrationEvent, type OrchestrationThread } from "@arkos/contracts";
+import { SIDECHAT_VISIBLE_ACTIVITY_HEARTBEAT_MS, createSidechatExpiryTimer, sidechatExpiryMs, type SidechatExpiryTimerClock } from "@arkos/shared/sidechatExpiry";
 import { isSidechatThread } from "@arkos/shared/sidechatThread";
 import { Cause, Duration, Effect, Layer, Schedule, Stream } from "effect";
 
 import { ProviderService } from "../../provider/Services/ProviderService.ts";
 import { ServerSettingsService } from "../../serverSettings.ts";
 import { OrchestrationEngineService } from "../Services/OrchestrationEngine.ts";
-import {
-  SidechatExpiryReactor,
-  type SidechatExpiryReactorShape,
-} from "../Services/SidechatExpiryReactor.ts";
+import { SidechatExpiryReactor, type SidechatExpiryReactorShape } from "../Services/SidechatExpiryReactor.ts";
 
 const EXPIRY_RETRY_DELAY_MS = 5_000;
 const SESSION_STOP_RETRY_COUNT = 2;

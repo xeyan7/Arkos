@@ -1,30 +1,11 @@
 import * as Crypto from "node:crypto";
 
 import type { WebContents } from "electron";
-import type {
-  BrowserAnnotationCancelInput,
-  BrowserAnnotationCancelReason,
-  BrowserAnnotationEvent,
-  BrowserAnnotationSession,
-  BrowserAnnotationStartInput,
-  BrowserAnnotationSyncMarkersInput,
-  BrowserAnnotationDocument,
-  BrowserAnnotationSource,
-  BrowserAnnotationTheme,
-  ThreadId,
-} from "@arkos/contracts";
-import {
-  browserAnnotationDocumentIdentityUrl,
-  sanitizeBrowserAnnotationUrl,
-} from "@arkos/shared/browserAnnotations";
+import type { BrowserAnnotationCancelInput, BrowserAnnotationCancelReason, BrowserAnnotationEvent, BrowserAnnotationSession, BrowserAnnotationStartInput, BrowserAnnotationSyncMarkersInput, BrowserAnnotationDocument, BrowserAnnotationSource, BrowserAnnotationTheme, ThreadId } from "@arkos/contracts";
+import { browserAnnotationDocumentIdentityUrl, sanitizeBrowserAnnotationUrl } from "@arkos/shared/browserAnnotations";
 
 import { BROWSER_ANNOTATION_GUEST_COMMAND_CHANNEL } from "../ipcChannels";
-import {
-  BROWSER_ANNOTATION_PROTOCOL_VERSION,
-  parseAnnotationGuestMessage,
-  parseBrowserAnnotationTheme,
-  parseBrowserAnnotationMarkers,
-} from "./protocol";
+import { BROWSER_ANNOTATION_PROTOCOL_VERSION, parseAnnotationGuestMessage, parseBrowserAnnotationTheme, parseBrowserAnnotationMarkers } from "./protocol";
 
 export interface BrowserAnnotationRuntime {
   readonly threadId: ThreadId;

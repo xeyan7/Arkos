@@ -3,26 +3,16 @@
 // Layer: Web hook
 // Exports: useThreadHandoff
 
+// FILE: useThreadHandoff.ts
+// Purpose: Hands a thread to another provider, in place or in a new thread.
+// Layer: Web hook
+// Exports: useThreadHandoff
 import { useNavigate } from "@tanstack/react-router";
-import {
-  PROVIDER_DISPLAY_NAMES,
-  type ModelSelection,
-  type ProviderInstanceId,
-  type ProviderKind,
-} from "@arkos/contracts";
+import { PROVIDER_DISPLAY_NAMES, type ModelSelection, type ProviderInstanceId, type ProviderKind } from "@arkos/contracts";
 import { useComposerDraftStore } from "../composerDraftStore";
 import { useProviderStatusesForLocalConfig } from "./useProviderStatusesForLocalConfig";
 import { useRefreshProviderStatusesNow } from "./useProviderStatusRefresh";
-import {
-  buildThreadHandoffImportedActivities,
-  buildThreadHandoffImportedMessages,
-  canContinueThreadHandoff,
-  canCreateThreadHandoff,
-  type ProviderHandoffOutcome,
-  resolveProviderHandoffOutcome,
-  resolveThreadHandoffModelSelection,
-  resolveThreadHandoffTitle,
-} from "../lib/threadHandoff";
+import { buildThreadHandoffImportedActivities, buildThreadHandoffImportedMessages, canContinueThreadHandoff, canCreateThreadHandoff, type ProviderHandoffOutcome, resolveProviderHandoffOutcome, resolveThreadHandoffModelSelection, resolveThreadHandoffTitle } from "../lib/threadHandoff";
 import { resolveProviderSendAvailabilityWithRefresh } from "../lib/providerAvailability";
 import { newCommandId, newThreadId } from "../lib/utils";
 import { readNativeApi } from "../nativeApi";

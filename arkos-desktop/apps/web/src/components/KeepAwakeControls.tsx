@@ -1,9 +1,5 @@
 import type { KeepAwakeMode, ServerKeepAwakeState } from "@arkos/contracts";
-import {
-  KEEP_AWAKE_MODE_OPTIONS,
-  KEEP_AWAKE_ROW_TITLE,
-  keepAwakeStatusLabel,
-} from "~/lib/keepAwake";
+import { KEEP_AWAKE_MODE_OPTIONS, KEEP_AWAKE_ROW_TITLE, keepAwakeStatusLabel } from "~/lib/keepAwake";
 import { SettingResetButton, SettingsSegmentedControl } from "./settings/SettingControls";
 import { SettingsRow, SettingsSection } from "./settings/SettingsPanelPrimitives";
 

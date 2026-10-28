@@ -1,43 +1,13 @@
-import {
-  THREAD_GOAL_MAX_CHARS,
-  THREAD_NOTES_MAX_CHARS,
-  type OrchestrationThreadShell,
-  type TurnDispatchMode,
-  ArkosCreateThreadsInput,
-  ArkosCreateThreadsResult,
-} from "@arkos/contracts";
-import {
-  deriveKanbanColumnV2,
-  deriveKanbanAttention,
-  KANBAN_COLUMN_V2_LABELS,
-  type KanbanAttentionFlag,
-  type KanbanColumnV2Key,
-  type KanbanThreadDerivationInput,
-} from "@arkos/shared/kanban";
+import { THREAD_GOAL_MAX_CHARS, THREAD_NOTES_MAX_CHARS, type OrchestrationThreadShell, type TurnDispatchMode, ArkosCreateThreadsInput, ArkosCreateThreadsResult } from "@arkos/contracts";
+import { deriveKanbanColumnV2, deriveKanbanAttention, KANBAN_COLUMN_V2_LABELS, type KanbanAttentionFlag, type KanbanColumnV2Key, type KanbanThreadDerivationInput } from "@arkos/shared/kanban";
 import { Effect, Option, Schema } from "effect";
 
-import {
-  isOrdinaryProjectRow,
-  threadHasInFlightTurn,
-  type SpaceAssignmentWorkspacePaths,
-} from "../orchestration/commandInvariants.ts";
+import { isOrdinaryProjectRow, threadHasInFlightTurn, type SpaceAssignmentWorkspacePaths } from "../orchestration/commandInvariants.ts";
 import type { ProjectionSnapshotQueryShape } from "../orchestration/Services/ProjectionSnapshotQuery.ts";
 import type { GatewayCreationContext } from "./creationCoordinator.ts";
 import { mcpToolResultError, mcpToolResultJson, type McpToolCallResult } from "./protocol.ts";
-import {
-  buildModelSelection,
-  decodeCreateThreadsInput,
-  errorText,
-  readStringArg,
-  ToolInputError,
-} from "./toolInput.ts";
-import {
-  GatewayToolError,
-  gatewayToolErrorResult,
-  READ_ONLY_TOOL_ANNOTATIONS,
-  type ToolEntry,
-  type ToolContext,
-} from "./toolRuntime.ts";
+import { buildModelSelection, decodeCreateThreadsInput, errorText, readStringArg, ToolInputError } from "./toolInput.ts";
+import { GatewayToolError, gatewayToolErrorResult, READ_ONLY_TOOL_ANNOTATIONS, type ToolEntry, type ToolContext } from "./toolRuntime.ts";
 import { summarizeThreadShell } from "./threadSummary.ts";
 
 /**

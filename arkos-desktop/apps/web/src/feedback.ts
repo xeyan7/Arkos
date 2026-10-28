@@ -3,6 +3,10 @@
 // Layer: Web feature logic
 // Depends on: An optional feedback endpoint configured via VITE_FEEDBACK_ENDPOINT.
 
+// FILE: feedback.ts
+// Purpose: Owns feedback categories, privacy-safe diagnostics, and delivery.
+// Layer: Web feature logic
+// Depends on: An optional feedback endpoint configured via VITE_FEEDBACK_ENDPOINT.
 import { APP_VERSION } from "./branding";
 
 /**

@@ -4,13 +4,12 @@
 //          what to do next), and the message that starts a fix turn.
 // Layer: Server domain logic (no Effect, no I/O)
 
-import {
-  PULL_REQUEST_AUTO_FIX_MAX_ATTEMPTS,
-  type GitPullRequestCheck,
-  type OrchestrationThreadShell,
-  type PullRequestAutoFixPauseReason,
-  type PullRequestAutoFixState,
-} from "@arkos/contracts";
+// FILE: pullRequestAutoFixDecision.ts
+// Purpose: The Auto-fix CI watcher's per-poll decision for one watched PR of a chat, as a
+//          pure function (given the stored state, the chat, its checkout, and the PR's checks,
+//          what to do next), and the message that starts a fix turn.
+// Layer: Server domain logic (no Effect, no I/O)
+import { PULL_REQUEST_AUTO_FIX_MAX_ATTEMPTS, type GitPullRequestCheck, type OrchestrationThreadShell, type PullRequestAutoFixPauseReason, type PullRequestAutoFixState } from "@arkos/contracts";
 
 import { threadHasInFlightTurn } from "../orchestration/commandInvariants";
 

@@ -3,12 +3,12 @@
 // Layer: Web lib
 // Exports: cwd resolution, search normalization, and provider skill/plugin display helpers.
 
+// FILE: providerDiscovery.ts
+// Purpose: Shares provider-discovery helpers across chat and browser surfaces.
+// Layer: Web lib
+// Exports: cwd resolution, search normalization, and provider skill/plugin display helpers.
 import { resolveThreadBranchSourceCwd } from "@arkos/shared/threadEnvironment";
-import type {
-  ProviderNativeCommandDescriptor,
-  ProviderPluginDescriptor,
-  ProviderSkillDescriptor,
-} from "@arkos/contracts";
+import type { ProviderNativeCommandDescriptor, ProviderPluginDescriptor, ProviderSkillDescriptor } from "@arkos/contracts";
 
 // Prefer the most specific workspace context so discovery reflects the active thread first.
 export function resolveProviderDiscoveryCwd(options: {

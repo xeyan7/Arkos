@@ -6,15 +6,17 @@
 // Layer: Shared UI component
 // Used by: markdown source links (ChatMarkdown), InlineLinkChip (composer + user bubble).
 
+// FILE: SiteFavicon.tsx
+// Purpose: Render a website's favicon for a URL, falling back to the globe icon
+//          while loading and on failure (no layout shift). Probes with Image()
+//          so behavior matches the actual visible <img>, and shares a module-level
+//          status cache so a known host renders immediately on re-render.
+// Layer: Shared UI component
+// Used by: markdown source links (ChatMarkdown), InlineLinkChip (composer + user bubble).
 import { useEffect, useState } from "react";
 
 import { GlobeIcon } from "~/lib/icons";
-import {
-  extractHostname,
-  probeSiteFavicon,
-  resolveSiteFaviconUrl,
-  siteFaviconStatusCache,
-} from "~/lib/siteFavicon";
+import { extractHostname, probeSiteFavicon, resolveSiteFaviconUrl, siteFaviconStatusCache } from "~/lib/siteFavicon";
 import { cn } from "~/lib/utils";
 
 export interface SiteFaviconProps {

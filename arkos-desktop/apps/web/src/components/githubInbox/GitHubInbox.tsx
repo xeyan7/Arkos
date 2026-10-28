@@ -9,25 +9,21 @@
 // Layer: GitHub inbox presentation
 // Exports: GitHubInbox
 
+// FILE: GitHubInbox.tsx
+// Purpose: The GitHub inbox body under the route header: a resizable list column (filter bar,
+//          involvement sections of pull request and issue rows, notes) beside an inline detail pane. On a narrow
+//          window it shows the list or the detail, with a back control. Filters persist in the
+//          local app settings; URL parameters override them for one visit, and the selection
+//          lives in the URL so an open item stays linkable. The detail's floating composer feeds
+//          the route's side chat dock; Send to agent picks among the projects the item's
+//          repository belongs to.
+// Layer: GitHub inbox presentation
+// Exports: GitHubInbox
 import type { GitHubInboxItem, GitHubInboxListError, ProjectId, ThreadId } from "@arkos/contracts";
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  type KeyboardEvent as ReactKeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
-  type RefObject,
-  useDeferredValue,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type RefObject, useDeferredValue, useMemo, useRef, useState } from "react";
 
-import {
-  type GitHubInboxInvolvementFilter,
-  type GitHubInboxKindFilter,
-  type GitHubInboxStateFilter,
-  type TimestampFormat,
-  useAppSettings,
-} from "~/appSettings";
+import { type GitHubInboxInvolvementFilter, type GitHubInboxKindFilter, type GitHubInboxStateFilter, type TimestampFormat, useAppSettings } from "~/appSettings";
 import { ProjectSidebarIcon } from "~/components/ProjectSidebarIcon";
 import type { GitHubItemSendTarget } from "~/components/pullRequest/GitHubItemAgentActions";
 import type { GitHubItemInfoThread } from "~/components/pullRequest/GitHubItemInfo";
@@ -43,58 +39,19 @@ import { PullRequestsUnavailableState } from "~/components/pullRequest/PullReque
 import { PR_FINE_TEXT_CLASS_NAME } from "~/components/pullRequest/pullRequestText";
 import { PullRequestWarningNote } from "~/components/pullRequest/PullRequestWarningNote";
 import { Button } from "~/components/ui/button";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "~/components/ui/empty";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "~/components/ui/empty";
 import { Skeleton } from "~/components/ui/skeleton";
 import { toastManager } from "~/components/ui/toast";
 import { useIsMobile } from "~/hooks/useMediaQuery";
 import { GitPullRequestIcon } from "~/lib/icons";
-import {
-  attachPanelPointerOverlaySession,
-  createPanelResizeOverlay,
-  removePanelResizeOverlay,
-} from "~/lib/panelResize";
-import {
-  githubInboxListQueryOptions,
-  pullRequestMutationKeys,
-  pullRequestQueryErrorState,
-  pullRequestsForceRefreshMutationOptions,
-  pullRequestSetPinnedMutationOptions,
-} from "~/lib/pullRequestReactQuery";
+import { attachPanelPointerOverlaySession, createPanelResizeOverlay, removePanelResizeOverlay } from "~/lib/panelResize";
+import { githubInboxListQueryOptions, pullRequestMutationKeys, pullRequestQueryErrorState, pullRequestsForceRefreshMutationOptions, pullRequestSetPinnedMutationOptions } from "~/lib/pullRequestReactQuery";
 import { cn } from "~/lib/utils";
 import { useStore } from "~/store";
 import { formatShortTimestamp } from "~/timestampFormat";
 import { GitHubInboxFilterBar } from "./GitHubInboxFilterBar";
 import { GitHubIssueDetailPanel } from "./GitHubIssueDetailPanel";
-import {
-  CLEARED_GITHUB_INBOX_FILTER_SEARCH,
-  CLEARED_GITHUB_INBOX_FILTER_SETTINGS,
-  CLEARED_GITHUB_INBOX_SELECTION,
-  collectInboxLabelOptions,
-  DEFAULT_EXPANDED_INBOX_SECTIONS,
-  countActiveGitHubInboxFilters,
-  countInboxItemsByKind,
-  countTruncatedInboxRepositories,
-  githubInboxItemNoun,
-  githubInboxListState,
-  githubInboxSelection,
-  githubInboxSelectionForItem,
-  githubInboxSendTargets,
-  groupVisibleInboxItems,
-  inboxErrorsInScope,
-  isGitHubInboxItemSelected,
-  resolveInboxItemReference,
-  resolveGitHubInboxFilters,
-  selectVisibleInboxItems,
-  type GitHubInboxSearch,
-  type GitHubInboxSearchPatch,
-  type GitHubInboxSelection,
-} from "./githubInbox.logic";
+import { CLEARED_GITHUB_INBOX_FILTER_SEARCH, CLEARED_GITHUB_INBOX_FILTER_SETTINGS, CLEARED_GITHUB_INBOX_SELECTION, collectInboxLabelOptions, DEFAULT_EXPANDED_INBOX_SECTIONS, countActiveGitHubInboxFilters, countInboxItemsByKind, countTruncatedInboxRepositories, githubInboxItemNoun, githubInboxListState, githubInboxSelection, githubInboxSelectionForItem, githubInboxSendTargets, groupVisibleInboxItems, inboxErrorsInScope, isGitHubInboxItemSelected, resolveInboxItemReference, resolveGitHubInboxFilters, selectVisibleInboxItems, type GitHubInboxSearch, type GitHubInboxSearchPatch, type GitHubInboxSelection } from "./githubInbox.logic";
 
 // Without the route's Ask dock the list is a slim column and the detail takes the rest; with it
 // open the page is three even columns (list, detail, chat). When the window is too small for

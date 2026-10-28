@@ -3,6 +3,10 @@
 // Layer: Pull request presentation
 // Exports: PullRequestStackPosition
 
+// FILE: PullRequestStackPosition.tsx
+// Purpose: Shared compact stack-position indicator for pull request list and detail surfaces.
+// Layer: Pull request presentation
+// Exports: PullRequestStackPosition
 import type { PullRequestStackSummary } from "@arkos/contracts";
 
 import { Badge } from "~/components/ui/badge";

@@ -4,6 +4,11 @@
 // Layer: Web UI helpers
 // Exports: showFileReferenceContextMenu, getRevealInFolderLabel
 
+// FILE: fileReferenceContextMenu.ts
+// Purpose: Right-click menu shared by file rows, file previews, and chat file
+//          links (editor explorer, changed-file lists, dock file pane).
+// Layer: Web UI helpers
+// Exports: showFileReferenceContextMenu, getRevealInFolderLabel
 import { formatSelectionLabel, type ChatFileReference } from "~/lib/chatReferences";
 import { copyTextToClipboard } from "~/hooks/useCopyToClipboard";
 import { getNavigatorPlatform, isMacPlatform, isWindowsPlatform } from "~/lib/utils";

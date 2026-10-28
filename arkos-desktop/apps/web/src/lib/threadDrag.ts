@@ -3,6 +3,10 @@
 // Layer: Web UI helpers
 // Exports: THREAD_DRAG_MIME, ThreadDragPayload, beginThreadDrag, endThreadDrag, getActiveThreadDragId, isThreadDragTransfer, readThreadDragPayload, THREAD_MENTION_DROPZONE_ATTRIBUTE, isWithinThreadMentionDropzone
 
+// FILE: threadDrag.ts
+// Purpose: Shared native drag contract for dragging a thread row (sidebar, activity view) onto chat surfaces.
+// Layer: Web UI helpers
+// Exports: THREAD_DRAG_MIME, ThreadDragPayload, beginThreadDrag, endThreadDrag, getActiveThreadDragId, isThreadDragTransfer, readThreadDragPayload, THREAD_MENTION_DROPZONE_ATTRIBUTE, isWithinThreadMentionDropzone
 import { type ThreadId } from "@arkos/contracts";
 
 // Custom MIME so external file drops on the composer (which listen for `Files`) cannot trigger us.

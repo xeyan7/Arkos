@@ -5,6 +5,12 @@
 // Layer: UI component
 // Exports: SettingsSidebarNav
 
+// FILE: SettingsSidebarNav.tsx
+// Purpose: Settings section sidebar navigation with central icons and reference-style pill rows.
+//          Doubles as a settings search surface: typing swaps the section list for ranked
+//          row matches (same behavior as the editor file search), each jumping to its section.
+// Layer: UI component
+// Exports: SettingsSidebarNav
 import { type KeyboardEvent as ReactKeyboardEvent, useState } from "react";
 
 import { CentralIcon } from "~/lib/central-icons";
@@ -12,33 +18,10 @@ import { cn } from "~/lib/utils";
 import { Badge } from "./ui/badge";
 import { SearchInput } from "./ui/search-input";
 import { SidebarLeadingIcon } from "./SidebarLeadingIcon";
-import {
-  SETTINGS_NAV_GROUPS,
-  SETTINGS_NAV_ITEMS,
-  type SettingsSectionId,
-} from "../settingsNavigation";
-import {
-  rankSettingsSearchEntries,
-  settingsSearchEntryTarget,
-  settingsSectionLabel,
-  type SettingsSearchContext,
-  type SettingsSearchEntry,
-} from "../settingsSearchIndex";
-import {
-  SIDEBAR_ROW_HOVER_CLASS_NAME,
-  SIDEBAR_ROW_IDLE_TEXT_CLASS_NAME,
-  SIDEBAR_THREAD_ROW_BASE_CLASS_NAME,
-} from "../sidebarRowStyles";
-import {
-  SETTINGS_SIDEBAR_ICON_CLASS_NAME,
-  SETTINGS_SIDEBAR_ITEM_CLASS_NAME,
-  SETTINGS_SIDEBAR_ITEM_LABEL_CLASS_NAME,
-  SETTINGS_SIDEBAR_LIST_GAP_CLASS_NAME,
-  SETTINGS_SIDEBAR_ROW_FILL_ACTIVE_CLASS_NAME,
-  SETTINGS_SIDEBAR_ROW_FILL_HOVER_CLASS_NAME,
-  SETTINGS_SIDEBAR_SECTION_CLASS_NAME,
-  SETTINGS_SIDEBAR_SECTION_LABEL_CLASS_NAME,
-} from "../settingsSidebarNavStyles";
+import { SETTINGS_NAV_GROUPS, SETTINGS_NAV_ITEMS, type SettingsSectionId } from "../settingsNavigation";
+import { rankSettingsSearchEntries, settingsSearchEntryTarget, settingsSectionLabel, type SettingsSearchContext, type SettingsSearchEntry } from "../settingsSearchIndex";
+import { SIDEBAR_ROW_HOVER_CLASS_NAME, SIDEBAR_ROW_IDLE_TEXT_CLASS_NAME, SIDEBAR_THREAD_ROW_BASE_CLASS_NAME } from "../sidebarRowStyles";
+import { SETTINGS_SIDEBAR_ICON_CLASS_NAME, SETTINGS_SIDEBAR_ITEM_CLASS_NAME, SETTINGS_SIDEBAR_ITEM_LABEL_CLASS_NAME, SETTINGS_SIDEBAR_LIST_GAP_CLASS_NAME, SETTINGS_SIDEBAR_ROW_FILL_ACTIVE_CLASS_NAME, SETTINGS_SIDEBAR_ROW_FILL_HOVER_CLASS_NAME, SETTINGS_SIDEBAR_SECTION_CLASS_NAME, SETTINGS_SIDEBAR_SECTION_LABEL_CLASS_NAME } from "../settingsSidebarNavStyles";
 
 // Cap the result list so a broad query stays a quick scan rather than a wall of rows.
 const SETTINGS_SEARCH_RESULTS_LIMIT = 12;

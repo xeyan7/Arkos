@@ -1,8 +1,4 @@
-import {
-  MEMORY_AUTO_DOCUMENT_PATH,
-  MEMORY_DOCUMENT_PREFIX,
-  MEMORY_THREAD_DOCUMENT_PREFIX,
-} from "@arkos/shared/projectAgent";
+import { MEMORY_AUTO_DOCUMENT_PATH, MEMORY_DOCUMENT_PREFIX, MEMORY_THREAD_DOCUMENT_PREFIX } from "@arkos/shared/projectAgent";
 import { useEffect, useState } from "react";
 
 import ChatMarkdown from "~/components/ChatMarkdown";
@@ -10,21 +6,9 @@ import type { useProjectInstructionsAutosave } from "~/components/chat/environme
 import type { useProjectInstructionsSource } from "~/components/chat/project/useProjectInstructionsSource";
 import type { useProjectAgent } from "~/components/chat/project/useProjectAgent";
 import { EnvironmentCollapsibleSection } from "~/components/chat/environment/EnvironmentRow";
-import {
-  SettingsCard,
-  SettingsEmptyState,
-  SettingsListRow,
-  SettingsRow,
-  SettingsSectionShell,
-} from "~/components/settings/SettingsPanelPrimitives";
+import { SettingsCard, SettingsEmptyState, SettingsListRow, SettingsRow, SettingsSectionShell } from "~/components/settings/SettingsPanelPrimitives";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogHeader, DialogPanel, DialogPopup, DialogTitle } from "~/components/ui/dialog";
 import { IconButton } from "~/components/ui/icon-button";
 import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
@@ -32,11 +16,7 @@ import { ArrowUpIcon } from "~/lib/icons";
 import { formatRelativeTime } from "~/lib/relativeTime";
 
 import { CharacterCountTextarea } from "./CharacterCountTextarea";
-import {
-  GROUP_INSTRUCTIONS_MAX_CHARS,
-  memoryNoteDocumentPath,
-  type GroupSettingsDraft,
-} from "./groupSettingsDialog.logic";
+import { GROUP_INSTRUCTIONS_MAX_CHARS, memoryNoteDocumentPath, type GroupSettingsDraft } from "./groupSettingsDialog.logic";
 
 function MemoryDocumentDialog(props: {
   readonly logicalPath: string | null;

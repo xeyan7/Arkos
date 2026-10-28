@@ -7,19 +7,16 @@
 // Exports: PullRequestListGroupKey, PullRequestListGroup, inboxItemViewerRelation, grouping,
 //          project scoping, involvement/search filters, identity, and pin helpers
 
-import type {
-  GitHubInboxItem,
-  GitHubInboxItemKind,
-  GitHubViewerInvolvement,
-  ProjectId,
-  PullRequestActor,
-  PullRequestLabel,
-  PullRequestSetPinnedInput,
-} from "@arkos/contracts";
-import {
-  pullRequestListProjectContexts,
-  pullRequestListRepositoryIdentity,
-} from "@arkos/shared/githubRepository";
+// FILE: pullRequestList.logic.ts
+// Purpose: Pure list helpers shared by every GitHub item list (pull requests and issues): the
+//          viewer's relation to an item, involvement grouping and filtering, project scoping,
+//          free-text search, pinned ordering, row identity, and pin toggles. The inbox page
+//          composes them in githubInbox.logic.ts.
+// Layer: Web domain helpers (no React)
+// Exports: PullRequestListGroupKey, PullRequestListGroup, inboxItemViewerRelation, grouping,
+//          project scoping, involvement/search filters, identity, and pin helpers
+import type { GitHubInboxItem, GitHubInboxItemKind, GitHubViewerInvolvement, ProjectId, PullRequestActor, PullRequestLabel, PullRequestSetPinnedInput } from "@arkos/contracts";
+import { pullRequestListProjectContexts, pullRequestListRepositoryIdentity } from "@arkos/shared/githubRepository";
 
 import type { GitHubInboxInvolvementFilter } from "~/appSettings";
 

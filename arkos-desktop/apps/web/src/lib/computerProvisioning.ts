@@ -12,18 +12,21 @@
 // provision concurrently. The state machine lives in `useProvisionComputer`; the
 // words live here.
 
-import type {
-  ComputerPermission,
-  ComputerProvisionResult,
-  DesktopAppSnapPermissionKind,
-  DesktopAppSnapState,
-  DesktopBridge,
-} from "@arkos/contracts";
-import {
-  COMPUTER_PERMISSION_KINDS,
-  listComputerPermissions,
-  missingComputerAppSnapPermissions,
-} from "@arkos/shared/computerGrants";
+// FILE: computerProvisioning.ts
+// Purpose: One vocabulary for "set up computer control" — the toasts the chat card
+//          raises, the inline note the settings panel renders, and the rule for what
+//          counts as done. Pure so both surfaces can be pinned by tests.
+// Layer: Web UI logic
+// Exports: computerProvisionOutcome, computerProvisionStartToast, computerProvisionResultToast,
+//          computerProvisionNote
+//
+// The card and the panel used to each own a private copy of this flow, and they
+// said different things about the same server call: one raised a toast the other
+// did not, one had no pending state, and the two could fire the underlying
+// provision concurrently. The state machine lives in `useProvisionComputer`; the
+// words live here.
+import type { ComputerPermission, ComputerProvisionResult, DesktopAppSnapPermissionKind, DesktopAppSnapState, DesktopBridge } from "@arkos/contracts";
+import { COMPUTER_PERMISSION_KINDS, listComputerPermissions, missingComputerAppSnapPermissions } from "@arkos/shared/computerGrants";
 
 import { computerStatusNeedsSetup } from "~/components/ComputerPanel.logic";
 import { isLoopbackHostname } from "~/components/Sidebar.logic";

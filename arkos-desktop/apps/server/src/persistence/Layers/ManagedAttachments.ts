@@ -2,17 +2,7 @@ import { Effect, Layer, Option } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
 import { toPersistenceSqlError } from "../Errors.ts";
-import {
-  DEFAULT_MANAGED_ATTACHMENT_LIMITS,
-  MANAGED_ATTACHMENT_CLEANUP_MAX_ATTEMPTS,
-  ManagedAttachmentRepository,
-  type ClaimManagedAttachmentsResult,
-  type ManagedAttachmentBlob,
-  type ManagedAttachmentCleanupJob,
-  type ManagedAttachmentLimits,
-  type ManagedAttachmentRepositoryShape,
-  type ManagedAttachmentUsage,
-} from "../Services/ManagedAttachments.ts";
+import { DEFAULT_MANAGED_ATTACHMENT_LIMITS, MANAGED_ATTACHMENT_CLEANUP_MAX_ATTEMPTS, ManagedAttachmentRepository, type ClaimManagedAttachmentsResult, type ManagedAttachmentBlob, type ManagedAttachmentCleanupJob, type ManagedAttachmentLimits, type ManagedAttachmentRepositoryShape, type ManagedAttachmentUsage } from "../Services/ManagedAttachments.ts";
 
 const blobColumns = (sql: SqlClient.SqlClient) => sql`
   attachment_id AS "attachmentId",

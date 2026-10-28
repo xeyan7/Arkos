@@ -12,16 +12,25 @@
 // dynamic: the card fits the space its slot offers while keeping the live
 // content's aspect, never a fixed box.
 
+// FILE: ComputerPreviewPopover.tsx
+// Purpose: Ambient in-chat mini preview of the desktop an agent is driving.
+// Layer: Chat surface UI
+// Depends on: computerPreviewStore session machine, computerStateStore thread
+//             state, useComputerImageStream, ComputerPanel.logic helpers.
+//
+// View-only: the card follows the driven content, with a compact activity
+// label and a visible error if its first frame cannot arrive. Close
+// lives in a hover/focus-reveal cluster (the composer's stop stays the
+// always-visible safety net). It mounts wherever the owning thread's transcript is on
+// screen and self-hides when that thread has no live preview session. Size is
+// dynamic: the card fits the space its slot offers while keeping the live
+// content's aspect, never a fixed box.
 import type { ThreadId } from "@arkos/contracts";
 import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useAppSettings } from "../../appSettings";
-import {
-  selectThreadComputerPreviewFloating,
-  selectThreadComputerPreviewSession,
-  useComputerPreviewStore,
-} from "../../computerPreviewStore";
+import { selectThreadComputerPreviewFloating, selectThreadComputerPreviewSession, useComputerPreviewStore } from "../../computerPreviewStore";
 import { selectThreadComputerState, useComputerStateStore } from "../../computerStateStore";
 import { useComputerDesktopControl } from "../../hooks/useComputerDesktopControl";
 import { useThreadComputerStateSeed } from "../../hooks/useThreadComputerStateSeed";
@@ -31,20 +40,9 @@ import { cn } from "../../lib/utils";
 import { StatusDot } from "../ui/status-chip";
 import { computerCanvasLabel, shouldSubscribeToComputerStream } from "../ComputerPanel.logic";
 import { useComputerImageStream } from "../computer/useComputerImageStream";
-import {
-  type ComputerPreviewFloat,
-  useComputerPreviewFloat,
-} from "../computer/useComputerPreviewFloat";
+import { type ComputerPreviewFloat, useComputerPreviewFloat } from "../computer/useComputerPreviewFloat";
 import { useComputerPreviewTap } from "../computer/useComputerPreviewTap";
-import {
-  computerPreviewCardCaps,
-  computerPreviewCardFitWidth,
-  computerPreviewCardOpen,
-  computerPreviewFrameSource,
-  computerPreviewStatusLabel,
-  type ComputerPreviewCardSize,
-  type ComputerPreviewSession,
-} from "./ComputerPreviewPopover.logic";
+import { computerPreviewCardCaps, computerPreviewCardFitWidth, computerPreviewCardOpen, computerPreviewFrameSource, computerPreviewStatusLabel, type ComputerPreviewCardSize, type ComputerPreviewSession } from "./ComputerPreviewPopover.logic";
 
 const FALLBACK_ASPECT_RATIO = "16 / 10";
 // Slot fallbacks for the first paint (and server markup), before the slot is

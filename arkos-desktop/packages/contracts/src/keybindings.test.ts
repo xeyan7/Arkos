@@ -29,13 +29,13 @@ it.effect("accepts customizable model effort cycling rules", () =>
   Effect.gen(function* () {
     const parsed = yield* decode(KeybindingRule, {
       key: "shift+tab",
-      command: "model.effort.next",
+      command: "sidebar.toggle",
       when: "composerFocus",
     });
 
     assert.deepEqual(parsed, {
       key: "shift+tab",
-      command: "model.effort.next",
+      command: "sidebar.toggle",
       when: "composerFocus",
     });
   }),

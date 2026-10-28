@@ -3,6 +3,10 @@
 // Layer: Chat status presentation
 // Exports: useThreadErrorToast, buildThreadErrorToastOptions, threadErrorToastId, decideThreadErrorToastAction, collectThreadErrorMap
 
+// FILE: useThreadErrorToast.ts
+// Purpose: Surfaces thread-level runtime errors as a floating error toast.
+// Layer: Chat status presentation
+// Exports: useThreadErrorToast, buildThreadErrorToastOptions, threadErrorToastId, decideThreadErrorToastAction, collectThreadErrorMap
 import type { ThreadId } from "@arkos/contracts";
 import { isProviderDeliveryBlockDetail } from "@arkos/shared/providerDeliveryBlock";
 import { useEffect, useRef, type RefObject } from "react";

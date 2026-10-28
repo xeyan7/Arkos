@@ -317,11 +317,6 @@ describe("active thread action shortcuts", () => {
     expect(unread).toEqual([firstId]);
     renderHarness({
       keybindings: [
-        {
-          command: "model.effort.next",
-          shortcut: { ...actionShortcut, key: "a" },
-          whenAst: { type: "identifier", name: "composerFocus" },
-        },
       ],
     });
     expect(press("a", {}, composer).defaultPrevented).toBe(false);

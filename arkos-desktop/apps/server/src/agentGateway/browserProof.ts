@@ -1,13 +1,13 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { resolveCodexGeneratedImagesRoot } from "../codexGeneratedImages.ts";
+import { tmpdir } from "node:os";
 
 /** Browser proof uses the existing durable image store and chat image allowlist. */
 export async function saveBrowserProof(
   threadId: string,
   data: string,
-  root = resolveCodexGeneratedImagesRoot(),
+  root = path.join(tmpdir(), "arkos-browser-proofs"),
 ): Promise<string> {
   const png = Buffer.from(data, "base64");
   if (

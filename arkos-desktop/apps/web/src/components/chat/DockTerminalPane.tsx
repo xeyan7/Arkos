@@ -1,5 +1,6 @@
 // A single terminal panel with an independent, chat-owned dock session.
 
+// A single terminal panel with an independent, chat-owned dock session.
 import { type ProjectId, type ThreadId } from "@arkos/contracts";
 import { resolveThreadWorkspaceCwd } from "@arkos/shared/threadEnvironment";
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
@@ -7,10 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "r
 import { useTerminalSurfaceController } from "~/hooks/useTerminalSurfaceController";
 import { SINGLE_CHAT_PANE_SCOPE_ID } from "~/lib/chatPaneScope";
 import { dockTerminalThreadId } from "~/lib/dockTerminalScope";
-import {
-  getTerminalContextComposerTarget,
-  subscribeTerminalContextComposerTarget,
-} from "~/lib/terminalContextComposerRegistry";
+import { getTerminalContextComposerTarget, subscribeTerminalContextComposerTarget } from "~/lib/terminalContextComposerRegistry";
 import { useTerminalStateStore } from "~/terminalStateStore";
 import { projectScriptRuntimeEnv } from "~/projectScripts";
 import { useStore } from "~/store";

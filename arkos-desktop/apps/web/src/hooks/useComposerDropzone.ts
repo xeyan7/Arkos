@@ -3,6 +3,10 @@
 // Layer: Web composer hook
 // Exports: useComposerDropzone
 
+// FILE: useComposerDropzone.ts
+// Purpose: Share composer paste/drop handling for image attachments and file references.
+// Layer: Web composer hook
+// Exports: useComposerDropzone
 import { useEffect, useRef, type ClipboardEvent, type DragEvent } from "react";
 
 import { CHAT_FILE_REFERENCE_DRAG_TYPE } from "~/lib/chatReferences";

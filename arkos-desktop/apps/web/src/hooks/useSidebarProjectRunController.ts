@@ -3,11 +3,11 @@
 // Layer: Web Sidebar controller hook
 // Exports: useSidebarProjectRunController
 
-import {
-  type ProjectDiscoveredScriptTarget,
-  type ProjectId,
-  type ServerLocalServerProcess,
-} from "@arkos/contracts";
+// FILE: useSidebarProjectRunController.ts
+// Purpose: Owns Sidebar project-run discovery, server attribution, dialog state, and lifecycle actions.
+// Layer: Web Sidebar controller hook
+// Exports: useSidebarProjectRunController
+import { type ProjectDiscoveredScriptTarget, type ProjectId, type ServerLocalServerProcess } from "@arkos/contracts";
 import { localServerAddressLabel, localServerMatchesRun } from "@arkos/shared/localServers";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -20,10 +20,7 @@ import { serverQueryKeys, sidebarLocalServersQueryOptions } from "../lib/serverR
 import { newCommandId } from "../lib/utils";
 import { readNativeApi } from "../nativeApi";
 import { useProjectRunStore, type ProjectRunState } from "../projectRunStore";
-import {
-  selectPrimaryProjectRunCommand,
-  upsertProjectRunCommandScripts,
-} from "../projectRunTargets";
+import { selectPrimaryProjectRunCommand, upsertProjectRunCommandScripts } from "../projectRunTargets";
 import { projectScriptRuntimeEnv } from "../projectScripts";
 import type { Project } from "../types";
 

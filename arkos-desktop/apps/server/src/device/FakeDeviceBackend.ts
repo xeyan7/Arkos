@@ -7,31 +7,21 @@
  *
  * @module device/FakeDeviceBackend
  */
+/**
+ * FakeDeviceBackend - deterministic in-memory DeviceBackend for tests.
+ *
+ * Every observable effect is recorded and every clock is injectable, so manager
+ * lifecycle tests, tool tests, and frame-transport tests can run identically on
+ * any platform without Xcode, a simulator, or the native helper.
+ *
+ * @module device/FakeDeviceBackend
+ */
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 
-import type {
-  DeviceAvailability,
-  DeviceDescribeUiResult,
-  DeviceDescriptor,
-  DeviceGeometry,
-  DeviceHardwareButton,
-  DeviceInstallAppResult,
-  DeviceLaunchAppResult,
-  DeviceScreenshotResult,
-  DeviceStartRecordingResult,
-  DeviceStopRecordingResult,
-} from "@arkos/contracts";
+import type { DeviceAvailability, DeviceDescribeUiResult, DeviceDescriptor, DeviceGeometry, DeviceHardwareButton, DeviceInstallAppResult, DeviceLaunchAppResult, DeviceScreenshotResult, DeviceStartRecordingResult, DeviceStopRecordingResult } from "@arkos/contracts";
 
-import {
-  DeviceBackendError,
-  type DeviceBackend,
-  type DeviceFrameListener,
-  type DeviceKeyEvent,
-  type DeviceListOptions,
-  type DeviceStreamFrame,
-  type DeviceSwipeGesture,
-} from "./DeviceBackend.ts";
+import { DeviceBackendError, type DeviceBackend, type DeviceFrameListener, type DeviceKeyEvent, type DeviceListOptions, type DeviceStreamFrame, type DeviceSwipeGesture } from "./DeviceBackend.ts";
 
 export interface FakeDeviceSeed {
   readonly udid: string;

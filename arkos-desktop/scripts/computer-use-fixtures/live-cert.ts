@@ -52,9 +52,387 @@
  * Usage: bun scripts/computer-use-fixtures/live-cert.ts [--out DIR] [--json]
  *        [--skip row,row] [--keep-targets] [--quiet]
  */
+/**
+ * live-cert: the single-command live gate for Arkos computer use.
+ *
+ * Boots a trusted CuaDriverHost + the packaged driver on the current tree,
+ * spawns real TextEdit targets without stealing focus (`open -g` / `open -j`
+ * / minimized), samples the focus-theft probe at ~50 Hz for the whole run,
+ * executes a named-assertion matrix through the same `cuaRequest` wire the
+ * server uses, and emits one JSON report plus a markdown note under
+ * `--out`. Exit 0 = every non-skipped row passed; exit 2 = a failure; exit 1
+ * = environment/usage error (missing grants, missing binary).
+ *
+ * Rows (each reports pass|fail|skipped with evidence):
+ *   launch-isolation        `open -g` target appears; frontmost unchanged
+ *   visible-nonkey-write    set_value into visible non-key TextEdit + readback
+ *   hidden-write            set_value into `open -j` hidden app + readback
+ *   minimized-write         set_value into minimized window + readback
+ *   concurrent-writes       three windows, Promise.all set_value, all confirmed
+ *   operator-typing         keystrokes into the front app while agent writes a
+ *                           hidden doc — no cross-contamination either way
+ *   hidden-launch-default   ComputerManager.launchApp with no options lands
+ *                           the window off-screen (invisible-workspace seam)
+ *   chromium-semantic       real Chrome: hidden launch + re-hide + driver-
+ *                           enabled AX tree + omnibox set_value + readback
+ *   grant-lifecycle         per-app always-allow: prompt→mint→silent cover
+ *                           →revoke→re-prompt through manager.admitDrivenApp
+ *   locked-use-reauth       host.pauseDesktop→resume through the real
+ *                           desktop-interrupted chain: standing task consent
+ *                           revoked (re-prompt), declines held, pending
+ *                           prompts survive, input paused→observation→resumed
+ *   space-roundtrip         SLSManagedDisplaySetCurrentSpace switch→act→back
+ *                           (skipped with `skipped-single-desktop` when only
+ *                           one managed desktop space exists)
+ *   off-space-refusal       element ops on an off-Space window refuse cleanly
+ *   screenshot-fresh        get_window_state include_screenshot returns fresh
+ *                           geometry+PNG bytes
+ *   hidden-screenshot       hidden-window backing store tracks live content
+ *                           (shot-A != shot-B across a semantic write)
+ *   stale-token             forged element_token refuses `stale_element_token`
+ *   verify-state            verify_state tri-state on a known value
+ *   masked-activation       shield panel verified via all-layer CGWindowList
+ *                           through a real activation + semantic write
+ *   escape-kill-switch      synthetic-Escape immunity + host latch + refusal
+ *                           + explicit rearm (physical key unverified on VM)
+ *   cancellation            long type_text cancelled mid-flight; honest effect
+ *   focus-invariant         probe: zero theft fields off baseline across run
+ *
+ * Requirements: the runner's terminal (or bun) needs Accessibility + Screen
+ * Recording for the probe's keyWin/focused fields; the packaged driver needs
+ * its own grants (the canary bundle id). Missing grants narrow coverage —
+ * rows dependent on them report `skipped`, never `pass`.
+ *
+ * Usage: bun scripts/computer-use-fixtures/live-cert.ts [--out DIR] [--json]
+ *        [--skip row,row] [--keep-targets] [--quiet]
+ */
+/**
+ * live-cert: the single-command live gate for Arkos computer use.
+ *
+ * Boots a trusted CuaDriverHost + the packaged driver on the current tree,
+ * spawns real TextEdit targets without stealing focus (`open -g` / `open -j`
+ * / minimized), samples the focus-theft probe at ~50 Hz for the whole run,
+ * executes a named-assertion matrix through the same `cuaRequest` wire the
+ * server uses, and emits one JSON report plus a markdown note under
+ * `--out`. Exit 0 = every non-skipped row passed; exit 2 = a failure; exit 1
+ * = environment/usage error (missing grants, missing binary).
+ *
+ * Rows (each reports pass|fail|skipped with evidence):
+ *   launch-isolation        `open -g` target appears; frontmost unchanged
+ *   visible-nonkey-write    set_value into visible non-key TextEdit + readback
+ *   hidden-write            set_value into `open -j` hidden app + readback
+ *   minimized-write         set_value into minimized window + readback
+ *   concurrent-writes       three windows, Promise.all set_value, all confirmed
+ *   operator-typing         keystrokes into the front app while agent writes a
+ *                           hidden doc — no cross-contamination either way
+ *   hidden-launch-default   ComputerManager.launchApp with no options lands
+ *                           the window off-screen (invisible-workspace seam)
+ *   chromium-semantic       real Chrome: hidden launch + re-hide + driver-
+ *                           enabled AX tree + omnibox set_value + readback
+ *   grant-lifecycle         per-app always-allow: prompt→mint→silent cover
+ *                           →revoke→re-prompt through manager.admitDrivenApp
+ *   locked-use-reauth       host.pauseDesktop→resume through the real
+ *                           desktop-interrupted chain: standing task consent
+ *                           revoked (re-prompt), declines held, pending
+ *                           prompts survive, input paused→observation→resumed
+ *   space-roundtrip         SLSManagedDisplaySetCurrentSpace switch→act→back
+ *                           (skipped with `skipped-single-desktop` when only
+ *                           one managed desktop space exists)
+ *   off-space-refusal       element ops on an off-Space window refuse cleanly
+ *   screenshot-fresh        get_window_state include_screenshot returns fresh
+ *                           geometry+PNG bytes
+ *   hidden-screenshot       hidden-window backing store tracks live content
+ *                           (shot-A != shot-B across a semantic write)
+ *   stale-token             forged element_token refuses `stale_element_token`
+ *   verify-state            verify_state tri-state on a known value
+ *   masked-activation       shield panel verified via all-layer CGWindowList
+ *                           through a real activation + semantic write
+ *   escape-kill-switch      synthetic-Escape immunity + host latch + refusal
+ *                           + explicit rearm (physical key unverified on VM)
+ *   cancellation            long type_text cancelled mid-flight; honest effect
+ *   focus-invariant         probe: zero theft fields off baseline across run
+ *
+ * Requirements: the runner's terminal (or bun) needs Accessibility + Screen
+ * Recording for the probe's keyWin/focused fields; the packaged driver needs
+ * its own grants (the canary bundle id). Missing grants narrow coverage —
+ * rows dependent on them report `skipped`, never `pass`.
+ *
+ * Usage: bun scripts/computer-use-fixtures/live-cert.ts [--out DIR] [--json]
+ *        [--skip row,row] [--keep-targets] [--quiet]
+ */
+/**
+ * live-cert: the single-command live gate for Arkos computer use.
+ *
+ * Boots a trusted CuaDriverHost + the packaged driver on the current tree,
+ * spawns real TextEdit targets without stealing focus (`open -g` / `open -j`
+ * / minimized), samples the focus-theft probe at ~50 Hz for the whole run,
+ * executes a named-assertion matrix through the same `cuaRequest` wire the
+ * server uses, and emits one JSON report plus a markdown note under
+ * `--out`. Exit 0 = every non-skipped row passed; exit 2 = a failure; exit 1
+ * = environment/usage error (missing grants, missing binary).
+ *
+ * Rows (each reports pass|fail|skipped with evidence):
+ *   launch-isolation        `open -g` target appears; frontmost unchanged
+ *   visible-nonkey-write    set_value into visible non-key TextEdit + readback
+ *   hidden-write            set_value into `open -j` hidden app + readback
+ *   minimized-write         set_value into minimized window + readback
+ *   concurrent-writes       three windows, Promise.all set_value, all confirmed
+ *   operator-typing         keystrokes into the front app while agent writes a
+ *                           hidden doc — no cross-contamination either way
+ *   hidden-launch-default   ComputerManager.launchApp with no options lands
+ *                           the window off-screen (invisible-workspace seam)
+ *   chromium-semantic       real Chrome: hidden launch + re-hide + driver-
+ *                           enabled AX tree + omnibox set_value + readback
+ *   grant-lifecycle         per-app always-allow: prompt→mint→silent cover
+ *                           →revoke→re-prompt through manager.admitDrivenApp
+ *   locked-use-reauth       host.pauseDesktop→resume through the real
+ *                           desktop-interrupted chain: standing task consent
+ *                           revoked (re-prompt), declines held, pending
+ *                           prompts survive, input paused→observation→resumed
+ *   space-roundtrip         SLSManagedDisplaySetCurrentSpace switch→act→back
+ *                           (skipped with `skipped-single-desktop` when only
+ *                           one managed desktop space exists)
+ *   off-space-refusal       element ops on an off-Space window refuse cleanly
+ *   screenshot-fresh        get_window_state include_screenshot returns fresh
+ *                           geometry+PNG bytes
+ *   hidden-screenshot       hidden-window backing store tracks live content
+ *                           (shot-A != shot-B across a semantic write)
+ *   stale-token             forged element_token refuses `stale_element_token`
+ *   verify-state            verify_state tri-state on a known value
+ *   masked-activation       shield panel verified via all-layer CGWindowList
+ *                           through a real activation + semantic write
+ *   escape-kill-switch      synthetic-Escape immunity + host latch + refusal
+ *                           + explicit rearm (physical key unverified on VM)
+ *   cancellation            long type_text cancelled mid-flight; honest effect
+ *   focus-invariant         probe: zero theft fields off baseline across run
+ *
+ * Requirements: the runner's terminal (or bun) needs Accessibility + Screen
+ * Recording for the probe's keyWin/focused fields; the packaged driver needs
+ * its own grants (the canary bundle id). Missing grants narrow coverage —
+ * rows dependent on them report `skipped`, never `pass`.
+ *
+ * Usage: bun scripts/computer-use-fixtures/live-cert.ts [--out DIR] [--json]
+ *        [--skip row,row] [--keep-targets] [--quiet]
+ */
+/**
+ * live-cert: the single-command live gate for Arkos computer use.
+ *
+ * Boots a trusted CuaDriverHost + the packaged driver on the current tree,
+ * spawns real TextEdit targets without stealing focus (`open -g` / `open -j`
+ * / minimized), samples the focus-theft probe at ~50 Hz for the whole run,
+ * executes a named-assertion matrix through the same `cuaRequest` wire the
+ * server uses, and emits one JSON report plus a markdown note under
+ * `--out`. Exit 0 = every non-skipped row passed; exit 2 = a failure; exit 1
+ * = environment/usage error (missing grants, missing binary).
+ *
+ * Rows (each reports pass|fail|skipped with evidence):
+ *   launch-isolation        `open -g` target appears; frontmost unchanged
+ *   visible-nonkey-write    set_value into visible non-key TextEdit + readback
+ *   hidden-write            set_value into `open -j` hidden app + readback
+ *   minimized-write         set_value into minimized window + readback
+ *   concurrent-writes       three windows, Promise.all set_value, all confirmed
+ *   operator-typing         keystrokes into the front app while agent writes a
+ *                           hidden doc — no cross-contamination either way
+ *   hidden-launch-default   ComputerManager.launchApp with no options lands
+ *                           the window off-screen (invisible-workspace seam)
+ *   chromium-semantic       real Chrome: hidden launch + re-hide + driver-
+ *                           enabled AX tree + omnibox set_value + readback
+ *   grant-lifecycle         per-app always-allow: prompt→mint→silent cover
+ *                           →revoke→re-prompt through manager.admitDrivenApp
+ *   locked-use-reauth       host.pauseDesktop→resume through the real
+ *                           desktop-interrupted chain: standing task consent
+ *                           revoked (re-prompt), declines held, pending
+ *                           prompts survive, input paused→observation→resumed
+ *   space-roundtrip         SLSManagedDisplaySetCurrentSpace switch→act→back
+ *                           (skipped with `skipped-single-desktop` when only
+ *                           one managed desktop space exists)
+ *   off-space-refusal       element ops on an off-Space window refuse cleanly
+ *   screenshot-fresh        get_window_state include_screenshot returns fresh
+ *                           geometry+PNG bytes
+ *   hidden-screenshot       hidden-window backing store tracks live content
+ *                           (shot-A != shot-B across a semantic write)
+ *   stale-token             forged element_token refuses `stale_element_token`
+ *   verify-state            verify_state tri-state on a known value
+ *   masked-activation       shield panel verified via all-layer CGWindowList
+ *                           through a real activation + semantic write
+ *   escape-kill-switch      synthetic-Escape immunity + host latch + refusal
+ *                           + explicit rearm (physical key unverified on VM)
+ *   cancellation            long type_text cancelled mid-flight; honest effect
+ *   focus-invariant         probe: zero theft fields off baseline across run
+ *
+ * Requirements: the runner's terminal (or bun) needs Accessibility + Screen
+ * Recording for the probe's keyWin/focused fields; the packaged driver needs
+ * its own grants (the canary bundle id). Missing grants narrow coverage —
+ * rows dependent on them report `skipped`, never `pass`.
+ *
+ * Usage: bun scripts/computer-use-fixtures/live-cert.ts [--out DIR] [--json]
+ *        [--skip row,row] [--keep-targets] [--quiet]
+ */
+/**
+ * live-cert: the single-command live gate for Arkos computer use.
+ *
+ * Boots a trusted CuaDriverHost + the packaged driver on the current tree,
+ * spawns real TextEdit targets without stealing focus (`open -g` / `open -j`
+ * / minimized), samples the focus-theft probe at ~50 Hz for the whole run,
+ * executes a named-assertion matrix through the same `cuaRequest` wire the
+ * server uses, and emits one JSON report plus a markdown note under
+ * `--out`. Exit 0 = every non-skipped row passed; exit 2 = a failure; exit 1
+ * = environment/usage error (missing grants, missing binary).
+ *
+ * Rows (each reports pass|fail|skipped with evidence):
+ *   launch-isolation        `open -g` target appears; frontmost unchanged
+ *   visible-nonkey-write    set_value into visible non-key TextEdit + readback
+ *   hidden-write            set_value into `open -j` hidden app + readback
+ *   minimized-write         set_value into minimized window + readback
+ *   concurrent-writes       three windows, Promise.all set_value, all confirmed
+ *   operator-typing         keystrokes into the front app while agent writes a
+ *                           hidden doc — no cross-contamination either way
+ *   hidden-launch-default   ComputerManager.launchApp with no options lands
+ *                           the window off-screen (invisible-workspace seam)
+ *   chromium-semantic       real Chrome: hidden launch + re-hide + driver-
+ *                           enabled AX tree + omnibox set_value + readback
+ *   grant-lifecycle         per-app always-allow: prompt→mint→silent cover
+ *                           →revoke→re-prompt through manager.admitDrivenApp
+ *   locked-use-reauth       host.pauseDesktop→resume through the real
+ *                           desktop-interrupted chain: standing task consent
+ *                           revoked (re-prompt), declines held, pending
+ *                           prompts survive, input paused→observation→resumed
+ *   space-roundtrip         SLSManagedDisplaySetCurrentSpace switch→act→back
+ *                           (skipped with `skipped-single-desktop` when only
+ *                           one managed desktop space exists)
+ *   off-space-refusal       element ops on an off-Space window refuse cleanly
+ *   screenshot-fresh        get_window_state include_screenshot returns fresh
+ *                           geometry+PNG bytes
+ *   hidden-screenshot       hidden-window backing store tracks live content
+ *                           (shot-A != shot-B across a semantic write)
+ *   stale-token             forged element_token refuses `stale_element_token`
+ *   verify-state            verify_state tri-state on a known value
+ *   masked-activation       shield panel verified via all-layer CGWindowList
+ *                           through a real activation + semantic write
+ *   escape-kill-switch      synthetic-Escape immunity + host latch + refusal
+ *                           + explicit rearm (physical key unverified on VM)
+ *   cancellation            long type_text cancelled mid-flight; honest effect
+ *   focus-invariant         probe: zero theft fields off baseline across run
+ *
+ * Requirements: the runner's terminal (or bun) needs Accessibility + Screen
+ * Recording for the probe's keyWin/focused fields; the packaged driver needs
+ * its own grants (the canary bundle id). Missing grants narrow coverage —
+ * rows dependent on them report `skipped`, never `pass`.
+ *
+ * Usage: bun scripts/computer-use-fixtures/live-cert.ts [--out DIR] [--json]
+ *        [--skip row,row] [--keep-targets] [--quiet]
+ */
+/**
+ * live-cert: the single-command live gate for Arkos computer use.
+ *
+ * Boots a trusted CuaDriverHost + the packaged driver on the current tree,
+ * spawns real TextEdit targets without stealing focus (`open -g` / `open -j`
+ * / minimized), samples the focus-theft probe at ~50 Hz for the whole run,
+ * executes a named-assertion matrix through the same `cuaRequest` wire the
+ * server uses, and emits one JSON report plus a markdown note under
+ * `--out`. Exit 0 = every non-skipped row passed; exit 2 = a failure; exit 1
+ * = environment/usage error (missing grants, missing binary).
+ *
+ * Rows (each reports pass|fail|skipped with evidence):
+ *   launch-isolation        `open -g` target appears; frontmost unchanged
+ *   visible-nonkey-write    set_value into visible non-key TextEdit + readback
+ *   hidden-write            set_value into `open -j` hidden app + readback
+ *   minimized-write         set_value into minimized window + readback
+ *   concurrent-writes       three windows, Promise.all set_value, all confirmed
+ *   operator-typing         keystrokes into the front app while agent writes a
+ *                           hidden doc — no cross-contamination either way
+ *   hidden-launch-default   ComputerManager.launchApp with no options lands
+ *                           the window off-screen (invisible-workspace seam)
+ *   chromium-semantic       real Chrome: hidden launch + re-hide + driver-
+ *                           enabled AX tree + omnibox set_value + readback
+ *   grant-lifecycle         per-app always-allow: prompt→mint→silent cover
+ *                           →revoke→re-prompt through manager.admitDrivenApp
+ *   locked-use-reauth       host.pauseDesktop→resume through the real
+ *                           desktop-interrupted chain: standing task consent
+ *                           revoked (re-prompt), declines held, pending
+ *                           prompts survive, input paused→observation→resumed
+ *   space-roundtrip         SLSManagedDisplaySetCurrentSpace switch→act→back
+ *                           (skipped with `skipped-single-desktop` when only
+ *                           one managed desktop space exists)
+ *   off-space-refusal       element ops on an off-Space window refuse cleanly
+ *   screenshot-fresh        get_window_state include_screenshot returns fresh
+ *                           geometry+PNG bytes
+ *   hidden-screenshot       hidden-window backing store tracks live content
+ *                           (shot-A != shot-B across a semantic write)
+ *   stale-token             forged element_token refuses `stale_element_token`
+ *   verify-state            verify_state tri-state on a known value
+ *   masked-activation       shield panel verified via all-layer CGWindowList
+ *                           through a real activation + semantic write
+ *   escape-kill-switch      synthetic-Escape immunity + host latch + refusal
+ *                           + explicit rearm (physical key unverified on VM)
+ *   cancellation            long type_text cancelled mid-flight; honest effect
+ *   focus-invariant         probe: zero theft fields off baseline across run
+ *
+ * Requirements: the runner's terminal (or bun) needs Accessibility + Screen
+ * Recording for the probe's keyWin/focused fields; the packaged driver needs
+ * its own grants (the canary bundle id). Missing grants narrow coverage —
+ * rows dependent on them report `skipped`, never `pass`.
+ *
+ * Usage: bun scripts/computer-use-fixtures/live-cert.ts [--out DIR] [--json]
+ *        [--skip row,row] [--keep-targets] [--quiet]
+ */
+/**
+ * live-cert: the single-command live gate for Arkos computer use.
+ *
+ * Boots a trusted CuaDriverHost + the packaged driver on the current tree,
+ * spawns real TextEdit targets without stealing focus (`open -g` / `open -j`
+ * / minimized), samples the focus-theft probe at ~50 Hz for the whole run,
+ * executes a named-assertion matrix through the same `cuaRequest` wire the
+ * server uses, and emits one JSON report plus a markdown note under
+ * `--out`. Exit 0 = every non-skipped row passed; exit 2 = a failure; exit 1
+ * = environment/usage error (missing grants, missing binary).
+ *
+ * Rows (each reports pass|fail|skipped with evidence):
+ *   launch-isolation        `open -g` target appears; frontmost unchanged
+ *   visible-nonkey-write    set_value into visible non-key TextEdit + readback
+ *   hidden-write            set_value into `open -j` hidden app + readback
+ *   minimized-write         set_value into minimized window + readback
+ *   concurrent-writes       three windows, Promise.all set_value, all confirmed
+ *   operator-typing         keystrokes into the front app while agent writes a
+ *                           hidden doc — no cross-contamination either way
+ *   hidden-launch-default   ComputerManager.launchApp with no options lands
+ *                           the window off-screen (invisible-workspace seam)
+ *   chromium-semantic       real Chrome: hidden launch + re-hide + driver-
+ *                           enabled AX tree + omnibox set_value + readback
+ *   grant-lifecycle         per-app always-allow: prompt→mint→silent cover
+ *                           →revoke→re-prompt through manager.admitDrivenApp
+ *   locked-use-reauth       host.pauseDesktop→resume through the real
+ *                           desktop-interrupted chain: standing task consent
+ *                           revoked (re-prompt), declines held, pending
+ *                           prompts survive, input paused→observation→resumed
+ *   space-roundtrip         SLSManagedDisplaySetCurrentSpace switch→act→back
+ *                           (skipped with `skipped-single-desktop` when only
+ *                           one managed desktop space exists)
+ *   off-space-refusal       element ops on an off-Space window refuse cleanly
+ *   screenshot-fresh        get_window_state include_screenshot returns fresh
+ *                           geometry+PNG bytes
+ *   hidden-screenshot       hidden-window backing store tracks live content
+ *                           (shot-A != shot-B across a semantic write)
+ *   stale-token             forged element_token refuses `stale_element_token`
+ *   verify-state            verify_state tri-state on a known value
+ *   masked-activation       shield panel verified via all-layer CGWindowList
+ *                           through a real activation + semantic write
+ *   escape-kill-switch      synthetic-Escape immunity + host latch + refusal
+ *                           + explicit rearm (physical key unverified on VM)
+ *   cancellation            long type_text cancelled mid-flight; honest effect
+ *   focus-invariant         probe: zero theft fields off baseline across run
+ *
+ * Requirements: the runner's terminal (or bun) needs Accessibility + Screen
+ * Recording for the probe's keyWin/focused fields; the packaged driver needs
+ * its own grants (the canary bundle id). Missing grants narrow coverage —
+ * rows dependent on them report `skipped`, never `pass`.
+ *
+ * Usage: bun scripts/computer-use-fixtures/live-cert.ts [--out DIR] [--json]
+ *        [--skip row,row] [--keep-targets] [--quiet]
+ */
 import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
@@ -65,13 +443,7 @@ import { EscapeKillSwitchMonitor } from "../../apps/desktop/src/escapeKillSwitch
 import { CuaComputerBackend } from "../../apps/server/src/computer/CuaComputerBackend";
 import { ComputerManager } from "../../apps/server/src/computer/ComputerManager";
 import { computerApprovalGate } from "../../apps/server/src/computer/ComputerApprovalGate";
-import {
-  analyzeFocusSamples,
-  parseFocusProbeLine,
-  type FocusProbeExpect,
-  type FocusProbeLine,
-  type FocusProbeSample,
-} from "../../apps/desktop/src/cuaFixtures/focusProbe";
+import { analyzeFocusSamples, parseFocusProbeLine, type FocusProbeLine, type FocusProbeSample } from "../../apps/desktop/src/cuaFixtures/focusProbe";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const DRIVER = join(root, "apps/desktop/resources/cua-driver/cua-driver");

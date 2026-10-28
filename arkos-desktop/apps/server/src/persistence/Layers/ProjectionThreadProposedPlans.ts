@@ -3,15 +3,7 @@ import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 
 import { toPersistenceSqlError } from "../Errors.ts";
-import {
-  DeleteProjectionThreadProposedPlansInput,
-  GetLatestProjectionThreadProposedPlanSummaryInput,
-  ListProjectionThreadProposedPlansInput,
-  ProjectionThreadProposedPlan,
-  ProjectionThreadProposedPlanSummary,
-  ProjectionThreadProposedPlanRepository,
-  type ProjectionThreadProposedPlanRepositoryShape,
-} from "../Services/ProjectionThreadProposedPlans.ts";
+import { DeleteProjectionThreadProposedPlansInput, GetLatestProjectionThreadProposedPlanSummaryInput, ListProjectionThreadProposedPlansInput, ProjectionThreadProposedPlan, ProjectionThreadProposedPlanSummary, ProjectionThreadProposedPlanRepository, type ProjectionThreadProposedPlanRepositoryShape } from "../Services/ProjectionThreadProposedPlans.ts";
 
 const makeProjectionThreadProposedPlanRepository = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;

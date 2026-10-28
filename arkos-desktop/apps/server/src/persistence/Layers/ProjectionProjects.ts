@@ -5,14 +5,7 @@ import * as SchemaGetter from "effect/SchemaGetter";
 
 import { ModelSelection, ProjectAdditionalFolders, ProjectScript } from "@arkos/contracts";
 import { toPersistenceSqlError } from "../Errors.ts";
-import {
-  ClearProjectionProjectSpaceAssignmentsInput,
-  DeleteProjectionProjectInput,
-  GetProjectionProjectInput,
-  ProjectionProject,
-  ProjectionProjectRepository,
-  type ProjectionProjectRepositoryShape,
-} from "../Services/ProjectionProjects.ts";
+import { ClearProjectionProjectSpaceAssignmentsInput, DeleteProjectionProjectInput, GetProjectionProjectInput, ProjectionProject, ProjectionProjectRepository, type ProjectionProjectRepositoryShape } from "../Services/ProjectionProjects.ts";
 
 const SqliteBoolean = Schema.Number.pipe(
   Schema.decodeTo(Schema.Boolean, {

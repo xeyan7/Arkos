@@ -6,6 +6,13 @@
 // Layer: Web component
 // Exports: GroupLifecycleSection
 
+// FILE: GroupLifecycleSection.tsx
+// Purpose: Group lifecycle controls inside group settings — pause/resume,
+//          archive, restart coordinator, and the typed-name delete zone.
+//          Actions go through useProjectAgent's lifecycle methods so the
+//          summaries store and overview stay in sync.
+// Layer: Web component
+// Exports: GroupLifecycleSection
 import { useState } from "react";
 
 import { Input } from "~/components/ui/input";

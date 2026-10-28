@@ -2,25 +2,11 @@
 // Purpose: Normalize browser DOM annotations and serialize them as hidden,
 // provider-agnostic prompt context.
 
-import {
-  BROWSER_ANNOTATION_MAX_COMMENT_LENGTH,
-  BROWSER_ANNOTATION_MAX_DOCUMENT_KEY_LENGTH,
-  BROWSER_ANNOTATION_MAX_FINGERPRINT_LENGTH,
-  BROWSER_ANNOTATION_MAX_ID_LENGTH,
-  BROWSER_ANNOTATION_MAX_NAME_LENGTH,
-  BROWSER_ANNOTATION_MAX_PAGE_TITLE_LENGTH,
-  BROWSER_ANNOTATION_MAX_ROLE_LENGTH,
-  BROWSER_ANNOTATION_MAX_SELECTOR_LENGTH,
-  BROWSER_ANNOTATION_MAX_TAG_NAME_LENGTH,
-  BROWSER_ANNOTATION_MAX_TEXT_LENGTH,
-  BROWSER_ANNOTATION_MAX_URL_LENGTH,
-  type BrowserAnnotation,
-  type MessageId,
-} from "@arkos/contracts";
-import {
-  sanitizeBrowserAnnotationPageTitle,
-  sanitizeBrowserAnnotationUrl,
-} from "@arkos/shared/browserAnnotations";
+// FILE: browserAnnotations.ts
+// Purpose: Normalize browser DOM annotations and serialize them as hidden,
+// provider-agnostic prompt context.
+import { BROWSER_ANNOTATION_MAX_COMMENT_LENGTH, BROWSER_ANNOTATION_MAX_DOCUMENT_KEY_LENGTH, BROWSER_ANNOTATION_MAX_FINGERPRINT_LENGTH, BROWSER_ANNOTATION_MAX_ID_LENGTH, BROWSER_ANNOTATION_MAX_NAME_LENGTH, BROWSER_ANNOTATION_MAX_PAGE_TITLE_LENGTH, BROWSER_ANNOTATION_MAX_ROLE_LENGTH, BROWSER_ANNOTATION_MAX_SELECTOR_LENGTH, BROWSER_ANNOTATION_MAX_TAG_NAME_LENGTH, BROWSER_ANNOTATION_MAX_TEXT_LENGTH, BROWSER_ANNOTATION_MAX_URL_LENGTH, type BrowserAnnotation, type MessageId } from "@arkos/contracts";
+import { sanitizeBrowserAnnotationPageTitle, sanitizeBrowserAnnotationUrl } from "@arkos/shared/browserAnnotations";
 
 export const BROWSER_ANNOTATIONS_VERSION = 2 as const;
 export const BROWSER_ANNOTATION_MAX_COUNT = 32;

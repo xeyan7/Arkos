@@ -2,16 +2,12 @@
 // Purpose: Applies in-thread find decoration after markdown parsing.
 // Layer: Web chat presentation helper
 
+// FILE: ChatMarkdownFind.tsx
+// Purpose: Applies in-thread find decoration after markdown parsing.
+// Layer: Web chat presentation helper
 import React, { useMemo, type ReactNode } from "react";
 
-import {
-  collectCaseInsensitiveSubstringRanges,
-  normalizeFindQuery,
-  splitTextWithFindMatches,
-  splitTextWithFindRanges,
-  wrapFindQueryInHtml,
-  type ThreadFindRange,
-} from "./chat/threadFind.logic";
+import { collectCaseInsensitiveSubstringRanges, normalizeFindQuery, splitTextWithFindMatches, splitTextWithFindRanges, wrapFindQueryInHtml, type ThreadFindRange } from "./chat/threadFind.logic";
 
 interface ChatFindRenderState {
   query: string;

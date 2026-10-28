@@ -3,18 +3,40 @@
 // Layer: Release/build helper
 // Depends on: Desktop packaging policy and electron-builder config shape.
 
+// FILE: desktop-platform-build-config.ts
+// Purpose: Builds platform-specific electron-builder config fragments for desktop artifacts.
+// Layer: Release/build helper
+// Depends on: Desktop packaging policy and electron-builder config shape.
+// FILE: desktop-platform-build-config.ts
+// Purpose: Builds platform-specific electron-builder config fragments for desktop artifacts.
+// Layer: Release/build helper
+// Depends on: Desktop packaging policy and electron-builder config shape.
+// FILE: desktop-platform-build-config.ts
+// Purpose: Builds platform-specific electron-builder config fragments for desktop artifacts.
+// Layer: Release/build helper
+// Depends on: Desktop packaging policy and electron-builder config shape.
+// FILE: desktop-platform-build-config.ts
+// Purpose: Builds platform-specific electron-builder config fragments for desktop artifacts.
+// Layer: Release/build helper
+// Depends on: Desktop packaging policy and electron-builder config shape.
+// FILE: desktop-platform-build-config.ts
+// Purpose: Builds platform-specific electron-builder config fragments for desktop artifacts.
+// Layer: Release/build helper
+// Depends on: Desktop packaging policy and electron-builder config shape.
+// FILE: desktop-platform-build-config.ts
+// Purpose: Builds platform-specific electron-builder config fragments for desktop artifacts.
+// Layer: Release/build helper
+// Depends on: Desktop packaging policy and electron-builder config shape.
+// FILE: desktop-platform-build-config.ts
+// Purpose: Builds platform-specific electron-builder config fragments for desktop artifacts.
+// Layer: Release/build helper
+// Depends on: Desktop packaging policy and electron-builder config shape.
 import { fileURLToPath } from "node:url";
 
-import {
-  ARKOS_BETA_WINDOWS_INSTALLER_GUID,
-  ARKOS_STABLE_WINDOWS_INSTALLER_GUID,
-} from "@arkos/shared/betaChannel";
+import { ARKOS_BETA_WINDOWS_INSTALLER_GUID, ARKOS_STABLE_WINDOWS_INSTALLER_GUID } from "@arkos/shared/betaChannel";
 import type { ArkosPackagedDesktopFlavor } from "@arkos/shared/desktopIdentity";
 
-import {
-  createDesktopBundleFilePatterns,
-  preserveDependencyDiagnostics,
-} from "./desktop-bundle-files.ts";
+import { createDesktopBundleFilePatterns, preserveDependencyDiagnostics } from "./desktop-bundle-files.ts";
 
 export const MICROPHONE_USAGE_DESCRIPTION =
   "Arkos needs microphone access so you can record voice notes and transcribe them into the chat composer, and, if you turn it on, to move the chat message trail with your voice.";

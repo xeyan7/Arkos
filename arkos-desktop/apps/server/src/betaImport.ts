@@ -11,32 +11,23 @@
 // The marker file is untrusted input: the source path is resolved and must not
 // point back at this install's own home before anything is read or written.
 
-import {
-  closeSync,
-  existsSync,
-  lstatSync,
-  mkdirSync,
-  mkdtempSync,
-  openSync,
-  readFileSync,
-  readSync,
-  realpathSync,
-  renameSync,
-  rmSync,
-  cpSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+// FILE: betaImport.ts
+// Purpose: Beta-side consumer of the stable app's "Copy my data to Beta" handoff.
+// Layer: Startup hook — runs before the beta server creates/opens its own database.
+//
+// Stable writes `<betaHome>/import-requested.json` when the user picks
+// "Copy my data to Beta". The beta server finds the marker here (baseDir is the
+// beta home), snapshots the stable home with a consistent `VACUUM INTO` copy of
+// `userdata/state.sqlite` plus the small non-database files, then deletes the
+// marker and reports through `<betaHome>/import-result.json` for the stable UI.
+//
+// The marker file is untrusted input: the source path is resolved and must not
+// point back at this install's own home before anything is read or written.
+import { closeSync, existsSync, lstatSync, mkdirSync, mkdtempSync, openSync, readFileSync, readSync, realpathSync, renameSync, rmSync, cpSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 
-import {
-  BETA_IMPORT_REQUEST_FILE_NAME,
-  BETA_IMPORT_RESULT_FILE_NAME,
-  ARKOS_STABLE_HOME_ENV,
-  type BetaImportRequest,
-} from "@arkos/shared/betaChannel";
+import { BETA_IMPORT_REQUEST_FILE_NAME, BETA_IMPORT_RESULT_FILE_NAME, ARKOS_STABLE_HOME_ENV, type BetaImportRequest } from "@arkos/shared/betaChannel";
 
 /** Entries that describe this install's live runtime, not user data. */
 const EXCLUDED_STATE_ENTRIES = new Set([

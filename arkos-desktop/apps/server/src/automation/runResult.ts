@@ -4,6 +4,11 @@
 // Exports: summary/reason normalizers plus AI completion-evaluation result builders.
 // Depends on: automation run-result contracts shared with the web app.
 
+// FILE: runResult.ts
+// Purpose: Builds and normalizes automation run-history result payloads.
+// Layer: Server automation helper
+// Exports: summary/reason normalizers plus AI completion-evaluation result builders.
+// Depends on: automation run-result contracts shared with the web app.
 import type { AutomationRunResult } from "@arkos/contracts";
 
 const AUTOMATION_RUN_RESULT_SUMMARY_MAX_CHARS = 2_000;

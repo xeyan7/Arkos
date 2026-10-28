@@ -40,7 +40,6 @@ it("shows Auto as applied with the 967k runtime threshold and no pending Auto", 
   await render(
     <ContextWindowMeter
       usage={usage}
-      showClaudeCache
       activeWindowLabel={status.activeLabel}
       pendingWindowLabel={status.pendingSelectedLabel}
     />,

@@ -1,8 +1,4 @@
-import {
-  ProjectId,
-  type ExternalMcpCapability,
-  type ExternalMcpCreateIntegrationResult,
-} from "@arkos/contracts";
+import { ProjectId, type ExternalMcpCapability, type ExternalMcpCreateIntegrationResult } from "@arkos/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
@@ -15,14 +11,7 @@ import { toastManager } from "~/components/ui/toast";
 import { copyTextToClipboard } from "~/hooks/useCopyToClipboard";
 import { cn, getNavigatorPlatform } from "~/lib/utils";
 import { ensureNativeApi } from "~/nativeApi";
-import {
-  buildExternalMcpClientConfiguration,
-  buildExternalMcpExamplePrompt,
-  buildExternalMcpSetupPrompt,
-  describeExternalMcpPermissions,
-  describeExternalMcpProjects,
-  externalMcpSetupAction,
-} from "./externalMcpSetup";
+import { buildExternalMcpClientConfiguration, buildExternalMcpExamplePrompt, buildExternalMcpSetupPrompt, describeExternalMcpPermissions, describeExternalMcpProjects, externalMcpSetupAction } from "./externalMcpSetup";
 import { SettingsListRow, SettingsRow, SettingsSection } from "./SettingsPanelPrimitives";
 
 const INTEGRATIONS_QUERY_KEY = ["server", "externalMcpIntegrations"] as const;

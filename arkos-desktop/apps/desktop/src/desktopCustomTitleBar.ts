@@ -6,11 +6,7 @@
 import * as FS from "node:fs";
 import * as Path from "node:path";
 
-import {
-  defaultCustomTitleBarPreference,
-  resolveCustomTitleBarActive,
-  supportsCustomTitleBar,
-} from "@arkos/shared/desktopTitleBar";
+import { defaultCustomTitleBarPreference, resolveCustomTitleBarActive, supportsCustomTitleBar } from "@arkos/shared/desktopTitleBar";
 
 export interface PersistedCustomTitleBarPreference {
   readonly version: 1;

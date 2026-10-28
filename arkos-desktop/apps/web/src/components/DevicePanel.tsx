@@ -6,12 +6,14 @@
 // Unlike BrowserPanel there is no native view to position: the simulator paints
 // into a canvas we own, so no bounds sync or occlusion machinery is needed.
 
-import type {
-  DeviceDescriptor,
-  DeviceHardwareButton,
-  DeviceUdid,
-  ThreadId,
-} from "@arkos/contracts";
+// FILE: DevicePanel.tsx
+// Purpose: Interactive iOS Simulator dock pane — live video, input injection, device picker, setup states.
+// Layer: Right-dock pane component
+// Depends on: deviceStateStore, nativeApi device namespace, useDeviceVideoStream, DevicePanel.logic
+//
+// Unlike BrowserPanel there is no native view to position: the simulator paints
+// into a canvas we own, so no bounds sync or occlusion machinery is needed.
+import type { DeviceDescriptor, DeviceHardwareButton, DeviceUdid, ThreadId } from "@arkos/contracts";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ensureNativeApi } from "~/nativeApi";
@@ -21,61 +23,21 @@ import { CheckIcon, ChevronDownIcon, LoaderCircleIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 
 import { selectThreadDeviceState, useDeviceStateStore } from "../deviceStateStore";
-import {
-  buildDevicePickerEntries,
-  canvasPointToDevicePoint,
-  createDeviceRecordingState,
-  deviceAttachStatusLabel,
-  deviceHidUsageForKey,
-  deviceKeyModifiers,
-  deviceRecordingClickIntent,
-  deviceSetupCheckingLabel,
-  isDeviceRecordingActive,
-  resolveDeviceAvailabilityView,
-  resolveDisplayedDevice,
-  type PendingDeviceSelection,
-  resolveDeviceHardwareButtonShortcut,
-  resolveDevicePointerGesture,
-  resolveDevicePointSize,
-  resolveDeviceSetupAction,
-  shouldSubscribeToDeviceStream,
-  stepDeviceRecording,
-  type DevicePoint,
-} from "./DevicePanel.logic";
+import { buildDevicePickerEntries, canvasPointToDevicePoint, createDeviceRecordingState, deviceAttachStatusLabel, deviceHidUsageForKey, deviceKeyModifiers, deviceRecordingClickIntent, deviceSetupCheckingLabel, isDeviceRecordingActive, resolveDeviceAvailabilityView, resolveDisplayedDevice, type PendingDeviceSelection, resolveDeviceHardwareButtonShortcut, resolveDevicePointerGesture, resolveDevicePointSize, resolveDeviceSetupAction, shouldSubscribeToDeviceStream, stepDeviceRecording, type DevicePoint } from "./DevicePanel.logic";
 import { DeviceScreen, deviceKindFor, RESOLUTION_SCALE } from "./device/DeviceFrame";
-import {
-  DEVICE_RAIL_HEIGHT_CLASS,
-  DeviceControlRail,
-  type DeviceRailAction,
-} from "./device/DeviceControlRail";
-import {
-  DeviceBootingScreen,
-  DeviceEmptyScreen,
-  DeviceSetupScreen,
-} from "./device/DeviceScreenStates";
+import { DEVICE_RAIL_HEIGHT_CLASS, DeviceControlRail, type DeviceRailAction } from "./device/DeviceControlRail";
+import { DeviceBootingScreen, DeviceEmptyScreen, DeviceSetupScreen } from "./device/DeviceScreenStates";
 import { useDeviceVideoStream } from "./device/useDeviceVideoStream";
 import { DiffPanelShell, type DiffPanelMode } from "./DiffPanelShell";
 import { ComposerPickerMenuPopup } from "./chat/ComposerPickerMenuPopup";
 import { DockPaneHeader } from "./chat/DockPaneHeader";
 import { Button } from "./ui/button";
 import { Menu, MenuItem, MenuTrigger } from "./ui/menu";
-import {
-  AlertDialog,
-  AlertDialogClose,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogPopup,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPopup,
-  DialogTitle,
-} from "./ui/dialog";
+import { AlertDialog, AlertDialogClose, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle } from "./ui/alert-dialog";
+import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPopup, DialogTitle } from "./ui/dialog";
+// The plain manager, not the anchored one: anchored toasts are dropped unless
+// they carry `positionerProps.anchor`, so every notification this pane raised —
+// save confirmations and input errors alike — was silently discarded.
 // The plain manager, not the anchored one: anchored toasts are dropped unless
 // they carry `positionerProps.anchor`, so every notification this pane raised —
 // save confirmations and input errors alike — was silently discarded.

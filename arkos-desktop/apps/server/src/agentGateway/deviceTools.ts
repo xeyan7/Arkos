@@ -22,33 +22,38 @@
  *
  * @module agentGateway/deviceTools
  */
-import {
-  DEVICE_SCROLL_MAX_SWIPES,
-  DEVICE_SCROLL_MIN_SWIPES,
-  DEVICE_SWIPE_DURATION_MAX_MS,
-  DEVICE_SWIPE_DURATION_MIN_MS,
-  type DeviceHardwareButton,
-  type DeviceOpenPaneReason,
-} from "@arkos/contracts";
+/**
+ * Agent gateway device tools - the agent's control surface for the device pane.
+ *
+ * Shaped exactly like `browserTools.ts`: one `ToolEntry` array appended to the
+ * gateway's tool assembly, gated on the `device:control` capability, and
+ * requiring a live turn so a detached provider cell cannot drive a simulator
+ * after its turn ended.
+ *
+ * Consent rides the Arkos-owned approval flow (`authorizeAction`) for every
+ * approval-required tool, mirroring the computer family: provider-native
+ * permission bridges cannot see MCP calls, so a gated provider like OMP still
+ * cannot ask about a device action unless Arkos asks on its behalf — and a
+ * gateless provider (`PROVIDERS_WITHOUT_APPROVAL_GATE`; Antigravity runs with
+ * `--dangerously-skip-permissions`, Pi executes gateway tools with no approval
+ * bridge) needs the same card or a prompt-injected agent could drive the
+ * device with no user in the loop. `device_open_url` is always in that set:
+ * it is an exfiltration vector (an arbitrary URL opened in the device's
+ * browser), so it cancels before the effect, following the
+ * `BrowserDownloadApprovalRequired` precedent. When no Arkos authorize
+ * surface was supplied at all, mutating tools refuse with the
+ * approval-unavailable error rather than running unasked.
+ *
+ * @module agentGateway/deviceTools
+ */
+import { DEVICE_SCROLL_MAX_SWIPES, DEVICE_SCROLL_MIN_SWIPES, DEVICE_SWIPE_DURATION_MAX_MS, DEVICE_SWIPE_DURATION_MIN_MS, type DeviceHardwareButton, type DeviceOpenPaneReason } from "@arkos/contracts";
 import { Effect } from "effect";
 
 import type { DeviceManager } from "../device/DeviceManager.ts";
 import { readTapRequest } from "../device/uiTreeTargeting.ts";
 import { mcpToolResultError, mcpToolResultJson, type McpToolCallResult } from "./protocol.ts";
-import {
-  ToolInputError,
-  errorText,
-  readBooleanArg,
-  readNumberArg,
-  readStringArg,
-  readStringArrayArg,
-} from "./toolInput.ts";
-import {
-  READ_ONLY_TOOL_ANNOTATIONS,
-  WRITE_TOOL_ANNOTATIONS,
-  type ToolContext,
-  type ToolEntry,
-} from "./toolRuntime.ts";
+import { ToolInputError, errorText, readBooleanArg, readNumberArg, readStringArg, readStringArrayArg } from "./toolInput.ts";
+import { READ_ONLY_TOOL_ANNOTATIONS, WRITE_TOOL_ANNOTATIONS, type ToolContext, type ToolEntry } from "./toolRuntime.ts";
 
 export const DEVICE_CONTROL_CAPABILITY = "device:control" as const;
 

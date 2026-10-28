@@ -2,59 +2,29 @@ import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 import { Effect, Layer, Schema, Struct } from "effect";
 import * as SchemaGetter from "effect/SchemaGetter";
-
 import { toPersistenceSqlError } from "../Errors.ts";
-import {
-  DeleteProjectionThreadInput,
-  GetProjectionThreadInput,
-  ListProjectionThreadsByProjectInput,
-  ProjectionThread,
-  ProjectionThreadRepository,
-  type ProjectionThreadRepositoryShape,
-} from "../Services/ProjectionThreads.ts";
-import {
-  ModelSelection,
-  OrchestrationThreadPullRequest,
-  PendingClaudeCacheReview,
-  ThreadPinnedMessages,
-  ThreadHandoff,
-  ThreadGoalAchievements,
-  ThreadSidechatContext,
-} from "@arkos/contracts";
-
-const SqliteBoolean = Schema.Number.pipe(
-  Schema.decodeTo(Schema.Boolean, {
+import { DeleteProjectionThreadInput, GetProjectionThreadInput, ListProjectionThreadsByProjectInput, ProjectionThread, ProjectionThreadRepository, type ProjectionThreadRepositoryShape } from "../Services/ProjectionThreads.ts";
+import { ModelSelection, OrchestrationThreadPullRequest, ThreadPinnedMessages, ThreadHandoff, ThreadGoalAchievements, ThreadSidechatContext } from "@arkos/contracts";
+const SqliteBoolean = Schema.Number.pipe(Schema.decodeTo(Schema.Boolean, {
     decode: SchemaGetter.transform((value) => value !== 0),
     encode: SchemaGetter.transform((value) => (value ? 1 : 0)),
-  }),
-);
-
-const ProjectionThreadDbRow = ProjectionThread.mapFields(
-  Struct.assign({
+}));
+const ProjectionThreadDbRow = ProjectionThread.mapFields(Struct.assign({
     createBranchFlowCompleted: SqliteBoolean,
     isPinned: SqliteBoolean,
     handoff: Schema.NullOr(Schema.fromJsonString(ThreadHandoff)),
-    claudeCacheReview: Schema.optional(
-      Schema.NullOr(Schema.fromJsonString(PendingClaudeCacheReview)),
-    ),
     lastKnownPr: Schema.NullOr(Schema.fromJsonString(OrchestrationThreadPullRequest)),
     sidechatContext: Schema.optional(Schema.NullOr(Schema.fromJsonString(ThreadSidechatContext))),
     pinnedMessages: Schema.NullOr(Schema.fromJsonString(ThreadPinnedMessages)),
-    goalAchievements: Schema.optional(
-      Schema.NullOr(Schema.fromJsonString(ThreadGoalAchievements)),
-    ).pipe(Schema.withDecodingDefault(() => null)),
+    goalAchievements: Schema.optional(Schema.NullOr(Schema.fromJsonString(ThreadGoalAchievements))).pipe(Schema.withDecodingDefault(() => null)),
     modelSelection: Schema.fromJsonString(ModelSelection),
-  }),
-);
+}));
 type ProjectionThreadDbRow = typeof ProjectionThreadDbRow.Type;
-
 const makeProjectionThreadRepository = Effect.gen(function* () {
-  const sql = yield* SqlClient.SqlClient;
-
-  const upsertProjectionThreadRow = SqlSchema.void({
-    Request: ProjectionThread,
-    execute: (row) =>
-      sql`
+    const sql = yield* SqlClient.SqlClient;
+    const upsertProjectionThreadRow = SqlSchema.void({
+        Request: ProjectionThread,
+        execute: (row) => sql `
         INSERT INTO projection_threads (
           thread_id,
           project_id,
@@ -141,7 +111,7 @@ const makeProjectionThreadRepository = Effect.gen(function* () {
           ${row.lastKnownPr === null ? null : JSON.stringify(row.lastKnownPr)},
           ${row.latestTurnId},
           ${row.handoff === null ? null : JSON.stringify(row.handoff)},
-          ${row.claudeCacheReview == null ? null : JSON.stringify(row.claudeCacheReview)},
+          null,
           ${row.pinnedMessages === null ? null : JSON.stringify(row.pinnedMessages)},
           ${row.notes},
           ${row.goal},
@@ -194,11 +164,7 @@ const makeProjectionThreadRepository = Effect.gen(function* () {
           last_known_pr_json = excluded.last_known_pr_json,
           latest_turn_id = excluded.latest_turn_id,
           handoff_json = excluded.handoff_json,
-          claude_cache_review_json = CASE
-            WHEN ${row.claudeCacheReview === undefined ? 1 : 0} = 1
-              THEN projection_threads.claude_cache_review_json
-            ELSE excluded.claude_cache_review_json
-          END,
+          claude_cache_review_json = null,
           pinned_messages_json = excluded.pinned_messages_json,
           notes = excluded.notes,
           goal = excluded.goal,
@@ -221,13 +187,11 @@ const makeProjectionThreadRepository = Effect.gen(function* () {
           snooze_reminder_at = excluded.snooze_reminder_at,
           deleted_at = excluded.deleted_at
       `,
-  });
-
-  const getProjectionThreadRow = SqlSchema.findOneOption({
-    Request: GetProjectionThreadInput,
-    Result: ProjectionThreadDbRow,
-    execute: ({ threadId }) =>
-      sql`
+    });
+    const getProjectionThreadRow = SqlSchema.findOneOption({
+        Request: GetProjectionThreadInput,
+        Result: ProjectionThreadDbRow,
+        execute: ({ threadId }) => sql `
         SELECT
           thread_id AS "threadId",
           project_id AS "projectId",
@@ -283,13 +247,11 @@ const makeProjectionThreadRepository = Effect.gen(function* () {
         FROM projection_threads
         WHERE thread_id = ${threadId}
       `,
-  });
-
-  const listProjectionThreadRows = SqlSchema.findAll({
-    Request: ListProjectionThreadsByProjectInput,
-    Result: ProjectionThreadDbRow,
-    execute: ({ projectId }) =>
-      sql`
+    });
+    const listProjectionThreadRows = SqlSchema.findAll({
+        Request: ListProjectionThreadsByProjectInput,
+        Result: ProjectionThreadDbRow,
+        execute: ({ projectId }) => sql `
         SELECT
           thread_id AS "threadId",
           project_id AS "projectId",
@@ -346,46 +308,23 @@ const makeProjectionThreadRepository = Effect.gen(function* () {
         WHERE project_id = ${projectId}
         ORDER BY created_at ASC, thread_id ASC
       `,
-  });
-
-  const deleteProjectionThreadRow = SqlSchema.void({
-    Request: DeleteProjectionThreadInput,
-    execute: ({ threadId }) =>
-      sql`
+    });
+    const deleteProjectionThreadRow = SqlSchema.void({
+        Request: DeleteProjectionThreadInput,
+        execute: ({ threadId }) => sql `
         DELETE FROM projection_threads
         WHERE thread_id = ${threadId}
       `,
-  });
-
-  const upsert: ProjectionThreadRepositoryShape["upsert"] = (row) =>
-    upsertProjectionThreadRow(row).pipe(
-      Effect.mapError(toPersistenceSqlError("ProjectionThreadRepository.upsert:query")),
-    );
-
-  const getById: ProjectionThreadRepositoryShape["getById"] = (input) =>
-    getProjectionThreadRow(input).pipe(
-      Effect.mapError(toPersistenceSqlError("ProjectionThreadRepository.getById:query")),
-    );
-
-  const listByProjectId: ProjectionThreadRepositoryShape["listByProjectId"] = (input) =>
-    listProjectionThreadRows(input).pipe(
-      Effect.mapError(toPersistenceSqlError("ProjectionThreadRepository.listByProjectId:query")),
-    );
-
-  const deleteById: ProjectionThreadRepositoryShape["deleteById"] = (input) =>
-    deleteProjectionThreadRow(input).pipe(
-      Effect.mapError(toPersistenceSqlError("ProjectionThreadRepository.deleteById:query")),
-    );
-
-  return {
-    upsert,
-    getById,
-    listByProjectId,
-    deleteById,
-  } satisfies ProjectionThreadRepositoryShape;
+    });
+    const upsert: ProjectionThreadRepositoryShape["upsert"] = (row) => upsertProjectionThreadRow(row).pipe(Effect.mapError(toPersistenceSqlError("ProjectionThreadRepository.upsert:query")));
+    const getById: ProjectionThreadRepositoryShape["getById"] = (input) => getProjectionThreadRow(input).pipe(Effect.mapError(toPersistenceSqlError("ProjectionThreadRepository.getById:query")));
+    const listByProjectId: ProjectionThreadRepositoryShape["listByProjectId"] = (input) => listProjectionThreadRows(input).pipe(Effect.mapError(toPersistenceSqlError("ProjectionThreadRepository.listByProjectId:query")));
+    const deleteById: ProjectionThreadRepositoryShape["deleteById"] = (input) => deleteProjectionThreadRow(input).pipe(Effect.mapError(toPersistenceSqlError("ProjectionThreadRepository.deleteById:query")));
+    return {
+        upsert,
+        getById,
+        listByProjectId,
+        deleteById,
+    } satisfies ProjectionThreadRepositoryShape;
 });
-
-export const ProjectionThreadRepositoryLive = Layer.effect(
-  ProjectionThreadRepository,
-  makeProjectionThreadRepository,
-);
+export const ProjectionThreadRepositoryLive = Layer.effect(ProjectionThreadRepository, makeProjectionThreadRepository);

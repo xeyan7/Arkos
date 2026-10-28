@@ -7,16 +7,22 @@
  *
  * @module agentGateway/Layers/AgentGatewayCredentials
  */
+/**
+ * AgentGatewayCredentialsLive - Live layer for agent gateway credentials.
+ *
+ * Issues opaque in-memory credentials. Tokens live for the provider session,
+ * can be revoked independently, and intentionally do not survive a Arkos
+ * restart.
+ *
+ * @module agentGateway/Layers/AgentGatewayCredentials
+ */
 import { randomUUID } from "node:crypto";
 
 import { Effect, Layer } from "effect";
 
 import { ServerConfig } from "../../config.ts";
 import { formatHostForUrl, isWildcardHost } from "../../startupAccess.ts";
-import {
-  AgentGatewayCredentials,
-  type AgentGatewayCredentialsShape,
-} from "../Services/AgentGatewayCredentials.ts";
+import { AgentGatewayCredentials, type AgentGatewayCredentialsShape } from "../Services/AgentGatewayCredentials.ts";
 import { AgentGatewaySessionRegistry } from "../Services/AgentGatewaySessionRegistry.ts";
 import { makeAgentGatewayInFlightRequestRegistry } from "../inFlightRequestRegistry.ts";
 import { ensureAgentGatewayStdioProxyScript } from "../stdioProxyScript.ts";

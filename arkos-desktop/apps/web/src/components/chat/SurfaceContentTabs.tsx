@@ -7,18 +7,19 @@
 // Layer: Chat surface UI primitive
 // Depends on: the shared SurfaceTabStrip + SurfaceTabChip and dnd-kit's sortable preset.
 
+// FILE: SurfaceContentTabs.tsx
+// Purpose: Browser-style content tabs shared by the open-thread strip in the chat header
+//          and the right dock's pane strip. Tabs are comfortable while few are open, shrink
+//          together as more open, and scroll behind an edge fade once they reach their
+//          minimum width. Dragging a tab reorders it; holding it near an edge scrolls the
+//          hidden tabs in.
+// Layer: Chat surface UI primitive
+// Depends on: the shared SurfaceTabStrip + SurfaceTabChip and dnd-kit's sortable preset.
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { SortableContext, horizontalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  type ComponentProps,
-  type CSSProperties,
-  type PointerEvent,
-  type ReactNode,
-  useRef,
-  useState,
-} from "react";
+import { type ComponentProps, type CSSProperties, type PointerEvent, type ReactNode, useRef, useState } from "react";
 
 import { DragHandleIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";

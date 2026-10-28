@@ -2,6 +2,9 @@
 // Purpose: End-of-turn recap for threads created through the Arkos MCP harness.
 // Layer: Chat transcript UI
 
+// FILE: ArkosThreadCreationCard.tsx
+// Purpose: End-of-turn recap for threads created through the Arkos MCP harness.
+// Layer: Chat transcript UI
 import { PROVIDER_DISPLAY_NAMES } from "@arkos/contracts";
 import { formatModelDisplayName } from "@arkos/shared/model";
 import { memo } from "react";

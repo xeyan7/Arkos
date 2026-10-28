@@ -2,12 +2,10 @@
 // Purpose: Shared sidebar sorting and status helpers used by the thread list UI.
 // Exports: Sidebar row state derivation, add-project error helpers, sort utilities, and visibility helpers.
 
-import {
-  MAX_PINNED_PROJECTS,
-  type ProjectId,
-  type SpaceId,
-  type ThreadId,
-} from "@arkos/contracts";
+// FILE: Sidebar.logic.ts
+// Purpose: Shared sidebar sorting and status helpers used by the thread list UI.
+// Exports: Sidebar row state derivation, add-project error helpers, sort utilities, and visibility helpers.
+import { MAX_PINNED_PROJECTS, type ProjectId, type SpaceId, type ThreadId } from "@arkos/contracts";
 import { pluralize } from "@arkos/shared/text";
 import { resolveThreadEnvironmentMode } from "@arkos/shared/threadEnvironment";
 import { isWorkspaceRootWithin, workspaceRootsEqual } from "@arkos/shared/threadWorkspace";
@@ -16,29 +14,12 @@ import { resolveRestorableThreadRoute, type LastThreadRoute } from "../chatRoute
 import type { ChatMessage, Project, SidebarThreadSummary, Thread } from "../types";
 import { cn } from "../lib/utils";
 import type { GitHubReviewRequestBadgeCount } from "../lib/githubInboxQueryOptions";
-import {
-  derivePinnedIds,
-  getPinnedItems,
-  isLatestPinMutation,
-  orderPinnedItemsFirst,
-} from "../pinning.logic";
-import {
-  SIDEBAR_ROW_ACTIVE_CLASS_NAME,
-  SIDEBAR_ROW_HOVER_CLASS_NAME,
-  SIDEBAR_ROW_IDLE_TEXT_CLASS_NAME,
-  SIDEBAR_ROW_SNOOZE_REMINDER_CLASS_NAME,
-  SIDEBAR_THREAD_ROW_BASE_CLASS_NAME,
-} from "../sidebarRowStyles";
+import { derivePinnedIds, getPinnedItems, isLatestPinMutation, orderPinnedItemsFirst } from "../pinning.logic";
+import { SIDEBAR_ROW_ACTIVE_CLASS_NAME, SIDEBAR_ROW_HOVER_CLASS_NAME, SIDEBAR_ROW_IDLE_TEXT_CLASS_NAME, SIDEBAR_ROW_SNOOZE_REMINDER_CLASS_NAME, SIDEBAR_THREAD_ROW_BASE_CLASS_NAME } from "../sidebarRowStyles";
 import { isDuplicateProjectCreateError } from "../lib/projectCreateRecovery";
 import { isThreadReachableFromSpace } from "../lib/spaceNavigation";
 import type { ServerWorkspacePaths } from "../lib/serverWorkspacePaths";
-import {
-  canSessionAnswerPendingRequests,
-  hasLiveLatestTurn,
-  findLatestProposedPlan,
-  hasActionableProposedPlan,
-  isLatestTurnSettled,
-} from "../session-logic";
+import { canSessionAnswerPendingRequests, hasLiveLatestTurn, findLatestProposedPlan, hasActionableProposedPlan, isLatestTurnSettled } from "../session-logic";
 import { formatWorktreePathForDisplay } from "../worktreeCleanup";
 
 export {

@@ -3,10 +3,11 @@
 // Layer: Server terminal metadata helper
 // Exports: TerminalThreadTitleTracker
 
-import {
-  consumeTerminalThreadTitleInput,
-  isGenericTerminalThreadTitle,
-} from "./terminalThreadTitle";
+// FILE: terminalThreadTitleTracker.ts
+// Purpose: Tracks per-terminal input buffers and emits safe one-shot thread title updates.
+// Layer: Server terminal metadata helper
+// Exports: TerminalThreadTitleTracker
+import { consumeTerminalThreadTitleInput, isGenericTerminalThreadTitle } from "./terminalThreadTitle";
 
 function terminalTitleSessionKey(threadId: string, terminalId: string): string {
   return `${threadId}:${terminalId}`;

@@ -3,6 +3,10 @@
 // Layer: Web lib (pure)
 // Exports: KEEP_AWAKE_MODE_OPTIONS and status label helpers.
 
+// FILE: keepAwake.ts
+// Purpose: Keep-awake (caffeinate) copy for the Settings "System" section.
+// Layer: Web lib (pure)
+// Exports: KEEP_AWAKE_MODE_OPTIONS and status label helpers.
 import type { KeepAwakeMode, ServerKeepAwakeState } from "@arkos/contracts";
 
 export interface KeepAwakeModeOption {

@@ -8,15 +8,21 @@
 //      pin and "Edit project" rows are real controls. Spacing/type mirror the
 //      app's menu rows (12px UI font, compact padding) so it reads as native.
 
+// FILE: ProjectHoverCardContent.tsx
+// Purpose: Interactive hover-card body for sidebar project/folder rows — project
+//          name + pin toggle on the header line, then the chat count, the project
+//          path, and a clickable "Edit project" action.
+// Layer: Sidebar UI component
+// Exports: ProjectHoverCardContent
+// Why: Rendered inside a Base UI PreviewCard (hover-open + interactive), so the
+//      pin and "Edit project" rows are real controls. Spacing/type mirror the
+//      app's menu rows (12px UI font, compact padding) so it reads as native.
 import { BotIcon, MessageCircleIcon, SettingsIcon, FolderIcon } from "~/lib/icons";
 import { PinStatusIcon, pinActionLabel } from "~/lib/pin";
 import type { ProjectAppearance } from "~/lib/projectAppearance";
 import { cn } from "~/lib/utils";
 import { ProjectSidebarIcon } from "./ProjectSidebarIcon";
-import {
-  SIDEBAR_HOVER_CARD_CONTAINER_PADDING_CLASS_NAME,
-  SIDEBAR_HOVER_CARD_ROW_CLASS_NAME,
-} from "./sidebarHoverCardStyles";
+import { SIDEBAR_HOVER_CARD_CONTAINER_PADDING_CLASS_NAME, SIDEBAR_HOVER_CARD_ROW_CLASS_NAME } from "./sidebarHoverCardStyles";
 
 export type ProjectHoverCardContentProps = {
   name: string;

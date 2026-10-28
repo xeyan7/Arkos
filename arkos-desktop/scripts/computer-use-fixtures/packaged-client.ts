@@ -1,20 +1,20 @@
 /** Owner connection to one explicitly selected isolated desktop. Credentials
  * are obtained from its preload bridge and are never written to evidence. */
-import {
-  WS_CLIENT_REQUIRED_CAPABILITIES,
-  WS_COMPATIBILITY_QUERY,
-  WS_FEATURE_PATH,
-  WS_NEGOTIATE_HTTP_PATH,
-  WS_NEGOTIATE_QUERY,
-  WS_PROTOCOL_EPOCH,
-  WS_PROTOCOL_MAX_REVISION,
-  WS_PROTOCOL_MIN_REVISION,
-  WsBootstrapNegotiateResult,
-  WsComputerRpcGroup,
-  WsFeatureRpcGroup,
-  type ProviderKind,
-  type ServerProviderStatus,
-} from "@arkos/contracts";
+/** Owner connection to one explicitly selected isolated desktop. Credentials
+ * are obtained from its preload bridge and are never written to evidence. */
+/** Owner connection to one explicitly selected isolated desktop. Credentials
+ * are obtained from its preload bridge and are never written to evidence. */
+/** Owner connection to one explicitly selected isolated desktop. Credentials
+ * are obtained from its preload bridge and are never written to evidence. */
+/** Owner connection to one explicitly selected isolated desktop. Credentials
+ * are obtained from its preload bridge and are never written to evidence. */
+/** Owner connection to one explicitly selected isolated desktop. Credentials
+ * are obtained from its preload bridge and are never written to evidence. */
+/** Owner connection to one explicitly selected isolated desktop. Credentials
+ * are obtained from its preload bridge and are never written to evidence. */
+/** Owner connection to one explicitly selected isolated desktop. Credentials
+ * are obtained from its preload bridge and are never written to evidence. */
+import { WS_CLIENT_REQUIRED_CAPABILITIES, WS_COMPATIBILITY_QUERY, WS_FEATURE_PATH, WS_NEGOTIATE_HTTP_PATH, WS_NEGOTIATE_QUERY, WS_PROTOCOL_EPOCH, WS_PROTOCOL_MAX_REVISION, WS_PROTOCOL_MIN_REVISION, WsBootstrapNegotiateResult, WsComputerRpcGroup, WsFeatureRpcGroup, type ProviderKind, type ServerProviderStatus } from "@arkos/contracts";
 import { ARKOS_CUA_DESKTOP_ORIGIN } from "@arkos/shared/desktopIdentity";
 import { Effect, Exit, Layer, ManagedRuntime, Schema, Scope } from "effect";
 import { RpcClient, RpcSerialization } from "effect/unstable/rpc";

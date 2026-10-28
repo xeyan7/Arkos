@@ -7,113 +7,22 @@ import { currentComputerTask } from "./computerTaskContext.ts";
 import { CursorActivity } from "./cursorActivity.ts";
 import { waitForWindow } from "./waitForWindow.ts";
 import { observedComputerTargetNode } from "./computerElementIdentity.ts";
-import {
-  ComputerId,
-  ComputerPoint,
-  ComputerScreenSize,
-  COMPUTER_PROVISION_SUMMARY_MAX_LENGTH,
-  COMPUTER_TEXT_MAX_LENGTH,
-  ThreadId,
-  type ComputerAccessibilityTreeResult,
-  type ComputerActionResult,
-  type ComputerApp,
-  type ComputerControlMode,
-  type ComputerAvailability,
-  type ComputerBuildSignature,
-  type ComputerCapabilities,
-  type ComputerCursorPosition,
-  type ComputerEvent,
-  type ComputerGetAuditHistoryInput,
-  type ComputerGetAuditHistoryResult,
-  type ComputerHealth,
-  type ComputerInputModifier,
-  type ComputerRect,
-  type ComputerScreenshot,
-  type ComputerGetScreenSizeResult,
-  type ComputerListAppsResult,
-  type ComputerListWindowsResult,
-  type ComputerProvisionResult,
-  type ComputerLaunchAppResult,
-  type ComputerPermission,
-  type ComputerState,
-  type ComputerStatusResult,
-  type ComputerTarget,
-  type ComputerVerifyStateResult,
-  type ComputerWindow,
-  type ComputerZoomResult,
-  type ThreadComputerState,
-} from "@arkos/contracts";
+import { ComputerId, ComputerPoint, ComputerScreenSize, COMPUTER_PROVISION_SUMMARY_MAX_LENGTH, COMPUTER_TEXT_MAX_LENGTH, ThreadId, type ComputerAccessibilityTreeResult, type ComputerActionResult, type ComputerApp, type ComputerControlMode, type ComputerAvailability, type ComputerBuildSignature, type ComputerCapabilities, type ComputerCursorPosition, type ComputerEvent, type ComputerGetAuditHistoryInput, type ComputerGetAuditHistoryResult, type ComputerHealth, type ComputerInputModifier, type ComputerRect, type ComputerScreenshot, type ComputerGetScreenSizeResult, type ComputerListAppsResult, type ComputerListWindowsResult, type ComputerProvisionResult, type ComputerLaunchAppResult, type ComputerPermission, type ComputerState, type ComputerStatusResult, type ComputerTarget, type ComputerVerifyStateResult, type ComputerWindow, type ComputerZoomResult, type ThreadComputerState } from "@arkos/contracts";
 import { encodeComputerFrame } from "@arkos/shared/computerFrame";
-import {
-  classifyByFrameFlags,
-  FrameTransport,
-  type FrameSink,
-} from "@arkos/shared/frameTransport";
+import { classifyByFrameFlags, FrameTransport, type FrameSink } from "@arkos/shared/frameTransport";
 
-import {
-  DesktopOperationQueue,
-  withDesktopDeliveryMode,
-  assertDesktopOperationActive,
-  assertDesktopOperationAdmission,
-  withDesktopOperationSignal,
-  desktopOperationSignal,
-  desktopDeliveryMode,
-  withoutDesktopCancellation,
-} from "./DesktopOperationQueue.ts";
-import {
-  clampComputerMessage,
-  COMPUTER_ACTION_OBSERVATION_MAX_DIMENSION,
-  computerBackendActionResult,
-  ComputerBackendError,
-  type ComputerAgentDialect,
-  type ComputerBackend,
-  type ComputerBackendActionResult,
-  type ComputerBrowserCallResult,
-  type ComputerCaptureRequest,
-  type ComputerStreamFrame,
-  type ComputerMenuTarget,
-  type ComputerResolvedTarget,
-  type ComputerTextRange,
-} from "./ComputerBackend.ts";
-import {
-  createComputerCallContext,
-  cuaActionSettleMsOverride,
-  cuaConditionalSettleEnabled,
-  currentComputerCall,
-  markComputerCall,
-  timedComputerLeg,
-  withComputerCallContext,
-} from "./computerCallContext.ts";
-import {
-  rectContainsPoint,
-  topmostWindowAtPoint,
-  windowsCoveringPoint,
-} from "./computerGeometry.ts";
+import { DesktopOperationQueue, withDesktopDeliveryMode, assertDesktopOperationActive, assertDesktopOperationAdmission, withDesktopOperationSignal, desktopOperationSignal, desktopDeliveryMode, withoutDesktopCancellation } from "./DesktopOperationQueue.ts";
+import { clampComputerMessage, COMPUTER_ACTION_OBSERVATION_MAX_DIMENSION, computerBackendActionResult, ComputerBackendError, type ComputerAgentDialect, type ComputerBackend, type ComputerBackendActionResult, type ComputerBrowserCallResult, type ComputerCaptureRequest, type ComputerStreamFrame, type ComputerMenuTarget, type ComputerResolvedTarget, type ComputerTextRange } from "./ComputerBackend.ts";
+import { createComputerCallContext, cuaActionSettleMsOverride, cuaConditionalSettleEnabled, currentComputerCall, markComputerCall, timedComputerLeg, withComputerCallContext } from "./computerCallContext.ts";
+import { rectContainsPoint, topmostWindowAtPoint, windowsCoveringPoint } from "./computerGeometry.ts";
 import { decodePngLuma, estimateVerticalTravel, ScrollGearingStore } from "./scrollCalibration.ts";
 import { ScrollGearingFile } from "./scrollGearingFile.ts";
-import {
-  ComputerTargetError,
-  activationPointForNode,
-  computerTargetCandidates,
-  resolveComputerPoint,
-  resolveComputerSemanticTarget,
-  resolveComputerUniqueTextTarget,
-  resolveComputerWindowTarget,
-} from "./uiTreeTargeting.ts";
+import { ComputerTargetError, activationPointForNode, computerTargetCandidates, resolveComputerPoint, resolveComputerSemanticTarget, resolveComputerUniqueTextTarget, resolveComputerWindowTarget } from "./uiTreeTargeting.ts";
 import { ComputerAuditLog, type ComputerAuditEntry } from "./computerAuditLog.ts";
 import { ComputerDenylistError, computerDenylistMatch } from "./computerDenylist.ts";
 import { CuaActionError } from "./CuaComputerBackend.ts";
-import {
-  COMPUTER_FOREGROUND_NOT_REQUESTED_CODE,
-  COMPUTER_FOREGROUND_USER_INTERACTION_CODE,
-  COMPUTER_USER_INTERACTION_QUIET_MS,
-  type ComputerForegroundAuthorization,
-} from "./computerVisibleUse.ts";
-import {
-  cuaMaskedActivationEnabled,
-  cuaMaskedActivationOptIn,
-  maskedActivationOptedIn,
-} from "./computerShield.ts";
+import { COMPUTER_FOREGROUND_NOT_REQUESTED_CODE, COMPUTER_FOREGROUND_USER_INTERACTION_CODE, COMPUTER_USER_INTERACTION_QUIET_MS, type ComputerForegroundAuthorization } from "./computerVisibleUse.ts";
+import { cuaMaskedActivationEnabled, cuaMaskedActivationOptIn, maskedActivationOptedIn } from "./computerShield.ts";
 import { describeComputerUiTree } from "./uiTreeText.ts";
 import { clampTextToLength } from "./utf8Truncation.ts";
 

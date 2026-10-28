@@ -9,16 +9,17 @@
 // Depends on: git status/PR-snapshot React Query helpers, the pull request action mutation,
 //             and the shared Environment row skin.
 
-import type {
-  GitPullRequestCheck,
-  GitPullRequestComment,
-  ProjectId,
-  PullRequestAction,
-  PullRequestDetailInput,
-  PullRequestMergeMethod,
-  PullRequestAutoFixState,
-  ThreadId,
-} from "@arkos/contracts";
+// FILE: EnvironmentPullRequestSection.tsx
+// Purpose: "Pull request" section of the Environment panel — one row (state glyph, title,
+//          live check status) that opens the PR action menu: view / code changes, the
+//          checks and review-comment lists, Repair (hands comments, failing checks, or
+//          conflicts to the composer as context cards), Auto-fix CI, Merge, Status
+//          (draft / ready / close / reopen), and Add to chat. Copy link and Open in GitHub
+//          ride on the View PR row.
+// Layer: Environment panel section
+// Depends on: git status/PR-snapshot React Query helpers, the pull request action mutation,
+//             and the shared Environment row skin.
+import type { GitPullRequestCheck, GitPullRequestComment, ProjectId, PullRequestAction, PullRequestDetailInput, PullRequestMergeMethod, PullRequestAutoFixState, ThreadId } from "@arkos/contracts";
 import { githubAvatarUrlForLogin } from "@arkos/shared/githubAvatar";
 import { parseGitHubRepositoryNameWithOwnerFromPullRequestUrl } from "@arkos/shared/githubRepository";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,91 +27,30 @@ import { useState, type ReactNode } from "react";
 
 import { ComposerPickerMenuPopup, ComposerPickerMenuSubPopup } from "../ComposerPickerMenuPopup";
 import { MENU_ICON_CLASS_NAME } from "../composerPickerStyles";
-import {
-  Menu,
-  MenuCheckboxItem,
-  MenuItem,
-  MenuRadioGroup,
-  MenuRadioItem,
-  MenuSeparator,
-  MenuSub,
-  MenuSubTrigger,
-  MenuTrigger,
-} from "../../ui/menu";
+import { Menu, MenuCheckboxItem, MenuItem, MenuRadioGroup, MenuRadioItem, MenuSeparator, MenuSub, MenuSubTrigger, MenuTrigger } from "../../ui/menu";
 import { Checkbox } from "../../ui/checkbox";
 import { toastManager } from "../../ui/toast";
 import { DEFAULT_TOAST_TIMEOUT_MS } from "../../ui/toast.logic";
 import { PullRequestAvatar } from "../../pullRequest/PullRequestAvatar";
-import {
-  copyPullRequestLink,
-  PullRequestConfirmActionDialog,
-  type PullRequestConfirmAction,
-} from "../../pullRequest/PullRequestConfirmActionDialog";
+import { copyPullRequestLink, PullRequestConfirmActionDialog, type PullRequestConfirmAction } from "../../pullRequest/PullRequestConfirmActionDialog";
 import { PullRequestCheckStatusIcon } from "../../pullRequest/PullRequestCheckStatusIcon";
 import { PullRequestDiffStat } from "../../pullRequest/PullRequestDiffStat";
-import {
-  PR_STATE_PRESENTATION_ICONS,
-  resolvePrStatePresentation,
-} from "../../pullRequest/pullRequestStatePresentation";
+import { PR_STATE_PRESENTATION_ICONS, resolvePrStatePresentation } from "../../pullRequest/pullRequestStatePresentation";
 import { PR_QUIET_INK_CLASS_NAME } from "../../pullRequest/pullRequestText";
-import {
-  assessPullRequestStack,
-  pullRequestMergeBlocker,
-} from "../../pullRequest/pullRequestStack.logic";
+import { assessPullRequestStack, pullRequestMergeBlocker } from "../../pullRequest/pullRequestStack.logic";
 import { PULL_REQUEST_AUTO_FIX_ON } from "~/betaFeatures";
 import { addChatPullRequestContext } from "~/lib/chatReferences";
 import { gitPullRequestSnapshotQueryOptions, gitStatusQueryOptions } from "~/lib/gitReactQuery";
-import {
-  ChatBubbleIcon,
-  ChatBubblePlusIcon,
-  CircleAlertIcon,
-  CircleCheckIcon,
-  DiffIcon,
-  GitHubMarkIcon,
-  GitMergeConflictIcon,
-  GitMergeIcon,
-  GitPullRequestClosedIcon,
-  GitPullRequestDraftIcon,
-  GitPullRequestIcon,
-  HammerIcon,
-  LinkIcon,
-  Loader2Icon,
-  PageTextIcon,
-  RefreshCwIcon,
-} from "~/lib/icons";
+import { ChatBubbleIcon, ChatBubblePlusIcon, CircleAlertIcon, CircleCheckIcon, DiffIcon, GitHubMarkIcon, GitMergeConflictIcon, GitMergeIcon, GitPullRequestClosedIcon, GitPullRequestDraftIcon, GitPullRequestIcon, HammerIcon, LinkIcon, Loader2Icon, PageTextIcon, RefreshCwIcon } from "~/lib/icons";
 import { useAppSettings } from "~/appSettings";
-import {
-  pullRequestActionMutationOptions,
-  pullRequestAutoFixQueryOptions,
-  pullRequestDetailQueryOptions,
-  pullRequestSetAutoFixMutationOptions,
-} from "~/lib/pullRequestReactQuery";
+import { pullRequestActionMutationOptions, pullRequestAutoFixQueryOptions, pullRequestDetailQueryOptions, pullRequestSetAutoFixMutationOptions } from "~/lib/pullRequestReactQuery";
 import { type PullRequestContextScope } from "~/lib/pullRequestContext";
 import { formatRelativeTime } from "~/lib/relativeTime";
 import { cn } from "~/lib/utils";
 import { ensureNativeApi } from "~/nativeApi";
 import { useRightDockStore } from "~/rightDockStore";
-import {
-  ENVIRONMENT_ROW_CLASS_NAME,
-  ENVIRONMENT_ROW_ICON_CLASS_NAME,
-  EnvironmentLabeledSection,
-  EnvironmentRowBody,
-  EnvironmentRowChevron,
-} from "./EnvironmentRow";
-import {
-  buildPullRequestContextCard,
-  describePullRequestAutoFix,
-  describePullRequestComment,
-  findPullRequestAutoFixState,
-  PULL_REQUEST_CHECK_STATUS_LABELS,
-  PULL_REQUEST_CHECKS_TONE_TEXT_CLASS,
-  summarizePullRequestChecks,
-  summarizePullRequestComments,
-  summarizePullRequestDiffStat,
-  summarizePullRequestRepairs,
-  withStableCheckKeys,
-  type PullRequestChecksTone,
-} from "./environmentPullRequest.logic";
+import { ENVIRONMENT_ROW_CLASS_NAME, ENVIRONMENT_ROW_ICON_CLASS_NAME, EnvironmentLabeledSection, EnvironmentRowBody, EnvironmentRowChevron } from "./EnvironmentRow";
+import { buildPullRequestContextCard, describePullRequestAutoFix, describePullRequestComment, findPullRequestAutoFixState, PULL_REQUEST_CHECK_STATUS_LABELS, PULL_REQUEST_CHECKS_TONE_TEXT_CLASS, summarizePullRequestChecks, summarizePullRequestComments, summarizePullRequestDiffStat, summarizePullRequestRepairs, withStableCheckKeys, type PullRequestChecksTone } from "./environmentPullRequest.logic";
 /** Shares the menu/stack action and loads its settings only when the control is shown. */
 function PullRequestAutoFixToggle(props: {
   threadId: ThreadId;

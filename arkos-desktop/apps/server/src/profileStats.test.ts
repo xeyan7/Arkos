@@ -2,273 +2,237 @@
 // Purpose: Focused coverage for Profile stats SQL aggregation against the migrated SQLite schema.
 // Layer: Server stats tests
 // Exports: Vitest coverage for ProfileStatsQuery.
-
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { Effect, Layer } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 import { describe, expect, it } from "vitest";
-
 import { ServerConfig } from "./config";
 import { SqlitePersistenceMemory } from "./persistence/Layers/Sqlite";
 import recoverClaudeUsage from "./persistence/Migrations/103_ClaudeTokenAccounting";
-import {
-  aggregateProfileSkillUsageRows,
-  heatmapIntensity,
-  ProfileStatsQuery,
-  ProfileStatsQueryLive,
-} from "./profileStats";
-
-const testLayer = ProfileStatsQueryLive.pipe(
-  Layer.provideMerge(SqlitePersistenceMemory),
-  Layer.provide(
-    ServerConfig.layerTest(process.cwd(), {
-      prefix: "arkos-profile-stats-test-",
-    }),
-  ),
-  Layer.provide(NodeServices.layer),
-);
-
-function runProfileStatsTest<A, E>(
-  effect: Effect.Effect<A, E, ProfileStatsQuery | SqlClient.SqlClient>,
-) {
-  return effect.pipe(Effect.provide(testLayer), Effect.scoped, Effect.runPromise);
+import { aggregateProfileSkillUsageRows, heatmapIntensity, ProfileStatsQuery, ProfileStatsQueryLive, } from "./profileStats";
+const testLayer = ProfileStatsQueryLive.pipe(Layer.provideMerge(SqlitePersistenceMemory), Layer.provide(ServerConfig.layerTest(process.cwd(), {
+    prefix: "arkos-profile-stats-test-",
+})), Layer.provide(NodeServices.layer));
+function runProfileStatsTest<A, E>(effect: Effect.Effect<A, E, ProfileStatsQuery | SqlClient.SqlClient>) {
+    return effect.pipe(Effect.provide(testLayer), Effect.scoped, Effect.runPromise);
 }
-
 function sorted(counts: readonly number[]): number[] {
-  return counts.toSorted((left, right) => left - right);
+    return counts.toSorted((left, right) => left - right);
 }
-
 describe("heatmapIntensity", () => {
-  it("returns level 0 for empty days and for an empty distribution", () => {
-    expect(heatmapIntensity(0, [1, 2, 3])).toBe(0);
-    expect(heatmapIntensity(500, [])).toBe(0);
-  });
-
-  it("spreads skewed token counts across all levels instead of collapsing to level 1", () => {
-    // One spike day plus many small days: percent-of-max bucketing would put every
-    // day except the spike at level 1.
-    const counts = [1_000, 2_000, 3_000, 4_000, 5_000, 6_000, 7_000, 4_000_000];
-    const levels = counts.map((count) => heatmapIntensity(count, sorted(counts)));
-    expect(levels).toEqual([1, 1, 2, 2, 3, 3, 4, 4]);
-  });
-
-  it("gives tied days the same level and renders a uniform window at full intensity", () => {
-    const active = sorted([500, 500, 500, 500]);
-    expect(active.map((count) => heatmapIntensity(count, active))).toEqual([4, 4, 4, 4]);
-  });
+    it("returns level 0 for empty days and for an empty distribution", () => {
+        expect(heatmapIntensity(0, [1, 2, 3])).toBe(0);
+        expect(heatmapIntensity(500, [])).toBe(0);
+    });
+    it("spreads skewed token counts across all levels instead of collapsing to level 1", () => {
+        // One spike day plus many small days: percent-of-max bucketing would put every
+        // day except the spike at level 1.
+        const counts = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 4000000];
+        const levels = counts.map((count) => heatmapIntensity(count, sorted(counts)));
+        expect(levels).toEqual([1, 1, 2, 2, 3, 3, 4, 4]);
+    });
+    it("gives tied days the same level and renders a uniform window at full intensity", () => {
+        const active = sorted([500, 500, 500, 500]);
+        expect(active.map((count) => heatmapIntensity(count, active))).toEqual([4, 4, 4, 4]);
+    });
 });
-
 describe("ProfileStatsQuery", () => {
-  it("uses versioned Claude results once, recovers retained main usage, and excludes unverifiable history", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const stats = yield* ProfileStatsQuery;
-        for (const [threadId, parentThreadId, creationSource] of [
-          ["root", null, null],
-          ["mirrored-child", "root", "provider_native"],
-          ["independent-child", "root", "arkos_mcp"],
-        ] as const) {
-          yield* sql`
+    it("uses versioned Claude results once, recovers retained main usage, and excludes unverifiable history", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const stats = yield* ProfileStatsQuery;
+            for (const [threadId, parentThreadId, creationSource] of [
+                ["root", null, null],
+                ["mirrored-child", "root", "provider_native"],
+                ["independent-child", "root", "arkos_mcp"],
+            ] as const) {
+                yield* sql `
           INSERT INTO projection_threads
             (thread_id, project_id, title, model_selection_json, runtime_mode, interaction_mode,
              env_mode, created_at, updated_at, parent_thread_id, creation_source)
-          VALUES (${threadId}, 'project', 'Claude', '{"provider":"claudeAgent","model":"claude-fable-5"}',
+          VALUES (${threadId}, 'project', 'Claude', '{"provider":"arkos","model":"claude-fable-5"}',
             'full-access', 'default', 'local', '2026-09-10', '2026-09-10',
             ${parentThreadId}, ${creationSource})
         `;
-        }
-        const addActivity = (id: string, threadId: string, turnId: string, payload: object) => sql`
+            }
+            const addActivity = (id: string, threadId: string, turnId: string, payload: object) => sql `
         INSERT INTO projection_thread_activities
           (activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at)
         VALUES (${id}, ${threadId}, ${turnId}, 'info', 'turn.completed', 'done',
           ${JSON.stringify(payload)}, ${Number(id)}, '2026-09-10T12:00:00Z')
       `;
-        const versioned = {
-          tokenAccountingVersion: 1,
-          mainLoopTokens: 27_326,
-          modelUsage: {
-            "claude-fable-5": {
-              inputTokens: 32,
-              outputTokens: 59,
-              cacheReadInputTokens: 26_816,
-              cacheCreationInputTokens: 419,
-              webSearchRequests: 0,
-              costUSD: 0.031,
-              contextWindow: 200_000,
-              maxOutputTokens: 32_000,
-            },
-            "claude-opus-4-8": {
-              inputTokens: 900,
-              outputTokens: 100,
-              cacheReadInputTokens: 0,
-              cacheCreationInputTokens: 0,
-              costUSD: 0.02,
-              contextWindow: 200_000,
-              maxOutputTokens: 32_000,
-            },
-          },
-        };
-        yield* addActivity("1", "root", "first", versioned);
-        yield* addActivity("2", "root", "first", versioned);
-        yield* addActivity("3", "mirrored-child", "mirrored", versioned);
-        yield* addActivity("4", "root", "legacy", { modelUsage: versioned.modelUsage });
-        yield* addActivity("5", "root", "unrecoverable", { modelUsage: versioned.modelUsage });
-        // An earlier private build emitted a compact shape whose input already
-        // included cache tokens. Its explicit total remains authoritative.
-        yield* addActivity("6", "root", "compact", {
-          tokenAccountingVersion: 1,
-          mainLoopTokens: 1_000,
-          modelUsage: {
-            "claude-fable-5": {
-              inputTokens: 900,
-              outputTokens: 100,
-              totalTokens: 1_000,
-              cacheReadInputTokens: 800,
-              cacheCreationInputTokens: 60,
-            },
-          },
-        });
-        // A malformed nonempty breakdown must not suppress the verified
-        // main-loop fallback or make SQLite JSON functions fail.
-        yield* addActivity("7", "root", "fallback", {
-          tokenAccountingVersion: 1,
-          mainLoopTokens: 250,
-          modelUsage: { "claude-fable-5": "unusable" },
-        });
-        yield* addActivity("8", "independent-child", "independent", versioned);
-        // Successful main-loop usage survives even though old compact model totals
-        // cannot be classified as per-turn or cumulative without process evidence.
-        yield* sql`
+            const versioned = {
+                tokenAccountingVersion: 1,
+                mainLoopTokens: 27326,
+                modelUsage: {
+                    "claude-fable-5": {
+                        inputTokens: 32,
+                        outputTokens: 59,
+                        cacheReadInputTokens: 26816,
+                        cacheCreationInputTokens: 419,
+                        webSearchRequests: 0,
+                        costUSD: 0.031,
+                        contextWindow: 200000,
+                        maxOutputTokens: 32000,
+                    },
+                    "claude-opus-4-8": {
+                        inputTokens: 900,
+                        outputTokens: 100,
+                        cacheReadInputTokens: 0,
+                        cacheCreationInputTokens: 0,
+                        costUSD: 0.02,
+                        contextWindow: 200000,
+                        maxOutputTokens: 32000,
+                    },
+                },
+            };
+            yield* addActivity("1", "root", "first", versioned);
+            yield* addActivity("2", "root", "first", versioned);
+            yield* addActivity("3", "mirrored-child", "mirrored", versioned);
+            yield* addActivity("4", "root", "legacy", { modelUsage: versioned.modelUsage });
+            yield* addActivity("5", "root", "unrecoverable", { modelUsage: versioned.modelUsage });
+            // An earlier private build emitted a compact shape whose input already
+            // included cache tokens. Its explicit total remains authoritative.
+            yield* addActivity("6", "root", "compact", {
+                tokenAccountingVersion: 1,
+                mainLoopTokens: 1000,
+                modelUsage: {
+                    "claude-fable-5": {
+                        inputTokens: 900,
+                        outputTokens: 100,
+                        totalTokens: 1000,
+                        cacheReadInputTokens: 800,
+                        cacheCreationInputTokens: 60,
+                    },
+                },
+            });
+            // A malformed nonempty breakdown must not suppress the verified
+            // main-loop fallback or make SQLite JSON functions fail.
+            yield* addActivity("7", "root", "fallback", {
+                tokenAccountingVersion: 1,
+                mainLoopTokens: 250,
+                modelUsage: { "claude-fable-5": "unusable" },
+            });
+            yield* addActivity("8", "independent-child", "independent", versioned);
+            // Successful main-loop usage survives even though old compact model totals
+            // cannot be classified as per-turn or cumulative without process evidence.
+            yield* sql `
         INSERT INTO provider_runtime_events
           (event_id, thread_id, turn_id, event_type, event_json, persisted_at)
         VALUES ('legacy-result', 'root', 'legacy', 'turn.completed',
           ${JSON.stringify({
-            provider: "claudeAgent",
-            payload: {
-              usage: {
-                input_tokens: 32,
-                cache_creation_input_tokens: 419,
-                cache_read_input_tokens: 26_816,
-                output_tokens: 59,
-              },
-            },
-          })}, '2026-09-10')
+                provider: "arkos",
+                payload: {
+                    usage: {
+                        input_tokens: 32,
+                        cache_creation_input_tokens: 419,
+                        cache_read_input_tokens: 26816,
+                        output_tokens: 59,
+                    },
+                },
+            })}, '2026-09-10')
       `;
-        yield* sql`
+            yield* sql `
         INSERT INTO projection_thread_activities
           (activity_id, thread_id, turn_id, tone, kind, summary, payload_json, created_at)
         VALUES ('inflated', 'root', 'first', 'info', 'context-window.updated', 'usage',
-          '{"provider":"claudeAgent","totalProcessedTokens":141818233}', '2026-09-10')
+          '{"provider":"arkos","totalProcessedTokens":141818233}', '2026-09-10')
       `;
-        yield* sql`
+            yield* sql `
         INSERT INTO profile_stats_deleted_tokens (thread_id, created_at, provider, model, tokens)
         VALUES ('old-deleted', '2026-09-10', 'claudeAgent', 'claude-fable-5', 999999)
       `;
-        const journalBefore = yield* sql`SELECT * FROM provider_runtime_events`;
-        yield* recoverClaudeUsage;
-        yield* recoverClaudeUsage;
-        expect(yield* sql`SELECT * FROM provider_runtime_events`).toEqual(journalBefore);
-        // The verified fallback must outlive ordinary runtime-event retention.
-        yield* sql`DELETE FROM provider_runtime_events`;
-        const result = yield* stats.getProfileTokenStats({ utcOffsetMinutes: 0 });
-        expect(result.lifetimeTotalTokens).toBe(85_228);
-        expect(result.models.map(({ model, tokens }) => ({ model, tokens }))).toEqual([
-          { model: "claude-fable-5", tokens: 83_228 },
-          { model: "claude-opus-4-8", tokens: 2_000 },
+            const journalBefore = yield* sql `SELECT * FROM provider_runtime_events`;
+            yield* recoverClaudeUsage;
+            yield* recoverClaudeUsage;
+            expect(yield* sql `SELECT * FROM provider_runtime_events`).toEqual(journalBefore);
+            // The verified fallback must outlive ordinary runtime-event retention.
+            yield* sql `DELETE FROM provider_runtime_events`;
+            const result = yield* stats.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(result.lifetimeTotalTokens).toBe(85228);
+            expect(result.models.map(({ model, tokens }) => ({ model, tokens }))).toEqual([
+                { model: "claude-fable-5", tokens: 83228 },
+                { model: "claude-opus-4-8", tokens: 2000 },
+            ]);
+        }));
+    });
+    it("normalizes profile skill usage from structured refs plus slash and dollar prompt tokens", () => {
+        expect(aggregateProfileSkillUsageRows([
+            {
+                messageId: "message-1",
+                text: "Use $check-code and /refactor-code",
+                skillsJson: JSON.stringify([
+                    { name: "check-code", path: "/skills/check-code/SKILL.md" },
+                    { name: "refactor-code", path: "/skills/refactor-code/SKILL.md" },
+                ]),
+                mentionsJson: null,
+            },
+            {
+                messageId: "message-2",
+                text: "Use /check-code again, but keep /plan plain, ignore /Users/test and $PATH",
+                skillsJson: null,
+                mentionsJson: JSON.stringify([{ name: "reviewer", path: "agent://reviewer" }]),
+            },
+            {
+                messageId: "message-3",
+                text: "Pi style /skill:planner should group as planner; shell $HOME and cost $100 do not",
+                skillsJson: null,
+                mentionsJson: null,
+            },
+        ])).toEqual([
+            { name: "check-code", displayName: "$check-code", kind: "skill", runCount: 2 },
+            { name: "planner", displayName: "$planner", kind: "skill", runCount: 1 },
+            { name: "refactor-code", displayName: "$refactor-code", kind: "skill", runCount: 1 },
+            { name: "reviewer", displayName: "@reviewer", kind: "agent", runCount: 1 },
         ]);
-      }),
-    );
-  });
-
-  it("normalizes profile skill usage from structured refs plus slash and dollar prompt tokens", () => {
-    expect(
-      aggregateProfileSkillUsageRows([
-        {
-          messageId: "message-1",
-          text: "Use $check-code and /refactor-code",
-          skillsJson: JSON.stringify([
-            { name: "check-code", path: "/skills/check-code/SKILL.md" },
-            { name: "refactor-code", path: "/skills/refactor-code/SKILL.md" },
-          ]),
-          mentionsJson: null,
-        },
-        {
-          messageId: "message-2",
-          text: "Use /check-code again, but keep /plan plain, ignore /Users/test and $PATH",
-          skillsJson: null,
-          mentionsJson: JSON.stringify([{ name: "reviewer", path: "agent://reviewer" }]),
-        },
-        {
-          messageId: "message-3",
-          text: "Pi style /skill:planner should group as planner; shell $HOME and cost $100 do not",
-          skillsJson: null,
-          mentionsJson: null,
-        },
-      ]),
-    ).toEqual([
-      { name: "check-code", displayName: "$check-code", kind: "skill", runCount: 2 },
-      { name: "planner", displayName: "$planner", kind: "skill", runCount: 1 },
-      { name: "refactor-code", displayName: "$refactor-code", kind: "skill", runCount: 1 },
-      { name: "reviewer", displayName: "@reviewer", kind: "agent", runCount: 1 },
-    ]);
-  });
-
-  it("counts repeated slash and dollar skill tokens without double-counting structured echoes", () => {
-    expect(
-      aggregateProfileSkillUsageRows([
-        {
-          messageId: "message-repeat",
-          text: "Use $check-code, /check-code, and /logic-consolidator /logic-consolidator",
-          skillsJson: JSON.stringify([
-            { name: "check-code", path: "/skills/check-code/SKILL.md" },
-            { name: "logic-consolidator", path: "/skills/logic-consolidator/SKILL.md" },
-          ]),
-          mentionsJson: null,
-        },
-      ]),
-    ).toEqual([
-      { name: "check-code", displayName: "$check-code", kind: "skill", runCount: 2 },
-      {
-        name: "logic-consolidator",
-        displayName: "$logic-consolidator",
-        kind: "skill",
-        runCount: 2,
-      },
-    ]);
-  });
-
-  it("does not count serialized prompt block closing tags as slash skills", () => {
-    expect(
-      aggregateProfileSkillUsageRows([
-        {
-          messageId: "message-blocks",
-          text: [
-            "Use /check-code for the actual request.",
-            "<terminal_context>",
-            "npm test",
-            "</terminal_context>",
-            "<file_comments>",
-            "src/app.ts: leave this as-is",
-            "</file_comments>",
-            "<pasted_text>",
-            '[{"text":"const value = $foo;\\nrun /deploy now"}]',
-            "</pasted_text>",
-          ].join("\n"),
-          skillsJson: null,
-          mentionsJson: null,
-        },
-      ]),
-    ).toEqual([{ name: "check-code", displayName: "$check-code", kind: "skill", runCount: 1 }]);
-  });
-
-  it("aggregates prompts, model usage, provider usage, and reasoning from local projections", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+    });
+    it("counts repeated slash and dollar skill tokens without double-counting structured echoes", () => {
+        expect(aggregateProfileSkillUsageRows([
+            {
+                messageId: "message-repeat",
+                text: "Use $check-code, /check-code, and /logic-consolidator /logic-consolidator",
+                skillsJson: JSON.stringify([
+                    { name: "check-code", path: "/skills/check-code/SKILL.md" },
+                    { name: "logic-consolidator", path: "/skills/logic-consolidator/SKILL.md" },
+                ]),
+                mentionsJson: null,
+            },
+        ])).toEqual([
+            { name: "check-code", displayName: "$check-code", kind: "skill", runCount: 2 },
+            {
+                name: "logic-consolidator",
+                displayName: "$logic-consolidator",
+                kind: "skill",
+                runCount: 2,
+            },
+        ]);
+    });
+    it("does not count serialized prompt block closing tags as slash skills", () => {
+        expect(aggregateProfileSkillUsageRows([
+            {
+                messageId: "message-blocks",
+                text: [
+                    "Use /check-code for the actual request.",
+                    "<terminal_context>",
+                    "npm test",
+                    "</terminal_context>",
+                    "<file_comments>",
+                    "src/app.ts: leave this as-is",
+                    "</file_comments>",
+                    "<pasted_text>",
+                    '[{"text":"const value = $foo;\\nrun /deploy now"}]',
+                    "</pasted_text>",
+                ].join("\n"),
+                skillsJson: null,
+                mentionsJson: null,
+            },
+        ])).toEqual([{ name: "check-code", displayName: "$check-code", kind: "skill", runCount: 1 }]);
+    });
+    it("aggregates prompts, model usage, provider usage, and reasoning from local projections", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -286,7 +250,7 @@ describe("ProfileStatsQuery", () => {
               'thread-codex',
               'project-profile',
               'Codex Thread',
-              '{"provider":"codex","model":"gpt-5-codex","options":{"reasoningEffort":"high"}}',
+              '{"provider":"arkos","model":"gpt-5-codex","options":{"reasoningEffort":"high"}}',
               'full-access',
               'default',
               'local',
@@ -298,7 +262,7 @@ describe("ProfileStatsQuery", () => {
               'thread-claude',
               'project-profile',
               'Claude Thread',
-              '{"provider":"claudeAgent","model":"claude-sonnet-4-6","options":{"effort":"max"}}',
+              '{"provider":"arkos","model":"claude-sonnet-4-6","options":{"effort":"max"}}',
               'full-access',
               'default',
               'local',
@@ -307,8 +271,7 @@ describe("ProfileStatsQuery", () => {
               NULL
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id,
             thread_id,
@@ -355,8 +318,7 @@ describe("ProfileStatsQuery", () => {
               '2026-06-14T10:05:00.000Z'
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id,
             aggregate_kind,
@@ -377,7 +339,7 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T09:05:00.000Z',
               'client',
-              '{"threadId":"thread-codex","modelSelection":{"provider":"codex","model":"gpt-5-codex","options":{"reasoningEffort":"high"}}}',
+              '{"threadId":"thread-codex","modelSelection":{"provider":"arkos","model":"gpt-5-codex","options":{"reasoningEffort":"high"}}}',
               '{}'
             ),
             (
@@ -388,7 +350,7 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T09:35:00.000Z',
               'client',
-              '{"threadId":"thread-codex","modelSelection":{"provider":"codex","instanceId":"codex","model":"gpt-5-codex","options":[{"id":"reasoningEffort","value":"high"}]}}',
+              '{"threadId":"thread-codex","modelSelection":{"provider":"arkos","instanceId":"arkos","model":"gpt-5-codex","options":[{"id":"reasoningEffort","value":"high"}]}}',
               '{}'
             ),
             (
@@ -399,56 +361,50 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-14T10:05:00.000Z',
               'client',
-              '{"threadId":"thread-claude","modelSelection":{"provider":"claudeAgent","model":"claude-sonnet-4-6","options":{"effort":"max"}}}',
+              '{"threadId":"thread-claude","modelSelection":{"provider":"arkos","model":"claude-sonnet-4-6","options":{"effort":"max"}}}',
               '{}'
             )
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-
-        expect(stats.activity.totalPromptsSent).toBe(3);
-        expect(stats.activity.totalThreads).toBe(2);
-        expect(stats.activeHours.startHour).toBe(9);
-        expect(stats.activeHours.turnCount).toBe(2);
-        expect(stats.insights.topProvider).toBe("codex");
-        expect(stats.insights.topProviderPercent).toBeCloseTo(66.7);
-        expect(stats.insights.topReasoning).toBe("high");
-        expect(stats.insights.topReasoningPercent).toBeCloseTo(66.7);
-        expect(stats.providerModels[0]).toMatchObject({
-          provider: "codex",
-          instanceId: "codex",
-          model: "gpt-5-codex",
-          turnCount: 2,
-        });
-      }),
-    );
-  });
-
-  it("scopes dispatch-origin joins when different threads reuse a message id", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(stats.activity.totalPromptsSent).toBe(3);
+            expect(stats.activity.totalThreads).toBe(2);
+            expect(stats.activeHours.startHour).toBe(9);
+            expect(stats.activeHours.turnCount).toBe(2);
+            expect(stats.insights.topProvider).toBe("arkos");
+            expect(stats.insights.topProviderPercent).toBeCloseTo(66.7);
+            expect(stats.insights.topReasoning).toBe("high");
+            expect(stats.insights.topReasoningPercent).toBeCloseTo(66.7);
+            expect(stats.providerModels[0]).toMatchObject({
+                provider: "arkos",
+                instanceId: "arkos",
+                model: "gpt-5-codex",
+                turnCount: 2,
+            });
+        }));
+    });
+    it("scopes dispatch-origin joins when different threads reuse a message id", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
           ) VALUES
             (
               'thread-reused-user', 'project-profile', 'User Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}', 'full-access',
+              '{"provider":"arkos","model":"gpt-5-codex"}', 'full-access',
               'default', 'local', '2026-06-13T09:00:00.000Z',
               '2026-06-13T09:00:00.000Z', NULL
             ),
             (
               'thread-reused-agent', 'project-profile', 'Agent Thread',
-              '{"provider":"claudeAgent","model":"claude-sonnet-4-6"}', 'full-access',
+              '{"provider":"arkos","model":"claude-sonnet-4-6"}', 'full-access',
               'default', 'local', '2026-06-13T10:00:00.000Z',
               '2026-06-13T10:00:00.000Z', NULL
             )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id, thread_id, turn_id, role, text, dispatch_origin,
             is_streaming, source, created_at, updated_at
@@ -462,7 +418,7 @@ describe("ProfileStatsQuery", () => {
               'agent', 0, 'native', '2026-06-13T10:05:00.000Z', '2026-06-13T10:05:00.000Z'
             )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id, aggregate_kind, stream_id, stream_version, event_type,
             occurred_at, actor_kind, payload_json, metadata_json
@@ -470,32 +426,27 @@ describe("ProfileStatsQuery", () => {
             (
               'event-reused-user', 'thread', 'thread-reused-user', 1,
               'thread.turn-start-requested', '2026-06-13T09:05:00.000Z', 'client',
-              '{"threadId":"thread-reused-user","messageId":"shared-message-id","modelSelection":{"provider":"codex","model":"gpt-5-codex"}}', '{}'
+              '{"threadId":"thread-reused-user","messageId":"shared-message-id","modelSelection":{"provider":"arkos","model":"gpt-5-codex"}}', '{}'
             ),
             (
               'event-reused-agent', 'thread', 'thread-reused-agent', 1,
               'thread.turn-start-requested', '2026-06-13T10:05:00.000Z', 'system',
-              '{"threadId":"thread-reused-agent","messageId":"shared-message-id","modelSelection":{"provider":"claudeAgent","model":"claude-sonnet-4-6"}}', '{}'
+              '{"threadId":"thread-reused-agent","messageId":"shared-message-id","modelSelection":{"provider":"arkos","model":"claude-sonnet-4-6"}}', '{}'
             )
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        expect(stats.insights.topProvider).toBe("codex");
-        expect(stats.insights.topProviderPercent).toBe(100);
-        expect(stats.providerModels).toEqual([
-          expect.objectContaining({ provider: "codex", model: "gpt-5-codex", turnCount: 1 }),
-        ]);
-      }),
-    );
-  });
-
-  it("attributes provider-less custom instance selections to their session provider", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(stats.insights.topProvider).toBe("arkos");
+            expect(stats.insights.topProviderPercent).toBe(100);
+            expect(stats.providerModels).toEqual([
+                expect.objectContaining({ provider: "arkos", model: "gpt-5-codex", turnCount: 1 }),
+            ]);
+        }));
+    });
+    it("attributes provider-less custom instance selections to their session provider", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -521,8 +472,7 @@ describe("ProfileStatsQuery", () => {
             NULL
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_sessions (
             thread_id,
             status,
@@ -538,8 +488,7 @@ describe("ProfileStatsQuery", () => {
             '2026-06-13T10:00:00.000Z'
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id,
             aggregate_kind,
@@ -563,8 +512,7 @@ describe("ProfileStatsQuery", () => {
             '{}'
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id,
             thread_id,
@@ -588,38 +536,31 @@ describe("ProfileStatsQuery", () => {
             '2026-06-13T10:06:00.000Z'
           )
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-
-        expect(stats.insights.topProvider).toBe("pi");
-        expect(stats.providerModels[0]).toMatchObject({
-          provider: "pi",
-          instanceId: "pi_work",
-          model: "openai/gpt-5",
-          turnCount: 1,
-        });
-        expect(tokenStats.topProvider).toBe("pi");
-        expect(tokenStats.providers).toEqual(["pi"]);
-        expect(tokenStats.models).toContainEqual(
-          expect.objectContaining({
-            provider: "pi",
-            instanceId: "pi_work",
-            model: "openai/gpt-5",
-          }),
-        );
-      }),
-    );
-  });
-
-  it("reports providers without positive token totals without inventing usage", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-        for (const provider of ["codex", "grok"]) {
-          const selection = JSON.stringify({ provider, model: `${provider}-model` });
-          yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(stats.insights.topProvider).toBe("arkos");
+            expect(stats.providerModels[0]).toMatchObject({
+                provider: "arkos",
+                instanceId: "pi_work",
+                model: "openai/gpt-5",
+                turnCount: 1,
+            });
+            expect(tokenStats.topProvider).toBe("arkos");
+            expect(tokenStats.providers).toEqual(["arkos"]);
+            expect(tokenStats.models).toContainEqual(expect.objectContaining({
+                provider: "arkos",
+                instanceId: "pi_work",
+                model: "openai/gpt-5",
+            }));
+        }));
+    });
+    it("reports providers without positive token totals without inventing usage", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            for (const provider of ["arkos", "arkos"]) {
+                const selection = JSON.stringify({ provider, model: `${provider}-model` });
+                yield* sql `
             INSERT INTO projection_threads (
               thread_id, project_id, title, model_selection_json, runtime_mode,
               interaction_mode, env_mode, created_at, updated_at
@@ -628,11 +569,11 @@ describe("ProfileStatsQuery", () => {
               'default', 'local', '2026-06-13T09:00:00.000Z', '2026-06-13T09:00:00.000Z'
             )
           `;
-          const payload = JSON.stringify({
-            threadId: provider,
-            modelSelection: { provider, model: `${provider}-model` },
-          });
-          yield* sql`
+                const payload = JSON.stringify({
+                    threadId: provider,
+                    modelSelection: { provider, model: `${provider}-model` },
+                });
+                yield* sql `
             INSERT INTO orchestration_events (
               event_id, aggregate_kind, stream_id, stream_version, event_type,
               occurred_at, actor_kind, payload_json, metadata_json
@@ -641,13 +582,11 @@ describe("ProfileStatsQuery", () => {
               '2026-06-13T09:05:00.000Z', 'client', ${payload}, '{}'
             )
           `;
-        }
-
-        const withoutTokens = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-        expect(withoutTokens.available).toBe(false);
-        expect(withoutTokens.unavailableProviders).toEqual(["codex", "grok"]);
-
-        yield* sql`
+            }
+            const withoutTokens = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(withoutTokens.available).toBe(false);
+            expect(withoutTokens.unavailableProviders).toEqual(["arkos", "arkos"]);
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at
           ) VALUES (
@@ -655,13 +594,12 @@ describe("ProfileStatsQuery", () => {
             '{"totalProcessedTokens":1000}', 1, '2026-06-13T09:06:00.000Z'
           )
         `;
-        const missingTelemetry = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-        expect(missingTelemetry.unavailableProviders).toEqual(["grok"]);
-        expect(missingTelemetry.lifetimeTotalTokens).toBe(1000);
-
-        // An observed zero is not a positive token total. The coverage notice must
-        // describe the missing positive totals, without claiming telemetry is absent.
-        yield* sql`
+            const missingTelemetry = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(missingTelemetry.unavailableProviders).toEqual(["arkos"]);
+            expect(missingTelemetry.lifetimeTotalTokens).toBe(1000);
+            // An observed zero is not a positive token total. The coverage notice must
+            // describe the missing positive totals, without claiming telemetry is absent.
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at
           ) VALUES (
@@ -669,30 +607,29 @@ describe("ProfileStatsQuery", () => {
             '{"totalProcessedTokens":0}', 1, '2026-06-13T09:06:00.000Z'
           )
         `;
-        const partial = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-        expect(partial.available).toBe(true);
-        expect(partial.lifetimeTotalTokens).toBe(1000);
-        expect(partial.topProviderPercent).toBe(100);
-        expect(partial.unavailableProviders).toEqual(["grok"]);
-        expect(partial.models).toEqual([
-          {
-            provider: "codex",
-            instanceId: "codex",
-            model: "codex-model",
-            tokens: 1000,
-            percent: 100,
-          },
-        ]);
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        expect(stats.providerModels).toContainEqual({
-          provider: "grok",
-          instanceId: "grok",
-          model: "grok-model",
-          turnCount: 1,
-          percent: 50,
-        });
-
-        yield* sql`
+            const partial = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(partial.available).toBe(true);
+            expect(partial.lifetimeTotalTokens).toBe(1000);
+            expect(partial.topProviderPercent).toBe(100);
+            expect(partial.unavailableProviders).toEqual(["arkos"]);
+            expect(partial.models).toEqual([
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "codex-model",
+                    tokens: 1000,
+                    percent: 100,
+                },
+            ]);
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(stats.providerModels).toContainEqual({
+                provider: "arkos",
+                instanceId: "arkos",
+                model: "grok-model",
+                turnCount: 1,
+                percent: 50,
+            });
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at
           ) VALUES (
@@ -700,20 +637,16 @@ describe("ProfileStatsQuery", () => {
             '{"totalProcessedTokens":1000}', 2, '2026-06-13T09:07:00.000Z'
           )
         `;
-        const complete = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-        expect(complete.unavailableProviders).toEqual([]);
-        expect(complete.lifetimeTotalTokens).toBe(2000);
-      }),
-    );
-  });
-
-  it("reports token-based provider ranking separately from turn-count profile stats", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const complete = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(complete.unavailableProviders).toEqual([]);
+            expect(complete.lifetimeTotalTokens).toBe(2000);
+        }));
+    });
+    it("reports token-based provider ranking separately from turn-count profile stats", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -731,7 +664,7 @@ describe("ProfileStatsQuery", () => {
               'thread-codex',
               'project-profile',
               'Codex Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -743,7 +676,7 @@ describe("ProfileStatsQuery", () => {
               'thread-claude',
               'project-profile',
               'Claude Thread',
-              '{"provider":"claudeAgent","model":"claude-sonnet-4-6"}',
+              '{"provider":"arkos","model":"claude-sonnet-4-6"}',
               'full-access',
               'default',
               'local',
@@ -752,8 +685,7 @@ describe("ProfileStatsQuery", () => {
               NULL
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id,
             aggregate_kind,
@@ -774,7 +706,7 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T09:05:00.000Z',
               'client',
-              '{"threadId":"thread-codex","modelSelection":{"provider":"codex","model":"gpt-5-codex"}}',
+              '{"threadId":"thread-codex","modelSelection":{"provider":"arkos","model":"gpt-5-codex"}}',
               '{}'
             ),
             (
@@ -785,7 +717,7 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T09:35:00.000Z',
               'client',
-              '{"threadId":"thread-codex","modelSelection":{"provider":"codex","model":"gpt-5-codex"}}',
+              '{"threadId":"thread-codex","modelSelection":{"provider":"arkos","model":"gpt-5-codex"}}',
               '{}'
             ),
             (
@@ -796,14 +728,13 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T10:05:00.000Z',
               'client',
-              '{"threadId":"thread-claude","modelSelection":{"provider":"claudeAgent","model":"claude-sonnet-4-6"}}',
+              '{"threadId":"thread-claude","modelSelection":{"provider":"arkos","model":"claude-sonnet-4-6"}}',
               '{}'
             )
         `;
-
-        // Codex has more turns (2 vs 1) but Claude processed far more tokens,
-        // so core stats stay turn-ranked while token stats report Claude on top.
-        yield* sql`
+            // Codex has more turns (2 vs 1) but Claude processed far more tokens,
+            // so core stats stay turn-ranked while token stats report Claude on top.
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id,
             thread_id,
@@ -839,49 +770,43 @@ describe("ProfileStatsQuery", () => {
               '2026-06-13T10:06:00.000Z'
             )
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-
-        expect(stats.insights.topProvider).toBe("codex");
-        expect(stats.insights.topProviderPercent).toBeCloseTo(66.7);
-        expect(tokenStats.topProvider).toBe("claudeAgent");
-        expect(tokenStats.topProviderPercent).toBeCloseTo(83.3);
-        expect(tokenStats.providers).toEqual(["claudeAgent", "codex"]);
-        // Token-based model mix mirrors the token ranking, not the turn counts.
-        expect(tokenStats.models).toEqual([
-          {
-            provider: "claudeAgent",
-            instanceId: "claudeAgent",
-            model: "claude-sonnet-4-6",
-            tokens: 5000,
-            percent: 83.3,
-          },
-          {
-            provider: "codex",
-            instanceId: "codex",
-            model: "gpt-5-codex",
-            tokens: 1000,
-            percent: 16.7,
-          },
-        ]);
-        // Turn-based provider/model mix is unchanged by the token ranking.
-        expect(stats.providerModels[0]).toMatchObject({ provider: "codex", turnCount: 2 });
-      }),
-    );
-  });
-
-  it("attributes token deltas to the model selected for each turn, including usedTokens-only adapters", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        // thread-switch is currently on Opus, but the first turn ran on Fable.
-        // Attributing by the thread's latest selection would hand every token to
-        // Opus. thread-mixed reports BOTH counters: only the cumulative rows may
-        // drive its series, or the dip recovery would double-count.
-        yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(stats.insights.topProvider).toBe("arkos");
+            expect(stats.insights.topProviderPercent).toBeCloseTo(66.7);
+            expect(tokenStats.topProvider).toBe("arkos");
+            expect(tokenStats.topProviderPercent).toBeCloseTo(83.3);
+            expect(tokenStats.providers).toEqual(["arkos", "arkos"]);
+            // Token-based model mix mirrors the token ranking, not the turn counts.
+            expect(tokenStats.models).toEqual([
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "claude-sonnet-4-6",
+                    tokens: 5000,
+                    percent: 83.3,
+                },
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "gpt-5-codex",
+                    tokens: 1000,
+                    percent: 16.7,
+                },
+            ]);
+            // Turn-based provider/model mix is unchanged by the token ranking.
+            expect(stats.providerModels[0]).toMatchObject({ provider: "arkos", turnCount: 2 });
+        }));
+    });
+    it("attributes token deltas to the model selected for each turn, including usedTokens-only adapters", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            // thread-switch is currently on Opus, but the first turn ran on Fable.
+            // Attributing by the thread's latest selection would hand every token to
+            // Opus. thread-mixed reports BOTH counters: only the cumulative rows may
+            // drive its series, or the dip recovery would double-count.
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -899,7 +824,7 @@ describe("ProfileStatsQuery", () => {
               'thread-switch',
               'project-profile',
               'Switch Thread',
-              '{"provider":"claudeAgent","model":"claude-opus-4-8"}',
+              '{"provider":"arkos","model":"claude-opus-4-8"}',
               'full-access',
               'default',
               'local',
@@ -911,7 +836,7 @@ describe("ProfileStatsQuery", () => {
               'thread-mixed',
               'project-profile',
               'Mixed Counters Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -920,8 +845,7 @@ describe("ProfileStatsQuery", () => {
               NULL
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id,
             aggregate_kind,
@@ -942,7 +866,7 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T09:01:00.000Z',
               'client',
-              '{"threadId":"thread-switch","messageId":"message-switch-1","modelSelection":{"provider":"claudeAgent","model":"claude-fable-5"}}',
+              '{"threadId":"thread-switch","messageId":"message-switch-1","modelSelection":{"provider":"arkos","model":"claude-fable-5"}}',
               '{}'
             ),
             (
@@ -953,12 +877,11 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T09:20:00.000Z',
               'client',
-              '{"threadId":"thread-switch","messageId":"message-switch-2","modelSelection":{"provider":"claudeAgent","model":"claude-opus-4-8"}}',
+              '{"threadId":"thread-switch","messageId":"message-switch-2","modelSelection":{"provider":"arkos","model":"claude-opus-4-8"}}',
               '{}'
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_turns (
             thread_id,
             turn_id,
@@ -985,11 +908,10 @@ describe("ProfileStatsQuery", () => {
               '[]'
             )
         `;
-
-        // Claude completes with per-turn totals; provisional context rows are ignored.
-        // thread-mixed dips to context scale mid-thread and recovers: only the
-        // cumulative rows count (6000 total, not 6000 + the dip recovery).
-        yield* sql`
+            // Claude completes with per-turn totals; provisional context rows are ignored.
+            // thread-mixed dips to context scale mid-thread and recovers: only the
+            // cumulative rows count (6000 total, not 6000 + the dip recovery).
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id,
             thread_id,
@@ -1069,46 +991,40 @@ describe("ProfileStatsQuery", () => {
               '2026-06-13T11:04:00.000Z'
             )
         `;
-
-        const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-
-        expect(tokenStats.available).toBe(true);
-        expect(tokenStats.lifetimeTotalTokens).toBe(11000);
-        expect(tokenStats.topProvider).toBe("codex");
-        expect(tokenStats.models).toEqual([
-          {
-            provider: "codex",
-            instanceId: "codex",
-            model: "gpt-5-codex",
-            tokens: 6000,
-            percent: 54.5,
-          },
-          {
-            provider: "claudeAgent",
-            instanceId: "claudeAgent",
-            model: "claude-fable-5",
-            tokens: 3000,
-            percent: 27.3,
-          },
-          {
-            provider: "claudeAgent",
-            instanceId: "claudeAgent",
-            model: "claude-opus-4-8",
-            tokens: 2000,
-            percent: 18.2,
-          },
-        ]);
-      }),
-    );
-  });
-
-  it("counts usedTokens-only model groups in threads that also have cumulative telemetry", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(tokenStats.available).toBe(true);
+            expect(tokenStats.lifetimeTotalTokens).toBe(11000);
+            expect(tokenStats.topProvider).toBe("arkos");
+            expect(tokenStats.models).toEqual([
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "gpt-5-codex",
+                    tokens: 6000,
+                    percent: 54.5,
+                },
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "claude-fable-5",
+                    tokens: 3000,
+                    percent: 27.3,
+                },
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "claude-opus-4-8",
+                    tokens: 2000,
+                    percent: 18.2,
+                },
+            ]);
+        }));
+    });
+    it("counts usedTokens-only model groups in threads that also have cumulative telemetry", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -1125,7 +1041,7 @@ describe("ProfileStatsQuery", () => {
             'thread-hybrid',
             'project-profile',
             'Hybrid Telemetry Thread',
-            '{"provider":"codex","model":"gpt-5-codex"}',
+            '{"provider":"arkos","model":"gpt-5-codex"}',
             'full-access',
             'default',
             'local',
@@ -1134,8 +1050,7 @@ describe("ProfileStatsQuery", () => {
             NULL
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id,
             aggregate_kind,
@@ -1156,7 +1071,7 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T12:01:00.000Z',
               'client',
-              '{"threadId":"thread-hybrid","messageId":"message-hybrid-codex","modelSelection":{"provider":"codex","model":"gpt-5-codex"}}',
+              '{"threadId":"thread-hybrid","messageId":"message-hybrid-codex","modelSelection":{"provider":"arkos","model":"gpt-5-codex"}}',
               '{}'
             ),
             (
@@ -1167,7 +1082,7 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T12:10:00.000Z',
               'client',
-              '{"threadId":"thread-hybrid","messageId":"message-hybrid-claude","modelSelection":{"provider":"claudeAgent","model":"claude-haiku-4-5"}}',
+              '{"threadId":"thread-hybrid","messageId":"message-hybrid-claude","modelSelection":{"provider":"arkos","model":"claude-haiku-4-5"}}',
               '{}'
             ),
             (
@@ -1178,12 +1093,11 @@ describe("ProfileStatsQuery", () => {
               'thread.turn-start-requested',
               '2026-06-13T12:20:00.000Z',
               'client',
-              '{"threadId":"thread-hybrid","messageId":"message-hybrid-codex-after","modelSelection":{"provider":"codex","model":"gpt-5-codex"}}',
+              '{"threadId":"thread-hybrid","messageId":"message-hybrid-codex-after","modelSelection":{"provider":"arkos","model":"gpt-5-codex"}}',
               '{}'
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_turns (
             thread_id,
             turn_id,
@@ -1218,11 +1132,10 @@ describe("ProfileStatsQuery", () => {
               '[]'
             )
         `;
-
-        // Codex has cumulative totals, so its usedTokens-only dip is ignored.
-        // A large legacy Claude counter sits between the two Codex turns, but
-        // Claude final usage is counted independently and cannot reset that delta.
-        yield* sql`
+            // Codex has cumulative totals, so its usedTokens-only dip is ignored.
+            // A large legacy Claude counter sits between the two Codex turns, but
+            // Claude final usage is counted independently and cannot reset that delta.
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id,
             thread_id,
@@ -1302,37 +1215,31 @@ describe("ProfileStatsQuery", () => {
               '2026-06-13T12:21:00.000Z'
             )
         `;
-
-        const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-
-        expect(tokenStats.lifetimeTotalTokens).toBe(4200);
-        expect(tokenStats.models).toEqual([
-          {
-            provider: "codex",
-            instanceId: "codex",
-            model: "gpt-5-codex",
-            tokens: 2500,
-            percent: 59.5,
-          },
-          {
-            provider: "claudeAgent",
-            instanceId: "claudeAgent",
-            model: "claude-haiku-4-5",
-            tokens: 1700,
-            percent: 40.5,
-          },
-        ]);
-      }),
-    );
-  });
-
-  it("attributes provider-less token updates to the active session before model heuristics", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(tokenStats.lifetimeTotalTokens).toBe(4200);
+            expect(tokenStats.models).toEqual([
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "gpt-5-codex",
+                    tokens: 2500,
+                    percent: 59.5,
+                },
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "claude-haiku-4-5",
+                    tokens: 1700,
+                    percent: 40.5,
+                },
+            ]);
+        }));
+    });
+    it("attributes provider-less token updates to the active session before model heuristics", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -1358,8 +1265,7 @@ describe("ProfileStatsQuery", () => {
             NULL
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_sessions (
             thread_id,
             status,
@@ -1375,8 +1281,7 @@ describe("ProfileStatsQuery", () => {
             '2026-06-13T10:00:00.000Z'
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id,
             thread_id,
@@ -1400,23 +1305,17 @@ describe("ProfileStatsQuery", () => {
             '2026-06-13T10:06:00.000Z'
           )
         `;
-
-        const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-
-        expect(tokenStats.topProvider).toBe("opencode");
-        expect(tokenStats.providers).toEqual(["opencode"]);
-        expect(tokenStats.unavailableProviders).not.toContain("claudeAgent");
-      }),
-    );
-  });
-
-  it("keeps historical provider-less turns attributed before latest session fallback", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(tokenStats.topProvider).toBe("arkos");
+            expect(tokenStats.providers).toEqual(["arkos"]);
+            expect(tokenStats.unavailableProviders).not.toContain("arkos");
+        }));
+    });
+    it("keeps historical provider-less turns attributed before latest session fallback", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -1442,8 +1341,7 @@ describe("ProfileStatsQuery", () => {
             NULL
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_sessions (
             thread_id,
             status,
@@ -1459,8 +1357,7 @@ describe("ProfileStatsQuery", () => {
             '2026-06-13T11:00:00.000Z'
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id,
             aggregate_kind,
@@ -1496,34 +1393,24 @@ describe("ProfileStatsQuery", () => {
               '{}'
             )
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-        const claudeRow = stats.providerModels.find(
-          (row) => row.provider === "claudeAgent" && row.instanceId === "work",
-        );
-        const codexRow = stats.providerModels.find(
-          (row) => row.provider === "codex" && row.instanceId === "codex_work",
-        );
-
-        expect(claudeRow).toMatchObject({
-          model: "claude-sonnet-4-6",
-          turnCount: 1,
-        });
-        expect(codexRow).toMatchObject({
-          model: "gpt-5-codex",
-          turnCount: 1,
-        });
-      }),
-    );
-  });
-
-  it("counts slash skill invocations from projected thread message text and groups them with dollar usage", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            const claudeRow = stats.providerModels.find((row) => row.provider === "arkos" && row.instanceId === "work");
+            const codexRow = stats.providerModels.find((row) => row.provider === "arkos" && row.instanceId === "codex_work");
+            expect(claudeRow).toMatchObject({
+                model: "claude-sonnet-4-6",
+                turnCount: 1,
+            });
+            expect(codexRow).toMatchObject({
+                model: "gpt-5-codex",
+                turnCount: 1,
+            });
+        }));
+    });
+    it("counts slash skill invocations from projected thread message text and groups them with dollar usage", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -1541,7 +1428,7 @@ describe("ProfileStatsQuery", () => {
               'thread-skills',
               'project-profile',
               'Skill Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -1553,7 +1440,7 @@ describe("ProfileStatsQuery", () => {
               'thread-retention-hidden',
               'project-profile',
               'Retention Hidden Skill Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -1565,7 +1452,7 @@ describe("ProfileStatsQuery", () => {
               'thread-manual-deleted',
               'project-profile',
               'Manual Deleted Skill Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -1574,8 +1461,7 @@ describe("ProfileStatsQuery", () => {
               '2026-06-15T10:00:00.000Z'
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id,
             aggregate_kind,
@@ -1614,8 +1500,7 @@ describe("ProfileStatsQuery", () => {
               '{}'
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id,
             thread_id,
@@ -1696,33 +1581,27 @@ describe("ProfileStatsQuery", () => {
               '2026-06-14T09:45:00.000Z'
             )
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-
-        // Retention-hidden and manually deleted threads both keep contributing:
-        // profile stats are lifetime totals and deletion is only a soft hide.
-        expect(stats.insights.skillsExplored).toBe(5);
-        expect(stats.insights.totalSkillsUsed).toBe(8);
-        expect(stats.activity.totalPromptsSent).toBe(4);
-        expect(stats.activity.totalThreads).toBe(3);
-        expect(stats.skills.slice(0, 5)).toEqual([
-          { name: "check-code", displayName: "$check-code", kind: "skill", runCount: 4 },
-          { name: "openai-docs", displayName: "$openai-docs", kind: "skill", runCount: 1 },
-          { name: "planner", displayName: "$planner", kind: "skill", runCount: 1 },
-          { name: "refactor-code", displayName: "$refactor-code", kind: "skill", runCount: 1 },
-          { name: "reviewer", displayName: "@reviewer", kind: "agent", runCount: 1 },
-        ]);
-      }),
-    );
-  });
-
-  it("keeps deleted threads and deleted projects in the most-worked ranking", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            // Retention-hidden and manually deleted threads both keep contributing:
+            // profile stats are lifetime totals and deletion is only a soft hide.
+            expect(stats.insights.skillsExplored).toBe(5);
+            expect(stats.insights.totalSkillsUsed).toBe(8);
+            expect(stats.activity.totalPromptsSent).toBe(4);
+            expect(stats.activity.totalThreads).toBe(3);
+            expect(stats.skills.slice(0, 5)).toEqual([
+                { name: "check-code", displayName: "$check-code", kind: "skill", runCount: 4 },
+                { name: "openai-docs", displayName: "$openai-docs", kind: "skill", runCount: 1 },
+                { name: "planner", displayName: "$planner", kind: "skill", runCount: 1 },
+                { name: "refactor-code", displayName: "$refactor-code", kind: "skill", runCount: 1 },
+                { name: "reviewer", displayName: "@reviewer", kind: "agent", runCount: 1 },
+            ]);
+        }));
+    });
+    it("keeps deleted threads and deleted projects in the most-worked ranking", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_projects (
             project_id,
             title,
@@ -1761,8 +1640,7 @@ describe("ProfileStatsQuery", () => {
               '2026-06-14T09:00:00.000Z'
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -1780,7 +1658,7 @@ describe("ProfileStatsQuery", () => {
               'thread-alpha',
               'project-alpha',
               'Alpha Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -1792,7 +1670,7 @@ describe("ProfileStatsQuery", () => {
               'thread-beta',
               'project-beta',
               'Beta Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -1804,7 +1682,7 @@ describe("ProfileStatsQuery", () => {
               'thread-alpha-deleted',
               'project-alpha',
               'Deleted Alpha Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -1816,7 +1694,7 @@ describe("ProfileStatsQuery", () => {
               'thread-deleted-project',
               'project-deleted',
               'Deleted Project Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}',
+              '{"provider":"arkos","model":"gpt-5-codex"}',
               'full-access',
               'default',
               'local',
@@ -1825,8 +1703,7 @@ describe("ProfileStatsQuery", () => {
               NULL
             )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id,
             thread_id,
@@ -1917,34 +1794,28 @@ describe("ProfileStatsQuery", () => {
               '2026-06-14T11:35:00.000Z'
             )
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-
-        // Lifetime totals: deleted threads/projects keep their contribution.
-        expect(stats.activity.totalPromptsSent).toBe(7);
-        expect(stats.activity.totalThreads).toBe(4);
-        // Alpha and Beta tie on prompts (3) and active days (2); the deleted
-        // Alpha thread's later prompt breaks the tie via lastWorkedAt.
-        expect(stats.mostWorkedProject).toEqual({
-          projectId: "project-alpha",
-          title: "Alpha",
-          workspaceRoot: "/work/alpha",
-          promptCount: 3,
-          threadCount: 2,
-          activeDays: 2,
-          lastWorkedAt: "2026-06-14T11:05:00.000Z",
-        });
-      }),
-    );
-  });
-
-  it("computes longest streak from all prompt days instead of only the heatmap window", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            // Lifetime totals: deleted threads/projects keep their contribution.
+            expect(stats.activity.totalPromptsSent).toBe(7);
+            expect(stats.activity.totalThreads).toBe(4);
+            // Alpha and Beta tie on prompts (3) and active days (2); the deleted
+            // Alpha thread's later prompt breaks the tie via lastWorkedAt.
+            expect(stats.mostWorkedProject).toEqual({
+                projectId: "project-alpha",
+                title: "Alpha",
+                workspaceRoot: "/work/alpha",
+                promptCount: 3,
+                threadCount: 2,
+                activeDays: 2,
+                lastWorkedAt: "2026-06-14T11:05:00.000Z",
+            });
+        }));
+    });
+    it("computes longest streak from all prompt days instead of only the heatmap window", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_projects (
             project_id,
             title,
@@ -1964,8 +1835,7 @@ describe("ProfileStatsQuery", () => {
             NULL
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -1982,7 +1852,7 @@ describe("ProfileStatsQuery", () => {
             'thread-streak',
             'project-streak',
             'Streak Thread',
-            '{"provider":"codex","model":"gpt-5-codex"}',
+            '{"provider":"arkos","model":"gpt-5-codex"}',
             'full-access',
             'default',
             'local',
@@ -1991,8 +1861,7 @@ describe("ProfileStatsQuery", () => {
             NULL
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id,
             thread_id,
@@ -2039,22 +1908,16 @@ describe("ProfileStatsQuery", () => {
               '2025-01-03T09:05:00.000Z'
             )
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-
-        expect(stats.activity.totalPromptsSent).toBe(3);
-        expect(stats.activity.longestStreakDays).toBe(3);
-      }),
-    );
-  });
-
-  it("uses the activity provider stamp when a legacy thread has malformed model JSON", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(stats.activity.totalPromptsSent).toBe(3);
+            expect(stats.activity.longestStreakDays).toBe(3);
+        }));
+    });
+    it("uses the activity provider stamp when a legacy thread has malformed model JSON", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id,
             project_id,
@@ -2080,8 +1943,7 @@ describe("ProfileStatsQuery", () => {
             NULL
           )
         `;
-
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id,
             thread_id,
@@ -2101,7 +1963,7 @@ describe("ProfileStatsQuery", () => {
               'info',
               'context-window.updated',
               'tokens updated',
-              '{"totalProcessedTokens":1000,"provider":"claudeAgent"}',
+              '{"totalProcessedTokens":1000,"provider":"arkos"}',
               1,
               '2026-06-14T09:05:00.000Z'
             ),
@@ -2112,48 +1974,42 @@ describe("ProfileStatsQuery", () => {
               'info',
               'turn.completed',
               'tokens updated',
-              '{"tokenAccountingVersion":1,"mainLoopTokens":1500,"provider":"claudeAgent"}',
+              '{"tokenAccountingVersion":1,"mainLoopTokens":1500,"provider":"arkos"}',
               2,
               '2026-06-14T09:10:00.000Z'
             )
         `;
-
-        const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-
-        expect(tokenStats.available).toBe(true);
-        expect(tokenStats.lifetimeTotalTokens).toBe(1500);
-        expect(tokenStats.providers).toEqual(["claudeAgent"]);
-        expect(tokenStats.models).toEqual([
-          {
-            provider: "claudeAgent",
-            instanceId: "claudeAgent",
-            model: "unknown",
-            tokens: 1500,
-            percent: 100,
-          },
-        ]);
-      }),
-    );
-  });
-
-  it("does not subtract another provider's counter when a thread switches providers and back", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(tokenStats.available).toBe(true);
+            expect(tokenStats.lifetimeTotalTokens).toBe(1500);
+            expect(tokenStats.providers).toEqual(["arkos"]);
+            expect(tokenStats.models).toEqual([
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "unknown",
+                    tokens: 1500,
+                    percent: 100,
+                },
+            ]);
+        }));
+    });
+    it("does not subtract another provider's counter when a thread switches providers and back", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
           )
           VALUES (
             'thread-switch', 'project-profile', 'Switch Thread',
-            '{"provider":"codex","model":"gpt-5-codex"}', 'full-access', 'default', 'local',
+            '{"provider":"arkos","model":"gpt-5-codex"}', 'full-access', 'default', 'local',
             '2026-06-13T12:00:00.000Z', '2026-06-13T12:00:00.000Z', NULL
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO orchestration_events (
             event_id, aggregate_kind, stream_id, stream_version, event_type,
             occurred_at, actor_kind, payload_json, metadata_json
@@ -2161,18 +2017,18 @@ describe("ProfileStatsQuery", () => {
           VALUES
             ('event-switch-1', 'thread', 'thread-switch', 1, 'thread.turn-start-requested',
               '2026-06-13T12:01:00.000Z', 'client',
-              '{"threadId":"thread-switch","messageId":"message-switch-1","modelSelection":{"provider":"codex","model":"gpt-5-codex"}}',
+              '{"threadId":"thread-switch","messageId":"message-switch-1","modelSelection":{"provider":"arkos","model":"gpt-5-codex"}}',
               '{}'),
             ('event-switch-2', 'thread', 'thread-switch', 2, 'thread.turn-start-requested',
               '2026-06-13T12:10:00.000Z', 'client',
-              '{"threadId":"thread-switch","messageId":"message-switch-2","modelSelection":{"provider":"opencode","model":"sonnet"}}',
+              '{"threadId":"thread-switch","messageId":"message-switch-2","modelSelection":{"provider":"arkos","model":"sonnet"}}',
               '{}'),
             ('event-switch-3', 'thread', 'thread-switch', 3, 'thread.turn-start-requested',
               '2026-06-13T12:20:00.000Z', 'client',
-              '{"threadId":"thread-switch","messageId":"message-switch-3","modelSelection":{"provider":"codex","model":"gpt-5-codex"}}',
+              '{"threadId":"thread-switch","messageId":"message-switch-3","modelSelection":{"provider":"arkos","model":"gpt-5-codex"}}',
               '{}')
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_turns (
             thread_id, turn_id, pending_message_id, state, requested_at, checkpoint_files_json
           )
@@ -2184,53 +2040,47 @@ describe("ProfileStatsQuery", () => {
             ('thread-switch', 'turn-switch-3', 'message-switch-3', 'completed',
               '2026-06-13T12:20:00.000Z', '[]')
         `;
-        // Codex resumes its own running total after the OpenCode turn.
-        yield* sql`
+            // Codex resumes its own running total after the OpenCode turn.
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at
           )
           VALUES
             ('activity-switch-1', 'thread-switch', 'turn-switch-1', 'info',
               'context-window.updated', 'tokens updated',
-              '{"provider":"codex","totalProcessedTokens":100000}', 1, '2026-06-13T12:02:00.000Z'),
+              '{"provider":"arkos","totalProcessedTokens":100000}', 1, '2026-06-13T12:02:00.000Z'),
             ('activity-switch-2', 'thread-switch', 'turn-switch-2', 'info',
               'context-window.updated', 'tokens updated',
-              '{"provider":"opencode","totalProcessedTokens":5000}', 2, '2026-06-13T12:11:00.000Z'),
+              '{"provider":"arkos","totalProcessedTokens":5000}', 2, '2026-06-13T12:11:00.000Z'),
             ('activity-switch-3', 'thread-switch', 'turn-switch-3', 'info',
               'context-window.updated', 'tokens updated',
-              '{"provider":"codex","totalProcessedTokens":110000}', 3, '2026-06-13T12:21:00.000Z')
+              '{"provider":"arkos","totalProcessedTokens":110000}', 3, '2026-06-13T12:21:00.000Z')
         `;
-
-        const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-
-        expect(tokenStats.lifetimeTotalTokens).toBe(115_000);
-        expect(tokenStats.models).toEqual([
-          {
-            provider: "codex",
-            instanceId: "codex",
-            model: "gpt-5-codex",
-            tokens: 110_000,
-            percent: 95.7,
-          },
-          {
-            provider: "opencode",
-            instanceId: "opencode",
-            model: "sonnet",
-            tokens: 5_000,
-            percent: 4.3,
-          },
-        ]);
-      }),
-    );
-  });
-
-  it("never ranks per-chat or Studio container projects as the most-worked project", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(tokenStats.lifetimeTotalTokens).toBe(115000);
+            expect(tokenStats.models).toEqual([
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "gpt-5-codex",
+                    tokens: 110000,
+                    percent: 95.7,
+                },
+                {
+                    provider: "arkos",
+                    instanceId: "arkos",
+                    model: "sonnet",
+                    tokens: 5000,
+                    percent: 4.3,
+                },
+            ]);
+        }));
+    });
+    it("never ranks per-chat or Studio container projects as the most-worked project", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_projects (
             project_id, title, workspace_root, scripts_json, kind, created_at, updated_at, deleted_at
           )
@@ -2240,20 +2090,20 @@ describe("ProfileStatsQuery", () => {
             ('project-chat', 'Busy chat', '/chats/busy', '{}', 'chat',
               '2026-06-12T09:00:00.000Z', '2026-06-12T09:00:00.000Z', NULL)
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
           )
           VALUES
             ('thread-real', 'project-real', 'Real Thread',
-              '{"provider":"codex","model":"gpt-5-codex"}', 'full-access', 'default', 'local',
+              '{"provider":"arkos","model":"gpt-5-codex"}', 'full-access', 'default', 'local',
               '2026-06-13T09:00:00.000Z', '2026-06-13T09:00:00.000Z', NULL),
             ('thread-chat', 'project-chat', 'Busy Chat',
-              '{"provider":"codex","model":"gpt-5-codex"}', 'full-access', 'default', 'local',
+              '{"provider":"arkos","model":"gpt-5-codex"}', 'full-access', 'default', 'local',
               '2026-06-13T09:00:00.000Z', '2026-06-13T09:00:00.000Z', NULL)
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id, thread_id, turn_id, role, text, is_streaming, source, created_at, updated_at
           )
@@ -2265,33 +2115,27 @@ describe("ProfileStatsQuery", () => {
             ('message-chat-2', 'thread-chat', 'turn-chat-2', 'user', 'chat two', 0, 'native',
               '2026-06-13T10:15:00.000Z', '2026-06-13T10:15:00.000Z')
         `;
-
-        const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
-
-        expect(stats.mostWorkedProject?.projectId).toBe("project-real");
-      }),
-    );
-  });
-
-  it("keeps Claude results of automation and agent dispatches out of the Profile totals", async () => {
-    await runProfileStatsTest(
-      Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
-        const statsQuery = yield* ProfileStatsQuery;
-
-        yield* sql`
+            const stats = yield* statsQuery.getProfileStats({ utcOffsetMinutes: 0 });
+            expect(stats.mostWorkedProject?.projectId).toBe("project-real");
+        }));
+    });
+    it("keeps Claude results of automation and agent dispatches out of the Profile totals", async () => {
+        await runProfileStatsTest(Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const statsQuery = yield* ProfileStatsQuery;
+            yield* sql `
           INSERT INTO projection_threads (
             thread_id, project_id, title, model_selection_json, runtime_mode,
             interaction_mode, env_mode, created_at, updated_at, deleted_at
           )
           VALUES (
             'thread-claude-origins', 'project-profile', 'Claude origins',
-            '{"provider":"claudeAgent","model":"claude-sonnet-5"}',
+            '{"provider":"arkos","model":"claude-sonnet-5"}',
             'full-access', 'default', 'local',
             '2026-06-14T09:00:00.000Z', '2026-06-14T09:00:00.000Z', NULL
           )
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_messages (
             message_id, thread_id, turn_id, role, text, is_streaming, source, dispatch_origin,
             created_at, updated_at
@@ -2304,7 +2148,7 @@ describe("ProfileStatsQuery", () => {
             ('m-agent', 'thread-claude-origins', 'turn-agent', 'user', 'go', 0, 'native', 'agent',
               '2026-06-14T11:00:00.000Z', '2026-06-14T11:00:00.000Z')
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_turns (
             thread_id, turn_id, pending_message_id, state, requested_at, started_at, completed_at,
             checkpoint_files_json
@@ -2317,26 +2161,23 @@ describe("ProfileStatsQuery", () => {
             ('thread-claude-origins', 'turn-agent', 'm-agent', 'completed', '2026-06-14T11:00:00.000Z',
               '2026-06-14T11:00:00.000Z', '2026-06-14T11:05:00.000Z', '[]')
         `;
-        yield* sql`
+            yield* sql `
           INSERT INTO projection_thread_activities (
             activity_id, thread_id, turn_id, tone, kind, summary, payload_json, sequence, created_at
           )
           VALUES
             ('a-user', 'thread-claude-origins', 'turn-user', 'info', 'turn.completed', 'done',
-              '{"provider":"claudeAgent","tokenAccountingVersion":1,"mainLoopTokens":1000}',
+              '{"provider":"arkos","tokenAccountingVersion":1,"mainLoopTokens":1000}',
               1, '2026-06-14T09:05:00.000Z'),
             ('a-auto', 'thread-claude-origins', 'turn-auto', 'info', 'turn.completed', 'done',
-              '{"provider":"claudeAgent","tokenAccountingVersion":1,"mainLoopTokens":7000}',
+              '{"provider":"arkos","tokenAccountingVersion":1,"mainLoopTokens":7000}',
               2, '2026-06-14T10:05:00.000Z'),
             ('a-agent', 'thread-claude-origins', 'turn-agent', 'info', 'turn.completed', 'done',
-              '{"provider":"claudeAgent","tokenAccountingVersion":1,"mainLoopTokens":9000}',
+              '{"provider":"arkos","tokenAccountingVersion":1,"mainLoopTokens":9000}',
               3, '2026-06-14T11:05:00.000Z')
         `;
-
-        const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
-
-        expect(tokenStats.lifetimeTotalTokens).toBe(1000);
-      }),
-    );
-  });
+            const tokenStats = yield* statsQuery.getProfileTokenStats({ utcOffsetMinutes: 0 });
+            expect(tokenStats.lifetimeTotalTokens).toBe(1000);
+        }));
+    });
 });

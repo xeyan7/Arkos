@@ -1,6 +1,8 @@
 // FILE: runEnvelope.ts
 // Purpose: Builds the single canonical synthetic message sent to automation runs.
 
+// FILE: runEnvelope.ts
+// Purpose: Builds the single canonical synthetic message sent to automation runs.
 import type { AutomationDefinition, AutomationRun } from "@arkos/contracts";
 import { automationContinuesThread, automationOwnsItsThread } from "@arkos/shared/automationMode";
 

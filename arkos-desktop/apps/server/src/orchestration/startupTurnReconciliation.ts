@@ -33,33 +33,49 @@
  *
  * @module startupTurnReconciliation
  */
-import type {
-  OrchestrationCommand,
-  OrchestrationPendingInteraction,
-  OrchestrationThreadActivity,
-  OrchestrationSession,
-  RuntimeMode,
-  ThreadId,
-} from "@arkos/contracts";
+/**
+ * startupTurnReconciliation - heal restart-orphaned turns at server boot.
+ *
+ * Provider runtimes (Codex app-server, ACP children, etc.) are purely
+ * in-memory: every one of them dies with the server process. A turn only
+ * leaves the "running" state when its runtime emits a terminal event, so any
+ * turn that was still in flight when the process exited has no surviving runtime
+ * to ever complete it. After a restart its persisted projection rows still say
+ * `session.status = "running"` / `activeTurnId != null` / `latestTurn = running`,
+ * and the UI shows "Working" forever (observed in the wild as multi-hour stuck
+ * turns).
+ *
+ * `projectionPipeline.bootstrap` faithfully replays the event log into the
+ * projection tables, so it restores that stale "running" state verbatim — it is
+ * not its job to second-guess history. This module runs once, immediately after
+ * bootstrap and before the server starts accepting client commands, and emits
+ * stale pending-request failure activities plus a terminal
+ * `thread.session.set { status: "interrupted", activeTurnId: null }` for each
+ * orphaned thread. That reuses the normal event-sourced path: activity handlers
+ * resolve dead approval/user-input requests, and the projection's session-set
+ * handler closes the newest still-open turn (`finalizeTurnStateFromSessionStatus`
+ * → "interrupted", with `completedAt`), so the UI clears blocked composers and
+ * spinners instead of hanging.
+ *
+ * The runtime idle watchdog (AcpTurnIdleWatchdog) only protects turns started in
+ * the *current* process; this is its restart-time counterpart for turns
+ * orphaned by a process boundary the watchdog never saw. The same argument
+ * applies to unresolved approval/user-input interactions, whose answer callback
+ * is equally in-memory: their durable rows are settled here too, which is the
+ * boot-time counterpart to the turn/session-scoped settlement in
+ * `Layers/ProviderRuntimeIngestion.ts` (that one reacts to runtime events, and a
+ * hard-killed process emits none).
+ *
+ * @module startupTurnReconciliation
+ */
+import type { OrchestrationCommand, OrchestrationPendingInteraction, OrchestrationThreadActivity, OrchestrationSession, RuntimeMode, ThreadId } from "@arkos/contracts";
 import { CommandId, EventId } from "@arkos/contracts";
-import {
-  derivePendingThreadRequestIds,
-  type PendingThreadRequestKind,
-} from "@arkos/shared/threadSummary";
+import { derivePendingThreadRequestIds, type PendingThreadRequestKind } from "@arkos/shared/threadSummary";
 import { Array as Arr, Effect, Option } from "effect";
 import type { ProjectionPendingInteraction } from "../persistence/Services/ProjectionPendingInteractions.ts";
 import { ProjectionPendingInteractionRepository } from "../persistence/Services/ProjectionPendingInteractions.ts";
-import {
-  CHECKPOINT_REVERT_FAILED_ACTIVITY_KIND,
-  threadHasCheckpointRevertInProgress,
-  threadHasInFlightTurn,
-} from "./commandInvariants.ts";
-import {
-  buildStalePendingRequestSettlementCommand,
-  isUnsettledPendingInteraction,
-  pendingInteractionRequestKind,
-  type ThreadActivityAppendCommand,
-} from "./stalePendingInteractions.ts";
+import { CHECKPOINT_REVERT_FAILED_ACTIVITY_KIND, threadHasCheckpointRevertInProgress, threadHasInFlightTurn } from "./commandInvariants.ts";
+import { buildStalePendingRequestSettlementCommand, isUnsettledPendingInteraction, pendingInteractionRequestKind, type ThreadActivityAppendCommand } from "./stalePendingInteractions.ts";
 import { OrchestrationEngineService } from "./Services/OrchestrationEngine.ts";
 import { ProjectionSnapshotQuery } from "./Services/ProjectionSnapshotQuery.ts";
 

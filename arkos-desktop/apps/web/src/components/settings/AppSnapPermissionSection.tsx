@@ -5,12 +5,13 @@
 //          (Accessibility + Screen Recording + Input Monitoring).
 // Layer: Settings UI component
 
-import {
-  type DesktopAppSnapPermission,
-  type DesktopAppSnapPermissionKind,
-  type DesktopAppSnapSettingsPane,
-  type DesktopAppSnapState,
-} from "@arkos/contracts";
+// FILE: AppSnapPermissionSection.tsx
+// Purpose: The single guided macOS permission checklist — per-pane Grant buttons that deep-link
+//          System Settings, run the floating GrantCoach, and poll until the grant lands. Shared
+//          by AppSnap (Input Monitoring + Screen Recording) and Computer control
+//          (Accessibility + Screen Recording + Input Monitoring).
+// Layer: Settings UI component
+import { type DesktopAppSnapPermission, type DesktopAppSnapPermissionKind, type DesktopAppSnapSettingsPane, type DesktopAppSnapState } from "@arkos/contracts";
 import { useEffect, useRef, useState } from "react";
 
 import { createLatestAppSnapRequestGuard } from "~/appSnap.logic";

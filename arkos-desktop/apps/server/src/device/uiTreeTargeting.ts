@@ -24,13 +24,34 @@
  *
  * @module device/uiTreeTargeting
  */
+/**
+ * Resolving an accessibility node to the point that actually taps it.
+ *
+ * Agents are bad at coordinate arithmetic and worse at knowing which
+ * coordinate of a node is the live one, so this module is the single place
+ * that answers "where do I tap to hit the thing called X". Both the MCP
+ * `device_tap` tool and any future caller go through it rather than each
+ * re-deriving a centre point from a frame.
+ *
+ * Two rules carry most of the value:
+ *
+ * - The tap point is the node's `activationPoint` when it has one. UIKit
+ *   merges a settings row and the control inside it into one element whose
+ *   frame spans the row, so the frame centre of a switch row is dead space.
+ * - A match that is scrolled out of view is refused rather than tapped. Its
+ *   frame is still in the tree with off-screen coordinates, and tapping it
+ *   would hit whatever happens to be at that position instead.
+ *
+ * The matching itself — exact label before substring, ambiguity refused rather
+ * than guessed — is `@arkos/shared/uiTreeTargeting`, shared with the desktop
+ * family. What stays here is what UIKit specifically needs: labels compared
+ * with case and surrounding space ignored, a subrole that counts as a role, and
+ * "on screen" meaning the tap point falls inside the display's own frame.
+ *
+ * @module device/uiTreeTargeting
+ */
 import type { DeviceUiNode, DeviceUiPoint } from "@arkos/contracts";
-import {
-  flattenUiTree,
-  resolveUiTreeTarget,
-  uiTreeActivationPoint,
-  type UiTreeTargetSpec,
-} from "@arkos/shared/uiTreeTargeting";
+import { flattenUiTree, resolveUiTreeTarget, uiTreeActivationPoint, type UiTreeTargetSpec } from "@arkos/shared/uiTreeTargeting";
 
 /** What the caller asked for. At least a label; role narrows an ambiguous one. */
 export interface DeviceUiTarget {

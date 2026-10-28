@@ -5,6 +5,12 @@
 //          editor (same entries as the header OpenInPicker).
 // Layer: Environment panel section
 
+// FILE: EnvironmentEditorSection.tsx
+// Purpose: "Editor" section of the Environment panel — the in-app Editor view as the
+//          default first row, followed by the "Open in <editor>" external-launcher picker
+//          (same skin as Commit and Push / env pickers). The menu lists every installed
+//          editor (same entries as the header OpenInPicker).
+// Layer: Environment panel section
 import type { EditorId, ResolvedKeybindingsConfig } from "@arkos/contracts";
 
 import { useEditorLaunchers } from "~/hooks/useEditorLaunchers";
@@ -12,14 +18,7 @@ import { EditorViewIcon } from "~/lib/icons";
 
 import { ComposerPickerMenuPopup } from "../ComposerPickerMenuPopup";
 import { Menu, MenuRadioGroup, MenuRadioItem, MenuShortcut, MenuTrigger } from "../../ui/menu";
-import {
-  ENVIRONMENT_ROW_CLASS_NAME,
-  ENVIRONMENT_ROW_ICON_CLASS_NAME,
-  EnvironmentRow,
-  EnvironmentRowBody,
-  EnvironmentLabeledSection,
-  EnvironmentRowChevron,
-} from "./EnvironmentRow";
+import { ENVIRONMENT_ROW_CLASS_NAME, ENVIRONMENT_ROW_ICON_CLASS_NAME, EnvironmentRow, EnvironmentRowBody, EnvironmentLabeledSection, EnvironmentRowChevron } from "./EnvironmentRow";
 
 export function EnvironmentEditorSection({
   keybindings,

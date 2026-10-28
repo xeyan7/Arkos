@@ -1,5 +1,7 @@
 /** Fixture-only native integration runner. It never targets a window until
  * title + WindowServer PID + native id identify this process's own fixture. */
+/** Fixture-only native integration runner. It never targets a window until
+ * title + WindowServer PID + native id identify this process's own fixture. */
 import { app, BrowserWindow, ipcMain } from "electron";
 import { writeFile, readFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
@@ -8,10 +10,7 @@ import { randomBytes } from "node:crypto";
 import type { ComputerUiNode } from "@arkos/contracts";
 import { cuaRequest, CUA_ACTION_TOOLS, type CuaReply } from "@arkos/shared/cuaDriverProtocol";
 import { CuaDriverHost } from "../cuaDriverHost";
-import {
-  CuaActionError,
-  CuaComputerBackend,
-} from "../../../server/src/computer/CuaComputerBackend";
+import { CuaActionError, CuaComputerBackend } from "../../../server/src/computer/CuaComputerBackend";
 import { runNativeFixture } from "./native";
 import { runGatewayFixture } from "./gateway";
 import { startFocusProbe, type FocusProbeExpect, type FocusProbeRunResult } from "./focusProbe";

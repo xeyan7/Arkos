@@ -3,6 +3,18 @@
 //          recursively watching the workspace.
 // Layer: Server filesystem utility
 
+// FILE: workspaceFileChanges.ts
+// Purpose: Stream bounded change notifications for one workspace file without
+//          recursively watching the workspace.
+// Layer: Server filesystem utility
+// FILE: workspaceFileChanges.ts
+// Purpose: Stream bounded change notifications for one workspace file without
+//          recursively watching the workspace.
+// Layer: Server filesystem utility
+// FILE: workspaceFileChanges.ts
+// Purpose: Stream bounded change notifications for one workspace file without
+//          recursively watching the workspace.
+// Layer: Server filesystem utility
 import { watch as watchNodeFileSystem } from "node:fs";
 import * as NodeFileSystem from "node:fs/promises";
 import * as NodePath from "node:path";
@@ -11,10 +23,7 @@ import type { ProjectFileChangeEvent, ProjectWatchFileInput } from "@arkos/contr
 import { Cause, Duration, Effect, Queue, Stream } from "effect";
 
 import { WorkspacePathOutsideRootError } from "./workspace/Services/WorkspacePaths";
-import {
-  resolveRealPathForCreateWithinRoot,
-  resolveRealPathWithinRoot,
-} from "./workspace/realPathContainment";
+import { resolveRealPathForCreateWithinRoot, resolveRealPathWithinRoot } from "./workspace/realPathContainment";
 
 const FILE_CHANGE_DEBOUNCE_MS = 100;
 

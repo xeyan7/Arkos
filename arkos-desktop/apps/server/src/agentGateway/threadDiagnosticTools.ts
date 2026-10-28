@@ -1,41 +1,17 @@
-import {
-  ThreadId,
-  type OrchestrationEvent,
-  type OrchestrationThreadShell,
-} from "@arkos/contracts";
+import { ThreadId, type OrchestrationEvent, type OrchestrationThreadShell } from "@arkos/contracts";
 import { Effect, Option } from "effect";
 
 import type { ProjectionSnapshotQueryShape } from "../orchestration/Services/ProjectionSnapshotQuery.ts";
 import type { ThreadDiagnosticsQueryShape } from "../diagnostics/Services/ThreadDiagnosticsQuery.ts";
-import {
-  PROVIDER_COMMAND_REACTOR_CONSUMER,
-  type OrchestrationEventDeliveryRepositoryShape,
-} from "../persistence/Services/OrchestrationEventDeliveries.ts";
+import { PROVIDER_COMMAND_REACTOR_CONSUMER, type OrchestrationEventDeliveryRepositoryShape } from "../persistence/Services/OrchestrationEventDeliveries.ts";
 import type { OrchestrationEventStoreShape } from "../persistence/Services/OrchestrationEventStore.ts";
-import {
-  PROVIDER_RUNTIME_EVENT_RETAIN_ACCEPTED,
-  type ProviderRuntimeEventRepositoryShape,
-} from "../persistence/Services/ProviderRuntimeEvents.ts";
-import {
-  decodeDiagnosticCursor,
-  diagnosticFilterFingerprint,
-  encodeDiagnosticCursor,
-} from "./diagnosticCursor.ts";
+import { PROVIDER_RUNTIME_EVENT_RETAIN_ACCEPTED, type ProviderRuntimeEventRepositoryShape } from "../persistence/Services/ProviderRuntimeEvents.ts";
+import { decodeDiagnosticCursor, diagnosticFilterFingerprint, encodeDiagnosticCursor } from "./diagnosticCursor.ts";
 import { sanitizeDiagnosticValue } from "./diagnosticSanitizer.ts";
-import {
-  groupDiagnosticEvents,
-  readDiagnosticPageLimit,
-  shapeDiagnosticEvents,
-} from "./threadDiagnosticSummary.ts";
+import { groupDiagnosticEvents, readDiagnosticPageLimit, shapeDiagnosticEvents } from "./threadDiagnosticSummary.ts";
 import { mcpToolResultError, mcpToolResultJson } from "./protocol.ts";
 import { summarizeThreadDetail } from "./threadSummary.ts";
-import {
-  errorText,
-  readBooleanArg,
-  readStringArg,
-  readStringArrayArg,
-  ToolInputError,
-} from "./toolInput.ts";
+import { errorText, readBooleanArg, readStringArg, readStringArrayArg, ToolInputError } from "./toolInput.ts";
 import { READ_ONLY_TOOL_ANNOTATIONS, type ToolEntry } from "./toolRuntime.ts";
 
 const DIAGNOSTIC_EVENT_SCAN_CHUNK_SIZE = 250;

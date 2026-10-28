@@ -3,6 +3,10 @@
 // Layer: Web Sidebar controller hook
 // Exports: useSidebarThreadActions
 
+// FILE: useSidebarThreadActions.ts
+// Purpose: Owns Sidebar thread pinning, Done/undo, snooze, archive/undo, deletion, and project-batch actions.
+// Layer: Web Sidebar controller hook
+// Exports: useSidebarThreadActions
 import { type ProjectId, ThreadId } from "@arkos/contracts";
 import { pluralize } from "@arkos/shared/text";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,54 +16,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AppSettings } from "../appSettings";
 import { useComposerDraftStore } from "../composerDraftStore";
 import { showConfirmDialogFallback } from "../confirmDialogFallback";
-import {
-  getFallbackThreadIdAfterDelete,
-  getFallbackThreadIdAfterSnooze,
-  derivePinnedThreadIdsForSidebar,
-  excludeHiddenProjectAgentCoordinatorThreads,
-  isLatestPinnedThreadMutation,
-} from "../components/Sidebar.logic";
-import {
-  isThreadSettledForActivity,
-  resolveActivityRecencyMs,
-} from "../components/SidebarActivityView.logic";
-import {
-  coordinatorThreadIdSet,
-  useProjectAgentSummariesStore,
-} from "../components/chat/project/useProjectAgentSummaries";
+import { getFallbackThreadIdAfterDelete, getFallbackThreadIdAfterSnooze, derivePinnedThreadIdsForSidebar, excludeHiddenProjectAgentCoordinatorThreads, isLatestPinnedThreadMutation } from "../components/Sidebar.logic";
+import { isThreadSettledForActivity, resolveActivityRecencyMs } from "../components/SidebarActivityView.logic";
+import { coordinatorThreadIdSet, useProjectAgentSummariesStore } from "../components/chat/project/useProjectAgentSummaries";
 import { toastManager } from "../components/ui/toast";
 import { deleteActiveThreadFromClient } from "../lib/activeThreadDelete";
 import { releaseOrphanedWorktreeAfterArchive } from "../lib/archiveThreadWorktreeCleanup";
 import { reconcileDeletedThreadsFromClient } from "../lib/deletedThreadClientReconciliation";
 import { gitRemoveWorktreeMutationOptions } from "../lib/gitReactQuery";
-import {
-  archiveThreadFromClient,
-  isThreadAlreadyUnarchivedError,
-  unarchiveThreadFromClient,
-} from "../lib/threadArchive";
-import {
-  dispatchThreadSnoozedUntil,
-  formatSnoozeDeadline,
-  resolveSnoozeDeadline,
-  type SnoozeDuration,
-} from "../lib/threadSnooze";
-import {
-  createOptimisticSettledMutation,
-  recordOptimisticSettledMutationSequence,
-  reconcileOptimisticSettledMutation,
-  setThreadSettledFromClient,
-  type OptimisticSettledMutation,
-} from "../lib/threadSettle";
+import { archiveThreadFromClient, isThreadAlreadyUnarchivedError, unarchiveThreadFromClient } from "../lib/threadArchive";
+import { dispatchThreadSnoozedUntil, formatSnoozeDeadline, resolveSnoozeDeadline, type SnoozeDuration } from "../lib/threadSnooze";
+import { createOptimisticSettledMutation, recordOptimisticSettledMutationSequence, reconcileOptimisticSettledMutation, setThreadSettledFromClient, type OptimisticSettledMutation } from "../lib/threadSettle";
 import { newCommandId, randomUUID } from "../lib/utils";
 import { readNativeApi } from "../nativeApi";
 import { usePinnedThreadsStore } from "../pinnedThreadsStore";
 import { reconcileOptimisticPinState } from "../pinning.logic";
-import {
-  resolveSplitViewFocusedThreadId,
-  resolveSplitViewPaneIdForThread,
-  type SplitView,
-  useSplitViewStore,
-} from "../splitViewStore";
+import { resolveSplitViewFocusedThreadId, resolveSplitViewPaneIdForThread, type SplitView, useSplitViewStore } from "../splitViewStore";
 import { useStore } from "../store";
 import { useTemporaryThreadStore } from "../temporaryThreadStore";
 import { getThreadFromState } from "../threadDerivation";

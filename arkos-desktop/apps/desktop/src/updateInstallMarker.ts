@@ -7,11 +7,7 @@ import * as FS from "node:fs";
 import * as Path from "node:path";
 
 import { isUpdateVersionNewer } from "./updateState";
-import {
-  isUpdateArtifactIdentity,
-  updateArtifactIdentitiesEqual,
-  type UpdateArtifactIdentity,
-} from "./updateArtifactIdentity";
+import { isUpdateArtifactIdentity, updateArtifactIdentitiesEqual, type UpdateArtifactIdentity } from "./updateArtifactIdentity";
 
 const INSTALL_MARKER_SCHEMA_VERSION = 2;
 const INSTALL_MARKER_STALE_AFTER_MS = 7 * 24 * 60 * 60 * 1000;

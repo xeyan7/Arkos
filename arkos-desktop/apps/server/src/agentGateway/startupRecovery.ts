@@ -6,10 +6,7 @@ import { Effect, Option } from "effect";
 import type { GitCoreShape } from "../git/Services/GitCore.ts";
 import type { OrchestrationEngineShape } from "../orchestration/Services/OrchestrationEngine.ts";
 import type { ProjectionSnapshotQueryShape } from "../orchestration/Services/ProjectionSnapshotQuery.ts";
-import type {
-  AgentGatewayOperationRecord,
-  AgentGatewayOperationRepositoryShape,
-} from "./Services/AgentGatewayOperationRepository.ts";
+import type { AgentGatewayOperationRecord, AgentGatewayOperationRepositoryShape } from "./Services/AgentGatewayOperationRepository.ts";
 import { gatewayIsoNow } from "./creationUtils.ts";
 import { parseRecoverableCreationPlan } from "./operationPlan.ts";
 import { errorText } from "./toolInput.ts";

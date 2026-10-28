@@ -1,14 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-import type {
-  GitHubProjectProvisionInput,
-  GitHubProjectProvisionPhase,
-  GitHubProjectProvisionProgressEvent,
-} from "@arkos/contracts";
-import {
-  parseGitHubRepositoryInput,
-  parseGitHubRepositoryNameWithOwnerFromRemoteUrl,
-} from "@arkos/shared/githubRepository";
+import type { GitHubProjectProvisionInput, GitHubProjectProvisionPhase, GitHubProjectProvisionProgressEvent } from "@arkos/contracts";
+import { parseGitHubRepositoryInput, parseGitHubRepositoryNameWithOwnerFromRemoteUrl } from "@arkos/shared/githubRepository";
 import { normalizeProjectDirectoryName } from "@arkos/shared/projectDirectoryName";
 import { Effect, FileSystem, Path, PlatformError, Schema, Semaphore } from "effect";
 

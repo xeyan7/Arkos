@@ -47,7 +47,7 @@ describe("profile ranking coverage", () => {
     queryState.tokenStats = {
       ...tokenStats,
       topProviderPercent: 100,
-      unavailableProviders: ["grok", "devin"],
+      unavailableProviders: ["arkos", "arkos"],
     };
     const markup = renderToStaticMarkup(<ProfileSettingsPanel />);
     expect(markup).toContain("100% of tracked tokens");
@@ -57,7 +57,7 @@ describe("profile ranking coverage", () => {
   });
 
   it("includes missing-provider disclosure in the exported card itself", () => {
-    queryState.tokenStats = { ...tokenStats, unavailableProviders: ["grok"] };
+    queryState.tokenStats = { ...tokenStats, unavailableProviders: ["arkos"] };
     const markup = renderCard();
     expect(markup).toContain("top provider · tracked tokens");
     expect(markup).toContain("Token usage is unavailable or zero for Grok.");
@@ -71,7 +71,7 @@ describe("profile ranking coverage", () => {
     }
   });
 
-  it.each([null, { ...tokenStats, available: false, unavailableProviders: ["grok"] }])(
+  it.each([null, { ...tokenStats, available: false, unavailableProviders: ["arkos"] }])(
     "labels fallback percentages as turns without a token exclusion notice",
     (unavailable) => {
       queryState.tokenStats = unavailable as ProfileTokenStats | null;

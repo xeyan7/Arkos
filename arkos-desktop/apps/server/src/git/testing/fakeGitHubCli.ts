@@ -5,32 +5,21 @@
 // Note: list and inbox responses decode through the live layer's decoders so raw gh-shaped
 //       fixtures ("OPEN", "CONFLICTING", GraphQL nodes, …) normalize exactly like production.
 
+// FILE: fakeGitHubCli.ts
+// Purpose: Shared test fake for the GitHubCli service — scripted `gh` responses (PR lists,
+//          views, checkout, repo lookups) plus a call log for command assertions.
+// Layer: Server test utility (imported by *.test.ts only; never by production code)
+// Note: list and inbox responses decode through the live layer's decoders so raw gh-shaped
+//       fixtures ("OPEN", "CONFLICTING", GraphQL nodes, …) normalize exactly like production.
 import { spawnSync } from "node:child_process";
 
 import { Effect, Semaphore } from "effect";
-import type {
-  GitPullRequestCheck,
-  GitPullRequestComment,
-  PullRequestMergeCapabilities,
-  PullRequestStack,
-} from "@arkos/contracts";
+import type { GitPullRequestCheck, GitPullRequestComment, PullRequestMergeCapabilities, PullRequestStack } from "@arkos/contracts";
 
 import { GitHubCliError } from "../Errors.ts";
 import { GITHUB_READ_SLOTS } from "../githubReadGate.ts";
-import {
-  decodePullRequestListJson,
-  decodeRepositoryInboxJson,
-  decodeRepositoryInvolvementJson,
-} from "../Layers/GitHubCli.ts";
-import {
-  type GitHubCliShape,
-  type GitHubIssueDetailData,
-  type GitHubPullRequestDetailData,
-  type GitHubPullRequestSummary,
-  type GitHubRepositoryChangeProbe,
-  type GitHubRepositoryInboxLookup,
-  PULL_REQUEST_SUMMARY_JSON_FIELDS,
-} from "../Services/GitHubCli.ts";
+import { decodePullRequestListJson, decodeRepositoryInboxJson, decodeRepositoryInvolvementJson } from "../Layers/GitHubCli.ts";
+import { type GitHubCliShape, type GitHubIssueDetailData, type GitHubPullRequestDetailData, type GitHubPullRequestSummary, type GitHubRepositoryChangeProbe, type GitHubRepositoryInboxLookup, PULL_REQUEST_SUMMARY_JSON_FIELDS } from "../Services/GitHubCli.ts";
 
 export interface FakeGhScenario {
   prListSequence?: string[];

@@ -1,10 +1,6 @@
 import { ThreadId, type ModelSelection, type ProviderStartOptions } from "@arkos/contracts";
 import { readNativeApi } from "~/nativeApi";
-import {
-  automationClarificationPrompt,
-  buildComposerAutomationDraft,
-  resolveComposerAutomationRequest,
-} from "../../lib/composerAutomation";
+import { automationClarificationPrompt, buildComposerAutomationDraft, resolveComposerAutomationRequest } from "../../lib/composerAutomation";
 import { projectModelSelection as automationProjectModelSelection } from "../../routes/-automations.shared";
 import type { Project } from "../../types";
 import { type Thread } from "../../types";

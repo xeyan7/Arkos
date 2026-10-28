@@ -4,6 +4,34 @@
 // Layer: Release/build script
 // Depends on: apps/desktop package metadata, electron-builder, and GitHub release config.
 
+// FILE: build-desktop-artifact.ts
+// Purpose: Stages and builds packaged desktop artifacts plus updater metadata for GitHub releases.
+// Layer: Release/build script
+// Depends on: apps/desktop package metadata, electron-builder, and GitHub release config.
+// FILE: build-desktop-artifact.ts
+// Purpose: Stages and builds packaged desktop artifacts plus updater metadata for GitHub releases.
+// Layer: Release/build script
+// Depends on: apps/desktop package metadata, electron-builder, and GitHub release config.
+// FILE: build-desktop-artifact.ts
+// Purpose: Stages and builds packaged desktop artifacts plus updater metadata for GitHub releases.
+// Layer: Release/build script
+// Depends on: apps/desktop package metadata, electron-builder, and GitHub release config.
+// FILE: build-desktop-artifact.ts
+// Purpose: Stages and builds packaged desktop artifacts plus updater metadata for GitHub releases.
+// Layer: Release/build script
+// Depends on: apps/desktop package metadata, electron-builder, and GitHub release config.
+// FILE: build-desktop-artifact.ts
+// Purpose: Stages and builds packaged desktop artifacts plus updater metadata for GitHub releases.
+// Layer: Release/build script
+// Depends on: apps/desktop package metadata, electron-builder, and GitHub release config.
+// FILE: build-desktop-artifact.ts
+// Purpose: Stages and builds packaged desktop artifacts plus updater metadata for GitHub releases.
+// Layer: Release/build script
+// Depends on: apps/desktop package metadata, electron-builder, and GitHub release config.
+// FILE: build-desktop-artifact.ts
+// Purpose: Stages and builds packaged desktop artifacts plus updater metadata for GitHub releases.
+// Layer: Release/build script
+// Depends on: apps/desktop package metadata, electron-builder, and GitHub release config.
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
@@ -16,52 +44,20 @@ import serverPackageJson from "../apps/server/package.json" with { type: "json" 
 
 import { startBuildStage } from "./lib/build-timing.ts";
 import { verifyPortableBuild } from "./lib/portable-build.ts";
-import {
-  BETA_ASSET_PATHS,
-  desktopIconAssetPaths,
-  distributionIconOverrides,
-} from "./lib/brand-assets.ts";
-import {
-  createDesktopPlatformBuildConfig,
-  MAC_APPSNAP_HELPER_STAGE_PATH,
-  MAC_DEVICE_HELPER_RESOURCE_PATH,
-  MAC_ICON_ASSET_NAME,
-  MAC_ICON_COMPOSER_DEPLOYMENT_TARGET,
-  MAC_WINDOW_MATERIAL_ADDON_STAGE_PATH,
-  validateDesktopNativeBuildHost,
-} from "./lib/desktop-platform-build-config.ts";
+import { BETA_ASSET_PATHS, desktopIconAssetPaths, distributionIconOverrides } from "./lib/brand-assets.ts";
+import { createDesktopPlatformBuildConfig, MAC_APPSNAP_HELPER_STAGE_PATH, MAC_DEVICE_HELPER_RESOURCE_PATH, MAC_ICON_ASSET_NAME, MAC_ICON_COMPOSER_DEPLOYMENT_TARGET, MAC_WINDOW_MATERIAL_ADDON_STAGE_PATH, validateDesktopNativeBuildHost } from "./lib/desktop-platform-build-config.ts";
 import { stageDesktopRuntimeResources } from "./lib/desktop-runtime-resources.ts";
-import {
-  ARKOS_PACKAGED_DESKTOP_FLAVORS,
-  type ArkosPackagedDesktopFlavor,
-} from "@arkos/shared/desktopIdentity";
+import { ARKOS_PACKAGED_DESKTOP_FLAVORS, type ArkosPackagedDesktopFlavor } from "@arkos/shared/desktopIdentity";
 import { createDesktopArtifactIdentity } from "./lib/desktop-artifact-identity.ts";
 import { parseBooleanEnvValue } from "./lib/env-bool.ts";
 import { finalizeSignedMacDmg, rebuildUnsignedMacDmg } from "./lib/mac-dmg-finalize.ts";
 import { finalizeMacUpdateZip } from "./lib/mac-update-zip-finalize.ts";
-import {
-  RELEASE_LOCKFILE_PATH,
-  RELEASE_PATCHES_PATH,
-  RELEASE_WORKSPACE_MANIFEST_PATHS,
-} from "./lib/release-workspace-manifests.ts";
+import { RELEASE_LOCKFILE_PATH, RELEASE_PATCHES_PATH, RELEASE_WORKSPACE_MANIFEST_PATHS } from "./lib/release-workspace-manifests.ts";
 import { resolveCatalogDependencies } from "./lib/resolve-catalog.ts";
 
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime";
 import * as NodeServices from "@effect/platform-node/NodeServices";
-import {
-  Config,
-  Data,
-  Effect,
-  Exit,
-  Fiber,
-  FileSystem,
-  Layer,
-  Logger,
-  Option,
-  Path,
-  Schema,
-  Stream,
-} from "effect";
+import { Config, Data, Effect, Exit, Fiber, FileSystem, Layer, Logger, Option, Path, Schema, Stream } from "effect";
 import { Command, Flag } from "effect/unstable/cli";
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 

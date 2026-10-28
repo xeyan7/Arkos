@@ -3,6 +3,10 @@
 // Layer: Notification runtime
 // Exports: TaskCompletionNotifications and browser permission helpers
 
+// FILE: taskCompletion.tsx
+// Purpose: Bridges thread completion and attention-needed events to in-app toasts and OS notifications.
+// Layer: Notification runtime
+// Exports: TaskCompletionNotifications and browser permission helpers
 import { ThreadId } from "@arkos/contracts";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useMemo, useEffect, useRef, useState } from "react";
@@ -14,28 +18,10 @@ import { useDiffRouteSearch } from "../hooks/useDiffRouteSearch";
 import { selectSplitView, useSplitViewStore } from "../splitViewStore";
 import { selectRightDockState, useRightDockStore } from "../rightDockStore";
 import { useStore } from "../store";
-import {
-  collectSnoozedThreadIds,
-  createAllThreadsSelector,
-  createSidebarThreadSummariesSelector,
-} from "../storeSelectors";
+import { collectSnoozedThreadIds, createAllThreadsSelector, createSidebarThreadSummariesSelector } from "../storeSelectors";
 import { useTerminalStateStore } from "../terminalStateStore";
 import type { Thread } from "../types";
-import {
-  buildTerminalAttentionCopy,
-  buildTerminalCompletionCopy,
-  buildInputNeededCopy,
-  buildTaskCompletionCopy,
-  collectCompletedThreadCandidates,
-  completedThreadNotificationKey,
-  collectCompletedTerminalCandidates,
-  collectInputNeededThreadCandidates,
-  collectTerminalAttentionCandidates,
-  collectSnoozeReminderCandidates,
-  isNotificationRuntimeFreshTimestamp,
-  shouldAttemptSystemTaskNotification,
-  shouldShowThreadNotificationToast,
-} from "./taskCompletion.logic";
+import { buildTerminalAttentionCopy, buildTerminalCompletionCopy, buildInputNeededCopy, buildTaskCompletionCopy, collectCompletedThreadCandidates, completedThreadNotificationKey, collectCompletedTerminalCandidates, collectInputNeededThreadCandidates, collectTerminalAttentionCandidates, collectSnoozeReminderCandidates, isNotificationRuntimeFreshTimestamp, shouldAttemptSystemTaskNotification, shouldShowThreadNotificationToast } from "./taskCompletion.logic";
 import { claimSnoozeReminder } from "./snoozeReminderReceipts";
 
 export type BrowserNotificationPermissionState =

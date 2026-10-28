@@ -5,6 +5,12 @@
 // Layer: Web component
 // Exports: SidebarGroupsSurface
 
+// FILE: SidebarGroupsSurface.tsx
+// Purpose: Groups sidebar surface — a "New group" action plus one expandable row per
+//          group container (coordinator row first, then the group's chats). Threads in a
+//          group are started by its coordinator. Replaces the old flat Studio list.
+// Layer: Web component
+// Exports: SidebarGroupsSurface
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { ProjectId, ThreadId } from "@arkos/contracts";
 
@@ -23,37 +29,17 @@ import { ChatSortMenu } from "./Sidebar";
 import { SidebarPrimaryAction } from "./SidebarPrimaryAction";
 import { SidebarRowHoverActions } from "./SidebarRowHoverActions";
 import { ThreadPinToggleButton } from "./ThreadPinToggleButton";
-import {
-  resolveGroupCoordinatorRowLabel,
-  resolveGroupsListEmptyState,
-} from "./SidebarGroupsSurface.logic";
+import { resolveGroupCoordinatorRowLabel, resolveGroupsListEmptyState } from "./SidebarGroupsSurface.logic";
 import { resolveCoordinatorAppearance } from "./chat/group/coordinatorAppearance";
-import {
-  createGroupNeedsAttentionSelector,
-  type GroupNeedsAttentionGroup,
-} from "./chat/project/groupOverview.logic";
-import {
-  useProjectAgentSummaries,
-  useProjectAgentSummariesStore,
-} from "./chat/project/useProjectAgentSummaries";
+import { createGroupNeedsAttentionSelector, type GroupNeedsAttentionGroup } from "./chat/project/groupOverview.logic";
+import { useProjectAgentSummaries, useProjectAgentSummariesStore } from "./chat/project/useProjectAgentSummaries";
 import { DisclosureChevron } from "./ui/DisclosureChevron";
-import {
-  SidebarGroup,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-} from "./ui/sidebar";
+import { SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "./ui/sidebar";
 import { DisclosureRegion } from "./ui/DisclosureRegion";
 import { RenameDialog } from "./RenameDialog";
 import { toastManager } from "./ui/toast";
 import type { Project } from "../types";
-import {
-  SIDEBAR_HEADER_ROW_CLASS_NAME,
-  SIDEBAR_NESTED_LIST_GAP_CLASS_NAME,
-  SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME,
-} from "../sidebarRowStyles";
+import { SIDEBAR_HEADER_ROW_CLASS_NAME, SIDEBAR_NESTED_LIST_GAP_CLASS_NAME, SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME } from "../sidebarRowStyles";
 import type { SidebarThreadSortOrder } from "../appSettings";
 
 // Rename fires once per project per session; the effect re-runs on every snapshot

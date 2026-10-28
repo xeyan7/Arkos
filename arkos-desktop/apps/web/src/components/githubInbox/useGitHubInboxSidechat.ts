@@ -7,6 +7,14 @@
 // Layer: GitHub inbox orchestration hook
 // Exports: useGitHubInboxSidechat
 
+// FILE: useGitHubInboxSidechat.ts
+// Purpose: The inbox's Ask: a standalone side chat about the selected pull request or issue,
+//          docked beside the detail so the user never leaves the page. Owns the dock's side chat
+//          pane (it follows the selection), reuses an item's live side chat before creating one,
+//          seeds a new one with the item's context card, and wires the side chat shortcut,
+//          Escape, and the expired notice's "Start new" to the same flow.
+// Layer: GitHub inbox orchestration hook
+// Exports: useGitHubInboxSidechat
 import type { ProjectId, ThreadId } from "@arkos/contracts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -14,18 +22,10 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getProviderInstanceOptions, getProviderStartOptions, useAppSettings } from "~/appSettings";
 import { createGitHubItemContextDraft } from "~/components/chat/environment/environmentPullRequest.logic";
 import { useSidechatShortcut } from "~/components/chat/useSidechatShortcut";
-import {
-  githubItemCardSourceFromIssue,
-  githubItemCardSourceFromPullRequest,
-  githubItemSidechatContext,
-  type GitHubItemAgentTarget,
-} from "~/components/pullRequest/githubItemAgentContext";
+import { githubItemCardSourceFromIssue, githubItemCardSourceFromPullRequest, githubItemSidechatContext, type GitHubItemAgentTarget } from "~/components/pullRequest/githubItemAgentContext";
 import { focusPullRequestRow } from "~/components/pullRequest/pullRequestFocus";
 import { toastManager } from "~/components/ui/toast";
-import {
-  resolvePreferredComposerModelSelection,
-  useComposerDraftStore,
-} from "~/composerDraftStore";
+import { resolvePreferredComposerModelSelection, useComposerDraftStore } from "~/composerDraftStore";
 import { randomUUID } from "~/lib/utils";
 import { addChatPullRequestContext } from "~/lib/chatReferences";
 import type { ModelSelection } from "@arkos/contracts";

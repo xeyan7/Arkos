@@ -4,13 +4,14 @@
 // Exports: deriveReadableToolTitle, deriveReadableCommandDisplay, deriveFriendlyCommandTarget, command icon classifiers, deriveInlineCommandCall, normalizeCompactToolLabel, isGenericToolTitle, extractWebFetchUrl
 // Depends on: @arkos/contracts tool lifecycle item types
 
+// FILE: toolCallLabel.ts
+// Purpose: Normalizes generic tool-call titles and humanizes command executions for timeline rows.
+// Layer: UI utility
+// Exports: deriveReadableToolTitle, deriveReadableCommandDisplay, deriveFriendlyCommandTarget, command icon classifiers, deriveInlineCommandCall, normalizeCompactToolLabel, isGenericToolTitle, extractWebFetchUrl
+// Depends on: @arkos/contracts tool lifecycle item types
 import type { ToolLifecycleItemType } from "@arkos/contracts";
 import { BROWSER_TOOL_TITLES } from "@arkos/shared/browserAutomationPresentation";
-import {
-  COMPUTER_TOOL_TITLES,
-  computerToolName,
-  type ComputerToolName,
-} from "./computerToolPresentation";
+import { COMPUTER_TOOL_TITLES, computerToolName, type ComputerToolName } from "./computerToolPresentation";
 import { basenameOfPath } from "../file-icons";
 import { extractToolArgumentField } from "./toolArgumentSummary";
 

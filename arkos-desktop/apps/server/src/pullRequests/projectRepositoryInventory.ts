@@ -1,10 +1,7 @@
 import type { GitHubInboxListError, OrchestrationProject, ProjectId } from "@arkos/contracts";
 import { Effect } from "effect";
 
-import type {
-  ProjectPullRequestPin,
-  ProjectPullRequestPinsShape,
-} from "../persistence/Services/ProjectPullRequestPins";
+import type { ProjectPullRequestPin, ProjectPullRequestPinsShape } from "../persistence/Services/ProjectPullRequestPins";
 import type { GitHubRepositoryInventory, GitHubRepositoryLink } from "./repositoryResolution";
 
 export type ProjectRepositoryResolution = {

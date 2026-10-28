@@ -1,16 +1,17 @@
 /** Read-only macOS sampler. Run alongside the sequential packaged workload. */
+/** Read-only macOS sampler. Run alongside the sequential packaged workload. */
+/** Read-only macOS sampler. Run alongside the sequential packaged workload. */
+/** Read-only macOS sampler. Run alongside the sequential packaged workload. */
+/** Read-only macOS sampler. Run alongside the sequential packaged workload. */
+/** Read-only macOS sampler. Run alongside the sequential packaged workload. */
+/** Read-only macOS sampler. Run alongside the sequential packaged workload. */
+/** Read-only macOS sampler. Run alongside the sequential packaged workload. */
 import { open, realpath, stat } from "node:fs/promises";
 import { basename, isAbsolute, join, relative, sep } from "node:path";
 import { setTimeout as pause } from "node:timers/promises";
 import { parseArgs } from "node:util";
 import { spawnProcessSync } from "@arkos/shared/processRuntime";
-import {
-  makeResourceTracker,
-  parseResourceSnapshot,
-  resourceIdentity,
-  resourceSamplingOptions,
-  type ResourceProcess,
-} from "./resource-sampling.ts";
+import { makeResourceTracker, parseResourceSnapshot, resourceIdentity, resourceSamplingOptions, type ResourceProcess } from "./resource-sampling.ts";
 
 const MAX_OUTPUT_BYTES = 16 * 1024 * 1024;
 const MAX_PROCESSES_PER_SAMPLE = 512;

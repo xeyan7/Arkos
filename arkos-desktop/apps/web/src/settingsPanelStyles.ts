@@ -3,6 +3,18 @@
 // Layer: Settings UI styling
 // Exports: border, surface, card, row, and inset list class names
 
+// FILE: settingsPanelStyles.ts
+// Purpose: Shared layout tokens for the settings content panel (page bg, bordered cards, rows).
+// Layer: Settings UI styling
+// Exports: border, surface, card, row, and inset list class names
+// FILE: settingsPanelStyles.ts
+// Purpose: Shared layout tokens for the settings content panel (page bg, bordered cards, rows).
+// Layer: Settings UI styling
+// Exports: border, surface, card, row, and inset list class names
+// FILE: settingsPanelStyles.ts
+// Purpose: Shared layout tokens for the settings content panel (page bg, bordered cards, rows).
+// Layer: Settings UI styling
+// Exports: border, surface, card, row, and inset list class names
 import { SIDEBAR_SECTION_LABEL_CLASS_NAME } from "./sidebarRowStyles";
 import { SOFT_SURFACE_FILL_CLASS_NAME } from "./surfaceStyles";
 

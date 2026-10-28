@@ -7,6 +7,14 @@
 //          Effect.promise). Follows the Map + TTL + max-size eviction pattern
 //          used by providerUsageSnapshot.ts / workspaceEntries.ts.
 
+// FILE: siteFaviconCache.ts
+// Purpose: Resolve and cache website favicons by domain so the UI can render a
+//          real site icon (instead of a generic globe) for link chips and
+//          markdown source links. Deduplicates by hostname — every URL on a
+//          given site shares one outbound fetch and one cached blob.
+// Layer: Server runtime utility (plain module; called from the HTTP route via
+//          Effect.promise). Follows the Map + TTL + max-size eviction pattern
+//          used by providerUsageSnapshot.ts / workspaceEntries.ts.
 import { outboundHttp } from "@arkos/shared/outboundHttp";
 
 const FAVICON_CACHE_MAX = 500;

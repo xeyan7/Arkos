@@ -2,29 +2,15 @@
 // Purpose: Keeps chat panes mounted in a flat layout and owns split-divider resizing.
 // Layer: Chat surface layout
 
-import {
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+// FILE: SplitPaneLayout.tsx
+// Purpose: Keeps chat panes mounted in a flat layout and owns split-divider resizing.
+// Layer: Chat surface layout
+import { type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  findSplitNodeById,
-  layoutSplitPanes,
-  replacePaneInTree,
-  type PaneRect,
-} from "../../splitView.logic";
+import { findSplitNodeById, layoutSplitPanes, replacePaneInTree, type PaneRect } from "../../splitView.logic";
 import { type LeafPane, type Pane, type PaneId, type SplitDirection } from "../../splitViewStore";
 import { useStableCallback } from "../../hooks/useStableCallback";
-import {
-  attachPanelPointerOverlaySession,
-  createPanelResizeOverlay,
-  removePanelResizeOverlay,
-} from "../../lib/panelResize";
+import { attachPanelPointerOverlaySession, createPanelResizeOverlay, removePanelResizeOverlay } from "../../lib/panelResize";
 import { cn } from "~/lib/utils";
 
 const SPLIT_RATIO_MIN = 0.25;

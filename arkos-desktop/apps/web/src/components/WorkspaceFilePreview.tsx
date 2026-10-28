@@ -5,54 +5,28 @@
 // Layer: Web chat presentation component
 // Exports: WorkspaceFilePreview, isMarkdownPreviewablePath
 
+// FILE: WorkspaceFilePreview.tsx
+// Purpose: Shared single-file preview (code with syntax highlighting, parsed
+//          markdown, images, PDFs) for workspace files plus absolute local
+//          file references reused by editor and right-dock panes.
+// Layer: Web chat presentation component
+// Exports: WorkspaceFilePreview, isMarkdownPreviewablePath
 import type { ProjectFileChangeEvent, ProjectReadFileResult } from "@arkos/contracts";
 import type { FileContents as PierreFileContents } from "@pierre/diffs";
-import {
-  Editor as PierreEditor,
-  type EditorOptions as PierreEditorOptions,
-} from "@pierre/diffs/edit";
+import { Editor as PierreEditor, type EditorOptions as PierreEditorOptions } from "@pierre/diffs/edit";
 import { EditProvider, File as PierreFile } from "@pierre/diffs/react";
-import {
-  isSupportedLocalImagePath,
-  isSupportedLocalPdfPath,
-  lowerCaseExtensionOf,
-} from "@arkos/shared/localPreviewFiles";
-import {
-  isLocalAbsolutePath,
-  isWorkspaceRelativePathSafe,
-  joinWorkspaceRelativePath,
-} from "@arkos/shared/path";
+import { isSupportedLocalImagePath, isSupportedLocalPdfPath, lowerCaseExtensionOf } from "@arkos/shared/localPreviewFiles";
+import { isLocalAbsolutePath, isWorkspaceRelativePathSafe, joinWorkspaceRelativePath } from "@arkos/shared/path";
 import { isScratchWorkspacePath } from "@arkos/shared/threadWorkspace";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Component,
-  Suspense,
-  type MouseEvent as ReactMouseEvent,
-  type ReactNode,
-  use,
-  useCallback,
-  useEffect,
-  useInsertionEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Component, Suspense, type MouseEvent as ReactMouseEvent, type ReactNode, use, useCallback, useEffect, useInsertionEffect, useId, useMemo, useRef, useState } from "react";
 
 import { basenameOfPath } from "~/file-icons";
 import { useWorkspaceFileEditorBuffer } from "~/hooks/useWorkspaceFileEditor";
 import { useTheme } from "~/hooks/useTheme";
 import { useProjectFileChangeSubscription } from "~/hooks/useProjectFileChangeSubscription";
-import {
-  getSelectionSnippetWithin,
-  getSelectionWithin,
-  type ChatFileReference,
-} from "~/lib/chatReferences";
-import {
-  buildDiffPanelUnsafeCSS,
-  resolveDiffThemeName,
-  type DiffThemeName,
-} from "~/lib/diffRendering";
+import { getSelectionSnippetWithin, getSelectionWithin, type ChatFileReference } from "~/lib/chatReferences";
+import { buildDiffPanelUnsafeCSS, resolveDiffThemeName, type DiffThemeName } from "~/lib/diffRendering";
 import { extractEditorGutterChanges, type EditorGutterChangeRange } from "~/lib/editorGutterDiff";
 import { formatFileCommentRange, type FileCommentSelection } from "~/lib/fileComments";
 import { showFileReferenceContextMenu } from "~/lib/fileReferenceContextMenu";
@@ -60,23 +34,9 @@ import { gitWorkingTreeDiffQueryOptions } from "~/lib/gitReactQuery";
 import { PlusIcon } from "~/lib/icons";
 import { toggleMarkdownTaskMarker } from "~/lib/markdownTaskList";
 import { isRpcCapacityExceededError } from "~/lib/expensiveReadRetry";
-import {
-  isLocalPreviewGrantUsable,
-  projectLocalPreviewGrantQueryOptions,
-  projectReadFileQueryOptions,
-  refetchFreshProjectFileQuery,
-  projectResolveOutOfRootFileReferenceQueryOptions,
-} from "~/lib/projectReactQuery";
+import { isLocalPreviewGrantUsable, projectLocalPreviewGrantQueryOptions, projectReadFileQueryOptions, refetchFreshProjectFileQuery, projectResolveOutOfRootFileReferenceQueryOptions } from "~/lib/projectReactQuery";
 import { refreshGitAfterFileWrite } from "~/lib/gitReactQuery";
-import {
-  MAX_SYNTAX_HIGHLIGHT_INPUT_CHARS,
-  cacheSyntaxHighlightedHtml,
-  createSyntaxHighlightCacheKey,
-  getCachedSyntaxHighlightedHtml,
-  getSyntaxHighlighterPromise,
-  getSyntaxLanguageForPath,
-  highlightCodeToHtmlWithFallback,
-} from "~/lib/syntaxHighlighting";
+import { MAX_SYNTAX_HIGHLIGHT_INPUT_CHARS, cacheSyntaxHighlightedHtml, createSyntaxHighlightCacheKey, getCachedSyntaxHighlightedHtml, getSyntaxHighlighterPromise, getSyntaxLanguageForPath, highlightCodeToHtmlWithFallback } from "~/lib/syntaxHighlighting";
 import { cn } from "~/lib/utils";
 import { resolveWorkspaceFileEditorReadOnlyReason } from "~/lib/workspaceFileEditor";
 import { readNativeApi } from "~/nativeApi";

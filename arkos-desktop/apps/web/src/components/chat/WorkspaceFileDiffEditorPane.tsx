@@ -6,18 +6,10 @@ import type { DiffEditBaseRev } from "~/lib/diffEditBaseRev";
 import { gitReadFileAtRevQueryOptions } from "~/lib/gitReactQuery";
 import { Columns2Icon, Rows3Icon } from "~/lib/icons";
 import { CodeDiffEditorPane } from "../codeEditor/CodeDiffEditorPane";
-import {
-  INITIAL_CODE_EDIT_HISTORY_STATE,
-  type CodeEditHistoryControls,
-} from "../codeEditor/pierreEdit";
+import { INITIAL_CODE_EDIT_HISTORY_STATE, type CodeEditHistoryControls } from "../codeEditor/pierreEdit";
 import { ChatHeaderIconButton } from "./chatHeaderControls";
 import { PanelStateMessage } from "./PanelStateMessage";
-import {
-  WorkspaceFileEditorConflictBar,
-  WorkspaceFileEditorDiscardDialog,
-  WorkspaceFileEditorHeader,
-  WorkspaceFileEditorHistoryActions,
-} from "./WorkspaceFileEditorChrome";
+import { WorkspaceFileEditorConflictBar, WorkspaceFileEditorDiscardDialog, WorkspaceFileEditorHeader, WorkspaceFileEditorHistoryActions } from "./WorkspaceFileEditorChrome";
 
 export interface WorkspaceFileDiffEditorPaneProps {
   workspaceRoot: string | null;

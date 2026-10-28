@@ -6,6 +6,13 @@
 //      One component, one voice: a title, a line of orientation, and an action only where
 //      there is something to do.
 
+// FILE: SpaceEmptyState.tsx
+// Purpose: The one empty state for the sidebar project list, across Void and custom Spaces.
+// Layer: Sidebar / Spaces UI
+// Why: Void and custom Spaces each had their own empty state (plain centred text vs. a dashed
+//      card with an icon bubble), so the list changed character as you moved between tabs.
+//      One component, one voice: a title, a line of orientation, and an action only where
+//      there is something to do.
 import type { Space } from "~/types";
 import { Button } from "./ui/button";
 

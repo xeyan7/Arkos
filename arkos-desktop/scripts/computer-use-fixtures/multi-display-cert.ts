@@ -34,12 +34,259 @@
  * TextEdit instances instead: same placement and write path, weaker landing
  * evidence (no in-process counter), recorded honestly.
  */
-import {
-  spawn,
-  spawnSync,
-  execFileSync,
-  type ChildProcessWithoutNullStreams,
-} from "node:child_process";
+/**
+ * multi-display-cert: second-display certification harness for Computer use.
+ *
+ * Runs the documented display certification matrix
+ * against the real backend path (CuaComputerBackend over a CuaDriverHost socket)
+ * on a Mac with two or more displays. On a single-display machine it refuses
+ * gracefully — prints exactly what the matrix needs and exits 3 — so the script
+ * is safe to ship and run anywhere.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/multi-display-cert.ts \
+ *       [--driver <cua-driver path>] \
+ *       [--endpoint <host.sock> --capability <token>] \
+ *       [--targets fixture|textedit] [--interactive] \
+ *       [--report <path>] [--keep-targets] \
+ *       [--display-ctl <path>] [--focus-probe <path>|--no-focus-probe]
+ *
+ * Exit codes: 0 every applicable rung passed; 1 harness/environment error;
+ * 2 one or more rungs failed or the environment refused; 3 refused — the
+ * machine does not have the displays this certification measures.
+ *
+ * Driver host: either attach to an already-trusted external host
+ * (--endpoint/--capability, or ARKOS_CUA_CERT_ENDPOINT /
+ * ARKOS_CUA_CERT_CAPABILITY — the same pattern the canary uses), or pass
+ * --driver and this script spawns CuaDriverHost itself. Run it from a terminal
+ * whose process ancestry already holds the TCC grants (the external trusted
+ * host pattern in belief-canary-runbook.md); the spawned driver inherits that
+ * trust, which is the point of the exercise.
+ *
+ * Targets: `fixture` builds and spawns scripts/computer-use-fixtures/
+ * NativeFixture.swift — one process per display, each contributing one window
+ * with a counter button (click landing is independently observable in-process)
+ * and a labelled text field (set_value read-back). `textedit` drives real
+ * TextEdit instances instead: same placement and write path, weaker landing
+ * evidence (no in-process counter), recorded honestly.
+ */
+/**
+ * multi-display-cert: second-display certification harness for Computer use.
+ *
+ * Runs the documented display certification matrix
+ * against the real backend path (CuaComputerBackend over a CuaDriverHost socket)
+ * on a Mac with two or more displays. On a single-display machine it refuses
+ * gracefully — prints exactly what the matrix needs and exits 3 — so the script
+ * is safe to ship and run anywhere.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/multi-display-cert.ts \
+ *       [--driver <cua-driver path>] \
+ *       [--endpoint <host.sock> --capability <token>] \
+ *       [--targets fixture|textedit] [--interactive] \
+ *       [--report <path>] [--keep-targets] \
+ *       [--display-ctl <path>] [--focus-probe <path>|--no-focus-probe]
+ *
+ * Exit codes: 0 every applicable rung passed; 1 harness/environment error;
+ * 2 one or more rungs failed or the environment refused; 3 refused — the
+ * machine does not have the displays this certification measures.
+ *
+ * Driver host: either attach to an already-trusted external host
+ * (--endpoint/--capability, or ARKOS_CUA_CERT_ENDPOINT /
+ * ARKOS_CUA_CERT_CAPABILITY — the same pattern the canary uses), or pass
+ * --driver and this script spawns CuaDriverHost itself. Run it from a terminal
+ * whose process ancestry already holds the TCC grants (the external trusted
+ * host pattern in belief-canary-runbook.md); the spawned driver inherits that
+ * trust, which is the point of the exercise.
+ *
+ * Targets: `fixture` builds and spawns scripts/computer-use-fixtures/
+ * NativeFixture.swift — one process per display, each contributing one window
+ * with a counter button (click landing is independently observable in-process)
+ * and a labelled text field (set_value read-back). `textedit` drives real
+ * TextEdit instances instead: same placement and write path, weaker landing
+ * evidence (no in-process counter), recorded honestly.
+ */
+/**
+ * multi-display-cert: second-display certification harness for Computer use.
+ *
+ * Runs the documented display certification matrix
+ * against the real backend path (CuaComputerBackend over a CuaDriverHost socket)
+ * on a Mac with two or more displays. On a single-display machine it refuses
+ * gracefully — prints exactly what the matrix needs and exits 3 — so the script
+ * is safe to ship and run anywhere.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/multi-display-cert.ts \
+ *       [--driver <cua-driver path>] \
+ *       [--endpoint <host.sock> --capability <token>] \
+ *       [--targets fixture|textedit] [--interactive] \
+ *       [--report <path>] [--keep-targets] \
+ *       [--display-ctl <path>] [--focus-probe <path>|--no-focus-probe]
+ *
+ * Exit codes: 0 every applicable rung passed; 1 harness/environment error;
+ * 2 one or more rungs failed or the environment refused; 3 refused — the
+ * machine does not have the displays this certification measures.
+ *
+ * Driver host: either attach to an already-trusted external host
+ * (--endpoint/--capability, or ARKOS_CUA_CERT_ENDPOINT /
+ * ARKOS_CUA_CERT_CAPABILITY — the same pattern the canary uses), or pass
+ * --driver and this script spawns CuaDriverHost itself. Run it from a terminal
+ * whose process ancestry already holds the TCC grants (the external trusted
+ * host pattern in belief-canary-runbook.md); the spawned driver inherits that
+ * trust, which is the point of the exercise.
+ *
+ * Targets: `fixture` builds and spawns scripts/computer-use-fixtures/
+ * NativeFixture.swift — one process per display, each contributing one window
+ * with a counter button (click landing is independently observable in-process)
+ * and a labelled text field (set_value read-back). `textedit` drives real
+ * TextEdit instances instead: same placement and write path, weaker landing
+ * evidence (no in-process counter), recorded honestly.
+ */
+/**
+ * multi-display-cert: second-display certification harness for Computer use.
+ *
+ * Runs the documented display certification matrix
+ * against the real backend path (CuaComputerBackend over a CuaDriverHost socket)
+ * on a Mac with two or more displays. On a single-display machine it refuses
+ * gracefully — prints exactly what the matrix needs and exits 3 — so the script
+ * is safe to ship and run anywhere.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/multi-display-cert.ts \
+ *       [--driver <cua-driver path>] \
+ *       [--endpoint <host.sock> --capability <token>] \
+ *       [--targets fixture|textedit] [--interactive] \
+ *       [--report <path>] [--keep-targets] \
+ *       [--display-ctl <path>] [--focus-probe <path>|--no-focus-probe]
+ *
+ * Exit codes: 0 every applicable rung passed; 1 harness/environment error;
+ * 2 one or more rungs failed or the environment refused; 3 refused — the
+ * machine does not have the displays this certification measures.
+ *
+ * Driver host: either attach to an already-trusted external host
+ * (--endpoint/--capability, or ARKOS_CUA_CERT_ENDPOINT /
+ * ARKOS_CUA_CERT_CAPABILITY — the same pattern the canary uses), or pass
+ * --driver and this script spawns CuaDriverHost itself. Run it from a terminal
+ * whose process ancestry already holds the TCC grants (the external trusted
+ * host pattern in belief-canary-runbook.md); the spawned driver inherits that
+ * trust, which is the point of the exercise.
+ *
+ * Targets: `fixture` builds and spawns scripts/computer-use-fixtures/
+ * NativeFixture.swift — one process per display, each contributing one window
+ * with a counter button (click landing is independently observable in-process)
+ * and a labelled text field (set_value read-back). `textedit` drives real
+ * TextEdit instances instead: same placement and write path, weaker landing
+ * evidence (no in-process counter), recorded honestly.
+ */
+/**
+ * multi-display-cert: second-display certification harness for Computer use.
+ *
+ * Runs the documented display certification matrix
+ * against the real backend path (CuaComputerBackend over a CuaDriverHost socket)
+ * on a Mac with two or more displays. On a single-display machine it refuses
+ * gracefully — prints exactly what the matrix needs and exits 3 — so the script
+ * is safe to ship and run anywhere.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/multi-display-cert.ts \
+ *       [--driver <cua-driver path>] \
+ *       [--endpoint <host.sock> --capability <token>] \
+ *       [--targets fixture|textedit] [--interactive] \
+ *       [--report <path>] [--keep-targets] \
+ *       [--display-ctl <path>] [--focus-probe <path>|--no-focus-probe]
+ *
+ * Exit codes: 0 every applicable rung passed; 1 harness/environment error;
+ * 2 one or more rungs failed or the environment refused; 3 refused — the
+ * machine does not have the displays this certification measures.
+ *
+ * Driver host: either attach to an already-trusted external host
+ * (--endpoint/--capability, or ARKOS_CUA_CERT_ENDPOINT /
+ * ARKOS_CUA_CERT_CAPABILITY — the same pattern the canary uses), or pass
+ * --driver and this script spawns CuaDriverHost itself. Run it from a terminal
+ * whose process ancestry already holds the TCC grants (the external trusted
+ * host pattern in belief-canary-runbook.md); the spawned driver inherits that
+ * trust, which is the point of the exercise.
+ *
+ * Targets: `fixture` builds and spawns scripts/computer-use-fixtures/
+ * NativeFixture.swift — one process per display, each contributing one window
+ * with a counter button (click landing is independently observable in-process)
+ * and a labelled text field (set_value read-back). `textedit` drives real
+ * TextEdit instances instead: same placement and write path, weaker landing
+ * evidence (no in-process counter), recorded honestly.
+ */
+/**
+ * multi-display-cert: second-display certification harness for Computer use.
+ *
+ * Runs the documented display certification matrix
+ * against the real backend path (CuaComputerBackend over a CuaDriverHost socket)
+ * on a Mac with two or more displays. On a single-display machine it refuses
+ * gracefully — prints exactly what the matrix needs and exits 3 — so the script
+ * is safe to ship and run anywhere.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/multi-display-cert.ts \
+ *       [--driver <cua-driver path>] \
+ *       [--endpoint <host.sock> --capability <token>] \
+ *       [--targets fixture|textedit] [--interactive] \
+ *       [--report <path>] [--keep-targets] \
+ *       [--display-ctl <path>] [--focus-probe <path>|--no-focus-probe]
+ *
+ * Exit codes: 0 every applicable rung passed; 1 harness/environment error;
+ * 2 one or more rungs failed or the environment refused; 3 refused — the
+ * machine does not have the displays this certification measures.
+ *
+ * Driver host: either attach to an already-trusted external host
+ * (--endpoint/--capability, or ARKOS_CUA_CERT_ENDPOINT /
+ * ARKOS_CUA_CERT_CAPABILITY — the same pattern the canary uses), or pass
+ * --driver and this script spawns CuaDriverHost itself. Run it from a terminal
+ * whose process ancestry already holds the TCC grants (the external trusted
+ * host pattern in belief-canary-runbook.md); the spawned driver inherits that
+ * trust, which is the point of the exercise.
+ *
+ * Targets: `fixture` builds and spawns scripts/computer-use-fixtures/
+ * NativeFixture.swift — one process per display, each contributing one window
+ * with a counter button (click landing is independently observable in-process)
+ * and a labelled text field (set_value read-back). `textedit` drives real
+ * TextEdit instances instead: same placement and write path, weaker landing
+ * evidence (no in-process counter), recorded honestly.
+ */
+/**
+ * multi-display-cert: second-display certification harness for Computer use.
+ *
+ * Runs the documented display certification matrix
+ * against the real backend path (CuaComputerBackend over a CuaDriverHost socket)
+ * on a Mac with two or more displays. On a single-display machine it refuses
+ * gracefully — prints exactly what the matrix needs and exits 3 — so the script
+ * is safe to ship and run anywhere.
+ *
+ * Usage:
+ *   bun scripts/computer-use-fixtures/multi-display-cert.ts \
+ *       [--driver <cua-driver path>] \
+ *       [--endpoint <host.sock> --capability <token>] \
+ *       [--targets fixture|textedit] [--interactive] \
+ *       [--report <path>] [--keep-targets] \
+ *       [--display-ctl <path>] [--focus-probe <path>|--no-focus-probe]
+ *
+ * Exit codes: 0 every applicable rung passed; 1 harness/environment error;
+ * 2 one or more rungs failed or the environment refused; 3 refused — the
+ * machine does not have the displays this certification measures.
+ *
+ * Driver host: either attach to an already-trusted external host
+ * (--endpoint/--capability, or ARKOS_CUA_CERT_ENDPOINT /
+ * ARKOS_CUA_CERT_CAPABILITY — the same pattern the canary uses), or pass
+ * --driver and this script spawns CuaDriverHost itself. Run it from a terminal
+ * whose process ancestry already holds the TCC grants (the external trusted
+ * host pattern in belief-canary-runbook.md); the spawned driver inherits that
+ * trust, which is the point of the exercise.
+ *
+ * Targets: `fixture` builds and spawns scripts/computer-use-fixtures/
+ * NativeFixture.swift — one process per display, each contributing one window
+ * with a counter button (click landing is independently observable in-process)
+ * and a labelled text field (set_value read-back). `textedit` drives real
+ * TextEdit instances instead: same placement and write path, weaker landing
+ * evidence (no in-process counter), recorded honestly.
+ */
+import { spawn, spawnSync, execFileSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { randomBytes, createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -51,10 +298,7 @@ import type { ComputerRect, ComputerUiNode } from "@arkos/contracts";
 import { cuaRequest, type CuaReply, type CuaToolResult } from "@arkos/shared/cuaDriverProtocol";
 import release from "../../packages/shared/src/cuaDriverRelease.json" with { type: "json" };
 import { CuaDriverHost } from "../../apps/desktop/src/cuaDriverHost";
-import {
-  CuaComputerBackend,
-  CuaActionError,
-} from "../../apps/server/src/computer/CuaComputerBackend";
+import { CuaComputerBackend, CuaActionError } from "../../apps/server/src/computer/CuaComputerBackend";
 import type { ComputerBackendActionResult } from "../../apps/server/src/computer/ComputerBackend";
 import { startFocusProbe } from "../../apps/desktop/src/cuaFixtures/focusProbe";
 

@@ -8,73 +8,38 @@
 // Layer: Pull request presentation
 // Exports: PullRequestDetailPanel
 
-import type {
-  PullRequestAction,
-  PullRequestDetailInput,
-  PullRequestMergeMethod,
-} from "@arkos/contracts";
+// FILE: PullRequestDetailPanel.tsx
+// Purpose: Orchestrator for the pull request detail surface — owns the queries, gh-backed
+//          actions (merge/ready/draft/close/reopen, fix findings, resolve conflicts, Send to
+//          agent), the tab state, and the confirm dialogs. Two hosts: the chat thread's right dock
+//          (a compact tab header, the default) and the code review page (`layout="page"`: the
+//          GitHub item page shell shared with issues). The action controls themselves live in
+//          PullRequestActions; Summary, Timeline, and Changes render in their own tab components.
+// Layer: Pull request presentation
+// Exports: PullRequestDetailPanel
+import type { PullRequestAction, PullRequestDetailInput, PullRequestMergeMethod } from "@arkos/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useRef, useState, type ReactNode } from "react";
 
-import {
-  CHAT_HEADER_CONTROL_CLASS_NAME,
-  CHAT_HEADER_ICON_CONTROL_CLASS_NAME,
-  CHAT_HEADER_ICON_STRENGTH_CLASS_NAME,
-  CHAT_HEADER_SPLIT_LEADING_CLASS_NAME,
-  CHAT_HEADER_SPLIT_TRAILING_CLASS_NAME,
-  ChatHeaderSplitGroup,
-} from "~/components/chat/chatHeaderControls";
+import { CHAT_HEADER_CONTROL_CLASS_NAME, CHAT_HEADER_ICON_CONTROL_CLASS_NAME, CHAT_HEADER_ICON_STRENGTH_CLASS_NAME, CHAT_HEADER_SPLIT_LEADING_CLASS_NAME, CHAT_HEADER_SPLIT_TRAILING_CLASS_NAME, ChatHeaderSplitGroup } from "~/components/chat/chatHeaderControls";
 import { ComposerPickerMenuPopup } from "~/components/chat/ComposerPickerMenuPopup";
-import {
-  buildFixFindingsPrompt,
-  buildResolveConflictsPrompt,
-  createGitHubItemContextDraft,
-  createPullRequestContextDraft,
-} from "~/components/chat/environment/environmentPullRequest.logic";
+import { buildFixFindingsPrompt, buildResolveConflictsPrompt, createGitHubItemContextDraft, createPullRequestContextDraft } from "~/components/chat/environment/environmentPullRequest.logic";
 import { Button } from "~/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "~/components/ui/empty";
 import { IconButton } from "~/components/ui/icon-button";
 import { Menu, MenuTrigger } from "~/components/ui/menu";
 import { toastManager } from "~/components/ui/toast";
 import { ChevronDownIcon, EllipsisIcon, ExternalLinkIcon, XIcon } from "~/lib/icons";
-import {
-  pullRequestActionMutationOptions,
-  pullRequestDetailQueryOptions,
-  pullRequestQueryErrorState,
-} from "~/lib/pullRequestReactQuery";
+import { pullRequestActionMutationOptions, pullRequestDetailQueryOptions, pullRequestQueryErrorState } from "~/lib/pullRequestReactQuery";
 import { cn } from "~/lib/utils";
 import { ensureNativeApi } from "~/nativeApi";
 import { useStartGitHubItemThread } from "~/hooks/useStartGitHubItemThread";
-import {
-  GitHubItemAgentActions,
-  TOP_BAR_NARROW_LABEL_CLASS_NAME,
-  type GitHubItemSendTarget,
-} from "./GitHubItemAgentActions";
+import { GitHubItemAgentActions, TOP_BAR_NARROW_LABEL_CLASS_NAME, type GitHubItemSendTarget } from "./GitHubItemAgentActions";
 import { GitHubItemHeader } from "./GitHubItemHeader";
 import { PullRequestInfo } from "./GitHubItemInfo";
-import {
-  DETACHED_GITHUB_ITEM_PAGE_HOST,
-  GitHubItemAskComposer,
-  GitHubItemDetailPage,
-  GitHubItemPageBody,
-  GitHubItemPageIconActions,
-  GitHubItemTabBody,
-  GitHubItemTabs,
-  PullRequestDetailSkeleton,
-  type GitHubItemPageHost,
-  type GitHubItemTabOption,
-} from "./GitHubItemPageLayout";
-import {
-  githubItemCardSourceFromPullRequest,
-  type GitHubItemAgentTarget,
-} from "./githubItemAgentContext";
-import {
-  isPullRequestPrimaryActionBlocked,
-  PullRequestActionMenuItems,
-  PullRequestDraftStateItems,
-  PullRequestPrimaryButton,
-  resolvePullRequestPrimaryAction,
-} from "./PullRequestActions";
+import { DETACHED_GITHUB_ITEM_PAGE_HOST, GitHubItemAskComposer, GitHubItemDetailPage, GitHubItemPageBody, GitHubItemPageIconActions, GitHubItemTabBody, GitHubItemTabs, PullRequestDetailSkeleton, type GitHubItemPageHost, type GitHubItemTabOption } from "./GitHubItemPageLayout";
+import { githubItemCardSourceFromPullRequest, type GitHubItemAgentTarget } from "./githubItemAgentContext";
+import { isPullRequestPrimaryActionBlocked, PullRequestActionMenuItems, PullRequestDraftStateItems, PullRequestPrimaryButton, resolvePullRequestPrimaryAction } from "./PullRequestActions";
 import { PullRequestConfirmActionDialog } from "./PullRequestConfirmActionDialog";
 import { PullRequestDiffStat } from "./PullRequestDiffStat";
 import { PullRequestStackPopover } from "./PullRequestStackPopover";

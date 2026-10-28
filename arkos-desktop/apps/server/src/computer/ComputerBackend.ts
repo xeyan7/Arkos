@@ -1,34 +1,5 @@
 import { MODEL_SCREEN_IMAGE_MAX_DIMENSION } from "@arkos/shared/modelImageBudget";
-import {
-  COMPUTER_DELIVERY_PATH_MAX_LENGTH,
-  COMPUTER_MESSAGE_MAX_LENGTH,
-  type ComputerAccessibilityTreeApp,
-  type ComputerAccessibilityTreeWindow,
-  type ComputerActionResult,
-  type ComputerApp,
-  type ComputerAvailability,
-  type ComputerBuildSignature,
-  type ComputerCapabilities,
-  type ComputerCursorPosition,
-  type ComputerDeliveryVerification,
-  type ComputerHealth,
-  type ComputerId,
-  type ComputerInputModifier,
-  type ComputerInputPause,
-  type ComputerLaunchAppResult,
-  type ComputerPermission,
-  type ComputerPoint,
-  type ComputerRect,
-  type ComputerScreenSize,
-  type ComputerSpaceInventory,
-  type ComputerScreenshot,
-  type ComputerState,
-  type ComputerTarget,
-  type ComputerUiNode,
-  type ComputerVerifyStateResult,
-  type ComputerWindow,
-  type ComputerZoomResult,
-} from "@arkos/contracts";
+import { COMPUTER_DELIVERY_PATH_MAX_LENGTH, COMPUTER_MESSAGE_MAX_LENGTH, type ComputerAccessibilityTreeApp, type ComputerAccessibilityTreeWindow, type ComputerActionResult, type ComputerApp, type ComputerAvailability, type ComputerBuildSignature, type ComputerCapabilities, type ComputerCursorPosition, type ComputerDeliveryVerification, type ComputerHealth, type ComputerId, type ComputerInputModifier, type ComputerInputPause, type ComputerLaunchAppResult, type ComputerPermission, type ComputerPoint, type ComputerRect, type ComputerScreenSize, type ComputerSpaceInventory, type ComputerScreenshot, type ComputerState, type ComputerTarget, type ComputerUiNode, type ComputerVerifyStateResult, type ComputerWindow, type ComputerZoomResult } from "@arkos/contracts";
 
 /**
  * The longest side, in pixels, of any screenshot handed to a model.

@@ -1,8 +1,5 @@
 import { memo, useMemo, useState, type ReactNode } from "react";
-import {
-  buildProposedPlanMarkdownFilename,
-  normalizePlanMarkdownForExport,
-} from "../../proposedPlan";
+import { buildProposedPlanMarkdownFilename, normalizePlanMarkdownForExport } from "../../proposedPlan";
 import { useCopyToClipboard } from "~/hooks/useCopyToClipboard";
 import { ArrowDownIcon, ArrowUpIcon, CopyIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";

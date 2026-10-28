@@ -1,25 +1,12 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 
-import {
-  EXTERNAL_MCP_AUDIENCE,
-  ProjectId,
-  type ExternalMcpCapability,
-  type ExternalMcpCreateIntegrationResult,
-  type ExternalMcpIntegration,
-  type ExternalMcpPairResult,
-  ThreadId,
-} from "@arkos/contracts";
+import { EXTERNAL_MCP_AUDIENCE, ProjectId, type ExternalMcpCapability, type ExternalMcpCreateIntegrationResult, type ExternalMcpIntegration, type ExternalMcpPairResult, ThreadId } from "@arkos/contracts";
 import { Effect, Layer, Option } from "effect";
 
 import { ServerConfig } from "../../config.ts";
 import { ProjectionSnapshotQuery } from "../../orchestration/Services/ProjectionSnapshotQuery.ts";
 import { ExternalMcpRepository } from "../Services/ExternalMcpRepository.ts";
-import {
-  ExternalMcpError,
-  ExternalMcpService,
-  type ExternalMcpServiceShape,
-  type ExternalMcpVerifiedClient,
-} from "../Services/ExternalMcpService.ts";
+import { ExternalMcpError, ExternalMcpService, type ExternalMcpServiceShape, type ExternalMcpVerifiedClient } from "../Services/ExternalMcpService.ts";
 import type { ExternalMcpIntegrationRecord } from "../Services/ExternalMcpRepository.ts";
 import { externalMcpLauncher, externalMcpShellCommand } from "../launcher.ts";
 

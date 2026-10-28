@@ -6,11 +6,7 @@
 import * as Path from "node:path";
 
 import { resolveExecutable } from "./executable";
-import {
-  resolveWindowsComSpec,
-  resolveWindowsSystemRoot,
-  resolveWindowsWslExecutable,
-} from "./platformEnvironment";
+import { resolveWindowsComSpec, resolveWindowsSystemRoot, resolveWindowsWslExecutable } from "./platformEnvironment";
 
 export interface WindowsSafeProcessInput {
   readonly platform?: NodeJS.Platform | undefined;

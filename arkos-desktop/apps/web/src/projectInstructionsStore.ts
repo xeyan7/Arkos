@@ -3,6 +3,10 @@
 // Layer: Web UI state store
 // Exports: useProjectInstructionsStore, mergeProjectInstructionsIntoThreadNotes
 
+// FILE: projectInstructionsStore.ts
+// Purpose: Persist per-project instructions and merge them into thread notes when requested.
+// Layer: Web UI state store
+// Exports: useProjectInstructionsStore, mergeProjectInstructionsIntoThreadNotes
 import type { ProjectId } from "@arkos/contracts";
 import { clampThreadNotes } from "@arkos/shared/pinnedMessages";
 import { create } from "zustand";

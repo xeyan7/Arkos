@@ -3,18 +3,11 @@
 //          and the current draft's selected workspace. Other tasks' worktrees stay with those tasks.
 // Layer: Chat / empty-state entrypoint
 
-import {
-  Fragment,
-  memo,
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ReactElement,
-} from "react";
+// FILE: ProjectPicker.tsx
+// Purpose: Folder selector beneath the new-chat composer for registered projects, home folders,
+//          and the current draft's selected workspace. Other tasks' worktrees stay with those tasks.
+// Layer: Chat / empty-state entrypoint
+import { Fragment, memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ComponentProps, type ReactElement } from "react";
 import { type ProjectDirectoryEntry, type ProjectId, type SpaceId } from "@arkos/contracts";
 import { readNativeApi } from "../../nativeApi";
 import { useStore } from "../../store";
@@ -28,26 +21,8 @@ import { ProjectSidebarIcon } from "../ProjectSidebarIcon";
 import { SpaceIcon } from "../SpaceIcon";
 import { PickerPanelShell } from "./PickerPanelShell";
 import { PickerTriggerButton } from "./PickerTriggerButton";
-import {
-  PICKER_PANEL_ACTION_ROW_CLASS_NAME,
-  PICKER_PANEL_GROUP_LABEL_CLASS_NAME,
-  PICKER_PANEL_PLAIN_SEARCH_INPUT_CLASS_NAME,
-  PICKER_PANEL_ROW_GEOMETRY_CLASS_NAME,
-  PICKER_PANEL_ROW_ICON_CLASS_NAME,
-  PICKER_PANEL_ROW_SELECTED_CLASS_NAME,
-} from "./pickerPanelStyles";
-import {
-  Combobox,
-  ComboboxEmpty,
-  ComboboxGroup,
-  ComboboxGroupLabel,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxPopup,
-  ComboboxSeparator,
-  ComboboxTrigger,
-} from "../ui/combobox";
+import { PICKER_PANEL_ACTION_ROW_CLASS_NAME, PICKER_PANEL_GROUP_LABEL_CLASS_NAME, PICKER_PANEL_PLAIN_SEARCH_INPUT_CLASS_NAME, PICKER_PANEL_ROW_GEOMETRY_CLASS_NAME, PICKER_PANEL_ROW_ICON_CLASS_NAME, PICKER_PANEL_ROW_SELECTED_CLASS_NAME } from "./pickerPanelStyles";
+import { Combobox, ComboboxEmpty, ComboboxGroup, ComboboxGroupLabel, ComboboxInput, ComboboxItem, ComboboxList, ComboboxPopup, ComboboxSeparator, ComboboxTrigger } from "../ui/combobox";
 import { useWorkspacePathsStore } from "../../workspacePathsStore";
 import { useSpacesUiStore } from "../../spacesUiStore";
 

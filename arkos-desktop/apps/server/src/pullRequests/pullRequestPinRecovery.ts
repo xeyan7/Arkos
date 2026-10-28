@@ -1,23 +1,10 @@
-import type {
-  GitHubInboxItem,
-  GitHubInboxListError,
-  GitHubInboxState,
-  OrchestrationProject,
-  ProjectId,
-} from "@arkos/contracts";
+import type { GitHubInboxItem, GitHubInboxListError, GitHubInboxState, OrchestrationProject, ProjectId } from "@arkos/contracts";
 import { Effect } from "effect";
 
 import type { GitHubCliError } from "../git/Errors";
 import type { GitHubRepositoryInboxLookup } from "../git/Services/GitHubCli";
-import {
-  PROJECT_PULL_REQUEST_PIN_LIMIT,
-  type ProjectPullRequestPin,
-  type ProjectPullRequestPinsShape,
-} from "../persistence/Services/ProjectPullRequestPins";
-import {
-  repositoryPullRequestIdentityKey,
-  selectRecoverablePullRequestPins,
-} from "../pullRequests.logic";
+import { PROJECT_PULL_REQUEST_PIN_LIMIT, type ProjectPullRequestPin, type ProjectPullRequestPinsShape } from "../persistence/Services/ProjectPullRequestPins";
+import { repositoryPullRequestIdentityKey, selectRecoverablePullRequestPins } from "../pullRequests.logic";
 
 /** Unique remote lookups per list request. Pins are capped per project, so this bounds recovery
  * work before any GitHub request is considered. */

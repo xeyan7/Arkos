@@ -4,41 +4,20 @@
 // Layer: Settings UI components
 // Exports: ComputerSettingsPanel
 
-import {
-  COMPUTER_HYPRLAND_BACKEND,
-  COMPUTER_KWIN_BACKEND,
-  COMPUTER_MAC_BACKEND,
-  COMPUTER_NESTED_KWIN_BACKEND,
-  COMPUTER_RELEASE_CONTROL_HOTKEY,
-  COMPUTER_RELEASE_HOTKEY_BACKENDS,
-  type ComputerCapabilities,
-  type ComputerPermission,
-} from "@arkos/contracts";
-import {
-  COMPUTER_PERMISSION_KINDS,
-  computerPermissionSetupMessage,
-  missingComputerAppSnapPermissions,
-} from "@arkos/shared/computerGrants";
-import {
-  computerPermissionSetupSupported,
-  readLocalComputerPermissionBridge,
-} from "~/lib/computerProvisioning";
+// FILE: ComputerSettingsPanel.tsx
+// Purpose: Own the Computer use settings panel: one surface for the control toggle,
+//          the honest attention-only status line, cursor colors, and the preview.
+// Layer: Settings UI components
+// Exports: ComputerSettingsPanel
+import { COMPUTER_HYPRLAND_BACKEND, COMPUTER_KWIN_BACKEND, COMPUTER_MAC_BACKEND, COMPUTER_NESTED_KWIN_BACKEND, COMPUTER_RELEASE_CONTROL_HOTKEY, COMPUTER_RELEASE_HOTKEY_BACKENDS, type ComputerCapabilities, type ComputerPermission } from "@arkos/contracts";
+import { COMPUTER_PERMISSION_KINDS, computerPermissionSetupMessage, missingComputerAppSnapPermissions } from "@arkos/shared/computerGrants";
+import { computerPermissionSetupSupported, readLocalComputerPermissionBridge } from "~/lib/computerProvisioning";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
-import {
-  DEFAULT_AGENT_CURSOR_COLOR_MODE,
-  normalizeCursorHexColor,
-  type AgentCursorColorMode,
-  type AppSettingsBinding,
-  type ComputerPreviewSize,
-} from "~/appSettings";
+import { DEFAULT_AGENT_CURSOR_COLOR_MODE, normalizeCursorHexColor, type AgentCursorColorMode, type AppSettingsBinding, type ComputerPreviewSize } from "~/appSettings";
 import type { DesktopAppSnapSettingsPane, DesktopAppSnapState } from "@arkos/contracts";
-import {
-  computerReconnectsNote,
-  computerStatusNeedsSetup,
-  resolveComputerAvailabilityView,
-} from "~/components/ComputerPanel.logic";
+import { computerReconnectsNote, computerStatusNeedsSetup, resolveComputerAvailabilityView } from "~/components/ComputerPanel.logic";
 import { DisclosureChevron } from "~/components/ui/DisclosureChevron";
 import { DisclosureRegion } from "~/components/ui/DisclosureRegion";
 import { Button } from "~/components/ui/button";
@@ -46,15 +25,8 @@ import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
 import { useProvisionComputer } from "~/hooks/useProvisionComputer";
 import { useRefreshOnWindowReturn } from "~/hooks/useRefreshOnWindowReturn";
-import {
-  AppSnapPermissionSection,
-  COMPUTER_PERMISSION_PANES,
-  useAppSnapPermissionGuideBridge,
-} from "./AppSnapPermissionSection";
-import {
-  COMPUTER_STATUS_VISIBLE_REFETCH_INTERVAL_MS,
-  computerStatusQueryOptions,
-} from "~/lib/serverReactQuery";
+import { AppSnapPermissionSection, COMPUTER_PERMISSION_PANES, useAppSnapPermissionGuideBridge } from "./AppSnapPermissionSection";
+import { COMPUTER_STATUS_VISIBLE_REFETCH_INTERVAL_MS, computerStatusQueryOptions } from "~/lib/serverReactQuery";
 import { cn } from "~/lib/utils";
 import { settingRowAnchorId } from "~/settingsNavigation";
 import { useAgentCursorDesktopSync } from "./agentCursorDesktopSync";

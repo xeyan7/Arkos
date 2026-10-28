@@ -1,19 +1,9 @@
 import { type MessageId, type ThreadId } from "@arkos/contracts";
-import {
-  extractTrailingAssistantSelections,
-  type ParsedAssistantSelectionEntry,
-} from "./assistantSelections";
-import {
-  buildBrowserAnnotationsPromptBlock,
-  extractTrailingBrowserAnnotations,
-  type BrowserAnnotationDraft,
-} from "./browserAnnotations";
+import { extractTrailingAssistantSelections, type ParsedAssistantSelectionEntry } from "./assistantSelections";
+import { buildBrowserAnnotationsPromptBlock, extractTrailingBrowserAnnotations, type BrowserAnnotationDraft } from "./browserAnnotations";
 import { extractTrailingFileComments, type ParsedFileCommentEntry } from "./fileComments";
 import { extractTrailingPastedTexts, type ParsedPastedTextEntry } from "./composerPastedText";
-import {
-  extractTrailingPullRequestContexts,
-  type ParsedPullRequestContextEntry,
-} from "./pullRequestContext";
+import { extractTrailingPullRequestContexts, type ParsedPullRequestContextEntry } from "./pullRequestContext";
 
 export interface TerminalContextSelection {
   terminalId: string;

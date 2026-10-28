@@ -1,18 +1,24 @@
 /** Read-only observation of one explicitly described, freshly-created Cua
  * Chrome profile. Never scans profiles or navigates/clicks the observed page. */
+/** Read-only observation of one explicitly described, freshly-created Cua
+ * Chrome profile. Never scans profiles or navigates/clicks the observed page. */
+/** Read-only observation of one explicitly described, freshly-created Cua
+ * Chrome profile. Never scans profiles or navigates/clicks the observed page. */
+/** Read-only observation of one explicitly described, freshly-created Cua
+ * Chrome profile. Never scans profiles or navigates/clicks the observed page. */
+/** Read-only observation of one explicitly described, freshly-created Cua
+ * Chrome profile. Never scans profiles or navigates/clicks the observed page. */
+/** Read-only observation of one explicitly described, freshly-created Cua
+ * Chrome profile. Never scans profiles or navigates/clicks the observed page. */
+/** Read-only observation of one explicitly described, freshly-created Cua
+ * Chrome profile. Never scans profiles or navigates/clicks the observed page. */
+/** Read-only observation of one explicitly described, freshly-created Cua
+ * Chrome profile. Never scans profiles or navigates/clicks the observed page. */
 import { execFileSync } from "node:child_process";
 import { readFile, realpath, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { assertLoopbackUrl } from "./packaged-client.ts";
-import {
-  parseBrowserWitness,
-  parsePullRequestTitles,
-  parseNeweggPrice,
-  type BrowserBenchmarkTask,
-  type BrowserWitness,
-  type NeweggPageEvidence,
-  type NeweggRunEvidence,
-} from "./browser-benchmark-evidence.ts";
+import { parseBrowserWitness, parsePullRequestTitles, parseNeweggPrice, type BrowserBenchmarkTask, type BrowserWitness, type NeweggPageEvidence, type NeweggRunEvidence } from "./browser-benchmark-evidence.ts";
 
 /** Canonical retailer SKU from current and legacy public product URLs. */
 export function neweggItemIdFromUrl(value: string): string | null {

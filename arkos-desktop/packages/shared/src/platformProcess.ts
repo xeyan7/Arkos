@@ -2,17 +2,34 @@
 // Purpose: Plans child-process launches behind one cross-platform boundary.
 // Layer: Shared platform runtime
 
+// FILE: platformProcess.ts
+// Purpose: Plans child-process launches behind one cross-platform boundary.
+// Layer: Shared platform runtime
+// FILE: platformProcess.ts
+// Purpose: Plans child-process launches behind one cross-platform boundary.
+// Layer: Shared platform runtime
+// FILE: platformProcess.ts
+// Purpose: Plans child-process launches behind one cross-platform boundary.
+// Layer: Shared platform runtime
+// FILE: platformProcess.ts
+// Purpose: Plans child-process launches behind one cross-platform boundary.
+// Layer: Shared platform runtime
+// FILE: platformProcess.ts
+// Purpose: Plans child-process launches behind one cross-platform boundary.
+// Layer: Shared platform runtime
+// FILE: platformProcess.ts
+// Purpose: Plans child-process launches behind one cross-platform boundary.
+// Layer: Shared platform runtime
+// FILE: platformProcess.ts
+// Purpose: Plans child-process launches behind one cross-platform boundary.
+// Layer: Shared platform runtime
 import { statSync } from "node:fs";
 import os from "node:os";
 import { win32 } from "node:path";
 
 import { hasPathSeparator, resolveExecutable } from "./executable";
 import { resolveWindowsPowerShellExecutable } from "./platformEnvironment";
-import {
-  parseWindowsWslUncPath,
-  prepareWindowsSafeProcess,
-  type WindowsSafeProcessCommand,
-} from "./windowsProcess";
+import { parseWindowsWslUncPath, prepareWindowsSafeProcess, type WindowsSafeProcessCommand } from "./windowsProcess";
 
 export type ProcessExecutionBackend = "native" | "wsl";
 

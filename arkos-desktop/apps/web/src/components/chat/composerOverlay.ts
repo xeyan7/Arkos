@@ -14,6 +14,21 @@
 // just above the composer's footer row, so nothing ever shows behind the send controls
 // or the padding strip below.
 
+// FILE: composerOverlay.ts
+// Purpose: Geometry for the floating composer — the transcript scrolls *under* the
+//   frosted composer, so its measured height becomes the transcript's bottom content inset.
+// Layer: Chat composer layout helper
+// Exports: useComposerOverlayHeight (measure), composerTranscriptBottomInsetPx (derive inset),
+//   composerOverlayScrollFadeVars (transcript edge fade)
+//
+// The composer is absolutely positioned at `bottom-full` of the in-flow block that
+// carries the trailing gutter (and the git BranchToolbar), so the transcript's scroll
+// viewport ends exactly at the composer's BOTTOM edge. While the transcript is scrolled
+// away from its end, the shared scroll edge fade dissolves rows just above the
+// composer's top edge; approaching the end, that fade slides away under the glass so
+// the resting tail is never cut. A second mask always dissolves content in a short band
+// just above the composer's footer row, so nothing ever shows behind the send controls
+// or the padding strip below.
 import { useCallback, useRef, useState } from "react";
 
 /**

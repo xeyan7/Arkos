@@ -4,15 +4,15 @@
 // Layer: Sidebar UI component
 // Exports: ProjectSidebarIcon, ProjectEmojiGlyph
 
+// FILE: ProjectSidebarIcon.tsx
+// Purpose: Render a project's glyph: its chosen emoji or icon, or the standard folder with an
+//          optional favicon badge overlay or a primary favicon in compact rows.
+// Layer: Sidebar UI component
+// Exports: ProjectSidebarIcon, ProjectEmojiGlyph
 import { useEffect, useState, type CSSProperties } from "react";
 
 import { CentralIcon } from "~/lib/central-icons";
-import {
-  DEFAULT_PROJECT_ICON,
-  projectColorValue,
-  type ProjectAppearance,
-  type ProjectColor,
-} from "~/lib/projectAppearance";
+import { DEFAULT_PROJECT_ICON, projectColorValue, type ProjectAppearance, type ProjectColor } from "~/lib/projectAppearance";
 import { cn } from "~/lib/utils";
 import { resolveWsHttpUrl } from "~/lib/wsHttpUrl";
 import { FolderIcon, FolderOpenIcon } from "~/lib/icons";

@@ -3,52 +3,27 @@
 // Layer: Chat right-dock UI
 // Depends on: ui/sidebar primitive, right-dock pane metadata, and a caller-provided pane renderer.
 
-import {
-  type CSSProperties,
-  type ReactNode,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+// FILE: RightDock.tsx
+// Purpose: Tabbed multi-pane right sidebar shell (browser, diff, terminal, sidechat, git).
+// Layer: Chat right-dock UI
+// Depends on: ui/sidebar primitive, right-dock pane metadata, and a caller-provided pane renderer.
+import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { cn } from "~/lib/utils";
 import { useIsMobile } from "~/hooks/useMediaQuery";
-import {
-  type DockPaneRuntimeMode,
-  EMPTY_PANE_ID_SET,
-  reconcileKeepMountedPaneIds,
-} from "~/lib/dockPaneActivation";
+import { type DockPaneRuntimeMode, EMPTY_PANE_ID_SET, reconcileKeepMountedPaneIds } from "~/lib/dockPaneActivation";
 import { LayoutRightIcon, PanelCollapseIcon, PanelExpandIcon, PlusSignIcon } from "~/lib/icons";
-import type {
-  RightDockPane,
-  RightDockPaneKind,
-  RightDockThreadState,
-} from "~/rightDockStore.logic";
+import type { RightDockPane, RightDockPaneKind, RightDockThreadState } from "~/rightDockStore.logic";
 import { resolveActivePane } from "~/rightDockStore.logic";
 import { Button } from "../ui/button";
 import { IconButton } from "../ui/icon-button";
 import { Menu, MenuItem, MenuTrigger } from "../ui/menu";
-import {
-  Sidebar,
-  SIDEBAR_OFFCANVAS_MOTION_CLASS,
-  SIDEBAR_OFFCANVAS_MOTION_SUPPRESSED_CLASS,
-  SidebarProvider,
-  SidebarRail,
-} from "../ui/sidebar";
+import { Sidebar, SIDEBAR_OFFCANVAS_MOTION_CLASS, SIDEBAR_OFFCANVAS_MOTION_SUPPRESSED_CLASS, SidebarProvider, SidebarRail } from "../ui/sidebar";
 import { CHAT_BACKGROUND_CLASS_NAME } from "./composerPickerStyles";
 import { ComposerPickerMenuPopup } from "./ComposerPickerMenuPopup";
-import {
-  CHAT_SURFACE_HEADER_ROW_CLASS_NAME,
-  DOCK_HEADER_ICON_BUTTON_CLASS,
-} from "./chatHeaderControls";
+import { CHAT_SURFACE_HEADER_ROW_CLASS_NAME, DOCK_HEADER_ICON_BUTTON_CLASS } from "./chatHeaderControls";
 import { SurfaceContentTabs } from "./SurfaceContentTabs";
-import {
-  getRightDockPaneMeta,
-  type RightDockLauncherItem,
-  resolveRightDockPaneIcon,
-  resolveRightDockPaneLabel,
-} from "./rightDockPaneMeta";
+import { getRightDockPaneMeta, type RightDockLauncherItem, resolveRightDockPaneIcon, resolveRightDockPaneLabel } from "./rightDockPaneMeta";
 import { useDesktopTopBarWindowControlsGutterClassName } from "~/hooks/useDesktopTopBarGutter";
 
 // Pane kinds whose content has a natural width, opened at that size rather than

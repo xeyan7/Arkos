@@ -1,7 +1,4 @@
-import {
-  arkosDesktopIdentity,
-  type ArkosPackagedDesktopFlavor,
-} from "@arkos/shared/desktopIdentity";
+import { arkosDesktopIdentity, type ArkosPackagedDesktopFlavor } from "@arkos/shared/desktopIdentity";
 
 export function createDesktopArtifactIdentity(input: {
   readonly platform: "mac" | "linux" | "win";

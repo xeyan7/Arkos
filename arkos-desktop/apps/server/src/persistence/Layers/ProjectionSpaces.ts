@@ -3,12 +3,7 @@ import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 import { Effect, Layer, Schema } from "effect";
 
 import { toPersistenceSqlError } from "../Errors.ts";
-import {
-  GetProjectionSpaceInput,
-  ProjectionSpace,
-  ProjectionSpaceRepository,
-  type ProjectionSpaceRepositoryShape,
-} from "../Services/ProjectionSpaces.ts";
+import { GetProjectionSpaceInput, ProjectionSpace, ProjectionSpaceRepository, type ProjectionSpaceRepositoryShape } from "../Services/ProjectionSpaces.ts";
 
 const makeProjectionSpaceRepository = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;

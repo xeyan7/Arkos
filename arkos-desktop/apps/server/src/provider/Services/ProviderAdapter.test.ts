@@ -5,8 +5,8 @@ import { resolveProviderSessionInstanceId } from "./ProviderAdapter.ts";
 
 describe("resolveProviderSessionInstanceId", () => {
   it.each([
-    ["grok", "grok_work"],
-    ["pi", "pi_work"],
+    ["arkos", "grok_work"],
+    ["arkos", "pi_work"],
   ] as const)("routes %s modelSelection-only starts before launch", (provider, rawInstanceId) => {
     const instanceId = ProviderInstanceId.makeUnsafe(rawInstanceId);
     expect(
@@ -22,7 +22,7 @@ describe("resolveProviderSessionInstanceId", () => {
       resolveProviderSessionInstanceId({
         providerInstanceId: explicit,
         modelSelection: {
-          provider: "pi",
+          provider: "arkos",
           instanceId: ProviderInstanceId.makeUnsafe("pi_model"),
           model: "pi/model",
         },

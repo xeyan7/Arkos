@@ -1,5 +1,7 @@
 // Exercises real Chromium viewport recovery after browser_resize emulation.
 // Uses an isolated Electron profile and a synthetic page through DesktopBrowserManager.
+// Exercises real Chromium viewport recovery after browser_resize emulation.
+// Uses an isolated Electron profile and a synthetic page through DesktopBrowserManager.
 import { strict as assert } from "node:assert";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";

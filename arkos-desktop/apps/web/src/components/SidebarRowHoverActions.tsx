@@ -3,6 +3,10 @@
 // Layer: Sidebar UI primitive
 // Exports: SidebarRowHoverActions
 
+// FILE: SidebarRowHoverActions.tsx
+// Purpose: Absolutely positioned hover action strip on thread/chat rows.
+// Layer: Sidebar UI primitive
+// Exports: SidebarRowHoverActions
 import type { ReactNode } from "react";
 import { cn } from "~/lib/utils";
 

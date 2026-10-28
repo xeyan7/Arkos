@@ -3,12 +3,19 @@
 // Layer: UI state logic
 // Exports: terminal identity map resolution plus representative-terminal selection.
 
-import {
-  type ResolvedTerminalVisualIdentity,
-  resolveTerminalVisualIdentity,
-  type TerminalCliKind,
-  type TerminalVisualState,
-} from "@arkos/shared/terminalThreads";
+// FILE: terminalVisualIdentity.ts
+// Purpose: Centralizes terminal icon/title/activity view-model rules for every web surface.
+// Layer: UI state logic
+// Exports: terminal identity map resolution plus representative-terminal selection.
+// FILE: terminalVisualIdentity.ts
+// Purpose: Centralizes terminal icon/title/activity view-model rules for every web surface.
+// Layer: UI state logic
+// Exports: terminal identity map resolution plus representative-terminal selection.
+// FILE: terminalVisualIdentity.ts
+// Purpose: Centralizes terminal icon/title/activity view-model rules for every web surface.
+// Layer: UI state logic
+// Exports: terminal identity map resolution plus representative-terminal selection.
+import { type ResolvedTerminalVisualIdentity, resolveTerminalVisualIdentity, type TerminalCliKind, type TerminalVisualState } from "@arkos/shared/terminalThreads";
 
 export interface RepresentativeTerminalVisualIdentity {
   terminalId: string;

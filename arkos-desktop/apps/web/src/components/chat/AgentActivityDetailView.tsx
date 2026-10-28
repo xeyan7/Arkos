@@ -3,6 +3,10 @@
 // Layer: Chat presentation component
 // Depends on: agentActivity.logic and ChatMarkdown
 
+// FILE: AgentActivityDetailView.tsx
+// Purpose: Full-width transcript replacement for inspecting agent activity without opening side UI.
+// Layer: Chat presentation component
+// Depends on: agentActivity.logic and ChatMarkdown
 import { pluralize } from "@arkos/shared/text";
 import { type CSSProperties, type ReactNode } from "react";
 import { BotIcon, ChevronLeftIcon } from "~/lib/icons";
@@ -12,18 +16,9 @@ import { formatShortTimestamp } from "../../timestampFormat";
 import type { TimestampFormat } from "../../appSettings";
 import ChatMarkdown from "../ChatMarkdown";
 import { getChatMessageFooterTextStyle, getChatTranscriptTextStyle } from "./chatTypography";
-import {
-  CHAT_COLUMN_FRAME_CLASS_NAME,
-  CHAT_COLUMN_GUTTER_CLASS_NAME,
-  ENVIRONMENT_CONTENT_INSET_MOTION_CLASS,
-} from "./composerPickerStyles";
+import { CHAT_COLUMN_FRAME_CLASS_NAME, CHAT_COLUMN_GUTTER_CLASS_NAME, ENVIRONMENT_CONTENT_INSET_MOTION_CLASS } from "./composerPickerStyles";
 import type { ExpandedImagePreview } from "./ExpandedImagePreview";
-import {
-  type AgentActivityDetail,
-  formatAgentActivityEntryPreview,
-  formatAgentActivityEntryTitle,
-  isReasoningUpdateWorkEntry,
-} from "./agentActivity.logic";
+import { type AgentActivityDetail, formatAgentActivityEntryPreview, formatAgentActivityEntryTitle, isReasoningUpdateWorkEntry } from "./agentActivity.logic";
 
 const DETAIL_BOTTOM_INSET_PX = 64;
 

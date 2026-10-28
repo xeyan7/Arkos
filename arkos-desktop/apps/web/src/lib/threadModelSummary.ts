@@ -6,13 +6,16 @@
 // Why: Reuses the composer's trait resolution so a thread's model reads exactly
 //      the same wherever it is displayed.
 
+// FILE: threadModelSummary.ts
+// Purpose: Summarize a thread's model selection (provider + model name + reasoning
+//          effort) for read-only surfaces such as the sidebar hover card.
+// Layer: Web presentation helpers
+// Exports: ThreadModelSummary, resolveThreadModelSummary
+// Why: Reuses the composer's trait resolution so a thread's model reads exactly
+//      the same wherever it is displayed.
 import type { ModelSelection, ProviderKind, ProviderModelDescriptor } from "@arkos/contracts";
 
-import {
-  getComposerTraitSelection,
-  resolveComposerTraitStatusLabel,
-  showsComposerFastModeBadge,
-} from "~/components/chat/composerTraits";
+import { getComposerTraitSelection, resolveComposerTraitStatusLabel, showsComposerFastModeBadge } from "~/components/chat/composerTraits";
 import { formatProviderModelOptionName, type ProviderOptions } from "~/providerModelOptions";
 
 export interface ThreadModelSummary {

@@ -1,44 +1,10 @@
-import {
-  AutomationId,
-  IsoDateTime,
-  ProjectActivity,
-  ProjectAgentConfig,
-  ProjectAgentLimits,
-  ProjectAgentWorkerRouting,
-  ProjectDigest,
-  ProjectDocumentHead,
-  ProjectDocumentRevision,
-  ProjectEvidence,
-  ProjectGoal,
-  ProjectGoalId,
-  ProjectGoalStatus,
-  ProjectId,
-  ProjectInboxEvent,
-  ProjectManagedWorker,
-  ProjectTask,
-  ProjectTaskAttempt,
-  ProjectTaskId,
-  ProjectThreadIndexEntry,
-  ModelSelection,
-  ProviderStartOptions,
-  ThreadId,
-} from "@arkos/contracts";
+import { AutomationId, IsoDateTime, ProjectActivity, ProjectAgentConfig, ProjectAgentLimits, ProjectAgentWorkerRouting, ProjectDigest, ProjectDocumentHead, ProjectDocumentRevision, ProjectEvidence, ProjectGoal, ProjectGoalId, ProjectGoalStatus, ProjectId, ProjectInboxEvent, ProjectManagedWorker, ProjectTask, ProjectTaskAttempt, ProjectTaskId, ProjectThreadIndexEntry, ModelSelection, ProviderStartOptions, ThreadId } from "@arkos/contracts";
 import { Effect, Layer, Option, Schema } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 
-import {
-  toPersistenceDecodeError,
-  toPersistenceSqlError,
-  toPersistenceSqlOrDecodeError,
-} from "../Errors.ts";
-import {
-  ProjectAgentReceipt,
-  ProjectAgentRepository,
-  type ProjectAgentConfigSummaryRow,
-  type ProjectAgentRepositoryShape,
-  normalizeDigestError,
-} from "../Services/ProjectAgentRepository.ts";
+import { toPersistenceDecodeError, toPersistenceSqlError, toPersistenceSqlOrDecodeError } from "../Errors.ts";
+import { ProjectAgentReceipt, ProjectAgentRepository, type ProjectAgentConfigSummaryRow, type ProjectAgentRepositoryShape, normalizeDigestError } from "../Services/ProjectAgentRepository.ts";
 
 const ConfigRow = Schema.Struct({
   projectId: ProjectId,

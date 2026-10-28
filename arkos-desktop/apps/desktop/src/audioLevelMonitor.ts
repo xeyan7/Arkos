@@ -1,11 +1,7 @@
 import * as ChildProcess from "node:child_process";
 import * as Readline from "node:readline";
 
-import type {
-  DesktopAudioInputDevice,
-  DesktopAudioLevelSource,
-  DesktopAudioLevelStatus,
-} from "@arkos/contracts";
+import type { DesktopAudioInputDevice, DesktopAudioLevelSource, DesktopAudioLevelStatus } from "@arkos/contracts";
 
 const MAX_HELPER_STDERR_CHARS = 4_000;
 const LIST_INPUTS_TIMEOUT_MS = 5_000;

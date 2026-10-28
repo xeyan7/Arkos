@@ -2,19 +2,15 @@
 // Purpose: Shows the current desktop permission state and an explicit setup action.
 // Layer: Chat transcript UI
 
+// FILE: ComputerSetupRequiredCard.tsx
+// Purpose: Shows the current desktop permission state and an explicit setup action.
+// Layer: Chat transcript UI
 import { useQuery } from "@tanstack/react-query";
 import { useProvisionComputer } from "~/hooks/useProvisionComputer";
 import { useRefreshOnWindowReturn } from "~/hooks/useRefreshOnWindowReturn";
-import {
-  computerStatusQueryOptions,
-  COMPUTER_STATUS_VISIBLE_REFETCH_INTERVAL_MS,
-} from "~/lib/serverReactQuery";
+import { computerStatusQueryOptions, COMPUTER_STATUS_VISIBLE_REFETCH_INTERVAL_MS } from "~/lib/serverReactQuery";
 import { computerStatusNeedsSetup, resolveComputerAvailabilityView } from "../ComputerPanel.logic";
-import type {
-  ComputerBuildSignature,
-  ComputerPermission,
-  ComputerStatusResult,
-} from "@arkos/contracts";
+import type { ComputerBuildSignature, ComputerPermission, ComputerStatusResult } from "@arkos/contracts";
 import { computerStaleGrantAdvice, listComputerPermissions } from "@arkos/shared/computerGrants";
 
 import { ComputerActionCard } from "./ComputerActionCard";

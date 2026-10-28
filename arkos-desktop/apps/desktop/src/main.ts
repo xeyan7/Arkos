@@ -230,7 +230,6 @@ import {
   shouldBroadcastDownloadProgress,
   shouldCheckForUpdatesOnForeground,
 } from "./updateState";
-import { registerDesktopVoiceTranscriptionHandler } from "./voiceTranscription";
 import {
   applyDesktopPhysicalZoomAction,
   DEFAULT_DESKTOP_MENU_ACCELERATORS,
@@ -5523,7 +5522,7 @@ function registerIpcHandlers(): void {
       },
     });
   }
-  registerDesktopVoiceTranscriptionHandler();
+
   startBrowserPerformanceLogging();
   registerBrowserIpcHandlers(ipcMain, browserManager);
   registerBrowserVaultIpc(

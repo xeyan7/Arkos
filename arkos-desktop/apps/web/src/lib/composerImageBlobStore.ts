@@ -3,6 +3,10 @@
 // Layer: Browser storage adapter
 // Depends on: IndexedDB structured-clone support for Blob values.
 
+// FILE: composerImageBlobStore.ts
+// Purpose: Persists large composer image blobs outside localStorage.
+// Layer: Browser storage adapter
+// Depends on: IndexedDB structured-clone support for Blob values.
 import { awaitIdbRequest, openIndexedDbDatabase, waitForIdbTransaction } from "./indexedDb";
 
 const DATABASE_NAME = "arkos-composer-images";

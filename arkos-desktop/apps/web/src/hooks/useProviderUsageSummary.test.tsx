@@ -23,7 +23,7 @@ vi.mock("~/lib/openUsageReactQuery", async (importOriginal) => {
 
 function snapshot(input: Partial<ServerProviderUsageSnapshot> = {}): ServerProviderUsageSnapshot {
   return {
-    provider: "claudeAgent",
+    provider: "arkos",
     updatedAt: "2026-06-09T12:00:00.000Z",
     limits: [],
     usageLines: [],
@@ -67,7 +67,7 @@ function readProviderUsageSummary(input: {
 
   function Probe() {
     captured.current = useProviderUsageSummary({
-      provider: "claudeAgent",
+      provider: "arkos",
       instanceId: input.instanceId,
       threads: [],
       threadRateLimits: input.threadRateLimits,
@@ -106,7 +106,7 @@ describe("useProviderUsageSummary", () => {
       }),
       threadRateLimits: [
         {
-          provider: "claudeAgent",
+          provider: "arkos",
           updatedAt: "2099-06-09T12:00:00.000Z",
           limits: [{ window: "Weekly", usedPercent: 90, windowDurationMins: 10080 }],
         },
@@ -120,7 +120,7 @@ describe("useProviderUsageSummary", () => {
     const queryClient = createQueryClient();
     queryClient.setQueryData(serverQueryKeys.allProviderUsage(), [
       snapshot({
-        instanceId: "claudeAgent",
+        instanceId: "arkos",
         limits: [{ window: "Weekly", usedPercent: 20, windowDurationMins: 10080 }],
       }),
     ]);
@@ -128,7 +128,7 @@ describe("useProviderUsageSummary", () => {
       queryClient,
       threadRateLimits: [
         {
-          provider: "claudeAgent",
+          provider: "arkos",
           updatedAt: "2099-06-09T12:00:00.000Z",
           limits: [{ window: "Weekly", usedPercent: 90, windowDurationMins: 10080 }],
         },
@@ -141,7 +141,7 @@ describe("useProviderUsageSummary", () => {
   it("uses the selected account snapshot rather than another account in the batch", () => {
     const queryClient = createQueryClient();
     queryClient.setQueryData(serverQueryKeys.allProviderUsage(), [
-      snapshot({ instanceId: "claudeAgent", ...fallbackSnapshot() }),
+      snapshot({ instanceId: "arkos", ...fallbackSnapshot() }),
       snapshot({
         instanceId: "claude_work",
         limits: [{ window: "Weekly", usedPercent: 20, windowDurationMins: 10080 }],
@@ -168,13 +168,13 @@ describe("useProviderUsageSummary", () => {
     expect(summary.usageLines).toEqual([]);
   });
 
-  it.each(["claudeAgent", "claude_work"])(
+  it.each(["arkos", "claude_work"])(
     "does not mix provider-wide fallback data into the %s account",
     (instanceId) => {
       const queryClient = createQueryClient();
       queryClient.setQueryData(serverQueryKeys.allProviderUsage(), []);
       queryClient.setQueryData(
-        serverQueryKeys.providerUsage("claudeAgent", null),
+        serverQueryKeys.providerUsage("arkos", null),
         fallbackSnapshot(),
       );
 
@@ -183,7 +183,7 @@ describe("useProviderUsageSummary", () => {
         instanceId,
         threadRateLimits: [
           {
-            provider: "claudeAgent",
+            provider: "arkos",
             updatedAt: "2026-06-09T12:00:00.000Z",
             limits: [{ window: "5h", usedPercent: 12, windowDurationMins: 300 }],
           },
@@ -200,7 +200,7 @@ describe("useProviderUsageSummary", () => {
 
     readProviderUsageSummary({ queryClient, fetchOpenUsageData: false });
 
-    expect(openUsageProviderSnapshotQueryOptions).toHaveBeenCalledWith("claudeAgent", {
+    expect(openUsageProviderSnapshotQueryOptions).toHaveBeenCalledWith("arkos", {
       enabled: false,
     });
     expect(
@@ -214,7 +214,7 @@ describe("useProviderUsageSummary", () => {
       snapshot({ status: "needs-auth", detail: "Sign in with claude to see usage." }),
     ]);
     queryClient.setQueryData(
-      serverQueryKeys.providerUsage("claudeAgent", null),
+      serverQueryKeys.providerUsage("arkos", null),
       fallbackSnapshot(),
     );
 
@@ -228,7 +228,7 @@ describe("useProviderUsageSummary", () => {
     const queryClient = createQueryClient();
     queryClient.setQueryData(serverQueryKeys.allProviderUsage(), []);
     queryClient.setQueryData(
-      serverQueryKeys.providerUsage("claudeAgent", null),
+      serverQueryKeys.providerUsage("arkos", null),
       fallbackSnapshot(),
     );
 
@@ -249,7 +249,7 @@ describe("useProviderUsageSummary", () => {
       queryClient,
       threadRateLimits: [
         {
-          provider: "claudeAgent",
+          provider: "arkos",
           updatedAt: "2026-06-09T12:00:00.000Z",
           limits: [
             {
@@ -290,7 +290,7 @@ describe("useProviderUsageSummary", () => {
         queryClient,
         threadRateLimits: [
           {
-            provider: "claudeAgent",
+            provider: "arkos",
             updatedAt,
             limits: [{ window: "seven_day_overage_included", usedPercent: 90 }],
           },
@@ -348,7 +348,7 @@ describe("useProviderUsageSummary", () => {
     const queryClient = createQueryClient();
     queryClient.setQueryData(serverQueryKeys.allProviderUsage(), []);
     queryClient.setQueryData(
-      serverQueryKeys.providerUsage("claudeAgent", null),
+      serverQueryKeys.providerUsage("arkos", null),
       fallbackSnapshot(),
     );
 

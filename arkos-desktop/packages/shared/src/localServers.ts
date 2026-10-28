@@ -3,6 +3,34 @@
 // Layer: Shared runtime utility (consumed by web UI surfaces).
 // Depends on: ServerLocalServerProcess contract shape.
 
+// FILE: localServers.ts
+// Purpose: Shared presentation helpers for detected local dev servers.
+// Layer: Shared runtime utility (consumed by web UI surfaces).
+// Depends on: ServerLocalServerProcess contract shape.
+// FILE: localServers.ts
+// Purpose: Shared presentation helpers for detected local dev servers.
+// Layer: Shared runtime utility (consumed by web UI surfaces).
+// Depends on: ServerLocalServerProcess contract shape.
+// FILE: localServers.ts
+// Purpose: Shared presentation helpers for detected local dev servers.
+// Layer: Shared runtime utility (consumed by web UI surfaces).
+// Depends on: ServerLocalServerProcess contract shape.
+// FILE: localServers.ts
+// Purpose: Shared presentation helpers for detected local dev servers.
+// Layer: Shared runtime utility (consumed by web UI surfaces).
+// Depends on: ServerLocalServerProcess contract shape.
+// FILE: localServers.ts
+// Purpose: Shared presentation helpers for detected local dev servers.
+// Layer: Shared runtime utility (consumed by web UI surfaces).
+// Depends on: ServerLocalServerProcess contract shape.
+// FILE: localServers.ts
+// Purpose: Shared presentation helpers for detected local dev servers.
+// Layer: Shared runtime utility (consumed by web UI surfaces).
+// Depends on: ServerLocalServerProcess contract shape.
+// FILE: localServers.ts
+// Purpose: Shared presentation helpers for detected local dev servers.
+// Layer: Shared runtime utility (consumed by web UI surfaces).
+// Depends on: ServerLocalServerProcess contract shape.
 import type { ServerLocalServerProcess } from "@arkos/contracts";
 
 import { isWorkspaceRootWithin } from "./threadWorkspace";

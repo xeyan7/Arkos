@@ -7,10 +7,10 @@ import { visibleProviderDescriptors } from "./betaFeatures";
 
 describe("visibleProviderDescriptors", () => {
   it("respects a disabled provider feature", () => {
-    const visible = visibleProviderDescriptors((feature) => feature !== "omp");
-    expect(visible.some((d) => d.kind === "omp")).toBe(false);
+    const visible = visibleProviderDescriptors((feature) => feature !== "arkos");
+    expect(visible.some((d) => d.kind === "arkos")).toBe(false);
     expect(visible.map((d) => d.kind)).toEqual(
-      PROVIDER_DESCRIPTORS.filter((d) => d.kind !== "omp").map((d) => d.kind),
+      PROVIDER_DESCRIPTORS.filter((d) => d.kind !== "arkos").map((d) => d.kind),
     );
   });
 

@@ -5,20 +5,11 @@ import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 
-import {
-  EXTERNAL_MCP_CREATE_TIMEOUT_MS,
-  EXTERNAL_MCP_DEFAULT_WAIT_MS,
-  EXTERNAL_MCP_MAX_WAIT_MS,
-  type ExternalMcpPairResult,
-} from "@arkos/contracts";
+import { EXTERNAL_MCP_CREATE_TIMEOUT_MS, EXTERNAL_MCP_DEFAULT_WAIT_MS, EXTERNAL_MCP_MAX_WAIT_MS, type ExternalMcpPairResult } from "@arkos/contracts";
 
 import type { PersistedServerRuntimeState } from "../serverRuntimeState.ts";
 import { ensurePrivateDirectorySync } from "../privatePathPermissions.ts";
-import {
-  computeExternalMcpRuntimeProof,
-  EXTERNAL_MCP_RUNTIME_CHALLENGE_HEADER,
-  runtimeProofsMatch,
-} from "./runtimeProof.ts";
+import { computeExternalMcpRuntimeProof, EXTERNAL_MCP_RUNTIME_CHALLENGE_HEADER, runtimeProofsMatch } from "./runtimeProof.ts";
 
 const CLIENT_STORE_VERSION = 1;
 const CLIENT_STORE_DIRECTORY = path.join("mcp", "credentials");

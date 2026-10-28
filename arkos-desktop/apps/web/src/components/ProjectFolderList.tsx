@@ -4,6 +4,11 @@
 // Layer: Web UI (Create project dialog)
 // Exports: ProjectFolderList
 
+// FILE: ProjectFolderList.tsx
+// Purpose: Lists the source folders of a project being created, primary first, with
+//          per-row "Make primary" and remove actions.
+// Layer: Web UI (Create project dialog)
+// Exports: ProjectFolderList
 import { deriveProjectFolderLabels } from "@arkos/shared/projectFolders";
 import type { ReactNode } from "react";
 

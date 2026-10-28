@@ -1,20 +1,6 @@
 import { randomBytes } from "node:crypto";
 
-import {
-  AutomationCompletionPolicy,
-  AutomationDefinition,
-  AutomationMemory,
-  AutomationPermissionSnapshot,
-  AutomationRun,
-  AutomationSchedule,
-  DEFAULT_AUTOMATION_STOP_AFTER_CONSECUTIVE_FAILURES,
-  DEFAULT_AUTOMATION_RUNTIME_MODE,
-  ModelSelection,
-  NonNegativeInt,
-  ProviderStartOptions,
-  ProjectId,
-  TurnId,
-} from "@arkos/contracts";
+import { AutomationCompletionPolicy, AutomationDefinition, AutomationMemory, AutomationPermissionSnapshot, AutomationRun, AutomationSchedule, DEFAULT_AUTOMATION_STOP_AFTER_CONSECUTIVE_FAILURES, DEFAULT_AUTOMATION_RUNTIME_MODE, ModelSelection, NonNegativeInt, ProviderStartOptions, ProjectId, TurnId } from "@arkos/contracts";
 import { automationRequiresTargetThread } from "@arkos/shared/automationMode";
 import { Effect, Layer, Option, Schema } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
@@ -22,53 +8,8 @@ import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 
 import { resolveAutomationStopPolicy } from "../../automation/stopPolicy.ts";
 
-import {
-  toPersistenceDecodeCauseError,
-  toPersistenceDecodeError,
-  toPersistenceSqlError,
-} from "../Errors.ts";
-import {
-  AcquireAutomationSchedulerLeaseInput,
-  ArchiveAutomationDefinitionInput,
-  AttachAutomationDefinitionThreadInput,
-  AutomationRepository,
-  type AutomationRepositoryShape,
-  CountActiveAutomationRunsByThreadInput,
-  CountActiveAutomationRunsInput,
-  CountPendingCompletionEvaluationsByThreadInput,
-  DisableAutomationDefinitionInput,
-  DisableAutomationDefinitionIfUnchangedInput,
-  GetEarliestAutomationNextRunAtInput,
-  GetAutomationMemoryInput,
-  GetAutomationDefinitionInput,
-  GetDeferredAutomationRunInput,
-  GetLatestFinishedAutomationRunInput,
-  GetAutomationRunByThreadInput,
-  GetAutomationRunInput,
-  IncrementAutomationIterationInput,
-  ListActiveAutomationRunsForDefinitionInput,
-  ListAutomationRunsForDefinitionInput,
-  ListDueAutomationDefinitionsInput,
-  ListAutomationRunsNeedingCompletionEvaluationInput,
-  ListDueDeferredAutomationRunsInput,
-  ListRecoverableAutomationRunsInput,
-  MarkAutomationRunFailedInput,
-  MarkAutomationRunInterruptedInput,
-  MarkAutomationRunResultInput,
-  MarkAutomationRunSkippedInput,
-  MarkAutomationRunStartedInput,
-  MarkAutomationRunSucceededInput,
-  MarkAutomationRunWaitingForApprovalInput,
-  ReserveDeferredAutomationRunInput,
-  RecordAutomationDefinitionRunFailureInput,
-  RecordAutomationDefinitionRunFailureResult,
-  ResetAutomationDefinitionFailureCountInput,
-  ResolvePendingAutomationProposalInput,
-  RestartAutomationDefinitionLoopInput,
-  SetAutomationRunDeferredInput,
-  SetAutomationDefinitionNextRunAtInput,
-  UpsertAutomationMemoryInput,
-} from "../Services/AutomationRepository.ts";
+import { toPersistenceDecodeCauseError, toPersistenceDecodeError, toPersistenceSqlError } from "../Errors.ts";
+import { AcquireAutomationSchedulerLeaseInput, ArchiveAutomationDefinitionInput, AttachAutomationDefinitionThreadInput, AutomationRepository, type AutomationRepositoryShape, CountActiveAutomationRunsByThreadInput, CountActiveAutomationRunsInput, CountPendingCompletionEvaluationsByThreadInput, DisableAutomationDefinitionInput, DisableAutomationDefinitionIfUnchangedInput, GetEarliestAutomationNextRunAtInput, GetAutomationMemoryInput, GetAutomationDefinitionInput, GetDeferredAutomationRunInput, GetLatestFinishedAutomationRunInput, GetAutomationRunByThreadInput, GetAutomationRunInput, IncrementAutomationIterationInput, ListActiveAutomationRunsForDefinitionInput, ListAutomationRunsForDefinitionInput, ListDueAutomationDefinitionsInput, ListAutomationRunsNeedingCompletionEvaluationInput, ListDueDeferredAutomationRunsInput, ListRecoverableAutomationRunsInput, MarkAutomationRunFailedInput, MarkAutomationRunInterruptedInput, MarkAutomationRunResultInput, MarkAutomationRunSkippedInput, MarkAutomationRunStartedInput, MarkAutomationRunSucceededInput, MarkAutomationRunWaitingForApprovalInput, ReserveDeferredAutomationRunInput, RecordAutomationDefinitionRunFailureInput, RecordAutomationDefinitionRunFailureResult, ResetAutomationDefinitionFailureCountInput, ResolvePendingAutomationProposalInput, RestartAutomationDefinitionLoopInput, SetAutomationRunDeferredInput, SetAutomationDefinitionNextRunAtInput, UpsertAutomationMemoryInput } from "../Services/AutomationRepository.ts";
 
 const AutomationDefinitionDbRow = Schema.Struct({
   id: AutomationDefinition.fields.id,

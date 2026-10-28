@@ -9,13 +9,18 @@
 //          resolveDockFileOpenTarget,
 //          openWorkspaceFileReference, prefetchWorkspaceFile
 
+// FILE: workspaceFileOpener.ts
+// Purpose: Context + helpers that let file references rendered deep in the
+//          chat tree (markdown links, mention chips, work-log rows) open in an
+//          in-app workspace file viewer (right-dock file pane or editor pane)
+//          instead of an external editor.
+// Layer: Web UI helpers
+// Exports: WorkspaceFileOpenerContext, useWorkspaceFileOpener,
+//          resolveWorkspaceFileOpenTarget, resolveScratchPreviewFileOpenTarget,
+//          resolveDockFileOpenTarget,
+//          openWorkspaceFileReference, prefetchWorkspaceFile
 import { isSupportedLocalPreviewFilePath } from "@arkos/shared/localPreviewFiles";
-import {
-  isLocalAbsolutePath,
-  isWorkspaceRelativePathSafe,
-  localPathsEqual,
-  workspaceRelativePathOf,
-} from "@arkos/shared/path";
+import { isLocalAbsolutePath, isWorkspaceRelativePathSafe, localPathsEqual, workspaceRelativePathOf } from "@arkos/shared/path";
 import { isScratchWorkspacePath } from "@arkos/shared/threadWorkspace";
 import type { QueryClient } from "@tanstack/react-query";
 import { createContext, useContext } from "react";

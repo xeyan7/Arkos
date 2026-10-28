@@ -1,23 +1,10 @@
 // FILE: AppSnapShortcutControl.tsx
 // Purpose: Record, validate, and save AppSnap's global two-key shortcut.
 
-import {
-  type DesktopAppSnapKeyChord,
-  type DesktopAppSnapShortcut,
-  type DesktopAppSnapShortcutAvailability,
-  type DesktopAppSnapShortcutModifier,
-  type DesktopAppSnapState,
-  type ResolvedKeybindingsConfig,
-} from "@arkos/contracts";
-import {
-  DEFAULT_APP_SNAP_SHORTCUT,
-  appSnapModifierFromEventCode,
-  appSnapShortcutLabels,
-  appSnapShortcutModifierLabel,
-  appSnapShortcutSystemConflict,
-  isAppSnapShortcutKey,
-  sameAppSnapShortcut,
-} from "@arkos/shared/appSnapShortcut";
+// FILE: AppSnapShortcutControl.tsx
+// Purpose: Record, validate, and save AppSnap's global two-key shortcut.
+import { type DesktopAppSnapKeyChord, type DesktopAppSnapShortcut, type DesktopAppSnapShortcutAvailability, type DesktopAppSnapShortcutModifier, type DesktopAppSnapState, type ResolvedKeybindingsConfig } from "@arkos/contracts";
+import { DEFAULT_APP_SNAP_SHORTCUT, appSnapModifierFromEventCode, appSnapShortcutLabels, appSnapShortcutModifierLabel, appSnapShortcutSystemConflict, isAppSnapShortcutKey, sameAppSnapShortcut } from "@arkos/shared/appSnapShortcut";
 import { useRef, useState, type KeyboardEvent } from "react";
 
 import { appSnapShortcutConflictCommand } from "~/appSnapShortcut";

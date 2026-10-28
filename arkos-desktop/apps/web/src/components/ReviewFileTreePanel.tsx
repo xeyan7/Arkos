@@ -6,16 +6,15 @@
 //          editor explorer instead of duplicating them.
 // Layer: Diff panel UI
 
+// FILE: ReviewFileTreePanel.tsx
+// Purpose: Compact, searchable file-tree side panel for the review/diff panel.
+//          Renders the changed files of the active diff as a nested, collapsible
+//          tree and navigates the diff on click. Reuses the diff path helpers,
+//          file-row chrome, file icons, and disclosure motion shared with the
+//          editor explorer instead of duplicating them.
+// Layer: Diff panel UI
 import type { FileDiffMetadata } from "@pierre/diffs/react";
-import {
-  forwardRef,
-  memo,
-  useMemo,
-  useState,
-  type ComponentPropsWithoutRef,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type ReactNode,
-} from "react";
+import { forwardRef, memo, useMemo, useState, type ComponentPropsWithoutRef, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 
 import { buildFileDiffTree, type FileDiffTreeNode } from "~/lib/fileDiffTree";
 import { XIcon } from "~/lib/icons";

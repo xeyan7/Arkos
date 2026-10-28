@@ -3,30 +3,15 @@
 // Layer: Environment panel hook
 // Exports: usePinnedMessageActions
 
-import {
-  PINNED_MESSAGES_MAX_COUNT,
-  type MessageId,
-  type PinnedMessage,
-  type ThreadId,
-} from "@arkos/contracts";
+// FILE: usePinnedMessageActions.ts
+// Purpose: Centralize sidepanel pin and notes command dispatch with optimistic rollback guards.
+// Layer: Environment panel hook
+// Exports: usePinnedMessageActions
+import { PINNED_MESSAGES_MAX_COUNT, type MessageId, type PinnedMessage, type ThreadId } from "@arkos/contracts";
 import { useEffect, useRef } from "react";
 
 import { toastManager } from "~/components/ui/toast";
-import {
-  addPin,
-  dispatchPinnedMessageAdd,
-  dispatchPinnedMessageDoneSet,
-  dispatchPinnedMessageLabelSet,
-  dispatchPinnedMessageRemove,
-  dispatchThreadNotes,
-  isMessagePinned,
-  normalizePinLabel,
-  removePin,
-  restorePinAtIndex,
-  setPinDone,
-  setPinLabel,
-  togglePinDone,
-} from "~/pinnedMessages";
+import { addPin, dispatchPinnedMessageAdd, dispatchPinnedMessageDoneSet, dispatchPinnedMessageLabelSet, dispatchPinnedMessageRemove, dispatchThreadNotes, isMessagePinned, normalizePinLabel, removePin, restorePinAtIndex, setPinDone, setPinLabel, togglePinDone } from "~/pinnedMessages";
 
 interface UsePinnedMessageActionsInput {
   readonly activeThreadId: ThreadId | null;

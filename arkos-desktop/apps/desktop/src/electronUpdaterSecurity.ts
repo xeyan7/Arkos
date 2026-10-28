@@ -3,13 +3,14 @@
 // Layer: Desktop update runtime
 // Exports: updater patching, shell-free PowerShell signature verification helpers.
 
+// FILE: electronUpdaterSecurity.ts
+// Purpose: Hardens electron-updater Windows process calls against Node deprecations.
+// Layer: Desktop update runtime
+// Exports: updater patching, shell-free PowerShell signature verification helpers.
 import type { ExecFileException } from "node:child_process";
 import * as Path from "node:path";
 
-import {
-  matchesDistinguishedName,
-  parseDistinguishedName,
-} from "@arkos/shared/windowsCertificate";
+import { matchesDistinguishedName, parseDistinguishedName } from "@arkos/shared/windowsCertificate";
 import { execProcessFile, spawnProcessSync } from "@arkos/shared/processRuntime";
 import { resolveWindowsPowerShellExecutable } from "@arkos/shared/platformEnvironment";
 

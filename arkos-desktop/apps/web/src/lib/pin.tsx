@@ -7,6 +7,14 @@
 //      the sidebar project/thread rows, the project hover card, and the context
 //      menus. Centralizing both keeps every pin control's wording and glyph aligned.
 
+// FILE: pin.tsx
+// Purpose: Shared semantic helpers for pin/unpin affordances.
+// Layer: web UI utility
+// Exports: pinActionLabel, PinStatusIcon
+// Why: The "Pin <target>" / "Unpin <target>" verb policy and the "solid glyph only
+//      when pinned, outline otherwise" rule were duplicated (and drifting) across
+//      the sidebar project/thread rows, the project hover card, and the context
+//      menus. Centralizing both keeps every pin control's wording and glyph aligned.
 import type { SVGProps } from "react";
 import { PinFilledIcon, PinIcon } from "./icons";
 

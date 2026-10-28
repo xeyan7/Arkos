@@ -9,13 +9,7 @@ import { buildDiffPanelUnsafeCSS, resolveDiffThemeName } from "~/lib/diffRenderi
 import { isEditorFileSaveShortcut } from "~/keybindings";
 import { serverConfigQueryOptions } from "~/lib/serverReactQuery";
 import { CodeEditBoundary } from "./CodeEditBoundary";
-import {
-  createCodeEditHistoryControls,
-  readCodeEditHistoryState,
-  type CodeEditHistoryControls,
-  type CodeEditHistoryState,
-  type PierreEditor,
-} from "./pierreEdit";
+import { createCodeEditHistoryControls, readCodeEditHistoryState, type CodeEditHistoryControls, type CodeEditHistoryState, type PierreEditor } from "./pierreEdit";
 
 export interface CodeEditorPaneProps {
   value: string;

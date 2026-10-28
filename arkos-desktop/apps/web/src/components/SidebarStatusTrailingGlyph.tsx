@@ -2,6 +2,9 @@
 // Purpose: Keep thread status and draft glyphs identical across classic and Activity sidebar rows.
 // Layer: Sidebar UI primitive
 
+// FILE: SidebarStatusTrailingGlyph.tsx
+// Purpose: Keep thread status and draft glyphs identical across classic and Activity sidebar rows.
+// Layer: Sidebar UI primitive
 import { StatusDot } from "~/components/ui/status-chip";
 import { ClockIcon, PencilIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";

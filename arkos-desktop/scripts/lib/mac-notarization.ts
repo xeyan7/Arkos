@@ -1,4 +1,11 @@
 // Keep Apple submission state beside the exact payload, never in shared caches.
+// Keep Apple submission state beside the exact payload, never in shared caches.
+// Keep Apple submission state beside the exact payload, never in shared caches.
+// Keep Apple submission state beside the exact payload, never in shared caches.
+// Keep Apple submission state beside the exact payload, never in shared caches.
+// Keep Apple submission state beside the exact payload, never in shared caches.
+// Keep Apple submission state beside the exact payload, never in shared caches.
+// Keep Apple submission state beside the exact payload, never in shared caches.
 import { spawn, spawnSync } from "node:child_process";
 import { hashFile } from "./file-digest.ts";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";

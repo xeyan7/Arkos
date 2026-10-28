@@ -8,26 +8,24 @@
 // (a GitHub-compatible releases API) supplies the newest `v*-beta.N` release; with
 // neither configured there is no remote beta feed.
 
+// FILE: betaInstaller.ts
+// Purpose: Download, verify, and install Arkos Beta on macOS from a
+//          generic update feed (beta-mac.yml + the zip it lists).
+// Layer: Desktop platform adapter (no Electron imports; I/O is injectable for tests).
+//
+// Feed resolution: `ARKOS_BETA_FEED_URL` points at a base URL that serves
+// `beta-mac.yml` plus the files it lists. Without it, `ARKOS_BETA_RELEASES_API_URL`
+// (a GitHub-compatible releases API) supplies the newest `v*-beta.N` release; with
+// neither configured there is no remote beta feed.
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import {
-  createWriteStream,
-  lstatSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  renameSync,
-  rmSync,
-} from "node:fs";
+import { createWriteStream, lstatSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync } from "node:fs";
 import { get as httpGet } from "node:http";
 import { get as httpsGet, type RequestOptions } from "node:https";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 
-import {
-  BETA_RELEASE_TAG_PATTERN,
-  ARKOS_BETA_RELEASES_API_URL_ENV,
-} from "@arkos/shared/betaChannel";
+import { BETA_RELEASE_TAG_PATTERN, ARKOS_BETA_RELEASES_API_URL_ENV } from "@arkos/shared/betaChannel";
 import { ARKOS_BETA_BUNDLE_ID } from "@arkos/shared/desktopIdentity";
 
 export const BETA_MAC_MANIFEST_NAME = "beta-mac.yml";

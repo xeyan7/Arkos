@@ -1,8 +1,4 @@
-import {
-  type TerminalContextDraft,
-  formatTerminalContextLabel,
-  isTerminalContextExpired,
-} from "~/lib/terminalContext";
+import { type TerminalContextDraft, formatTerminalContextLabel, isTerminalContextExpired } from "~/lib/terminalContext";
 import { TerminalContextInlineChip } from "./TerminalContextInlineChip";
 
 interface ComposerPendingTerminalContextChipProps {

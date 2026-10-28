@@ -9,6 +9,39 @@
  *
  * @module CheckpointStoreLive
  */
+/**
+ * CheckpointStoreLive - Filesystem checkpoint store adapter layer.
+ *
+ * Implements hidden Git-ref checkpoint capture/restore directly with
+ * Effect-native child process execution (`effect/unstable/process`).
+ *
+ * This layer owns filesystem/Git interactions only; it does not persist
+ * checkpoint metadata and does not coordinate provider rollback semantics.
+ *
+ * @module CheckpointStoreLive
+ */
+/**
+ * CheckpointStoreLive - Filesystem checkpoint store adapter layer.
+ *
+ * Implements hidden Git-ref checkpoint capture/restore directly with
+ * Effect-native child process execution (`effect/unstable/process`).
+ *
+ * This layer owns filesystem/Git interactions only; it does not persist
+ * checkpoint metadata and does not coordinate provider rollback semantics.
+ *
+ * @module CheckpointStoreLive
+ */
+/**
+ * CheckpointStoreLive - Filesystem checkpoint store adapter layer.
+ *
+ * Implements hidden Git-ref checkpoint capture/restore directly with
+ * Effect-native child process execution (`effect/unstable/process`).
+ *
+ * This layer owns filesystem/Git interactions only; it does not persist
+ * checkpoint metadata and does not coordinate provider rollback semantics.
+ *
+ * @module CheckpointStoreLive
+ */
 import { randomUUID } from "node:crypto";
 
 import { Cause, Deferred, Effect, Exit, Layer, FileSystem, Option, Path, Semaphore } from "effect";

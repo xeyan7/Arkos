@@ -1,16 +1,9 @@
-import {
-  ApprovalRequestId,
-  UserInputQuestion,
-  type OrchestrationThreadActivity,
-} from "@arkos/contracts";
+import { ApprovalRequestId, UserInputQuestion, type OrchestrationThreadActivity } from "@arkos/contracts";
 import { createStalePendingInteractionMatcher } from "@arkos/shared/pendingInteractions";
 import { pendingRequestInstanceKey } from "@arkos/shared/threadSummary";
 import { Schema } from "effect";
 import type { PendingUserInput } from "./pendingInteractionDerivation";
-import {
-  resolvePendingUserInputAnswer,
-  type PendingUserInputDraftAnswer,
-} from "./pendingUserInput";
+import { resolvePendingUserInputAnswer, type PendingUserInputDraftAnswer } from "./pendingUserInput";
 
 export interface PendingUserInputRecoveryDraft {
   request: PendingUserInput;

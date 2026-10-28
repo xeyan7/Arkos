@@ -3,6 +3,10 @@
 //          per-directory entry listing the `projectAgent.library.*` RPCs return.
 // Layer: Chat UI logic (framework-free)
 
+// FILE: libraryPanel.logic.ts
+// Purpose: Pure helpers for the group Library panel — sort/filter/flatten of the
+//          per-directory entry listing the `projectAgent.library.*` RPCs return.
+// Layer: Chat UI logic (framework-free)
 import type { LibraryEntry } from "@arkos/contracts";
 
 import { getFileIconName } from "~/file-icons";

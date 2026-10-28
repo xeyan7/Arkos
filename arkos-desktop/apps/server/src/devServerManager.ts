@@ -10,18 +10,19 @@
  *
  * @module DevServerManager
  */
-import {
-  DEFAULT_TERMINAL_ID,
-  ProjectId,
-  type ProjectDevServer,
-  type ProjectDevServerEvent,
-  type ProjectListDevServersResult,
-  type ProjectRunDevServerInput,
-  type ProjectRunDevServerResult,
-  type ProjectStopDevServerInput,
-  type ProjectStopDevServerResult,
-  type ServerLocalServerProcess,
-} from "@arkos/contracts";
+/**
+ * DevServerManager - Server-owned dev-server process orchestration.
+ *
+ * Dev servers are first-class background processes keyed by project id, fully
+ * decoupled from chat threads. Each runs in a managed PTY (via TerminalManager)
+ * under a synthetic `dev-server:<projectId>` thread so its lifetime survives
+ * WebSocket reconnects and never clutters the thread list. The manager keeps an
+ * in-memory registry, broadcasts changes over a PubSub for the
+ * `project.devServerEvent` push channel, and reaps entries when their PTY exits.
+ *
+ * @module DevServerManager
+ */
+import { DEFAULT_TERMINAL_ID, ProjectId, type ProjectDevServer, type ProjectDevServerEvent, type ProjectListDevServersResult, type ProjectRunDevServerInput, type ProjectRunDevServerResult, type ProjectStopDevServerInput, type ProjectStopDevServerResult, type ServerLocalServerProcess } from "@arkos/contracts";
 import { localServerMatchesRun } from "@arkos/shared/localServers";
 import { Effect, Layer, PubSub, Ref, ServiceMap, Stream } from "effect";
 

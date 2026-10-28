@@ -3,6 +3,10 @@
 // Layer: Web chat presentation constants
 // Exports: transcript measurement helpers and inline styles for chat text
 
+// FILE: chatTypography.ts
+// Purpose: Centralizes transcript typography tokens shared by chat message renderers.
+// Layer: Web chat presentation constants
+// Exports: transcript measurement helpers and inline styles for chat text
 import type { CSSProperties } from "react";
 import { DEFAULT_CHAT_FONT_SIZE_PX, normalizeChatFontSizePx } from "../../appSettings";
 

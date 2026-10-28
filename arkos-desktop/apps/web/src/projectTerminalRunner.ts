@@ -3,11 +3,12 @@
 // Layer: Web terminal orchestration helper
 // Exports: runProjectCommandInTerminal and default dimensions for script terminals.
 
+// FILE: projectTerminalRunner.ts
+// Purpose: Shared helper for launching project commands in managed terminal sessions.
+// Layer: Web terminal orchestration helper
+// Exports: runProjectCommandInTerminal and default dimensions for script terminals.
 import type { NativeApi, TerminalSessionSnapshot, ThreadId } from "@arkos/contracts";
-import {
-  deriveTerminalCommandIdentity,
-  type TerminalCliKind,
-} from "@arkos/shared/terminalThreads";
+import { deriveTerminalCommandIdentity, type TerminalCliKind } from "@arkos/shared/terminalThreads";
 
 import { projectScriptRuntimeEnv } from "./projectScripts";
 

@@ -53,7 +53,7 @@ function withoutClipboard(backend: FakeComputerBackend): FakeComputerBackend {
 }
 
 function makeContext(
-  provider: ProviderKind = "claudeAgent",
+  provider: ProviderKind = "arkos",
   threadId = THREAD,
   label: string | null = null,
 ): ToolContext {
@@ -411,10 +411,10 @@ describe("agent gateway computer tools", () => {
     const { call, see } = await setup(backend);
     await see(THREAD, "Luna");
 
-    await call("computer_click", { x: 4, y: 4 }, "claudeAgent", THREAD, "Luna");
+    await call("computer_click", { x: 4, y: 4 }, "arkos", THREAD, "Luna");
     expect(names).toEqual(["Luna"]);
 
-    await call("computer_press_key", { key: "enter" }, "claudeAgent", THREAD, "Luna");
+    await call("computer_press_key", { key: "enter" }, "arkos", THREAD, "Luna");
     expect(names).toEqual(["Luna"]);
   });
 
@@ -1114,7 +1114,7 @@ describe("agent gateway computer tools", () => {
     const result = await call(
       "computer_screenshot",
       { window_id: "fake-calculator" },
-      "antigravity",
+      "arkos",
     );
     expect(result.isError).not.toBe(true);
     expect(backend.callsFor("captureScreenshot")).toHaveLength(1);
@@ -2147,7 +2147,7 @@ describe("agent gateway computer tools", () => {
 
   it("refuses action tools for providers without an approval gate", async () => {
     const { backend, call } = await setup();
-    const result = await call("computer_click", { x: 10, y: 10 }, "antigravity");
+    const result = await call("computer_click", { x: 10, y: 10 }, "arkos");
     expect(result.isError).toBe(true);
     expect(backend.callsFor("click")).toHaveLength(0);
   });
@@ -2158,7 +2158,7 @@ describe("agent gateway computer tools", () => {
    * set only ever changes deliberately.
    */
   it("pins the gate-less provider set", async () => {
-    expect(PROVIDERS_WITHOUT_APPROVAL_GATE).toEqual(new Set(["antigravity", "pi"]));
+    expect(PROVIDERS_WITHOUT_APPROVAL_GATE).toEqual(new Set(["arkos", "arkos"]));
   });
 
   it("keeps the clipboard read behind approval instead of the perception set", async () => {
@@ -2171,7 +2171,7 @@ describe("agent gateway computer tools", () => {
       destructiveHint: false,
     });
 
-    const refused = await call("computer_read_clipboard", {}, "antigravity");
+    const refused = await call("computer_read_clipboard", {}, "arkos");
     expect(refused.isError).toBe(true);
     expect(backend.callsFor("readClipboard")).toHaveLength(0);
   });
@@ -2385,7 +2385,7 @@ describe("agent gateway computer tools", () => {
           from: { x: 1, y: 1 },
           to: { x: 2, y: 2 },
         },
-        "pi",
+        "arkos",
       );
       expect(refused.isError).toBe(true);
       expect(resultJson(refused)).toMatchObject({
@@ -2397,7 +2397,7 @@ describe("agent gateway computer tools", () => {
     expect(backend.callsFor("pressKey")).toHaveLength(0);
     expect(backend.callsFor("drag")).toHaveLength(0);
     // Perception is untouched: refusing to read the screen protects nobody.
-    const seen = await call("computer_list_windows", {}, "pi");
+    const seen = await call("computer_list_windows", {}, "arkos");
     expect(seen.isError).not.toBe(true);
   });
 
@@ -3756,7 +3756,7 @@ describe("computer_activate_window foreground restore", () => {
 describe("computer_inspect", () => {
   // The route is provider-agnostic; one gated and one gate-less provider cover
   // both approval branches.
-  it.each(["claudeAgent", "pi"] as const)(
+  it.each(["arkos", "arkos"] as const)(
     "preserves specialist reads and image results for %s",
     async (provider) => {
       const authorize = vi.fn<NonNullable<AgentGatewayComputerToolsOptions["authorizeAction"]>>(

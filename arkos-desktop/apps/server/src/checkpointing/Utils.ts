@@ -1,12 +1,5 @@
 import { Encoding } from "effect";
-import {
-  CheckpointRef,
-  MessageId,
-  ProjectId,
-  type ProjectKind,
-  type ThreadId,
-  TurnId,
-} from "@arkos/contracts";
+import { CheckpointRef, MessageId, ProjectId, type ProjectKind, type ThreadId, TurnId } from "@arkos/contracts";
 import { resolveThreadWorkspaceCwd as resolveSharedThreadWorkspaceCwd } from "@arkos/shared/threadEnvironment";
 
 export const CHECKPOINT_REFS_PREFIX = "refs/arkos/checkpoints";

@@ -3,6 +3,10 @@
 // Layer: Web UI state helper
 // Depends on: Desktop update IPC contracts.
 
+// FILE: desktopUpdate.logic.ts
+// Purpose: Maps desktop updater state into sidebar button actions and copy.
+// Layer: Web UI state helper
+// Depends on: Desktop update IPC contracts.
 import type { DesktopUpdateActionResult, DesktopUpdateState } from "@arkos/contracts";
 
 export type DesktopUpdateButtonAction = "check" | "download" | "install" | "none";

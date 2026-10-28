@@ -1,120 +1,36 @@
 import { parseCuaActionDiagnostics } from "@arkos/shared/cuaActionDiagnostics";
 import { ComputerProgressGuard, type ComputerProgressAction } from "./computerProgressGuard.ts";
 import { beginComputerTurnCall } from "../computer/computerTurnTiming.ts";
-import {
-  bindComputerTargetRef,
-  computerElementRefIdentity,
-} from "../computer/computerElementIdentity.ts";
+import { bindComputerTargetRef, computerElementRefIdentity } from "../computer/computerElementIdentity.ts";
 import { makeComputerSpaceTools } from "./computerSpaceTools.ts";
 import { cursorToolActivity } from "../computer/cursorActivity.ts";
 import { waitForControl } from "../computer/waitForControl.ts";
-import {
-  assertDesktopOperationActive,
-  desktopOperationSignal,
-  withDesktopOperationSignal,
-} from "../computer/DesktopOperationQueue.ts";
+import { assertDesktopOperationActive, desktopOperationSignal, withDesktopOperationSignal } from "../computer/DesktopOperationQueue.ts";
 import { setTimeout as waitForComputer } from "node:timers/promises";
+/** Agent-facing desktop perception and control tools. */
 /** Agent-facing desktop perception and control tools. */
 import { Effect } from "effect";
 
-import {
-  COMPUTER_DRAG_MAX_DURATION_MS,
-  COMPUTER_HOTKEY_MAX_KEYS,
-  COMPUTER_KEY_NAME_MAX_LENGTH,
-  COMPUTER_MODIFIERS_MAX_ITEMS,
-  COMPUTER_SELECT_TEXT_RANGE_MAX,
-  COMPUTER_SEMANTIC_ACTION_MAX_LENGTH,
-  COMPUTER_TEXT_MAX_LENGTH,
-  COMPUTER_WAIT_MAX_MS,
-  type ComputerActionResult,
-  type ComputerApp,
-  type ComputerAvailability,
-  type ComputerBuildSignature,
-  type ComputerInputModifier,
-  type ComputerLaunchAppResult,
-  type ComputerPermission,
-  type ComputerRect,
-  type ComputerScreenshot,
-  type ComputerTarget,
-  type ComputerWindow,
-} from "@arkos/contracts";
+import { COMPUTER_DRAG_MAX_DURATION_MS, COMPUTER_HOTKEY_MAX_KEYS, COMPUTER_KEY_NAME_MAX_LENGTH, COMPUTER_MODIFIERS_MAX_ITEMS, COMPUTER_SELECT_TEXT_RANGE_MAX, COMPUTER_SEMANTIC_ACTION_MAX_LENGTH, COMPUTER_TEXT_MAX_LENGTH, COMPUTER_WAIT_MAX_MS, type ComputerActionResult, type ComputerAvailability, type ComputerBuildSignature, type ComputerInputModifier, type ComputerLaunchAppResult, type ComputerPermission, type ComputerRect, type ComputerScreenshot, type ComputerTarget } from "@arkos/contracts";
 
-import {
-  actionableElements,
-  diffActionableElements,
-  normalizeLabelSpaces,
-  resolveComputerSemanticTarget,
-  ComputerTargetError,
-  type ComputerActionableElementRef,
-  type ComputerActionableElements,
-} from "../computer/uiTreeTargeting.ts";
-import {
-  COMPUTER_ACTION_OBSERVATION_MAX_DIMENSION,
-  DEFAULT_COMPUTER_CAPTURE_MAX_DIMENSION,
-  MAX_COMPUTER_CLIPBOARD_BYTES,
-  ComputerBackendError,
-  type ComputerAgentDialect,
-  type ComputerCaptureRequest,
-  type ComputerMenuTarget,
-  type ComputerTextRange,
-} from "../computer/ComputerBackend.ts";
-import {
-  computerSetupSignal,
-  computerSetupToolNote,
-  type ComputerSetupSignal,
-} from "../computer/computerSetupSignal.ts";
-import {
-  ComputerLeaseError,
-  ComputerManager,
-  type ComputerActionObservation,
-} from "../computer/ComputerManager.ts";
-import {
-  computerAuditGatewayRequestId,
-  summarizeComputerAuditArgs,
-  type ComputerAuditEffect,
-  type ComputerAuditEntry,
-} from "../computer/computerAuditLog.ts";
-import {
-  ScreenshotFrameRegistry,
-  screenshotDeltaToDesktop,
-  screenshotPointToDesktop,
-  screenshotRectToDesktop,
-} from "../computer/screenshotFrames.ts";
+import { actionableElements, diffActionableElements, normalizeLabelSpaces, resolveComputerSemanticTarget, ComputerTargetError, type ComputerActionableElementRef, type ComputerActionableElements } from "../computer/uiTreeTargeting.ts";
+import { COMPUTER_ACTION_OBSERVATION_MAX_DIMENSION, DEFAULT_COMPUTER_CAPTURE_MAX_DIMENSION, MAX_COMPUTER_CLIPBOARD_BYTES, ComputerBackendError, type ComputerAgentDialect, type ComputerCaptureRequest, type ComputerMenuTarget, type ComputerTextRange } from "../computer/ComputerBackend.ts";
+import { computerSetupSignal, computerSetupToolNote, type ComputerSetupSignal } from "../computer/computerSetupSignal.ts";
+import { ComputerLeaseError, ComputerManager, type ComputerActionObservation } from "../computer/ComputerManager.ts";
+import { computerAuditGatewayRequestId, summarizeComputerAuditArgs, type ComputerAuditEffect, type ComputerAuditEntry } from "../computer/computerAuditLog.ts";
+import { ScreenshotFrameRegistry, screenshotDeltaToDesktop, screenshotPointToDesktop, screenshotRectToDesktop } from "../computer/screenshotFrames.ts";
 import { withDesktopDeliveryMode } from "../computer/DesktopOperationQueue.ts";
 import { CuaActionError } from "../computer/CuaComputerBackend.ts";
 import { cuaCaptureReuseEnabled } from "../computer/computerCallContext.ts";
 import { withModelDesktopObservation } from "../computer/modelDesktopObservation.ts";
 import { withComputerTask } from "../computer/computerTaskContext.ts";
-import {
-  COMPUTER_FOREGROUND_NOT_AUTHORIZED,
-  COMPUTER_FOREGROUND_NOT_REQUESTED_CODE,
-  type ComputerForegroundAuthorization,
-} from "../computer/computerVisibleUse.ts";
+import { COMPUTER_FOREGROUND_NOT_AUTHORIZED, COMPUTER_FOREGROUND_NOT_REQUESTED_CODE, type ComputerForegroundAuthorization } from "../computer/computerVisibleUse.ts";
 import { PROVIDERS_WITHOUT_APPROVAL_GATE } from "./approvalGate.ts";
 export { computerToolInstructions } from "./computerGuidance.ts";
-import {
-  COMPUTER_HELP_INDEX,
-  COMPUTER_HELP_SECTIONS,
-  COMPUTER_HELP_TOPICS,
-  type ComputerHelpTopic,
-} from "./computerGuidance.ts";
+import { COMPUTER_HELP_INDEX, COMPUTER_HELP_SECTIONS, COMPUTER_HELP_TOPICS, type ComputerHelpTopic } from "./computerGuidance.ts";
 import { mcpToolResultError, type McpToolCallResult } from "./protocol.ts";
-import {
-  ToolInputError,
-  errorText,
-  readBooleanArg,
-  readNumberArg,
-  readRecordArg,
-  readStringArg,
-  readStringArrayArg,
-  readVerbatimStringArg,
-} from "./toolInput.ts";
-import {
-  READ_ONLY_TOOL_ANNOTATIONS,
-  WRITE_TOOL_ANNOTATIONS,
-  type ToolContext,
-  type ToolEntry,
-} from "./toolRuntime.ts";
+import { ToolInputError, errorText, readBooleanArg, readNumberArg, readRecordArg, readStringArg, readStringArrayArg, readVerbatimStringArg } from "./toolInput.ts";
+import { READ_ONLY_TOOL_ANNOTATIONS, WRITE_TOOL_ANNOTATIONS, type ToolContext, type ToolEntry } from "./toolRuntime.ts";
 import { ToolGuidanceCadence } from "./toolGuidanceCadence.ts";
 
 /** Compact only Computer result JSON; preserve every value and other tool families. */

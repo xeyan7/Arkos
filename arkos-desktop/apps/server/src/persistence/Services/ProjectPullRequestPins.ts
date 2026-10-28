@@ -4,6 +4,12 @@
  * Repository keys are canonical values supplied by callers. This service owns only
  * persistence and never derives or normalizes repository identity.
  */
+/**
+ * Durable project-scoped pull request pins.
+ *
+ * Repository keys are canonical values supplied by callers. This service owns only
+ * persistence and never derives or normalizes repository identity.
+ */
 import { PositiveInt, ProjectId, TrimmedNonEmptyString } from "@arkos/contracts";
 import { Schema, ServiceMap } from "effect";
 import type { Effect } from "effect";

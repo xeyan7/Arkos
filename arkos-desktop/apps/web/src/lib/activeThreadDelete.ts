@@ -3,6 +3,10 @@
 // Layer: Web orchestration helper
 // Exports: deleteActiveThreadFromClient
 
+// FILE: activeThreadDelete.ts
+// Purpose: Owns the shared server-delete and worktree-cleanup sequence for active threads.
+// Layer: Web orchestration helper
+// Exports: deleteActiveThreadFromClient
 import type { ThreadId } from "@arkos/contracts";
 import { terminalScopeIdsForThread } from "@arkos/shared/terminalThreads";
 import { collectSubagentDescendants } from "@arkos/shared/threadHierarchy";

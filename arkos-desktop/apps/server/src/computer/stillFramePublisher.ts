@@ -23,6 +23,31 @@
  *
  * @module computer/stillFramePublisher
  */
+/**
+ * The still-frame stream every Tier-1 desktop backend publishes.
+ *
+ * A Tier-1 backend has no video encoder: it pulls one still on a timer and
+ * pushes it at whoever is watching the pane. The still is always scoped to the
+ * thing the agent is using — one exact window, or one browser tab — and never
+ * the whole desktop: a capture with no such target returns `undefined` and
+ * nothing is published. The loop around that is identical on every display
+ * server — one interval, one capture in flight at a time, a byte-identity
+ * dedupe (`StillFrameDedupe`), and the `force` bookkeeping that guarantees a
+ * receiver with nothing to draw gets a picture even when the target has not
+ * changed.
+ *
+ * The part worth stating is the failure bound. An earlier version re-armed the
+ * deferred force whenever a forced capture threw, and the `finally` block then
+ * immediately republished because a force was pending — so a target whose
+ * captures kept failing (a revoked Screen Recording grant, a window that moved
+ * off the current Space) spun in a tight recursive retry loop for as long as
+ * anyone watched the pane, with no delay between attempts. Here a failed force
+ * buys exactly one immediate retry; after that the request is dropped and the
+ * ordinary timer cadence takes over, so a persistent failure costs two captures
+ * per interval instead of an unbounded recursion.
+ *
+ * @module computer/stillFramePublisher
+ */
 import type { ComputerFrameListener, ComputerStreamFrame } from "./ComputerBackend.ts";
 import { createHash } from "node:crypto";
 

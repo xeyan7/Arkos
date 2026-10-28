@@ -6,6 +6,13 @@
 // Layer: Tasks route surface
 // Exports: TasksView (default)
 
+// FILE: TasksView.tsx
+// Purpose: The Tasks route — one calm list of everything to do, any of which can be handed to
+//          an agent. Open to-dos come first (what needs the user, then what's working, then
+//          the rest), a line at the end adds a new one, and finished ones fade out below.
+//          Selecting a to-do opens its card, floating beside the list.
+// Layer: Tasks route surface
+// Exports: TasksView (default)
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 

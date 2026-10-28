@@ -11,6 +11,19 @@
  *
  * @module agentGateway/stdioProxyScript
  */
+/**
+ * Stdio-to-HTTP proxy script for the Arkos agent gateway.
+ *
+ * Some MCP clients (ACP agents without `mcpCapabilities.http`) can only spawn
+ * stdio MCP servers. This module materializes a small self-contained script
+ * (runnable by both Node and Bun via `process.execPath`) that forwards each
+ * newline-delimited JSON-RPC message from stdin to the gateway's streamable
+ * HTTP endpoint and writes responses back to stdout. The endpoint URL and the
+ * per-thread bearer token arrive via environment variables so the script file
+ * itself is identical for every session.
+ *
+ * @module agentGateway/stdioProxyScript
+ */
 import { Effect, FileSystem, Path } from "effect";
 
 export const AGENT_GATEWAY_STDIO_PROXY_FILE_NAME = "agent-gateway-mcp-proxy.mjs";

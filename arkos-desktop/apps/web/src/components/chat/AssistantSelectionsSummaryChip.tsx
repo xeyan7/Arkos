@@ -2,6 +2,9 @@
 // Purpose: Renders the compact assistant-selection count chip used in composer and user bubbles.
 // Layer: Chat attachment presentation
 
+// FILE: AssistantSelectionsSummaryChip.tsx
+// Purpose: Renders the compact assistant-selection count chip used in composer and user bubbles.
+// Layer: Chat attachment presentation
 import { pluralize } from "@arkos/shared/text";
 
 import { MessageCircleIcon } from "~/lib/icons";

@@ -25,6 +25,33 @@
  *   caller thread's workspace — the driver checks canonicality; the workspace
  *   boundary is Arkos's own filesystem policy on top of that.
  */
+/**
+ * Agent-facing tools for the cua-driver CDP browser surface, exposed as
+ * `computer_browser_*`.
+ *
+ * These are deliberately separate from the integrated `browser_*` family:
+ * the integrated surface drives a Arkos-owned browser through its own host,
+ * while this surface dispatches through the desktop driver's CDP engine —
+ * the only route that reaches a driver-launched isolated Chromium or an
+ * approved existing profile, and the only input route that works on a
+ * background Chromium renderer (OS-level events do not reach inactive
+ * renderers; Input.dispatchMouseEvent does).
+ *
+ * Boundary rules this file owns:
+ * - `session`, `_session_id`, `_transport_session_id`, and every other
+ *   lifecycle field are injected by the host, never taken from model input.
+ *   The schemas below simply do not name them.
+ * - `target_id`/`tab_id`/refs are opaque session-scoped capabilities; they are
+ *   forwarded verbatim and never interpreted as desktop window ids. They are
+ *   also distinct from each other: results label both, and an omitted `tab_id`
+ *   resolves from the target's remembered bind only when unambiguous.
+ * - Deliberate driver refusals (`structuredContent.status === "refused"`)
+ *   are RESULTS, not errors: the model is expected to branch on the refusal
+ *   code (for example `browser_requires_setup` → call computer_browser_prepare).
+ * - Upload and download paths are canonicalized and must resolve inside the
+ *   caller thread's workspace — the driver checks canonicality; the workspace
+ *   boundary is Arkos's own filesystem policy on top of that.
+ */
 import { realpath } from "node:fs/promises";
 import { isAbsolute, sep } from "node:path";
 import { Effect } from "effect";
@@ -32,38 +59,16 @@ import { Effect } from "effect";
 import type { ComputerBrowserToolName } from "@arkos/contracts";
 import { COMPUTER_BROWSER_DRIVER_NAMES } from "@arkos/contracts";
 
-import {
-  ComputerBackendError,
-  type ComputerBrowserCallResult,
-} from "../computer/ComputerBackend.ts";
+import { ComputerBackendError, type ComputerBrowserCallResult } from "../computer/ComputerBackend.ts";
 import { CuaActionError } from "../computer/CuaComputerBackend.ts";
 import type { ComputerManager } from "../computer/ComputerManager.ts";
 import { withModelDesktopObservation } from "../computer/modelDesktopObservation.ts";
-import {
-  COMPUTER_FOREGROUND_NOT_AUTHORIZED,
-  COMPUTER_FOREGROUND_NOT_REQUESTED_CODE,
-  type ComputerForegroundAuthorization,
-} from "../computer/computerVisibleUse.ts";
+import { COMPUTER_FOREGROUND_NOT_AUTHORIZED, COMPUTER_FOREGROUND_NOT_REQUESTED_CODE, type ComputerForegroundAuthorization } from "../computer/computerVisibleUse.ts";
 import { ToolInputError, errorText } from "./toolInput.ts";
 import { mcpToolResultError, type McpToolCallResult } from "./protocol.ts";
-import {
-  READ_ONLY_TOOL_ANNOTATIONS,
-  WRITE_TOOL_ANNOTATIONS,
-  type ToolContext,
-  type ToolEntry,
-} from "./toolRuntime.ts";
-import {
-  COMPUTER_CONTROL_CAPABILITY,
-  computerApprovalRequiredError,
-  computerAuditErrorOutcome,
-  cuaActionErrorPayload,
-  type AgentGatewayComputerToolsOptions,
-} from "./computerTools.ts";
-import {
-  computerAuditGatewayRequestId,
-  summarizeComputerAuditArgs,
-  type ComputerAuditEffect,
-} from "../computer/computerAuditLog.ts";
+import { READ_ONLY_TOOL_ANNOTATIONS, WRITE_TOOL_ANNOTATIONS, type ToolContext, type ToolEntry } from "./toolRuntime.ts";
+import { COMPUTER_CONTROL_CAPABILITY, computerApprovalRequiredError, computerAuditErrorOutcome, cuaActionErrorPayload, type AgentGatewayComputerToolsOptions } from "./computerTools.ts";
+import { computerAuditGatewayRequestId, summarizeComputerAuditArgs, type ComputerAuditEffect } from "../computer/computerAuditLog.ts";
 import { computerBrowserEffect, computerBrowserFieldReadback } from "./computerBrowserEffect.ts";
 
 export interface AgentGatewayComputerBrowserToolsOptions {

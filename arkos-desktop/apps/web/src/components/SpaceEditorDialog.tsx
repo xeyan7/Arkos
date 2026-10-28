@@ -1,6 +1,8 @@
 // FILE: SpaceEditorDialog.tsx
 // Purpose: Shared create/edit dialog for a Space name and curated Central icon.
 
+// FILE: SpaceEditorDialog.tsx
+// Purpose: Shared create/edit dialog for a Space name and curated Central icon.
 import { SPACE_NAME_MAX_LENGTH } from "@arkos/contracts";
 import { useEffect, useId, useRef, useState } from "react";
 
@@ -9,23 +11,9 @@ import { DEFAULT_SPACE_ICON, DEFAULT_VOID_SPACE_ICON } from "~/lib/spaceGrouping
 import { suggestSpaceIcon } from "~/lib/spaceIconSuggestion";
 
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-  dialogFieldLabelClassName,
-} from "./ui/dialog";
+import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogPopup, DialogTitle, dialogFieldLabelClassName } from "./ui/dialog";
 import { Input } from "./ui/input";
-import {
-  SPACE_ICON_OPTIONS,
-  SpaceIcon,
-  VOID_SPACE_ICON_OPTIONS,
-  type SpaceIconValue,
-} from "./SpaceIcon";
+import { SPACE_ICON_OPTIONS, SpaceIcon, VOID_SPACE_ICON_OPTIONS, type SpaceIconValue } from "./SpaceIcon";
 import { cn } from "~/lib/utils";
 
 const FIELD_LABEL_CLASS_NAME = dialogFieldLabelClassName;

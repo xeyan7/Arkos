@@ -6,6 +6,14 @@
  *
  * @module ServerConfig
  */
+/**
+ * ServerConfig - Runtime configuration services.
+ *
+ * Defines process-level server configuration and networking helpers used by
+ * startup and runtime layers.
+ *
+ * @module ServerConfig
+ */
 import { Effect, FileSystem, Layer, Path, ServiceMap } from "effect";
 import { existsSync } from "node:fs";
 import OS from "node:os";
@@ -13,11 +21,7 @@ import path from "node:path";
 import pathPosix from "node:path/posix";
 import pathWin32 from "node:path/win32";
 
-import {
-  ensurePrivateDirectorySync,
-  ensurePrivateFileSync,
-  repairPrivateTreeSync,
-} from "./privatePathPermissions";
+import { ensurePrivateDirectorySync, ensurePrivateFileSync, repairPrivateTreeSync } from "./privatePathPermissions";
 import { realpathNearestExisting } from "./realpathNearestExisting";
 import { isLoopbackHost } from "./startupAccess";
 

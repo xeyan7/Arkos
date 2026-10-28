@@ -10,6 +10,17 @@
 // Layer: Web PDF rendering component
 // Exports: PdfPageView
 
+// FILE: PdfPageView.tsx
+// Purpose: Render a single PDF page for the in-app viewer: a HiDPI canvas plus a
+//          selectable text layer and a clickable link layer. Virtualized both
+//          ways — a page paints only while it is near the viewport and releases
+//          its canvas/text layer again once scrolled far away, so memory stays
+//          bounded on long documents. The placeholder box keeps its size either
+//          way so the scroll height (and page indicator) stay correct. The paint
+//          pipeline lives in usePdfPageRender; this component owns activation +
+//          layout markup.
+// Layer: Web PDF rendering component
+// Exports: PdfPageView
 import { useEffect, useRef, useState } from "react";
 
 import type { PDFDocumentProxy } from "~/lib/pdf/pdfEngine";

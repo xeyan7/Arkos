@@ -5,6 +5,12 @@
 // Layer: Shared presentation
 // Exports: SegmentedPicker, SegmentedPickerOption
 
+// FILE: SegmentedPicker.tsx
+// Purpose: The raised-thumb segmented control (a recessed track with a sliding selected chip that
+//          hangs past the track at either end), as a radio group with arrow-key selection.
+//          Styling lives in index.css (`.sidebar-segmented-picker`, `.sidebar-segmented-thumb`).
+// Layer: Shared presentation
+// Exports: SegmentedPicker, SegmentedPickerOption
 import type { ReactNode } from "react";
 
 import { useRadioGroupKeyboardNav } from "~/hooks/useRadioGroupKeyboardNav";

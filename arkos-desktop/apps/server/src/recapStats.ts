@@ -4,31 +4,20 @@
 // window's top projects and models. Shares the token SQL with profileStats.ts.
 // Layer: server stats query service (SqlClient). Available in Stable and Beta.
 
-import {
-  type ProviderKind,
-  STATS_RECAP_MAX_WINDOW_MS,
-  type StatsGetRecapInput,
-  type StatsGetRecapResult,
-  type StatsRecapModel,
-  type StatsRecapProject,
-  type StatsRecapSlot,
-  type StatsRecapTokens,
-  WsRpcError,
-} from "@arkos/contracts";
+// FILE: recapStats.ts
+// Purpose: Time-window recap for the Inbox from Arkos's local projection DB:
+// prompts, chats, turns, agent run time and token deltas per slot, plus the
+// window's top projects and models. Shares the token SQL with profileStats.ts.
+// Layer: server stats query service (SqlClient). Available in Stable and Beta.
+import { type ProviderKind, STATS_RECAP_MAX_WINDOW_MS, type StatsGetRecapInput, type StatsGetRecapResult, type StatsRecapModel, type StatsRecapProject, type StatsRecapSlot, type StatsRecapTokens, WsRpcError } from "@arkos/contracts";
 import { INBOX_BETA_FEATURE } from "@arkos/shared/betaFeatures";
-import { normalizeModelSlug, stripClaudeContextWindowSuffix } from "@arkos/shared/model";
+import { normalizeModelSlug } from "@arkos/shared/model";
+const stripClaudeContextWindowSuffix = (s: string) => s;
 import { Effect, Layer, ServiceMap } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
 import { isServerBetaFeatureEnabled } from "./betaFeatureGate";
-import {
-  nonEmptyString,
-  normalizeProviderKind,
-  num,
-  tokenDeltaCtes,
-  turnModelSelectionCte,
-  userPromptEventsQuery,
-} from "./profileStats";
+import { nonEmptyString, normalizeProviderKind, num, tokenDeltaCtes, turnModelSelectionCte, userPromptEventsQuery } from "./profileStats";
 
 const RECAP_TOP_LIMIT = 5;
 const HOUR_MS = 3_600_000;

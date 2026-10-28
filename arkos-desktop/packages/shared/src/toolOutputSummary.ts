@@ -3,6 +3,34 @@
 // Layer: Shared runtime utility
 // Exports: summarizeToolRawOutput, countTextLines, stripTrailingToolExitCode
 
+// FILE: toolOutputSummary.ts
+// Purpose: Produces compact display summaries from provider tool rawOutput payloads.
+// Layer: Shared runtime utility
+// Exports: summarizeToolRawOutput, countTextLines, stripTrailingToolExitCode
+// FILE: toolOutputSummary.ts
+// Purpose: Produces compact display summaries from provider tool rawOutput payloads.
+// Layer: Shared runtime utility
+// Exports: summarizeToolRawOutput, countTextLines, stripTrailingToolExitCode
+// FILE: toolOutputSummary.ts
+// Purpose: Produces compact display summaries from provider tool rawOutput payloads.
+// Layer: Shared runtime utility
+// Exports: summarizeToolRawOutput, countTextLines, stripTrailingToolExitCode
+// FILE: toolOutputSummary.ts
+// Purpose: Produces compact display summaries from provider tool rawOutput payloads.
+// Layer: Shared runtime utility
+// Exports: summarizeToolRawOutput, countTextLines, stripTrailingToolExitCode
+// FILE: toolOutputSummary.ts
+// Purpose: Produces compact display summaries from provider tool rawOutput payloads.
+// Layer: Shared runtime utility
+// Exports: summarizeToolRawOutput, countTextLines, stripTrailingToolExitCode
+// FILE: toolOutputSummary.ts
+// Purpose: Produces compact display summaries from provider tool rawOutput payloads.
+// Layer: Shared runtime utility
+// Exports: summarizeToolRawOutput, countTextLines, stripTrailingToolExitCode
+// FILE: toolOutputSummary.ts
+// Purpose: Produces compact display summaries from provider tool rawOutput payloads.
+// Layer: Shared runtime utility
+// Exports: summarizeToolRawOutput, countTextLines, stripTrailingToolExitCode
 import { pluralize } from "./text";
 
 function isRecord(value: unknown): value is Record<string, unknown> {

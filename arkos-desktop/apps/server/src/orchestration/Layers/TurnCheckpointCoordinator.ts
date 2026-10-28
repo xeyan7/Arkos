@@ -1,15 +1,8 @@
 import { Effect, Layer, Semaphore } from "effect";
 
-import {
-  canonicalImportPath,
-  findImportGitWorkspace,
-  importPathIdentity,
-} from "../projectImportPaths.ts";
+import { canonicalImportPath, findImportGitWorkspace, importPathIdentity } from "../projectImportPaths.ts";
 
-import {
-  TurnCheckpointCoordinator,
-  type TurnCheckpointCoordinatorShape,
-} from "../Services/TurnCheckpointCoordinator.ts";
+import { TurnCheckpointCoordinator, type TurnCheckpointCoordinatorShape } from "../Services/TurnCheckpointCoordinator.ts";
 
 const make = Effect.sync(() => {
   const leases = new Map<string, { readonly semaphore: Semaphore.Semaphore; users: number }>();

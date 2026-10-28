@@ -3,13 +3,12 @@
 // Layer: Chat composer UI
 // Exports: ActiveTaskListCard
 
+// FILE: ActiveTaskListCard.tsx
+// Purpose: Renders the active plan/task activity panel used above the composer.
+// Layer: Chat composer UI
+// Exports: ActiveTaskListCard
 import { pluralize } from "@arkos/shared/text";
-import {
-  PiArrowsInSimple,
-  PiArrowsOutSimple,
-  PiSidebarSimple,
-  PiSlidersHorizontal,
-} from "react-icons/pi";
+import { PiArrowsInSimple, PiArrowsOutSimple, PiSidebarSimple, PiSlidersHorizontal } from "react-icons/pi";
 
 import type { ActiveTaskListState } from "../../session-logic";
 import { TaskProgressSteps } from "./TaskProgressSteps";
@@ -17,19 +16,9 @@ import { BotIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 import { LiveStatusSpinner } from "../ui/spinner";
-import {
-  ComposerStackedPanelHeaderRow,
-  ComposerStackedPanelRowLabel,
-  ComposerStackedPanelRowMain,
-} from "./ComposerStackedPanelContent";
+import { ComposerStackedPanelHeaderRow, ComposerStackedPanelRowLabel, ComposerStackedPanelRowMain } from "./ComposerStackedPanelContent";
 import { COMPOSER_STACKED_PANEL_DIVIDER_CLASS_NAME } from "./ComposerStackedPanel";
-import {
-  COMPOSER_STACKED_PANEL_BODY_PADDING_CLASS_NAME,
-  COMPOSER_STACKED_PANEL_FOOTER_ROW_CLASS_NAME,
-  COMPOSER_STACKED_PANEL_ICON_BUTTON_CLASS_NAME,
-  COMPOSER_STACKED_PANEL_ICON_CLASS_NAME,
-  COMPOSER_STACKED_PANEL_SCROLL_REGION_CLASS_NAME,
-} from "./composerStackedPanelStyles";
+import { COMPOSER_STACKED_PANEL_BODY_PADDING_CLASS_NAME, COMPOSER_STACKED_PANEL_FOOTER_ROW_CLASS_NAME, COMPOSER_STACKED_PANEL_ICON_BUTTON_CLASS_NAME, COMPOSER_STACKED_PANEL_ICON_CLASS_NAME, COMPOSER_STACKED_PANEL_SCROLL_REGION_CLASS_NAME } from "./composerStackedPanelStyles";
 
 interface ActiveTaskListCardProps {
   activeTaskList: ActiveTaskListState;

@@ -4,6 +4,11 @@
 // opening a social composer is an explicit, user-initiated action.
 // Layer: web profile feature.
 
+// FILE: shareCardExport.ts
+// Purpose: Fully offline rendering of the share card to a PNG, plus clipboard copy,
+// file download, and social-intent URLs. No data leaves the device to BUILD the image;
+// opening a social composer is an explicit, user-initiated action.
+// Layer: web profile feature.
 import { toBlob } from "html-to-image";
 import { copyPngBlobToDesktopClipboard } from "~/lib/desktopClipboard";
 import { readNativeApi } from "~/nativeApi";

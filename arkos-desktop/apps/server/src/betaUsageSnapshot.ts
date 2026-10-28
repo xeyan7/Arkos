@@ -8,6 +8,15 @@
 // Only counts and provider names are written — never thread titles, paths,
 // prompts, or provider payloads.
 
+// FILE: betaUsageSnapshot.ts
+// Purpose: Computes the anonymous last-24h usage snapshot for Arkos Beta.
+// Layer: Server maintenance task — runs only on beta-flavor desktop builds.
+//
+// The desktop main process cannot reach the projection database, so the server
+// writes counts to <betaHome>/diagnostics/usage-snapshot.json and the main
+// process relays them as one `usage.daily` diagnostics event per UTC day.
+// Only counts and provider names are written — never thread titles, paths,
+// prompts, or provider payloads.
 import { Effect, Path } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 

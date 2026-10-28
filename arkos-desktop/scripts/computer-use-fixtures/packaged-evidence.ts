@@ -1,8 +1,4 @@
-import {
-  analyzeFocusSamples,
-  type FocusProbeExpect,
-  type FocusProbeRunResult,
-} from "../../apps/desktop/src/cuaFixtures/focusProbe.ts";
+import { analyzeFocusSamples, type FocusProbeExpect, type FocusProbeRunResult } from "../../apps/desktop/src/cuaFixtures/focusProbe.ts";
 import type { ComputerStatusResult, ComputerWindow } from "@arkos/contracts";
 
 /** A fresh host deliberately leaves its physical-input listener idle. The

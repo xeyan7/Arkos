@@ -1,82 +1,57 @@
-import {
-  GIT_TEXT_GENERATION_PROVIDERS,
-  type GitTextGenerationProvider,
-  type ModelSelection,
-  type ProviderKind,
-  type ProviderStartOptions,
-} from "@arkos/contracts";
-
+import { GIT_TEXT_GENERATION_PROVIDERS, type GitTextGenerationProvider, type ModelSelection, type ProviderKind, type ProviderStartOptions } from "@arkos/contracts";
 export const GIT_TEXT_GENERATION_PROVIDER_ORDER = GIT_TEXT_GENERATION_PROVIDERS;
 export type { GitTextGenerationProvider };
-
 const GIT_TEXT_GENERATION_PROVIDER_SET = new Set<ProviderKind>(GIT_TEXT_GENERATION_PROVIDERS);
-
 export interface TextGenerationProviderInput {
-  readonly modelSelection: ModelSelection;
-  readonly providerOptions?: ProviderStartOptions;
-  readonly codexHomePath?: string;
+    readonly modelSelection: ModelSelection;
+    readonly providerOptions?: ProviderStartOptions;
+    readonly codexHomePath?: string;
 }
-
-export function hasDedicatedTextGenerationProvider(
-  provider: ProviderKind | undefined,
-): provider is GitTextGenerationProvider {
-  return provider !== undefined && GIT_TEXT_GENERATION_PROVIDER_SET.has(provider);
+export function hasDedicatedTextGenerationProvider(provider: ProviderKind | undefined): provider is GitTextGenerationProvider {
+    return provider !== undefined && GIT_TEXT_GENERATION_PROVIDER_SET.has(provider);
 }
-
-export function resolveTextGenerationInputForSelection(
-  modelSelection: ModelSelection | undefined,
-  providerOptions: ProviderStartOptions | undefined,
-  resolvedProvider?: ProviderKind,
-): TextGenerationProviderInput | null {
-  if (!modelSelection) {
-    return null;
-  }
-  const routedModelSelection =
-    resolvedProvider !== undefined && resolvedProvider !== modelSelection.provider
-      ? ({
-          provider: resolvedProvider,
-          instanceId: modelSelection.instanceId,
-          model: modelSelection.model,
+export function resolveTextGenerationInputForSelection(modelSelection: ModelSelection | undefined, providerOptions: ProviderStartOptions | undefined, resolvedProvider?: ProviderKind): TextGenerationProviderInput | null {
+    if (!modelSelection) {
+        return null;
+    }
+    const routedModelSelection = resolvedProvider !== undefined && resolvedProvider !== modelSelection.provider
+        ? ({
+            provider: resolvedProvider,
+            instanceId: modelSelection.instanceId,
+            model: modelSelection.model,
         } as ModelSelection)
-      : modelSelection;
-  if (!hasDedicatedTextGenerationProvider(routedModelSelection.provider)) {
-    return null;
-  }
-
-  if (routedModelSelection.provider === "codex") {
+        : modelSelection;
+    if (!hasDedicatedTextGenerationProvider(routedModelSelection.provider)) {
+        return null;
+    }
+    if (routedModelSelection.provider === "arkos") {
+        return {
+            modelSelection: routedModelSelection,
+            ...(providerOptions ? { providerOptions } : {}),
+        };
+    }
     return {
-      modelSelection: routedModelSelection,
-      ...(providerOptions ? { providerOptions } : {}),
-      ...(providerOptions?.codex?.homePath
-        ? { codexHomePath: providerOptions.codex.homePath }
-        : {}),
+        modelSelection: routedModelSelection,
+        ...(providerOptions ? { providerOptions } : {}),
     };
-  }
-
-  return {
-    modelSelection: routedModelSelection,
-    ...(providerOptions ? { providerOptions } : {}),
-  };
 }
-
 export function buildGitTextGenerationCallInput(input: {
-  readonly textGenerationModel?: string | undefined;
-  readonly textGenerationModelSelection?: ModelSelection | undefined;
-  readonly codexHomePath?: string | undefined;
-  readonly providerOptions?: ProviderStartOptions | undefined;
+    readonly textGenerationModel?: string | undefined;
+    readonly textGenerationModelSelection?: ModelSelection | undefined;
+    readonly codexHomePath?: string | undefined;
+    readonly providerOptions?: ProviderStartOptions | undefined;
 }): {
-  readonly model?: string;
-  readonly modelSelection?: ModelSelection;
-  readonly codexHomePath?: string;
-  readonly providerOptions?: ProviderStartOptions;
+    readonly model?: string;
+    readonly modelSelection?: ModelSelection;
+    readonly codexHomePath?: string;
+    readonly providerOptions?: ProviderStartOptions;
 } {
-  const modelSelection = input.textGenerationModelSelection;
-  const model = input.textGenerationModel?.trim() || modelSelection?.model;
-
-  return {
-    ...(model ? { model } : {}),
-    ...(modelSelection ? { modelSelection } : {}),
-    ...(input.codexHomePath ? { codexHomePath: input.codexHomePath } : {}),
-    ...(input.providerOptions ? { providerOptions: input.providerOptions } : {}),
-  };
+    const modelSelection = input.textGenerationModelSelection;
+    const model = input.textGenerationModel?.trim() || modelSelection?.model;
+    return {
+        ...(model ? { model } : {}),
+        ...(modelSelection ? { modelSelection } : {}),
+        ...(input.codexHomePath ? {} : {}),
+        ...(input.providerOptions ? { providerOptions: input.providerOptions } : {}),
+    };
 }

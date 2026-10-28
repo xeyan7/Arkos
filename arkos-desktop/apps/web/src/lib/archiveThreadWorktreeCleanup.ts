@@ -3,6 +3,10 @@
 // Layer: Web orchestration helper
 // Exports: releaseOrphanedWorktreeAfterArchive
 
+// FILE: archiveThreadWorktreeCleanup.ts
+// Purpose: Releases a finished task's worktree after it was archived, when the user opted in.
+// Layer: Web orchestration helper
+// Exports: releaseOrphanedWorktreeAfterArchive
 import type { GitRemoveWorktreeInput, ThreadId } from "@arkos/contracts";
 
 import { toastManager } from "../components/ui/toast";

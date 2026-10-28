@@ -17,7 +17,7 @@ const managers: ComputerManager[] = [];
 afterEach(async () => {
   await Promise.all(managers.splice(0).map((m) => m.dispose()));
 });
-function context(provider: ProviderKind = "claudeAgent"): ToolContext {
+function context(provider: ProviderKind = "arkos"): ToolContext {
   return {
     principal: {
       kind: "provider-session",

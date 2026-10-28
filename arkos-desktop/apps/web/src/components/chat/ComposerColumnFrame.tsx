@@ -5,20 +5,16 @@
 // Layer: Chat composer layout
 // Exports: ComposerColumnFrame, ComposerStackedHeaderFrame
 
-import {
-  createContext,
-  memo,
-  useContext,
-  type HTMLAttributes,
-  type ReactNode,
-  type Ref,
-} from "react";
+// FILE: ComposerColumnFrame.tsx
+// Purpose: Shared composer column wrapper and the stacked-activity rail that must
+// live inside it (queued follow-ups, active plan/task activity). Keeps stacked panels
+// aligned with the composer input instead of the full gutter viewport.
+// Layer: Chat composer layout
+// Exports: ComposerColumnFrame, ComposerStackedHeaderFrame
+import { createContext, memo, useContext, type HTMLAttributes, type ReactNode, type Ref } from "react";
 
 import { cn } from "~/lib/utils";
-import {
-  COMPOSER_COLUMN_FRAME_CLASS_NAME,
-  COMPOSER_STACKED_HEADER_FRAME_CLASS_NAME,
-} from "./composerPickerStyles";
+import { COMPOSER_COLUMN_FRAME_CLASS_NAME, COMPOSER_STACKED_HEADER_FRAME_CLASS_NAME } from "./composerPickerStyles";
 
 const ComposerColumnFrameContext = createContext(false);
 

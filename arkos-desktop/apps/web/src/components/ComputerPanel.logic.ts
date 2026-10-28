@@ -1,14 +1,4 @@
-import {
-  COMPUTER_MAC_BACKEND,
-  COMPUTER_NESTED_KWIN_BACKEND,
-  type ComputerActionEvent,
-  type ComputerAvailability,
-  type ComputerFrameHeader,
-  type ComputerHealth,
-  type ComputerStatusResult,
-  type ComputerWindow,
-  type ThreadComputerState,
-} from "@arkos/contracts";
+import { COMPUTER_MAC_BACKEND, COMPUTER_NESTED_KWIN_BACKEND, type ComputerActionEvent, type ComputerAvailability, type ComputerFrameHeader, type ComputerHealth, type ComputerStatusResult, type ComputerWindow, type ThreadComputerState } from "@arkos/contracts";
 import { listComputerPermissions } from "@arkos/shared/computerGrants";
 import { COMPUTER_TOOL_TITLES, computerToolName } from "../lib/computerToolPresentation";
 

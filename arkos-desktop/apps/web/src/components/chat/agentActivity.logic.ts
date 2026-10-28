@@ -3,6 +3,10 @@
 // Layer: Chat presentation helpers
 // Exports: agent activity detection, formatting, and timeline compaction
 
+// FILE: agentActivity.logic.ts
+// Purpose: Derive compact transcript rows and full-detail models for agent activity.
+// Layer: Chat presentation helpers
+// Exports: agent activity detection, formatting, and timeline compaction
 import { normalizeCompactToolLabel } from "../../lib/toolCallLabel";
 import type { WorkLogEntry } from "../../session-logic";
 

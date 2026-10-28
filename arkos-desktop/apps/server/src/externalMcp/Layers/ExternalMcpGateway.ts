@@ -1,17 +1,4 @@
-import {
-  EXTERNAL_MCP_DEFAULT_WAIT_MS,
-  EXTERNAL_MCP_MAX_MESSAGE_CHARS,
-  EXTERNAL_MCP_MAX_PROMPT_CHARS,
-  EXTERNAL_MCP_MAX_WAIT_MS,
-  ExternalMcpCreateTaskInput,
-  ExternalMcpReadTaskInput,
-  ExternalMcpWaitTaskInput,
-  ProjectId,
-  ThreadId,
-  type ExternalMcpCapability,
-  type ProviderKind,
-  type ServerProviderStatus,
-} from "@arkos/contracts";
+import { EXTERNAL_MCP_DEFAULT_WAIT_MS, EXTERNAL_MCP_MAX_MESSAGE_CHARS, EXTERNAL_MCP_MAX_PROMPT_CHARS, EXTERNAL_MCP_MAX_WAIT_MS, ExternalMcpCreateTaskInput, ExternalMcpReadTaskInput, ExternalMcpWaitTaskInput, ProjectId, ThreadId, type ExternalMcpCapability, type ProviderKind, type ServerProviderStatus } from "@arkos/contracts";
 import { Effect, Layer, Option, Schema } from "effect";
 import { isProviderKind } from "@arkos/shared/providerInstances";
 
@@ -27,66 +14,18 @@ import { AgentGatewayOperationRepository } from "../../agentGateway/Services/Age
 import { makeCreateThreadsHandler } from "../../agentGateway/creationCoordinator.ts";
 import { recoverInterruptedAgentGatewayOperations } from "../../agentGateway/startupRecovery.ts";
 import { extractBearerToken } from "../../agentGateway/bearerToken.ts";
-import {
-  buildMcpInitializeResult,
-  JSON_RPC_INVALID_PARAMS,
-  JSON_RPC_INVALID_REQUEST,
-  JSON_RPC_METHOD_NOT_FOUND,
-  jsonRpcError,
-  jsonRpcResult,
-  mcpToolResultError,
-  mcpToolResultJson,
-  parseMcpMessage,
-  type JsonRpcId,
-  type JsonRpcRequest,
-  type McpToolCallResult,
-} from "../../agentGateway/protocol.ts";
-import {
-  filterToolsByCapability,
-  gatewayToolErrorResult,
-  GatewayToolError,
-  READ_ONLY_TOOL_ANNOTATIONS,
-  type ExternalClientPrincipal,
-  type McpToolEntry,
-} from "../../agentGateway/toolRuntime.ts";
-import {
-  AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION,
-  agentGatewayTargetOptionGuidance,
-  loadAgentGatewayProviderCatalog,
-  type AgentGatewayProviderAvailability,
-} from "../../agentGateway/targetResolver.ts";
-import {
-  decodeCreateThreadsInput,
-  errorText,
-  PROVIDER_KINDS,
-  ToolInputError,
-} from "../../agentGateway/toolInput.ts";
-import {
-  summarizeThreadDetail,
-  summarizeWaitThreadText,
-} from "../../agentGateway/threadSummary.ts";
-import {
-  latestExternalMcpWaitState,
-  requestedExternalMcpRunId,
-  terminalExternalMcpSessionStateForRun,
-  waitForExternalMcpTaskState,
-} from "../waitForTask.ts";
+import { buildMcpInitializeResult, JSON_RPC_INVALID_PARAMS, JSON_RPC_INVALID_REQUEST, JSON_RPC_METHOD_NOT_FOUND, jsonRpcError, jsonRpcResult, mcpToolResultError, mcpToolResultJson, parseMcpMessage, type JsonRpcId, type JsonRpcRequest, type McpToolCallResult } from "../../agentGateway/protocol.ts";
+import { filterToolsByCapability, gatewayToolErrorResult, GatewayToolError, READ_ONLY_TOOL_ANNOTATIONS, type ExternalClientPrincipal, type McpToolEntry } from "../../agentGateway/toolRuntime.ts";
+import { AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION, agentGatewayTargetOptionGuidance, loadAgentGatewayProviderCatalog, type AgentGatewayProviderAvailability } from "../../agentGateway/targetResolver.ts";
+import { decodeCreateThreadsInput, errorText, PROVIDER_KINDS, ToolInputError } from "../../agentGateway/toolInput.ts";
+import { summarizeThreadDetail, summarizeWaitThreadText } from "../../agentGateway/threadSummary.ts";
+import { latestExternalMcpWaitState, requestedExternalMcpRunId, terminalExternalMcpSessionStateForRun, waitForExternalMcpTaskState } from "../waitForTask.ts";
 import { ExternalMcpRepository } from "../Services/ExternalMcpRepository.ts";
-import {
-  ExternalMcpError,
-  ExternalMcpService,
-  type ExternalMcpVerifiedClient,
-} from "../Services/ExternalMcpService.ts";
+import { ExternalMcpError, ExternalMcpService, type ExternalMcpVerifiedClient } from "../Services/ExternalMcpService.ts";
 import { makeExternalMcpAuditCompletion } from "../auditCompletion.ts";
 import { verifyExternalMcpTransportCredential } from "../credentialVerification.ts";
-import {
-  buildExternalMcpOverviewNextSteps,
-  buildExternalMcpOverviewProjects,
-} from "../overview.ts";
-import {
-  ExternalMcpGateway,
-  type ExternalMcpGatewayShape,
-} from "../Services/ExternalMcpGateway.ts";
+import { buildExternalMcpOverviewNextSteps, buildExternalMcpOverviewProjects } from "../overview.ts";
+import { ExternalMcpGateway, type ExternalMcpGatewayShape } from "../Services/ExternalMcpGateway.ts";
 
 const EXTERNAL_MCP_INSTRUCTIONS =
   "This is Arkos's loopback-only external integration. Call arkos_overview first to discover the allowed projects (with on-disk paths), provider availability, and granted scopes. Tools are restricted to the integration's allowed projects and scopes. Task creation is one task per stable requestId and defaults to a managed worktree with approval-required execution.";

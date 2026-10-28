@@ -1,4 +1,5 @@
 /** Window geometry shared by action routing, observation and fake captures. */
+/** Window geometry shared by action routing, observation and fake captures. */
 import type { ComputerPoint, ComputerRect, ComputerWindow } from "@arkos/contracts";
 
 import { ComputerBackendError } from "./ComputerBackend.ts";

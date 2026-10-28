@@ -4,21 +4,16 @@ import type { ComposerComputerControlMode } from "./computerControlMode";
 // Purpose: Defines composer draft state, stable defaults, and content/project normalization.
 // Exports: Internal domain primitives plus public facade types.
 
-import {
-  type ModelSelection,
-  type OrchestrationLatestTurn,
-  type OrchestrationThreadPullRequest,
-  type ProjectId,
-  type ProviderInteractionMode,
-  type ProviderInstanceId,
-  type ProviderKind,
-  type ProviderMentionReference,
-  type ProviderModelOptions,
-  type ProviderSkillReference,
-  type ProviderStartOptions,
-  type RuntimeMode,
-  type ThreadId,
-} from "@arkos/contracts";
+// FILE: composerDraftDomain.ts
+// Purpose: Defines composer draft state, stable defaults, and content/project normalization.
+// Exports: Internal domain primitives plus public facade types.
+// FILE: composerDraftDomain.ts
+// Purpose: Defines composer draft state, stable defaults, and content/project normalization.
+// Exports: Internal domain primitives plus public facade types.
+// FILE: composerDraftDomain.ts
+// Purpose: Defines composer draft state, stable defaults, and content/project normalization.
+// Exports: Internal domain primitives plus public facade types.
+import { type ModelSelection, type OrchestrationLatestTurn, type OrchestrationThreadPullRequest, type ProjectId, type ProviderInteractionMode, type ProviderInstanceId, type ProviderKind, type ProviderMentionReference, type ProviderModelOptions, type ProviderSkillReference, type ProviderStartOptions, type RuntimeMode, type ThreadId } from "@arkos/contracts";
 import * as Equal from "effect/Equal";
 import * as Schema from "effect/Schema";
 import { shallow } from "zustand/vanilla/shallow";
@@ -26,34 +21,11 @@ import { shallow } from "zustand/vanilla/shallow";
 import { normalizeAssistantSelectionAttachment } from "./lib/assistantSelections";
 import { type BrowserAnnotationDraft, normalizeBrowserAnnotations } from "./lib/browserAnnotations";
 import type { ComposerImageSource } from "./lib/composerImageSource";
-import {
-  type PastedTextDraft,
-  countPastedTextLines,
-  createPastedTextDraft,
-  normalizePastedTextContent,
-} from "./lib/composerPastedText";
-import {
-  type FileCommentDraft,
-  type FileCommentSelection,
-  normalizeFileCommentSelection,
-} from "./lib/fileComments";
-import {
-  type PullRequestContextDraft,
-  normalizePullRequestContexts,
-} from "./lib/pullRequestContext";
-import {
-  INLINE_TERMINAL_CONTEXT_PLACEHOLDER,
-  type TerminalContextDraft,
-  normalizeTerminalContextText,
-} from "./lib/terminalContext";
-import {
-  type ChatAssistantSelectionAttachment,
-  type ChatFileAttachment,
-  type ChatImageAttachment,
-  DEFAULT_INTERACTION_MODE,
-  DEFAULT_RUNTIME_MODE,
-  type ThreadPrimarySurface,
-} from "./types";
+import { type PastedTextDraft, countPastedTextLines, createPastedTextDraft, normalizePastedTextContent } from "./lib/composerPastedText";
+import { type FileCommentDraft, type FileCommentSelection, normalizeFileCommentSelection } from "./lib/fileComments";
+import { type PullRequestContextDraft, normalizePullRequestContexts } from "./lib/pullRequestContext";
+import { INLINE_TERMINAL_CONTEXT_PLACEHOLDER, type TerminalContextDraft, normalizeTerminalContextText } from "./lib/terminalContext";
+import { type ChatAssistantSelectionAttachment, type ChatFileAttachment, type ChatImageAttachment, DEFAULT_INTERACTION_MODE, DEFAULT_RUNTIME_MODE, type ThreadPrimarySurface } from "./types";
 
 export const COMPOSER_DRAFT_STORAGE_KEY = "arkos:composer-drafts:v1";
 export const COMPOSER_DRAFT_STORAGE_VERSION = 6;

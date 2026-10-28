@@ -2,19 +2,11 @@
 // Purpose: Hydrates Electron's inherited env with values from the user's login shell.
 // Exports: syncShellEnvironment for desktop startup.
 
-import {
-  isPathName,
-  listLoginShellCandidates,
-  mergePathEntries,
-  readPathFromLaunchctl,
-  readWindowsPersistentEnvironment,
-  type ShellEnvironmentReader,
-  type WindowsEnvironmentReader,
-} from "@arkos/shared/shell";
-import {
-  createCachedLoginShellEnvironmentReader,
-  LOGIN_SHELL_ENVIRONMENT_NAMES,
-} from "@arkos/shared/loginShellEnvironment";
+// FILE: syncShellEnvironment.ts
+// Purpose: Hydrates Electron's inherited env with values from the user's login shell.
+// Exports: syncShellEnvironment for desktop startup.
+import { isPathName, listLoginShellCandidates, mergePathEntries, readPathFromLaunchctl, readWindowsPersistentEnvironment, type ShellEnvironmentReader, type WindowsEnvironmentReader } from "@arkos/shared/shell";
+import { createCachedLoginShellEnvironmentReader, LOGIN_SHELL_ENVIRONMENT_NAMES } from "@arkos/shared/loginShellEnvironment";
 
 function logShellEnvironmentWarning(message: string, error?: unknown): void {
   console.warn(`[desktop] ${message}`, error instanceof Error ? error.message : (error ?? ""));

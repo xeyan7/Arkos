@@ -1,50 +1,33 @@
 /** Small packaged-app acceptance path. Each measured task owns a fresh thread;
  * state in two controlled AppKit processes supplies the independent oracle. */
+/** Small packaged-app acceptance path. Each measured task owns a fresh thread;
+ * state in two controlled AppKit processes supplies the independent oracle. */
+/** Small packaged-app acceptance path. Each measured task owns a fresh thread;
+ * state in two controlled AppKit processes supplies the independent oracle. */
+/** Small packaged-app acceptance path. Each measured task owns a fresh thread;
+ * state in two controlled AppKit processes supplies the independent oracle. */
+/** Small packaged-app acceptance path. Each measured task owns a fresh thread;
+ * state in two controlled AppKit processes supplies the independent oracle. */
+/** Small packaged-app acceptance path. Each measured task owns a fresh thread;
+ * state in two controlled AppKit processes supplies the independent oracle. */
+/** Small packaged-app acceptance path. Each measured task owns a fresh thread;
+ * state in two controlled AppKit processes supplies the independent oracle. */
+/** Small packaged-app acceptance path. Each measured task owns a fresh thread;
+ * state in two controlled AppKit processes supplies the independent oracle. */
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, realpath, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import {
-  ClientOrchestrationCommand,
-  COMPUTER_WS_METHODS,
-  ModelSelection,
-  ORCHESTRATION_WS_METHODS,
-  ProjectId,
-  ThreadId,
-  WS_METHODS,
-  type OrchestrationLatestTurn,
-  type ServerConfig,
-} from "@arkos/contracts";
+import { ClientOrchestrationCommand, COMPUTER_WS_METHODS, ModelSelection, ORCHESTRATION_WS_METHODS, ProjectId, ThreadId, WS_METHODS, type OrchestrationLatestTurn, type ServerConfig } from "@arkos/contracts";
 import { ARKOS_DESKTOP_SMOKE_USER_DATA_ENV } from "@arkos/shared/desktopIdentity";
 import { Schema, type Effect } from "effect";
-import {
-  startFocusProbe,
-  type FocusProbeExpect,
-} from "../../apps/desktop/src/cuaFixtures/focusProbe.ts";
+import { startFocusProbe, type FocusProbeExpect } from "../../apps/desktop/src/cuaFixtures/focusProbe.ts";
 import { artifactIdentity, PackagedAppInstallationError } from "./packaged-artifact.ts";
-import {
-  collectComputerRun,
-  prepareComputerRunDiagnostics,
-  type DiagnosticToolCaller,
-} from "./measurement.ts";
-import {
-  connectPackagedOwner,
-  waitForSelectedProvider,
-  type PackagedOwnerClient,
-} from "./packaged-client.ts";
-import {
-  assessContinuousFocus,
-  assessFixtureReportCoverage,
-  assertPassiveComputerReady,
-  fixtureReceiptTiming,
-  fixtureUnchanged,
-  resolveFixtureComputerWindow,
-  verifyFixtureClick,
-  type FixtureReportVerdict,
-  type FixtureState,
-} from "./packaged-evidence.ts";
+import { collectComputerRun, prepareComputerRunDiagnostics, type DiagnosticToolCaller } from "./measurement.ts";
+import { connectPackagedOwner, waitForSelectedProvider, type PackagedOwnerClient } from "./packaged-client.ts";
+import { assessContinuousFocus, assessFixtureReportCoverage, assertPassiveComputerReady, fixtureReceiptTiming, fixtureUnchanged, resolveFixtureComputerWindow, verifyFixtureClick, type FixtureReportVerdict, type FixtureState } from "./packaged-evidence.ts";
 import { delay, startNativeTarget, waitUntil } from "./packaged-fixture.ts";
 
 const { values } = parseArgs({

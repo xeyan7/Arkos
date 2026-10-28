@@ -3,13 +3,14 @@
 // Layer: Chat status presentation
 // Exports: ProviderHealthBanner
 
+// FILE: ProviderHealthBanner.tsx
+// Purpose: Surfaces provider availability warnings above the active chat.
+// Layer: Chat status presentation
+// Exports: ProviderHealthBanner
 import { PROVIDER_DISPLAY_NAMES, type ServerProviderStatus } from "@arkos/contracts";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "../ui/alert";
 import { IconButton } from "../ui/icon-button";
-import {
-  EXPANDED_NOTIFICATION_SURFACE_CLASS_NAME,
-  NOTIFICATION_ICON_CLASS_NAME,
-} from "../ui/notificationSurface";
+import { EXPANDED_NOTIFICATION_SURFACE_CLASS_NAME, NOTIFICATION_ICON_CLASS_NAME } from "../ui/notificationSurface";
 import { CircleAlertIcon, TriangleAlertIcon, XIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { ChatColumnBannerFrame } from "./ChatColumnBannerFrame";

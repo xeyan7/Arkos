@@ -3,16 +3,14 @@
 // Layer: UI component
 // Exports: RecentViewSwitcher plus item shape used by the chat route shell.
 
+// FILE: RecentViewSwitcher.tsx
+// Purpose: Render the transient Ctrl+Tab recent-view overlay.
+// Layer: UI component
+// Exports: RecentViewSwitcher plus item shape used by the chat route shell.
 import type { KeybindingShortcut } from "@arkos/contracts";
 
 import { formatShortcutLabel } from "../keybindings";
-import {
-  MessageCircleIcon,
-  PanelLeftIcon,
-  PinFilledIcon,
-  PluginIcon,
-  SettingsIcon,
-} from "../lib/icons";
+import { MessageCircleIcon, PanelLeftIcon, PinFilledIcon, PluginIcon, SettingsIcon } from "../lib/icons";
 import { cn } from "../lib/utils";
 import type { RecentViewDisplayEntry } from "../recentViews.logic";
 import { ProviderIcon } from "./ProviderIcon";

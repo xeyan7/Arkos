@@ -5,6 +5,12 @@
 // Layer: Pull request presentation
 // Exports: PullRequestCodeTab (default export for React.lazy)
 
+// FILE: PullRequestCodeTab.tsx
+// Purpose: The Code tab of the pull request detail surface — owns the diff query and the
+//          patch viewport. Lazy-loaded by PullRequestDetailPanel so the diff renderer and its
+//          worker infrastructure never ship to users who only read the list or Summary.
+// Layer: Pull request presentation
+// Exports: PullRequestCodeTab (default export for React.lazy)
 import type { PullRequestDetail, PullRequestDetailInput } from "@arkos/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -13,11 +19,7 @@ import { DiffPanelPatchViewport } from "~/components/DiffPanelPatchViewport";
 import { DiffWorkerPoolProvider } from "~/components/DiffWorkerPoolProvider";
 import { DiffPanelLoadingState } from "~/components/DiffPanelShell";
 import { useTheme } from "~/hooks/useTheme";
-import {
-  getRenderablePatch,
-  sortFileDiffsByPath,
-  summarizeRenderablePatchStats,
-} from "~/lib/diffRendering";
+import { getRenderablePatch, sortFileDiffsByPath, summarizeRenderablePatchStats } from "~/lib/diffRendering";
 import { pullRequestDiffQueryOptions } from "~/lib/pullRequestReactQuery";
 import { cn } from "~/lib/utils";
 import { PullRequestDiffStat } from "./PullRequestDiffStat";

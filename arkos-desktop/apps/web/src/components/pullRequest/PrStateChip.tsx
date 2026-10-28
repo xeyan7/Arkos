@@ -4,14 +4,16 @@
 // Layer: UI component (pure)
 // Exports: PrStateChip
 
+// FILE: PrStateChip.tsx
+// Purpose: Compact PR chip (state icon + #number, hover title) shared by the
+//          kanban card meta row and the sidebar Activity rows.
+// Layer: UI component (pure)
+// Exports: PrStateChip
 import type { OrchestrationThreadPullRequest } from "@arkos/contracts";
 import type { MouseEvent } from "react";
 
 import { cn } from "~/lib/utils";
-import {
-  PR_STATE_PRESENTATION_ICONS,
-  resolvePrStatePresentation,
-} from "./pullRequestStatePresentation";
+import { PR_STATE_PRESENTATION_ICONS, resolvePrStatePresentation } from "./pullRequestStatePresentation";
 import { PR_FINE_TEXT_CLASS_NAME } from "./pullRequestText";
 
 export function PrStateChip({

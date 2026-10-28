@@ -1,8 +1,4 @@
-import type {
-  ClientOrchestrationCommand,
-  OrchestrationCommand,
-  ProjectId,
-} from "@arkos/contracts";
+import type { ClientOrchestrationCommand, OrchestrationCommand, ProjectId } from "@arkos/contracts";
 import { isWorkspaceRootWithin, workspaceRootsEqual } from "@arkos/shared/threadWorkspace";
 import type { FileSystem, Path } from "effect";
 import { Effect, Schedule } from "effect";

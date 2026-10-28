@@ -6,6 +6,13 @@
 // Layer: Pull request presentation
 // Exports: PullRequestChecksRing
 
+// FILE: PullRequestChecksRing.tsx
+// Purpose: Segmented stroke-circle summarizing a PR's check outcomes at a glance — arc length
+//          proportional to each bucket (green passed, red failed/cancelled, amber running,
+//          muted skipped/neutral), with small gaps between segments like the reference
+//          design's checks donut. Replaces a static glyph in the Checks meta row.
+// Layer: Pull request presentation
+// Exports: PullRequestChecksRing
 import type { PullRequestCheck, PullRequestCheckStatus } from "@arkos/contracts";
 
 import { cn } from "~/lib/utils";

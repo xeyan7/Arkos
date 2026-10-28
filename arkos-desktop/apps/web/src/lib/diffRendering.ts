@@ -3,6 +3,10 @@
 // Layer: Web diff utilities
 // Depends on: @pierre/diffs patch parsing
 
+// FILE: diffRendering.ts
+// Purpose: Shared helpers for rendering, caching, copying, and summarizing git patches.
+// Layer: Web diff utilities
+// Depends on: @pierre/diffs patch parsing
 import { parsePatchFiles } from "@pierre/diffs";
 import type { FileDiffMetadata } from "@pierre/diffs/react";
 

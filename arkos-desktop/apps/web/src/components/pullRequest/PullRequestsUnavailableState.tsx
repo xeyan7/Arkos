@@ -5,19 +5,18 @@
 // Layer: Pull request presentation
 // Exports: PullRequestsUnavailableState, isPullRequestsUnavailableError
 
+// FILE: PullRequestsUnavailableState.tsx
+// Purpose: Actionable empty state for the pull requests surface when the GitHub CLI is missing,
+//          unauthenticated, rate-limited, or a request otherwise failed — each case gets a short
+//          explanation and a copyable terminal command or reset time instead of a dead end.
+// Layer: Pull request presentation
+// Exports: PullRequestsUnavailableState, isPullRequestsUnavailableError
 import { useEffect, useRef, useState } from "react";
 
 import { useAppSettings } from "~/appSettings";
 import { Button } from "~/components/ui/button";
 import { toastManager } from "~/components/ui/toast";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "~/components/ui/empty";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "~/components/ui/empty";
 import { copyTextToClipboard } from "~/hooks/useCopyToClipboard";
 import { CheckIcon, CopyIcon, GitPullRequestIcon, TriangleAlertIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";

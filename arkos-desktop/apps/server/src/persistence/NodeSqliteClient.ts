@@ -4,6 +4,12 @@
  *
  * @module SqliteClient
  */
+/**
+ * Port of `@effect/sql-sqlite-node` that uses the native `node:sqlite`
+ * bindings instead of `better-sqlite3`.
+ *
+ * @module SqliteClient
+ */
 import { DatabaseSync, type StatementSync } from "node:sqlite";
 
 import * as Cache from "effect/Cache";

@@ -1,6 +1,8 @@
 // FILE: SpaceProjectPickerDialog.tsx
 // Purpose: Searchable bulk assignment flow for populating an empty Space.
 
+// FILE: SpaceProjectPickerDialog.tsx
+// Purpose: Searchable bulk assignment flow for populating an empty Space.
 import type { ProjectId } from "@arkos/contracts";
 import { useEffect, useMemo, useState } from "react";
 
@@ -15,15 +17,7 @@ import { useWorkspacePathsStore } from "~/workspacePathsStore";
 import { ProjectSidebarIcon } from "./ProjectSidebarIcon";
 import { SpaceIcon } from "./SpaceIcon";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-} from "./ui/dialog";
+import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogPopup, DialogTitle } from "./ui/dialog";
 import { SearchInput } from "./ui/search-input";
 
 export function SpaceProjectPickerDialog(props: {

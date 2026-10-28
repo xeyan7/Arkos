@@ -3,6 +3,10 @@
 // Layer: UI styling helper
 // Exports: surface/option/radius tokens; open panels via ComposerPickerMenuPopup / ComposerPickerSelectPopup
 
+// FILE: composerPickerStyles.ts
+// Purpose: Shared tokens for picker open panels (shell, options, radius) and composer chrome.
+// Layer: UI styling helper
+// Exports: surface/option/radius tokens; open panels via ComposerPickerMenuPopup / ComposerPickerSelectPopup
 import { FLOATING_OVERLAY_SURFACE_CLASS_NAME } from "~/surfaceStyles";
 import { MUTED_LABEL_TEXT_CLASS_NAME } from "~/surfaceStyles";
 

@@ -18,7 +18,7 @@ describe("resolveRuntimeModelDescriptor", () => {
 
     expect(
       resolveRuntimeModelDescriptor({
-        provider: "claudeAgent",
+        provider: "arkos",
         model: "claude-sonnet-5",
         runtimeModels,
       }),
@@ -34,22 +34,22 @@ describe("resolveRuntimeModelDescriptor", () => {
       { slug, resolvedModel: "claude-opus-6[1m]", name: "Opus", supportsAutoMode },
     ];
     const [option] = mergeDynamicModelOptions({
-      provider: "claudeAgent",
+      provider: "arkos",
       staticOptions: [],
       dynamicModels: runtimeModels,
     });
     expect(option?.slug).toBe("claude-opus-6");
     const descriptor = resolveRuntimeModelDescriptor({
-      provider: "claudeAgent",
+      provider: "arkos",
       model: option?.slug,
       runtimeModels,
     });
     expect(descriptor).toBe(runtimeModels[0]);
     expect(
-      providerModelSupportsAutoRuntimeMode("claudeAgent", descriptor, {
-        provider: "claudeAgent",
-        instanceId: "claudeAgent",
-        driver: "claudeAgent",
+      providerModelSupportsAutoRuntimeMode("arkos", descriptor, {
+        provider: "arkos",
+        instanceId: "arkos",
+        driver: "arkos",
         status: "ready",
         available: true,
         authStatus: "authenticated",
@@ -71,7 +71,7 @@ describe("resolveRuntimeModelDescriptor", () => {
     ];
     expect(
       resolveRuntimeModelDescriptor({
-        provider: "claudeAgent",
+        provider: "arkos",
         model: "claude-opus-6",
         runtimeModels,
       }),
@@ -81,7 +81,7 @@ describe("resolveRuntimeModelDescriptor", () => {
   it("does not resolve an explicitly qualified selection to a bare Claude descriptor", () => {
     expect(
       resolveRuntimeModelDescriptor({
-        provider: "claudeAgent",
+        provider: "arkos",
         model: "claude-opus-6[1m]",
         runtimeModels: [{ slug: "claude-opus-6", name: "Opus", supportsAutoMode: true }],
       }),

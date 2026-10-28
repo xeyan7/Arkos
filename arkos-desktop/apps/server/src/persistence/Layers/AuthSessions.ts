@@ -4,17 +4,7 @@ import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 
 import { toPersistenceSqlOrDecodeError } from "../Errors";
-import {
-  AuthSessionRecord,
-  AuthSessionRepository,
-  type AuthSessionRepositoryShape,
-  CreateAuthSessionInput,
-  GetAuthSessionByIdInput,
-  ListActiveAuthSessionsInput,
-  RevokeAuthSessionInput,
-  RevokeOtherAuthSessionsInput,
-  SetAuthSessionLastConnectedAtInput,
-} from "../Services/AuthSessions";
+import { AuthSessionRecord, AuthSessionRepository, type AuthSessionRepositoryShape, CreateAuthSessionInput, GetAuthSessionByIdInput, ListActiveAuthSessionsInput, RevokeAuthSessionInput, RevokeOtherAuthSessionsInput, SetAuthSessionLastConnectedAtInput } from "../Services/AuthSessions";
 
 const AuthSessionDbRow = Schema.Struct({
   sessionId: AuthSessionId,

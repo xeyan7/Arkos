@@ -6,6 +6,13 @@
 // Layer: Tasks UI component
 // Exports: TaskCard
 
+// FILE: TaskCard.tsx
+// Purpose: The floating card for the selected to-do: its editable title and note, property
+//          pills, then either the hand-off controls (a plain to-do), what its agent is doing
+//          and needs (a delegated one), or the way back from done. ⌘↵ anywhere on the card
+//          hands a plain to-do off, note included.
+// Layer: Tasks UI component
+// Exports: TaskCard
 import { GLASS_RAISED_SURFACE_CLASS_NAME } from "~/surfaceStyles";
 import type { ProjectId, Todo, TodoUpdateInput } from "@arkos/contracts";
 import { useEffect, useRef } from "react";
@@ -19,14 +26,7 @@ import { TaskCardProperties } from "./TaskCardProperties";
 import { TaskActionRow, TaskPillButton, TaskWell } from "./TaskCardPrimitives";
 import { TaskHandOff } from "./TaskHandOff";
 import { TaskTextFields } from "./TaskTextFields";
-import {
-  pruneSavedTaskText,
-  recordSavedTaskText,
-  type SavedTaskText,
-  type TaskRowModel,
-  unlinkChatInput,
-  withSavedTaskText,
-} from "./tasks.logic";
+import { pruneSavedTaskText, recordSavedTaskText, type SavedTaskText, type TaskRowModel, unlinkChatInput, withSavedTaskText } from "./tasks.logic";
 import { useTaskCanUnlink } from "./taskDelegationState";
 import { useOpenChat } from "./useOpenChat";
 

@@ -6,35 +6,23 @@
 //             items and their handlers and portals the rail into the slot the route shell
 //             places left of the panel, so no handler moves out of ThreadSidebar.
 
-import {
-  type ComponentType,
-  createContext,
-  type MouseEvent,
-  type ReactNode,
-  useContext,
-} from "react";
+// FILE: AppRail.tsx
+// Purpose: The rail layout's fixed icon tab strip (Home, Spaces, route destinations, Settings).
+// Layer: App shell component
+// Exports: AppRail, AppRailItem, AppRailPortal, AppRailSlotProvider
+// Depends on: SidebarIconButton and the shared sidebar row tokens. ThreadSidebar owns the
+//             items and their handlers and portals the rail into the slot the route shell
+//             places left of the panel, so no handler moves out of ThreadSidebar.
+import { type ComponentType, createContext, type MouseEvent, type ReactNode, useContext } from "react";
 import { createPortal } from "react-dom";
 
 import { TasksCoachmark } from "./OneTimeCoachmark";
 import type { RailItemId } from "~/appRail.logic";
 import { createCentralIconComponent } from "~/lib/central-icons";
-import {
-  ClockIcon,
-  CodeReviewIcon,
-  FoldersIcon,
-  HomeIcon,
-  HubActiveIcon,
-  HubIcon,
-  InboxIcon,
-  TasksIcon,
-} from "~/lib/icons";
+import { ClockIcon, CodeReviewIcon, FoldersIcon, HomeIcon, HubActiveIcon, HubIcon, InboxIcon, TasksIcon } from "~/lib/icons";
 import { projectAppearanceKey, type ProjectAppearance } from "~/lib/projectAppearance";
 import { cn } from "~/lib/utils";
-import {
-  SIDEBAR_ROW_ACTIVE_CLASS_NAME,
-  SIDEBAR_ROW_HOVER_CLASS_NAME,
-  SIDEBAR_SECTION_LABEL_TONE_CLASS_NAME,
-} from "~/sidebarRowStyles";
+import { SIDEBAR_ROW_ACTIVE_CLASS_NAME, SIDEBAR_ROW_HOVER_CLASS_NAME, SIDEBAR_SECTION_LABEL_TONE_CLASS_NAME } from "~/sidebarRowStyles";
 import { ProjectSidebarIcon } from "./ProjectSidebarIcon";
 import type { SidebarActionBadge } from "./Sidebar.logic";
 import { SidebarIconButton } from "./SidebarIconButton";

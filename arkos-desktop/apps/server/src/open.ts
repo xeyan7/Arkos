@@ -6,6 +6,14 @@
  *
  * @module Open
  */
+/**
+ * Open - Browser/editor launch service interface.
+ *
+ * Owns process launch helpers for opening URLs in a browser and workspace
+ * paths in a configured editor.
+ *
+ * @module Open
+ */
 import { createBatchExecutableResolver, resolveExecutable } from "@arkos/shared/executable";
 import { spawnProcess } from "@arkos/shared/processRuntime";
 import { statSync } from "node:fs";
@@ -16,14 +24,7 @@ import { EDITORS, type EditorId } from "@arkos/contracts";
 import { isMacAppBundlePath } from "@arkos/shared/filesystemPlatform";
 import { resolveWindowsSystemRoot } from "@arkos/shared/platformEnvironment";
 import { ServiceMap, Schema, Effect, Layer } from "effect";
-import {
-  getEditorMacApplications,
-  getEditorWindowsStorePackages,
-  getEditorWindowsUriScheme,
-  resolveAvailableMacApplication,
-  resolveWindowsStorePackageInstallLocation,
-  type EditorDefinition,
-} from "./editorAppDiscovery";
+import { getEditorMacApplications, getEditorWindowsStorePackages, getEditorWindowsUriScheme, resolveAvailableMacApplication, resolveWindowsStorePackageInstallLocation, type EditorDefinition } from "./editorAppDiscovery";
 
 // ==============================
 // Definitions

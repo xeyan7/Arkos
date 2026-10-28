@@ -17,7 +17,6 @@ const THREAD_ID = ThreadId.makeUnsafe("thread-auto-claude");
 const PROJECT_ID = ProjectId.makeUnsafe("project-auto-claude");
 
 function makeReadModel(
-  supportsAutoMode: boolean,
   threadOverrides?: { creationSource?: "provider_native" },
 ): OrchestrationReadModel {
   return {
@@ -31,7 +30,7 @@ function makeReadModel(
         projectId: PROJECT_ID,
         title: "Claude Auto",
         modelSelection: {
-          provider: "claudeAgent",
+          provider: "arkos",
           model: "claude-opus-4-6",
           supportsAutoMode,
         },
@@ -94,9 +93,8 @@ describe("decider Auto model compatibility", () => {
             commandId: CommandId.makeUnsafe("cmd-unsupported-claude-model"),
             threadId: THREAD_ID,
             modelSelection: {
-              provider: "claudeAgent",
+              provider: "arkos",
               model: "claude-haiku-4-5",
-              supportsAutoMode: false,
             },
           },
           readModel: makeReadModel(true),
@@ -130,9 +128,8 @@ describe("decider Auto model compatibility", () => {
           commandId: CommandId.makeUnsafe("cmd-supported-claude-model"),
           threadId: THREAD_ID,
           modelSelection: {
-            provider: "claudeAgent",
+            provider: "arkos",
             model: "claude-fable-5",
-            supportsAutoMode: true,
           },
         },
         readModel: makeReadModel(true),
@@ -155,7 +152,7 @@ describe("decider Auto model compatibility", () => {
             projectId: PROJECT_ID,
             title: "User Auto thread",
             modelSelection: {
-              provider: "claudeAgent",
+              provider: "arkos",
               model: "claude-fable-5",
             },
             interactionMode: DEFAULT_PROVIDER_INTERACTION_MODE,
@@ -187,7 +184,7 @@ describe("decider Auto model compatibility", () => {
           projectId: PROJECT_ID,
           title: "Subagent",
           modelSelection: {
-            provider: "claudeAgent",
+            provider: "arkos",
             model: "claude-fable-5",
           },
           interactionMode: DEFAULT_PROVIDER_INTERACTION_MODE,
@@ -217,7 +214,7 @@ describe("decider Auto model compatibility", () => {
           commandId: CommandId.makeUnsafe("cmd-subagent-model-update"),
           threadId: THREAD_ID,
           modelSelection: {
-            provider: "claudeAgent",
+            provider: "arkos",
             model: "claude-fable-5",
           },
         },

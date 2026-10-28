@@ -1,78 +1,32 @@
 import { type ProjectId, type ProviderKind, type ThreadId, type TurnId } from "@arkos/contracts";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-  startTransition,
-  lazy,
-  Suspense,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, startTransition, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Schema } from "effect";
 
 import { SplitPaneLayout } from "./SplitPaneLayout";
 import { ProviderIcon } from "../ProviderIcon";
 import { PanelStateMessage } from "./PanelStateMessage";
-import {
-  ChatMountLoader,
-  DeferredChatView,
-  LazyBrowserPanel,
-  LazyDiffPanel,
-  noopChatSurfaceAction,
-} from "./ChatThreadSurfacePrimitives";
+import { ChatMountLoader, DeferredChatView, LazyBrowserPanel, LazyDiffPanel, noopChatSurfaceAction } from "./ChatThreadSurfacePrimitives";
 import { FloatingBrowserPanel } from "./FloatingBrowserPanel";
 import { shouldRenderFloatingBrowserPanel } from "./floatingBrowserPanel.logic";
-import {
-  selectFloatingBrowserRequested,
-  useFloatingBrowserRequestStore,
-} from "./floatingBrowserRequestStore";
+import { useFloatingBrowserRequestStore } from "./floatingBrowserRequestStore";
 import { useBrowserPanelDesktopBridge } from "../../hooks/useBrowserPanelDesktopBridge";
 import { useHandleNewChat } from "../../hooks/useHandleNewChat";
 import type { ChatRightPanel } from "../../diffRouteSearch";
 import { stripDiffSearchParams } from "../../diffRouteSearch";
-import {
-  canComposerHandlePanelWidth,
-  createPanelResizeOverlay,
-  attachPanelPointerOverlaySession,
-  removePanelResizeOverlay,
-} from "../../lib/panelResize";
+import { canComposerHandlePanelWidth, createPanelResizeOverlay, attachPanelPointerOverlaySession, removePanelResizeOverlay } from "../../lib/panelResize";
 import { splitViewPaneScopeId } from "../../lib/chatPaneScope";
 import { selectRightDockState, useRightDockStore } from "../../rightDockStore";
 import { DockPaneHeader } from "./DockPaneHeader";
 import { resolveActiveSplitView } from "../../splitViewRoute";
 import { canSubdividePane, collectLeaves, findLeafPaneById } from "../../splitView.logic";
-import {
-  resolveSplitViewFocusedThreadId,
-  resolveSplitViewPaneIdForThread,
-  resolveSplitViewThreadIds,
-  selectSplitView,
-  type LeafPane,
-  type PaneId,
-  type SplitDirection,
-  type SplitDropSide,
-  type SplitView,
-  type SplitViewId,
-  type SplitViewPanePanelState,
-  useSplitViewStore,
-} from "../../splitViewStore";
+import { resolveSplitViewFocusedThreadId, resolveSplitViewPaneIdForThread, resolveSplitViewThreadIds, selectSplitView, type LeafPane, type PaneId, type SplitDirection, type SplitDropSide, type SplitView, type SplitViewId, type SplitViewPanePanelState, useSplitViewStore } from "../../splitViewStore";
 import { useStore } from "../../store";
 import { createThreadShellsSelector } from "../../storeSelectors";
-import {
-  resolveSplitPaneCloseDecision,
-  resolveThreadPickerTitle,
-  resolveToggledChatPanelPatch,
-} from "../../routes/-chatThreadRoute.logic";
+import { resolveSplitPaneCloseDecision, resolveThreadPickerTitle, resolveToggledChatPanelPatch } from "../../routes/-chatThreadRoute.logic";
 import { getLocalStorageItem, setLocalStorageItem } from "../../hooks/useLocalStorage";
 import { ChatPaneBody, KeptChatPane } from "./ChatPaneKeepAlive";
-import {
-  CHAT_BACKGROUND_CLASS_NAME,
-  CHAT_MAIN_CONTENT_SURFACE_CLASS_NAME,
-  CHAT_MAIN_VIEWPORT_SHELL_CLASS_NAME,
-} from "./composerPickerStyles";
+import { CHAT_BACKGROUND_CLASS_NAME, CHAT_MAIN_CONTENT_SURFACE_CLASS_NAME, CHAT_MAIN_VIEWPORT_SHELL_CLASS_NAME } from "./composerPickerStyles";
 import { routeSplitBrowserPanelOpenRequest } from "./browserPanelOpenRequest";
 import { cn } from "~/lib/utils";
 import { isSidechatThread } from "@arkos/shared/sidechatThread";

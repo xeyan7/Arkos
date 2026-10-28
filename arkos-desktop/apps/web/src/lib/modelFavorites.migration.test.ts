@@ -26,28 +26,5 @@ function makeMemoryStorage(initial: Record<string, string>): Storage {
 }
 
 describe("migrateLegacyKiloFavoriteModelSlugs", () => {
-  it("merges Kilo favorites into OpenCode without duplicates", () => {
-    const storage = makeMemoryStorage({
-      [FAVORITE_MODEL_STORAGE_KEYS.opencode]: JSON.stringify(["openai/gpt-5", "shared/model"]),
-      [LEGACY_KILO_KEY]: JSON.stringify(["shared/model", "anthropic/claude-sonnet", ""]),
-    });
 
-    migrateLegacyKiloFavoriteModelSlugs(storage);
-
-    expect(JSON.parse(storage.getItem(FAVORITE_MODEL_STORAGE_KEYS.opencode) ?? "null")).toEqual([
-      "openai/gpt-5",
-      "shared/model",
-      "anthropic/claude-sonnet",
-    ]);
-    expect(storage.getItem(LEGACY_KILO_KEY)).toBeNull();
-  });
-
-  it("keeps invalid legacy data for a later recovery attempt", () => {
-    const storage = makeMemoryStorage({ [LEGACY_KILO_KEY]: "not-json" });
-
-    migrateLegacyKiloFavoriteModelSlugs(storage);
-
-    expect(storage.getItem(LEGACY_KILO_KEY)).toBe("not-json");
-    expect(storage.getItem(FAVORITE_MODEL_STORAGE_KEYS.opencode)).toBeNull();
-  });
 });

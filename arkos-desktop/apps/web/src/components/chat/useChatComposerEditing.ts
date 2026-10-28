@@ -1,21 +1,9 @@
 import { ThreadId } from "@arkos/contracts";
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback } from "react";
-import {
-  composerMentionPathNeedsQuoting,
-  formatComposerMentionToken,
-} from "~/lib/composerMentions";
-import {
-  collapseExpandedComposerCursor,
-  detectComposerTrigger,
-  expandCollapsedComposerCursor,
-  replaceTextRange,
-  type ComposerTrigger,
-} from "../../composer-logic";
-import {
-  ensureLeadingSpaceForReplacement,
-  extendReplacementRangeForTrailingSpace,
-} from "../../composerTriggerInsertion";
+import { composerMentionPathNeedsQuoting, formatComposerMentionToken } from "~/lib/composerMentions";
+import { collapseExpandedComposerCursor, detectComposerTrigger, expandCollapsedComposerCursor, replaceTextRange, type ComposerTrigger } from "../../composer-logic";
+import { ensureLeadingSpaceForReplacement, extendReplacementRangeForTrailingSpace } from "../../composerTriggerInsertion";
 import { setPendingUserInputCustomAnswer } from "../../pendingUserInput";
 import { useChatComposerDraft } from "./useChatComposerDraft";
 import { useChatPendingInteractions } from "./useChatPendingInteractions";

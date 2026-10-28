@@ -3,6 +3,10 @@
 // Layer: Web project-run logic
 // Exports: selectPrimaryProjectRunCommand and labels for sidebar run actions.
 
+// FILE: projectRunTargets.ts
+// Purpose: Choose the sidebar run command from saved scripts and discovered package scripts.
+// Layer: Web project-run logic
+// Exports: selectPrimaryProjectRunCommand and labels for sidebar run actions.
 import type { ProjectDiscoveredScriptTarget, ProjectScript } from "@arkos/contracts";
 
 import { nextProjectScriptId, primaryProjectScript } from "./projectScripts";

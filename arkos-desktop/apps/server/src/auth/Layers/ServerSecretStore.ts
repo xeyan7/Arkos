@@ -4,11 +4,7 @@ import { Effect, FileSystem, Layer, Path } from "effect";
 
 import { writeFileStringAtomically } from "../../atomicWrite";
 import { ServerConfig } from "../../config";
-import {
-  SecretStoreError,
-  ServerSecretStore,
-  type ServerSecretStoreShape,
-} from "../Services/ServerSecretStore";
+import { SecretStoreError, ServerSecretStore, type ServerSecretStoreShape } from "../Services/ServerSecretStore";
 
 const secretFileName = (name: string): string => `${name.replace(/[^a-zA-Z0-9_.-]/g, "_")}.bin`;
 

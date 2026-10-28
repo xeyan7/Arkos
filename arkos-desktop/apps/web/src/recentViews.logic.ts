@@ -3,11 +3,12 @@
 // Layer: UI state logic
 // Exports: recent view types plus MRU update, pruning, and display derivation helpers
 
+// FILE: recentViews.logic.ts
+// Purpose: Pure helpers for the Ctrl+Tab recent primary-view switcher.
+// Layer: UI state logic
+// Exports: recent view types plus MRU update, pruning, and display derivation helpers
 import type { ProjectId, ProviderKind, ThreadId } from "@arkos/contracts";
-import type {
-  ResolvedTerminalVisualIdentity,
-  TerminalIconKey,
-} from "@arkos/shared/terminalThreads";
+import type { ResolvedTerminalVisualIdentity, TerminalIconKey } from "@arkos/shared/terminalThreads";
 import type { Project, SidebarThreadSummary } from "./types";
 
 export const MAX_RECENT_VIEWS = 5;

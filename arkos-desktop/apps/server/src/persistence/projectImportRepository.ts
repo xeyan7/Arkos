@@ -1,14 +1,6 @@
 import { Effect, Schema } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
-import {
-  IsoDateTime,
-  NonNegativeInt,
-  ProjectImportProvider,
-  ProviderInstanceId,
-  ThreadHandoffImportedMessage,
-  ThreadId,
-  type ProjectId,
-} from "@arkos/contracts";
+import { IsoDateTime, NonNegativeInt, ProjectImportProvider, ProviderInstanceId, ThreadHandoffImportedMessage, ThreadId, type ProjectId } from "@arkos/contracts";
 
 export const ProjectImportHistoryState = Schema.Struct({
   threadId: ThreadId,

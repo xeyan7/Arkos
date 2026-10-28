@@ -1,33 +1,11 @@
-import {
-  selectMessageTextChunks,
-  encodeMessageTextFallback,
-  selectSegmentEndedAt,
-  joinMessageTextChunks,
-} from "../messageTextChunks.ts";
+import { selectMessageTextChunks, encodeMessageTextFallback, selectSegmentEndedAt, joinMessageTextChunks } from "../messageTextChunks.ts";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 import { Effect, Layer, Option, Schema } from "effect";
 
-import {
-  toPersistenceSqlError,
-  toPersistenceSqlOrDecodeError,
-  type ProjectionRepositoryError,
-} from "../Errors.ts";
-import {
-  ProjectionThreadMessageDbRowSchema,
-  projectionThreadMessageFromRow,
-  type ProjectionThreadMessageDbRow,
-} from "../projectionThreadMessageRow.ts";
-import {
-  GetProjectionThreadMessageInput,
-  ProjectionThreadMessageRepository,
-  type ProjectionThreadMessageRepositoryShape,
-  DeleteProjectionThreadMessagesInput,
-  ListProjectionThreadMessagesInput,
-  ProjectionThreadMessage,
-  ProjectionThreadMessageSegmentDbRow,
-  type ProjectionThreadMessageTextSegment,
-} from "../Services/ProjectionThreadMessages.ts";
+import { toPersistenceSqlError, toPersistenceSqlOrDecodeError, type ProjectionRepositoryError } from "../Errors.ts";
+import { ProjectionThreadMessageDbRowSchema, projectionThreadMessageFromRow, type ProjectionThreadMessageDbRow } from "../projectionThreadMessageRow.ts";
+import { GetProjectionThreadMessageInput, ProjectionThreadMessageRepository, type ProjectionThreadMessageRepositoryShape, DeleteProjectionThreadMessagesInput, ListProjectionThreadMessagesInput, ProjectionThreadMessage, ProjectionThreadMessageSegmentDbRow, type ProjectionThreadMessageTextSegment } from "../Services/ProjectionThreadMessages.ts";
 
 const MessageTimestampRowSchema = Schema.Struct({
   messageAt: Schema.String,

@@ -1,10 +1,4 @@
-import type {
-  ComputerSpace,
-  ComputerSpaceErrorCode,
-  ComputerSpaceInventory,
-  ComputerSpaceReservation,
-  ComputerWindow,
-} from "@arkos/contracts";
+import type { ComputerSpace, ComputerSpaceErrorCode, ComputerSpaceInventory, ComputerSpaceReservation, ComputerWindow } from "@arkos/contracts";
 
 import { ComputerTargetError } from "./uiTreeTargeting.ts";
 

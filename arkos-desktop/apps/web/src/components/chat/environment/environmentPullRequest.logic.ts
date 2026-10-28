@@ -6,20 +6,16 @@ import { normalizeGitHubPullRequestUrl } from "@arkos/shared/githubRepository";
 //          context cards ("Repair", "Add to chat") that carry those prompts.
 // Layer: Web domain helpers (no React)
 
-import {
-  PULL_REQUEST_AUTO_FIX_MAX_ATTEMPTS,
-  type GitPullRequestCheck,
-  type GitPullRequestComment,
-  type PullRequestAutoFixState,
-  type PullRequestCheck,
-  type PullRequestComment,
-} from "@arkos/contracts";
+// FILE: environmentPullRequest.logic.ts
+// Purpose: Pure display/prompt helpers for the Environment panel "Pull request" section —
+//          check-rollup summaries, review-comment display models, the repair prompts that
+//          hand comments / failing checks / conflicts to the agent, and the composer
+//          context cards ("Repair", "Add to chat") that carry those prompts.
+// Layer: Web domain helpers (no React)
+import { PULL_REQUEST_AUTO_FIX_MAX_ATTEMPTS, type GitPullRequestCheck, type GitPullRequestComment, type PullRequestAutoFixState, type PullRequestCheck, type PullRequestComment } from "@arkos/contracts";
 import { pluralize } from "@arkos/shared/text";
 
-import {
-  type PullRequestContextDraft,
-  type PullRequestContextScope,
-} from "~/lib/pullRequestContext";
+import { type PullRequestContextDraft, type PullRequestContextScope } from "~/lib/pullRequestContext";
 import { randomUUID } from "~/lib/utils";
 
 export type PullRequestChecksTone = "pending" | "success" | "failure" | "none";

@@ -7,11 +7,7 @@ import * as React from "react";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import {
-  APP_TRANSLUCENT_POPUP_SURFACE_BASE_CLASS_NAME,
-  COMPOSER_PICKER_OPTION_RADIUS_CLASS_NAME,
-  COMPOSER_PICKER_RADIUS_CLASS_NAME,
-} from "../chat/composerPickerStyles";
+import { APP_TRANSLUCENT_POPUP_SURFACE_BASE_CLASS_NAME, COMPOSER_PICKER_OPTION_RADIUS_CLASS_NAME, COMPOSER_PICKER_RADIUS_CLASS_NAME } from "../chat/composerPickerStyles";
 
 const ComboboxContext = React.createContext<{
   chipsRef: React.RefObject<Element | null> | null;

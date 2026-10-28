@@ -6,6 +6,13 @@
 // Depends on: @pierre/diffs filename→language map (shared with the diff renderer)
 //             and the shared path basename helper (file-icons).
 
+// FILE: codeFence.ts
+// Purpose: Parse markdown code-fence info strings into a highlighter language plus
+//          optional file-reference metadata (Cursor-style `startLine:endLine:path`).
+// Layer: web chat markdown helper
+// Exports: parseCodeFenceInfo, type CodeFenceInfo
+// Depends on: @pierre/diffs filename→language map (shared with the diff renderer)
+//             and the shared path basename helper (file-icons).
 import { getFiletypeFromFileName } from "@pierre/diffs";
 import { basenameOfPath } from "../file-icons";
 

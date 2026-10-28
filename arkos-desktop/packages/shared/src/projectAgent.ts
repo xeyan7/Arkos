@@ -2,11 +2,29 @@
 // Purpose: Path, graph, and context-budget helpers for the Project Coordinator domain.
 // Layer: Shared domain helper (schema-only contracts live in @arkos/contracts)
 
+// FILE: projectAgent.ts
+// Purpose: Path, graph, and context-budget helpers for the Project Coordinator domain.
+// Layer: Shared domain helper (schema-only contracts live in @arkos/contracts)
+// FILE: projectAgent.ts
+// Purpose: Path, graph, and context-budget helpers for the Project Coordinator domain.
+// Layer: Shared domain helper (schema-only contracts live in @arkos/contracts)
+// FILE: projectAgent.ts
+// Purpose: Path, graph, and context-budget helpers for the Project Coordinator domain.
+// Layer: Shared domain helper (schema-only contracts live in @arkos/contracts)
+// FILE: projectAgent.ts
+// Purpose: Path, graph, and context-budget helpers for the Project Coordinator domain.
+// Layer: Shared domain helper (schema-only contracts live in @arkos/contracts)
+// FILE: projectAgent.ts
+// Purpose: Path, graph, and context-budget helpers for the Project Coordinator domain.
+// Layer: Shared domain helper (schema-only contracts live in @arkos/contracts)
+// FILE: projectAgent.ts
+// Purpose: Path, graph, and context-budget helpers for the Project Coordinator domain.
+// Layer: Shared domain helper (schema-only contracts live in @arkos/contracts)
+// FILE: projectAgent.ts
+// Purpose: Path, graph, and context-budget helpers for the Project Coordinator domain.
+// Layer: Shared domain helper (schema-only contracts live in @arkos/contracts)
 import type { ProjectTaskId } from "@arkos/contracts";
-import {
-  PROJECT_AGENT_CONTEXT_BUDGET_CHARS,
-  PROJECT_AGENT_WORKER_INBOX_PREFIX,
-} from "@arkos/contracts";
+import { PROJECT_AGENT_CONTEXT_BUDGET_CHARS, PROJECT_AGENT_WORKER_INBOX_PREFIX } from "@arkos/contracts";
 
 const WINDOWS_DRIVE = /^[a-zA-Z]:/;
 

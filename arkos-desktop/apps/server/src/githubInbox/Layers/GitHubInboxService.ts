@@ -1,69 +1,24 @@
-import type {
-  GitHubInboxItem,
-  GitHubInboxListError,
-  GitHubInboxListResult,
-  GitHubInboxRepositoryBatch,
-  OrchestrationProject,
-} from "@arkos/contracts";
+import type { GitHubInboxItem, GitHubInboxListError, GitHubInboxListResult, GitHubInboxRepositoryBatch, OrchestrationProject } from "@arkos/contracts";
 import { pullRequestListProjectContexts } from "@arkos/shared/githubRepository";
 import { Effect, Layer, Scope, Stream } from "effect";
 
 import type { GitHubCliError } from "../../git/Errors";
 import { GITHUB_READ_SLOTS } from "../../git/githubReadGate";
 import { GitCore } from "../../git/Services/GitCore";
-import {
-  GitHubCli,
-  type GitHubCliShape,
-  type GitHubIssueDetailData,
-  type GitHubRepositoryInboxLookup,
-} from "../../git/Services/GitHubCli";
+import { GitHubCli, type GitHubCliShape, type GitHubIssueDetailData, type GitHubRepositoryInboxLookup } from "../../git/Services/GitHubCli";
 import { OrchestrationEngineService } from "../../orchestration/Services/OrchestrationEngine";
 import { ProjectionSnapshotQuery } from "../../orchestration/Services/ProjectionSnapshotQuery";
-import {
-  ProjectPullRequestPins,
-  type ProjectPullRequestPinsShape,
-} from "../../persistence/Services/ProjectPullRequestPins";
-import {
-  orderPullRequestListEntries,
-  projectPullRequestIdentityKey,
-} from "../../pullRequests.logic";
+import { ProjectPullRequestPins, type ProjectPullRequestPinsShape } from "../../persistence/Services/ProjectPullRequestPins";
+import { orderPullRequestListEntries, projectPullRequestIdentityKey } from "../../pullRequests.logic";
 import { makeKeyedSingleFlightCache } from "../../pullRequests/KeyedSingleFlightCache";
-import {
-  isGlobalGitHubCliError,
-  isLiveRepositoryProject,
-  liveProjectFromShell,
-  makeProjectRepositoryAccess,
-} from "../../pullRequests/projectRepositoryAccess";
-import {
-  cleanupUnconfiguredPullRequestPins,
-  indexProjectRepositoryInventories,
-  resolveProjectRepositoryInventories,
-  type ProjectRepositoryResolution,
-} from "../../pullRequests/projectRepositoryInventory";
+import { isGlobalGitHubCliError, isLiveRepositoryProject, liveProjectFromShell, makeProjectRepositoryAccess } from "../../pullRequests/projectRepositoryAccess";
+import { cleanupUnconfiguredPullRequestPins, indexProjectRepositoryInventories, resolveProjectRepositoryInventories, type ProjectRepositoryResolution } from "../../pullRequests/projectRepositoryInventory";
 import { recoverPinnedInboxItems } from "../../pullRequests/pullRequestPinRecovery";
-import {
-  resolveGitHubRepositories,
-  type GitHubRepositoryInventory,
-} from "../../pullRequests/repositoryResolution";
+import { resolveGitHubRepositories, type GitHubRepositoryInventory } from "../../pullRequests/repositoryResolution";
 import { ServerSettingsService } from "../../serverSettings";
-import {
-  GITHUB_INBOX_SNAPSHOT_TTL_MS,
-  GITHUB_ITEM_DETAIL_CACHE_TTL_MS,
-  buildGitHubInboxItem,
-  githubItemCacheKey,
-  summarizeGitHubInboxError,
-  type GitHubInboxRowContext,
-} from "../githubInbox.logic";
-import {
-  makeGitHubInboxSnapshotStore,
-  type GitHubInboxSnapshotEntry,
-  type GitHubInboxSnapshotLoad,
-} from "../githubInboxSnapshotStore";
-import {
-  GitHubInboxRateLimitedError,
-  GitHubInboxService,
-  type GitHubInboxServiceShape,
-} from "../Services/GitHubInboxService";
+import { GITHUB_INBOX_SNAPSHOT_TTL_MS, GITHUB_ITEM_DETAIL_CACHE_TTL_MS, buildGitHubInboxItem, githubItemCacheKey, summarizeGitHubInboxError, type GitHubInboxRowContext } from "../githubInbox.logic";
+import { makeGitHubInboxSnapshotStore, type GitHubInboxSnapshotEntry, type GitHubInboxSnapshotLoad } from "../githubInboxSnapshotStore";
+import { GitHubInboxRateLimitedError, GitHubInboxService, type GitHubInboxServiceShape } from "../Services/GitHubInboxService";
 
 const GITHUB_REPOSITORY_CACHE_MAX_ENTRIES = 256;
 /** Local git config rarely changes; project add/remove/edit events invalidate it explicitly. */

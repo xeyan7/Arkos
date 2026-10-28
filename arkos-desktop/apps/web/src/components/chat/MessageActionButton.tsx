@@ -3,6 +3,10 @@
 // Layer: Web chat presentation component
 // Exports: MessageActionButton
 
+// FILE: MessageActionButton.tsx
+// Purpose: Shared icon button chrome for compact message actions.
+// Layer: Web chat presentation component
+// Exports: MessageActionButton
 import { forwardRef, type ComponentProps, type ReactNode } from "react";
 import { cn } from "~/lib/utils";
 import { MUTED_LABEL_TEXT_CLASS_NAME } from "~/surfaceStyles";

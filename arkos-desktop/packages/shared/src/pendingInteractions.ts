@@ -3,10 +3,35 @@
 // Layer: Cross-package orchestration utility
 // Exports: stale-callback matcher, reclaim timing, and response-status predicates.
 
-import type {
-  OrchestrationPendingInteraction,
-  OrchestrationThreadActivity,
-} from "@arkos/contracts";
+// FILE: pendingInteractions.ts
+// Purpose: Shared policy for claiming responses and recognizing invalidated approval/user-input callbacks.
+// Layer: Cross-package orchestration utility
+// Exports: stale-callback matcher, reclaim timing, and response-status predicates.
+// FILE: pendingInteractions.ts
+// Purpose: Shared policy for claiming responses and recognizing invalidated approval/user-input callbacks.
+// Layer: Cross-package orchestration utility
+// Exports: stale-callback matcher, reclaim timing, and response-status predicates.
+// FILE: pendingInteractions.ts
+// Purpose: Shared policy for claiming responses and recognizing invalidated approval/user-input callbacks.
+// Layer: Cross-package orchestration utility
+// Exports: stale-callback matcher, reclaim timing, and response-status predicates.
+// FILE: pendingInteractions.ts
+// Purpose: Shared policy for claiming responses and recognizing invalidated approval/user-input callbacks.
+// Layer: Cross-package orchestration utility
+// Exports: stale-callback matcher, reclaim timing, and response-status predicates.
+// FILE: pendingInteractions.ts
+// Purpose: Shared policy for claiming responses and recognizing invalidated approval/user-input callbacks.
+// Layer: Cross-package orchestration utility
+// Exports: stale-callback matcher, reclaim timing, and response-status predicates.
+// FILE: pendingInteractions.ts
+// Purpose: Shared policy for claiming responses and recognizing invalidated approval/user-input callbacks.
+// Layer: Cross-package orchestration utility
+// Exports: stale-callback matcher, reclaim timing, and response-status predicates.
+// FILE: pendingInteractions.ts
+// Purpose: Shared policy for claiming responses and recognizing invalidated approval/user-input callbacks.
+// Layer: Cross-package orchestration utility
+// Exports: stale-callback matcher, reclaim timing, and response-status predicates.
+import type { OrchestrationPendingInteraction, OrchestrationThreadActivity } from "@arkos/contracts";
 import { isStalePendingRequestFailureDetail, pendingRequestInstanceKey } from "./threadSummary";
 
 /** Index explicit callback invalidations without mixing runtime and orchestration sequences. */

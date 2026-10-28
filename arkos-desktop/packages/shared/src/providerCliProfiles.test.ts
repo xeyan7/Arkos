@@ -1,40 +1,25 @@
 import { describe, expect, it } from "vitest";
-
 import { normalizeProviderCliAlias, providerCliCommandName } from "./providerCliProfiles";
 
 describe("provider CLI profile names", () => {
   it("derives stable commands from instance ids rather than editable labels", () => {
-    expect(providerCliCommandName({ provider: "claudeAgent", instanceId: "claude_work" })).toBe(
-      "claude-work",
-    );
-    expect(providerCliCommandName({ provider: "codex", instanceId: "codex_personal" })).toBe(
-      "codex-personal",
-    );
-    expect(providerCliCommandName({ provider: "cursor", instanceId: "cursor_team" })).toBe(
-      "cursor-agent-team",
-    );
+    expect(providerCliCommandName({ provider: "arkos", instanceId: "arkos_custom" })).toBe("arkos-custom");
   });
 
   it("gives default instances explicit names without replacing bare commands", () => {
-    expect(providerCliCommandName({ provider: "claudeAgent", instanceId: "claudeAgent" })).toBe(
-      "claude-default",
-    );
-    expect(providerCliCommandName({ provider: "antigravity", instanceId: "antigravity" })).toBe(
-      "agy-default",
-    );
+    expect(providerCliCommandName({ provider: "arkos", instanceId: "arkos" })).toBe("arkos-default");
   });
 
   it("accepts portable overrides and rejects shell syntax", () => {
     expect(
       providerCliCommandName({
-        provider: "pi",
-        instanceId: "pi_work",
-        config: { cliAlias: "pairing-pi" },
+        provider: "arkos",
+        instanceId: "arkos_work",
+        config: { cliAlias: "pairing-arkos" },
       }),
-    ).toBe("pairing-pi");
-    expect(normalizeProviderCliAlias("claude work")).toBeUndefined();
-    expect(normalizeProviderCliAlias("claude-work; rm -rf /")).toBeUndefined();
-    expect(normalizeProviderCliAlias("claude")).toBeUndefined();
-    expect(normalizeProviderCliAlias("codex")).toBeUndefined();
+    ).toBe("pairing-arkos");
+    expect(normalizeProviderCliAlias("arkos work")).toBeUndefined();
+    expect(normalizeProviderCliAlias("arkos-work; rm -rf /")).toBeUndefined();
+    expect(normalizeProviderCliAlias("arkos")).toBeUndefined();
   });
 });

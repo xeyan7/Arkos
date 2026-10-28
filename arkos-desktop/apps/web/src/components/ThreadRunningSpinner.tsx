@@ -3,6 +3,10 @@
 // Layer: Sidebar UI primitive
 // Exports: ThreadRunningSpinner, ThreadBackgroundWorkSpinner
 
+// FILE: ThreadRunningSpinner.tsx
+// Purpose: Shared inline running/pulse spinner for sidebar thread status slots.
+// Layer: Sidebar UI primitive
+// Exports: ThreadRunningSpinner, ThreadBackgroundWorkSpinner
 import { useRef } from "react";
 
 import { useTimelineSynchronizedAnimations } from "~/lib/animationTimelineSync";

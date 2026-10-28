@@ -7,6 +7,14 @@
 // Why: Claude Code's Projects Overview lists every thread by live state; this is
 //      Arkos's version, derived from the same helpers the sidebar uses.
 
+// FILE: GroupOverview.tsx
+// Purpose: Section bodies for the Group panel — Threads grouped by live state,
+//          Pull requests opened by group threads, and group-scoped Automations.
+//          The panel hoists the derivation (thread rows, PR rows, automation
+//          scoping) so each row's count and its expanded body read the same data.
+// Layer: Group panel UI
+// Why: Claude Code's Projects Overview lists every thread by live state; this is
+//      Arkos's version, derived from the same helpers the sidebar uses.
 import type { AutomationDefinition, ThreadId } from "@arkos/contracts";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -17,10 +25,7 @@ import { toastManager } from "~/components/ui/toast";
 import { PanelStateMessage } from "~/components/chat/PanelStateMessage";
 import { PrStateChip } from "~/components/pullRequest/PrStateChip";
 import { resolvePrStatePresentation } from "~/components/pullRequest/pullRequestStatePresentation";
-import {
-  EnvironmentCollapsibleSection,
-  EnvironmentSectionLabel,
-} from "~/components/chat/environment/EnvironmentRow";
+import { EnvironmentCollapsibleSection, EnvironmentSectionLabel } from "~/components/chat/environment/EnvironmentRow";
 import { CheckIcon, Columns2Icon, EllipsisIcon, GitHubIcon, RotateCcwIcon } from "~/lib/icons";
 import { formatSchedule } from "~/lib/automationForm";
 import { formatRelativeTime } from "~/lib/relativeTime";
@@ -29,12 +34,7 @@ import { cn } from "~/lib/utils";
 import { readNativeApi } from "~/nativeApi";
 import type { useAutomations } from "~/routes/-automations.shared";
 
-import {
-  GROUP_THREAD_SECTIONS,
-  type GroupPullRequestRow,
-  type GroupThreadRow as GroupThreadRowData,
-  type GroupThreadSectionId,
-} from "./groupOverview.logic";
+import { GROUP_THREAD_SECTIONS, type GroupPullRequestRow, type GroupThreadRow as GroupThreadRowData, type GroupThreadSectionId } from "./groupOverview.logic";
 import type { useProjectAgent } from "./useProjectAgent";
 
 type ProjectAgent = ReturnType<typeof useProjectAgent>;

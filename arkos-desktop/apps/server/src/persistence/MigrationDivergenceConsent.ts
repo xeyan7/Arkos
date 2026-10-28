@@ -1,12 +1,6 @@
 import * as path from "node:path";
 
-import {
-  createMigrationDivergenceConsentToken,
-  MIGRATION_DIVERGENCE_CONSENT_ENV,
-  migrationBackupDirectory,
-  serializeMigrationDivergenceConsentChallenge,
-  type MigrationDivergenceConsentChallenge,
-} from "@arkos/shared/migrationRecovery";
+import { createMigrationDivergenceConsentToken, MIGRATION_DIVERGENCE_CONSENT_ENV, migrationBackupDirectory, serializeMigrationDivergenceConsentChallenge, type MigrationDivergenceConsentChallenge } from "@arkos/shared/migrationRecovery";
 
 export interface MigrationLineageDivergence {
   readonly firstDivergedId: number;

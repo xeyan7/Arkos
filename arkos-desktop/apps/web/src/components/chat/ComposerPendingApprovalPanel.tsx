@@ -7,6 +7,14 @@
 // Layer: Chat composer UI
 // Exports: ComposerPendingApprovalPanel
 
+// FILE: ComposerPendingApprovalPanel.tsx
+// Purpose: Detached card, floating just above the composer, that surfaces a pending
+// tool approval — the command / file context plus approve / decline / cancel actions
+// rendered as list-style choice rows. Mirrors ComposerPendingUserInputPanel (same
+// surface, spacing, chips, and scoped keyboard shortcuts) so approvals and AskUserQuestion
+// prompts read as one coherent decision surface instead of the old fused-banner look.
+// Layer: Chat composer UI
+// Exports: ComposerPendingApprovalPanel
 import { type ApprovalRequestId, type ProviderApprovalDecision } from "@arkos/contracts";
 import { pendingRequestInstanceKey } from "@arkos/shared/threadSummary";
 import { type KeyboardEvent, useRef } from "react";

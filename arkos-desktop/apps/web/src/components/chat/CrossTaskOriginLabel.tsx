@@ -2,6 +2,9 @@
 // Purpose: Identify the source thread for conversations created by another Arkos agent.
 // Layer: Chat transcript UI
 
+// FILE: CrossTaskOriginLabel.tsx
+// Purpose: Identify the source thread for conversations created by another Arkos agent.
+// Layer: Chat transcript UI
 import { type ProviderKind, type ThreadId } from "@arkos/contracts";
 import { memo, type ReactNode } from "react";
 

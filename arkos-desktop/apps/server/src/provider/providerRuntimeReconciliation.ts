@@ -7,13 +7,16 @@
  *
  * @module providerRuntimeReconciliation
  */
-import {
-  TurnId,
-  type OrchestrationSession,
-  type OrchestrationThreadShell,
-  type ProviderSession,
-  type ThreadId,
-} from "@arkos/contracts";
+/**
+ * providerRuntimeReconciliation - Pure live runtime/projection convergence plan.
+ *
+ * Provider Adapter state is live evidence; the provider session directory is a
+ * durable routing cache; orchestration is the UI read model. This planner finds
+ * stale lifecycle divergence without inventing successful completion.
+ *
+ * @module providerRuntimeReconciliation
+ */
+import { TurnId, type OrchestrationSession, type OrchestrationThreadShell, type ProviderSession, type ThreadId } from "@arkos/contracts";
 import { nonEmptyTrimmed } from "@arkos/shared/text";
 
 import type { ProviderRuntimeEventPumpHealth } from "./Services/ProviderService.ts";

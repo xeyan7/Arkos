@@ -2,21 +2,13 @@
 // Purpose: Owns graceful, forced, and verified teardown for provider/runtime process trees.
 // Layer: Server platform runtime
 
+// FILE: supervisedProcessTeardown.ts
+// Purpose: Owns graceful, forced, and verified teardown for provider/runtime process trees.
+// Layer: Server platform runtime
 import { Effect } from "effect";
 import { didProcessFailToSpawn } from "@arkos/shared/processRuntime";
 
-import {
-  captureProcessTree,
-  defaultProcessTreeKiller,
-  inspectProcessTree,
-  isProcessRunning,
-  signalProcessTree,
-  type CapturedProcess,
-  type CapturedProcessTree,
-  type CapturedProcessTreeInspection,
-  type ProcessTreeKiller,
-  type TerminalKillSignal,
-} from "./processTreeController";
+import { captureProcessTree, defaultProcessTreeKiller, inspectProcessTree, isProcessRunning, signalProcessTree, type CapturedProcess, type CapturedProcessTree, type CapturedProcessTreeInspection, type ProcessTreeKiller, type TerminalKillSignal } from "./processTreeController";
 import { createWindowsTeardownProcessSnapshotObserver } from "./windowsProcessSnapshot";
 
 const DEFAULT_TERM_GRACE_MS = 1_500;

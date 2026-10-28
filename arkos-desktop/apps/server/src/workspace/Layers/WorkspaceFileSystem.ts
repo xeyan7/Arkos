@@ -8,21 +8,11 @@ import { normalizeLineEndings } from "@arkos/shared/text";
 import { Effect, Layer, Path } from "effect";
 
 import { resolveLocalPreviewGrantRealPath } from "../../localImageFiles";
-import {
-  WorkspaceFileConflictError,
-  WorkspaceFileDeletedError,
-  WorkspaceFileSystem,
-  WorkspaceFileSystemError,
-  type WorkspaceFileSystemShape,
-} from "../Services/WorkspaceFileSystem";
+import { WorkspaceFileConflictError, WorkspaceFileDeletedError, WorkspaceFileSystem, WorkspaceFileSystemError, type WorkspaceFileSystemShape } from "../Services/WorkspaceFileSystem";
 import { WorkspaceEntries } from "../Services/WorkspaceEntries";
 import { WorkspacePathOutsideRootError } from "../Services/WorkspacePaths";
 import { WorkspacePaths } from "../Services/WorkspacePaths";
-import {
-  prepareRealPathForWriteWithinRoot,
-  resolveRealPathForCreateWithinRoot,
-  resolveRealPathWithinRoot,
-} from "../realPathContainment";
+import { prepareRealPathForWriteWithinRoot, resolveRealPathForCreateWithinRoot, resolveRealPathWithinRoot } from "../realPathContainment";
 
 const DEFAULT_READ_FILE_MAX_BYTES = 1_000_000;
 const UTF8_BOM = Buffer.from([0xef, 0xbb, 0xbf]);

@@ -3,20 +3,14 @@
 // Layer: Notification logic
 // Exports: lifecycle detection helpers and notification copy helpers
 
-import {
-  defaultTerminalTitleForCliKind,
-  type TerminalCliKind,
-  type TerminalVisualState,
-} from "@arkos/shared/terminalThreads";
+// FILE: taskCompletion.logic.ts
+// Purpose: Detects new thread lifecycle notifications and builds alert copy.
+// Layer: Notification logic
+// Exports: lifecycle detection helpers and notification copy helpers
+import { defaultTerminalTitleForCliKind, type TerminalCliKind, type TerminalVisualState } from "@arkos/shared/terminalThreads";
 import { pendingRequestInstanceKey } from "@arkos/shared/threadSummary";
 import type { Thread, ThreadSession } from "../types";
-import {
-  derivePendingApprovals,
-  countOutstandingBackgroundWork,
-  derivePendingBackgroundWork,
-  derivePendingUserInputs,
-  hasLiveLatestTurn,
-} from "../session-logic";
+import { derivePendingApprovals, countOutstandingBackgroundWork, derivePendingBackgroundWork, derivePendingUserInputs, hasLiveLatestTurn } from "../session-logic";
 
 export interface CompletedThreadCandidate {
   threadId: Thread["id"];

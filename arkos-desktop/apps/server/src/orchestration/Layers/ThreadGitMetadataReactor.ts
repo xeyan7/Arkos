@@ -9,14 +9,8 @@ import type { ProjectionRepositoryError } from "../../persistence/Errors.ts";
 import { ProviderService } from "../../provider/Services/ProviderService.ts";
 import { OrchestrationEngineService } from "../Services/OrchestrationEngine.ts";
 import { ProjectionSnapshotQuery } from "../Services/ProjectionSnapshotQuery.ts";
-import {
-  ThreadGitMetadataReactor,
-  type ThreadGitMetadataReactorShape,
-} from "../Services/ThreadGitMetadataReactor.ts";
-import {
-  deriveThreadGitMetadataPatch,
-  type ThreadPullRequestLookup,
-} from "../threadGitMetadata.ts";
+import { ThreadGitMetadataReactor, type ThreadGitMetadataReactorShape } from "../Services/ThreadGitMetadataReactor.ts";
+import { deriveThreadGitMetadataPatch, type ThreadPullRequestLookup } from "../threadGitMetadata.ts";
 
 const THREAD_GIT_METADATA_REACTOR_CAPACITY = 128;
 

@@ -3,6 +3,10 @@
 // Layer: Web UI state store
 // Exports: repo diff scope labels, validation, and a persisted Zustand store.
 
+// FILE: repoDiffScopeStore.ts
+// Purpose: Persists the active repo diff scope shared by the diff panel and header badge.
+// Layer: Web UI state store
+// Exports: repo diff scope labels, validation, and a persisted Zustand store.
 import type { GitReadWorkingTreeDiffInput } from "@arkos/contracts";
 import { useMemo } from "react";
 import { create } from "zustand";

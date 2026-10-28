@@ -2,6 +2,9 @@
 // Purpose: Centralizes rate-limit parsing, normalization, formatting, and row derivation
 // for provider runtime events so UI components can stay presentation-only.
 
+// FILE: rateLimits.ts
+// Purpose: Centralizes rate-limit parsing, normalization, formatting, and row derivation
+// for provider runtime events so UI components can stay presentation-only.
 import type { OrchestrationThread } from "@arkos/contracts";
 import { providerUsageLearnMoreHref } from "@arkos/shared/providerUsage";
 

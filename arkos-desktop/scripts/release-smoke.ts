@@ -3,26 +3,44 @@
 // Layer: Release verification script
 // Depends on: update-release-package-versions.ts and merge-mac-update-manifests.ts.
 
+// FILE: release-smoke.ts
+// Purpose: Smoke-tests release version alignment and merged macOS updater manifests.
+// Layer: Release verification script
+// Depends on: update-release-package-versions.ts and merge-mac-update-manifests.ts.
+// FILE: release-smoke.ts
+// Purpose: Smoke-tests release version alignment and merged macOS updater manifests.
+// Layer: Release verification script
+// Depends on: update-release-package-versions.ts and merge-mac-update-manifests.ts.
+// FILE: release-smoke.ts
+// Purpose: Smoke-tests release version alignment and merged macOS updater manifests.
+// Layer: Release verification script
+// Depends on: update-release-package-versions.ts and merge-mac-update-manifests.ts.
+// FILE: release-smoke.ts
+// Purpose: Smoke-tests release version alignment and merged macOS updater manifests.
+// Layer: Release verification script
+// Depends on: update-release-package-versions.ts and merge-mac-update-manifests.ts.
+// FILE: release-smoke.ts
+// Purpose: Smoke-tests release version alignment and merged macOS updater manifests.
+// Layer: Release verification script
+// Depends on: update-release-package-versions.ts and merge-mac-update-manifests.ts.
+// FILE: release-smoke.ts
+// Purpose: Smoke-tests release version alignment and merged macOS updater manifests.
+// Layer: Release verification script
+// Depends on: update-release-package-versions.ts and merge-mac-update-manifests.ts.
+// FILE: release-smoke.ts
+// Purpose: Smoke-tests release version alignment and merged macOS updater manifests.
+// Layer: Release verification script
+// Depends on: update-release-package-versions.ts and merge-mac-update-manifests.ts.
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-  ARKOS_DESKTOP_UPDATE_CHANNEL,
-  ARKOS_PRODUCTION_BUNDLE_ID,
-} from "@arkos/shared/desktopIdentity";
+import { ARKOS_DESKTOP_UPDATE_CHANNEL, ARKOS_PRODUCTION_BUNDLE_ID } from "@arkos/shared/desktopIdentity";
 
-import {
-  readReleaseUpdatePolicyConfig,
-  resolveReleaseUpdatePolicy,
-} from "./lib/release-update-policy.ts";
-import {
-  RELEASE_LOCKFILE_PATH,
-  RELEASE_PATCHES_PATH,
-  RELEASE_WORKSPACE_MANIFEST_PATHS,
-} from "./lib/release-workspace-manifests.ts";
+import { readReleaseUpdatePolicyConfig, resolveReleaseUpdatePolicy } from "./lib/release-update-policy.ts";
+import { RELEASE_LOCKFILE_PATH, RELEASE_PATCHES_PATH, RELEASE_WORKSPACE_MANIFEST_PATHS } from "./lib/release-workspace-manifests.ts";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 

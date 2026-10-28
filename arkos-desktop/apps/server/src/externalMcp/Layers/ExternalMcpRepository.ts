@@ -1,21 +1,9 @@
-import type {
-  ExternalMcpCapability,
-  ExternalMcpClientKind,
-  ExternalMcpProjectScope,
-} from "@arkos/contracts";
+import type { ExternalMcpCapability, ExternalMcpClientKind, ExternalMcpProjectScope } from "@arkos/contracts";
 import { Effect, Layer } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
 import { recordCreatedWorktreeInPlan } from "../../agentGateway/operationPlan.ts";
-import {
-  ExternalMcpRepository,
-  type ExternalMcpIntegrationRecord,
-  type ExternalMcpOperationRecord,
-  type ExternalMcpProjectRecord,
-  type ExternalMcpRepositoryShape,
-  type ExternalMcpTaskRecord,
-  type ReserveExternalMcpOperationResult,
-} from "../Services/ExternalMcpRepository.ts";
+import { ExternalMcpRepository, type ExternalMcpIntegrationRecord, type ExternalMcpOperationRecord, type ExternalMcpProjectRecord, type ExternalMcpRepositoryShape, type ExternalMcpTaskRecord, type ReserveExternalMcpOperationResult } from "../Services/ExternalMcpRepository.ts";
 
 interface IntegrationRow {
   readonly integrationId: string;

@@ -8,6 +8,76 @@
  * ends the ladder. The only artifact is report.json under
  * ARKOS_CUA_CANARY_DIR; the app prints nothing user-facing.
  */
+/**
+ * Belief canary main-process entry. It is the probe sibling of the desktop
+ * fixture runner (apps/desktop/src/cuaFixtures/electron.ts): same driver host
+ * and backend mechanics, different flow. A belief-probe helper posts one
+ * candidate focus-belief phase, then the backend types a unique string into a
+ * background target window of this same process. Each phase records an
+ * Electron readback and an AX readback; the first phase whose exact text lands
+ * ends the ladder. The only artifact is report.json under
+ * ARKOS_CUA_CANARY_DIR; the app prints nothing user-facing.
+ */
+/**
+ * Belief canary main-process entry. It is the probe sibling of the desktop
+ * fixture runner (apps/desktop/src/cuaFixtures/electron.ts): same driver host
+ * and backend mechanics, different flow. A belief-probe helper posts one
+ * candidate focus-belief phase, then the backend types a unique string into a
+ * background target window of this same process. Each phase records an
+ * Electron readback and an AX readback; the first phase whose exact text lands
+ * ends the ladder. The only artifact is report.json under
+ * ARKOS_CUA_CANARY_DIR; the app prints nothing user-facing.
+ */
+/**
+ * Belief canary main-process entry. It is the probe sibling of the desktop
+ * fixture runner (apps/desktop/src/cuaFixtures/electron.ts): same driver host
+ * and backend mechanics, different flow. A belief-probe helper posts one
+ * candidate focus-belief phase, then the backend types a unique string into a
+ * background target window of this same process. Each phase records an
+ * Electron readback and an AX readback; the first phase whose exact text lands
+ * ends the ladder. The only artifact is report.json under
+ * ARKOS_CUA_CANARY_DIR; the app prints nothing user-facing.
+ */
+/**
+ * Belief canary main-process entry. It is the probe sibling of the desktop
+ * fixture runner (apps/desktop/src/cuaFixtures/electron.ts): same driver host
+ * and backend mechanics, different flow. A belief-probe helper posts one
+ * candidate focus-belief phase, then the backend types a unique string into a
+ * background target window of this same process. Each phase records an
+ * Electron readback and an AX readback; the first phase whose exact text lands
+ * ends the ladder. The only artifact is report.json under
+ * ARKOS_CUA_CANARY_DIR; the app prints nothing user-facing.
+ */
+/**
+ * Belief canary main-process entry. It is the probe sibling of the desktop
+ * fixture runner (apps/desktop/src/cuaFixtures/electron.ts): same driver host
+ * and backend mechanics, different flow. A belief-probe helper posts one
+ * candidate focus-belief phase, then the backend types a unique string into a
+ * background target window of this same process. Each phase records an
+ * Electron readback and an AX readback; the first phase whose exact text lands
+ * ends the ladder. The only artifact is report.json under
+ * ARKOS_CUA_CANARY_DIR; the app prints nothing user-facing.
+ */
+/**
+ * Belief canary main-process entry. It is the probe sibling of the desktop
+ * fixture runner (apps/desktop/src/cuaFixtures/electron.ts): same driver host
+ * and backend mechanics, different flow. A belief-probe helper posts one
+ * candidate focus-belief phase, then the backend types a unique string into a
+ * background target window of this same process. Each phase records an
+ * Electron readback and an AX readback; the first phase whose exact text lands
+ * ends the ladder. The only artifact is report.json under
+ * ARKOS_CUA_CANARY_DIR; the app prints nothing user-facing.
+ */
+/**
+ * Belief canary main-process entry. It is the probe sibling of the desktop
+ * fixture runner (apps/desktop/src/cuaFixtures/electron.ts): same driver host
+ * and backend mechanics, different flow. A belief-probe helper posts one
+ * candidate focus-belief phase, then the backend types a unique string into a
+ * background target window of this same process. Each phase records an
+ * Electron readback and an AX readback; the first phase whose exact text lands
+ * ends the ladder. The only artifact is report.json under
+ * ARKOS_CUA_CANARY_DIR; the app prints nothing user-facing.
+ */
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";

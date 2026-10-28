@@ -4,16 +4,12 @@
 //          about a GitHub item, with no source thread).
 // Layer: Chat orchestration
 
-import type {
-  ClientOrchestrationCommand,
-  ModelSelection,
-  NativeApi,
-  OrchestrationShellSnapshot,
-  ProjectId,
-  RuntimeMode,
-  ThreadId,
-  ThreadSidechatContext,
-} from "@arkos/contracts";
+// FILE: sidechatCreation.ts
+// Purpose: Own the sidechat create/start/snapshot lifecycle independently of composer state:
+//          forked sidechats (a source thread's /side) and standalone ones (the inbox's Ask
+//          about a GitHub item, with no source thread).
+// Layer: Chat orchestration
+import type { ClientOrchestrationCommand, ModelSelection, NativeApi, OrchestrationShellSnapshot, ProjectId, RuntimeMode, ThreadId, ThreadSidechatContext } from "@arkos/contracts";
 import { buildPromptThreadTitleFallback } from "@arkos/shared/chatThreads";
 import { autoRuntimeModeSelectionIssue } from "@arkos/shared/runtimeMode";
 

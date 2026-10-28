@@ -4,42 +4,20 @@
 // Layer: Sidebar UI component
 // Exports: SidebarActivityView, ActivityThreadRow, SidebarSnoozedThreadsSection
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-} from "react";
+// FILE: SidebarActivityView.tsx
+// Purpose: Task-feed sidebar surface — every thread is a 2-line task row
+//          (provider + title / project + branch) grouped by status, with settle.
+// Layer: Sidebar UI component
+// Exports: SidebarActivityView, ActivityThreadRow, SidebarSnoozedThreadsSection
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 
 import type { OrchestrationThreadPullRequest, ProjectId, ThreadId } from "@arkos/contracts";
 import { resolveThreadEnvironmentMode } from "@arkos/shared/threadEnvironment";
 
-import {
-  AddPlusIcon,
-  CircleCheckIcon,
-  ClockIcon,
-  GitBranchIcon,
-  NewThreadIcon,
-  SortIcon,
-  Undo2Icon,
-  WorktreeIcon,
-  FolderIcon,
-} from "~/lib/icons";
+import { AddPlusIcon, CircleCheckIcon, ClockIcon, GitBranchIcon, NewThreadIcon, SortIcon, Undo2Icon, WorktreeIcon, FolderIcon } from "~/lib/icons";
 import { beginThreadDrag, endThreadDrag } from "~/lib/threadDrag";
 import { cn } from "~/lib/utils";
-import {
-  SIDEBAR_ROW_ACTIVE_CLASS_NAME,
-  SIDEBAR_ROW_FOCUS_CLASS_NAME,
-  SIDEBAR_ROW_HOVER_CLASS_NAME,
-  SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME,
-  SIDEBAR_ROW_SNOOZE_REMINDER_CLASS_NAME,
-  SIDEBAR_SECTION_LABEL_CLASS_NAME,
-  sidebarHoverRevealHideClassName,
-} from "../sidebarRowStyles";
+import { SIDEBAR_ROW_ACTIVE_CLASS_NAME, SIDEBAR_ROW_FOCUS_CLASS_NAME, SIDEBAR_ROW_HOVER_CLASS_NAME, SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME, SIDEBAR_ROW_SNOOZE_REMINDER_CLASS_NAME, SIDEBAR_SECTION_LABEL_CLASS_NAME, sidebarHoverRevealHideClassName } from "../sidebarRowStyles";
 import { resolveThreadPullRequestFallback } from "../hooks/useThreadPullRequests";
 import { useThreadIdsWithPendingDraft } from "../composerDraftStore";
 import type { Project, SidebarThreadSummary } from "../types";
@@ -48,58 +26,20 @@ import { ProviderIcon } from "./ProviderIcon";
 import { SnoozeCountdown } from "./SnoozeCountdown";
 import { ProjectSidebarIcon } from "./ProjectSidebarIcon";
 import { PrStateChip } from "./pullRequest/PrStateChip";
-import {
-  createSidebarThreadHoverAnchorId,
-  resolveSidebarThreadListPaging,
-  resolveThreadDisplayBranch,
-  resolveThreadProjectLabel,
-  resolveThreadStatusTrailingIndicator,
-  type ThreadStatusPill,
-} from "./Sidebar.logic";
-import {
-  buildActivityViewModel,
-  collectActivityScopeOptions,
-  collectUnreadActivityThreads,
-  collectVisibleActivityThreadIds,
-  resolveActivitySectionRows,
-  groupActivityThreadsByProject,
-  isThreadSettledForActivity,
-  resolveActivityScope,
-  resolveActivityThreadReadAt,
-  splitActivityThreadsByDateBucket,
-  splitRecentActivityThreads,
-  type ActivityGroupMode,
-  type ActivityProjectGroup,
-  type ActivityScopeOption,
-  type ActivityScopeSelection,
-} from "./SidebarActivityView.logic";
+import { createSidebarThreadHoverAnchorId, resolveSidebarThreadListPaging, resolveThreadDisplayBranch, resolveThreadProjectLabel, resolveThreadStatusTrailingIndicator, type ThreadStatusPill } from "./Sidebar.logic";
+import { buildActivityViewModel, collectActivityScopeOptions, collectUnreadActivityThreads, collectVisibleActivityThreadIds, resolveActivitySectionRows, groupActivityThreadsByProject, isThreadSettledForActivity, resolveActivityScope, resolveActivityThreadReadAt, splitActivityThreadsByDateBucket, splitRecentActivityThreads, type ActivityGroupMode, type ActivityProjectGroup, type ActivityScopeOption, type ActivityScopeSelection } from "./SidebarActivityView.logic";
 import { SIDEBAR_TRAILING_ICON_CLASS, sidebarGlyphClass } from "./sidebarGlyphs";
 import { SIDEBAR_HOVER_CARD_TRIGGER_PROPS } from "./sidebarHoverCardStyles";
-import {
-  createSidebarThreadRowGestures,
-  type SidebarRowContextMenuPosition,
-} from "./sidebarThreadRowGestures";
+import { createSidebarThreadRowGestures, type SidebarRowContextMenuPosition } from "./sidebarThreadRowGestures";
 import { SidebarIconButton } from "./SidebarIconButton";
-import {
-  SidebarCollapsibleSection,
-  SidebarSectionLabel,
-  SidebarShowMoreRow,
-} from "./SidebarListSection";
+import { SidebarCollapsibleSection, SidebarSectionLabel, SidebarShowMoreRow } from "./SidebarListSection";
 import { SidebarSectionToolbar } from "./SidebarSectionToolbar";
 import { SidebarDraftGlyph, SidebarStatusTrailingGlyph } from "./SidebarStatusTrailingGlyph";
 import { ThreadArchiveActionButton } from "./ThreadArchiveActionButton";
 import { ThreadPinToggleButton } from "./ThreadPinToggleButton";
 import { ShortcutKbd } from "./ui/kbd";
 import { DisclosureChevron } from "./ui/DisclosureChevron";
-import {
-  Menu,
-  MenuGroup,
-  MenuItem,
-  MenuRadioGroup,
-  MenuRadioItem,
-  MenuSeparator,
-  MenuTrigger,
-} from "./ui/menu";
+import { Menu, MenuGroup, MenuItem, MenuRadioGroup, MenuRadioItem, MenuSeparator, MenuTrigger } from "./ui/menu";
 import { Tooltip, TooltipTrigger } from "./ui/tooltip";
 
 const ACTIVITY_LIST_BASE_LIMIT = 20;

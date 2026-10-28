@@ -4,6 +4,11 @@
 //          with another window's sign-in terminal on the same server.
 // Layer: Web domain helper
 
+// FILE: onboardingTerminalScope.ts
+// Purpose: Synthetic terminal scope ids for the provider sign-in terminals shown during
+//          the welcome tour, so they never collide with a real thread's terminal state nor
+//          with another window's sign-in terminal on the same server.
+// Layer: Web domain helper
 import type { ProviderKind, ThreadId } from "@arkos/contracts";
 
 export const ONBOARDING_TERMINAL_SCOPE_PREFIX = "onboarding-terminal:";

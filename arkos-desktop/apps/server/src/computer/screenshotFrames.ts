@@ -18,6 +18,26 @@
  * different windows must not read each other's pictures, and bounded, because
  * a model only ever refers back a few screenshots.
  */
+/**
+ * The coordinate frame a model points in: the screenshot it is looking at.
+ *
+ * A model does not see the desktop; it sees pictures of it, each one a
+ * possibly downscaled crop at some offset. The earlier tool surface handed the
+ * model the crop's `region` and `scale` and asked it to convert every pixel it
+ * wanted to click into a desktop coordinate itself — across a workspace
+ * overview squeezed to a third of its size and window captures offset by
+ * thousands of pixels — and that arithmetic is where clicks went astray. The
+ * official computer-use harnesses (OpenAI's `@oai/sky` client behind the Codex
+ * app, Anthropic's computer tool) never ask for it: the model gives pixel
+ * coordinates in the screenshot it was shown and the harness does the
+ * geometry. This module is that geometry.
+ *
+ * Every screenshot delivered to a thread is remembered here as a frame with an
+ * id; a target's x/y are pixels in the thread's most recent frame unless it
+ * names an earlier one. Frames are per thread, because two agents looking at
+ * different windows must not read each other's pictures, and bounded, because
+ * a model only ever refers back a few screenshots.
+ */
 import { createHash } from "node:crypto";
 
 import type { ComputerPoint, ComputerRect, ComputerScreenshot } from "@arkos/contracts";

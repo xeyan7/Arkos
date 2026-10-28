@@ -3,41 +3,20 @@
 // Layer: Kanban UI hook
 // Exports: useKanbanTaskComposerEditor
 
-import type {
-  ModelSlug,
-  ProviderInteractionMode,
-  ProviderInstanceId,
-  ProviderKind,
-  ProviderMentionReference,
-  ProviderSkillReference,
-  ThreadId,
-} from "@arkos/contracts";
+// FILE: useKanbanTaskComposerEditor.ts
+// Purpose: Handles kanban task composer insertion, cursor, and menu key behavior.
+// Layer: Kanban UI hook
+// Exports: useKanbanTaskComposerEditor
+import type { ModelSlug, ProviderInteractionMode, ProviderInstanceId, ProviderKind, ProviderMentionReference, ProviderSkillReference, ThreadId } from "@arkos/contracts";
 import { type Dispatch, type MutableRefObject, type RefObject, type SetStateAction } from "react";
 
 import type { ComposerPromptEditorHandle } from "~/components/ComposerPromptEditor";
 import type { ComposerCommandItem } from "~/components/chat/ComposerCommandMenu";
 import type { ComposerLocalDirectoryMenuHandle } from "~/components/chat/ComposerLocalDirectoryMenu";
-import {
-  collapseExpandedComposerCursor,
-  detectComposerTrigger,
-  expandCollapsedComposerCursor,
-  replaceTextRange,
-  type ComposerTrigger,
-} from "~/composer-logic";
-import {
-  ensureLeadingSpaceForReplacement,
-  extendReplacementRangeForTrailingSpace,
-} from "~/composerTriggerInsertion";
-import {
-  composerMentionPathNeedsQuoting,
-  formatComposerMentionToken,
-  skillMentionPrefix,
-} from "~/lib/composerMentions";
-import {
-  syncTerminalContextsByIds,
-  terminalContextIdListsEqual,
-  type TerminalContextDraft,
-} from "~/lib/terminalContext";
+import { collapseExpandedComposerCursor, detectComposerTrigger, expandCollapsedComposerCursor, replaceTextRange, type ComposerTrigger } from "~/composer-logic";
+import { ensureLeadingSpaceForReplacement, extendReplacementRangeForTrailingSpace } from "~/composerTriggerInsertion";
+import { composerMentionPathNeedsQuoting, formatComposerMentionToken, skillMentionPrefix } from "~/lib/composerMentions";
+import { syncTerminalContextsByIds, terminalContextIdListsEqual, type TerminalContextDraft } from "~/lib/terminalContext";
 import { useComposerDraftStore } from "../../composerDraftStore";
 
 interface UseKanbanTaskComposerEditorInput {

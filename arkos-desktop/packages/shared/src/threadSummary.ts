@@ -1,10 +1,4 @@
-import type {
-  OrchestrationLatestTurn,
-  OrchestrationMessage,
-  OrchestrationPendingInteraction,
-  OrchestrationProposedPlan,
-  OrchestrationThreadActivity,
-} from "@arkos/contracts";
+import type { OrchestrationLatestTurn, OrchestrationMessage, OrchestrationPendingInteraction, OrchestrationProposedPlan, OrchestrationThreadActivity } from "@arkos/contracts";
 
 export interface ThreadSummaryMetadata {
   latestUserMessageAt: string | null;

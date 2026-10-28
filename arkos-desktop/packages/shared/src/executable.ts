@@ -3,6 +3,34 @@
 // Layer: Shared platform runtime
 // Depends on: node:fs and node:path only.
 
+// FILE: executable.ts
+// Purpose: Defines how a command name becomes a concrete executable on every platform.
+// Layer: Shared platform runtime
+// Depends on: node:fs and node:path only.
+// FILE: executable.ts
+// Purpose: Defines how a command name becomes a concrete executable on every platform.
+// Layer: Shared platform runtime
+// Depends on: node:fs and node:path only.
+// FILE: executable.ts
+// Purpose: Defines how a command name becomes a concrete executable on every platform.
+// Layer: Shared platform runtime
+// Depends on: node:fs and node:path only.
+// FILE: executable.ts
+// Purpose: Defines how a command name becomes a concrete executable on every platform.
+// Layer: Shared platform runtime
+// Depends on: node:fs and node:path only.
+// FILE: executable.ts
+// Purpose: Defines how a command name becomes a concrete executable on every platform.
+// Layer: Shared platform runtime
+// Depends on: node:fs and node:path only.
+// FILE: executable.ts
+// Purpose: Defines how a command name becomes a concrete executable on every platform.
+// Layer: Shared platform runtime
+// Depends on: node:fs and node:path only.
+// FILE: executable.ts
+// Purpose: Defines how a command name becomes a concrete executable on every platform.
+// Layer: Shared platform runtime
+// Depends on: node:fs and node:path only.
 import { accessSync, constants, readdirSync, statSync } from "node:fs";
 import { extname, join, posix, win32 } from "node:path";
 

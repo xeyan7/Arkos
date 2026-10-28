@@ -18,29 +18,34 @@
  *
  * @module HubOutputReactorLive
  */
-import {
-  CommandId,
-  EventId,
-  STUDIO_OUTPUTS_ACTIVITY_KIND,
-  ThreadId,
-  type ProviderRuntimeEvent,
-  type TurnId,
-} from "@arkos/contracts";
+/**
+ * HubOutputReactorLive - Per-turn Hub output capture layer.
+ *
+ * Git checkpoints attribute produced files precisely, but the Hub root is
+ * typically not a Git repository, and file-change tool activities miss files
+ * created by shell subprocesses (scripts, converters, downloads). This reactor
+ * closes that gap: it snapshots the Hub workspace tree before provider turn
+ * execution, rescans when the turn settles, and persists the diff as a thread activity
+ * (`studio.outputs.captured`) that the Hub outputs listing reads back.
+ * The activity kind retains its legacy name for persisted-history compatibility.
+ *
+ * Codex-generated images live under the Codex home, outside the Hub root, so
+ * this scan never sees them; ProviderRuntimeIngestion owns copying those into
+ * the workspace (with their own direct attribution) as image items complete.
+ *
+ * Concurrent Hub chats share one root, so overlapping turns may both claim
+ * a file; attribution is deliberately generous rather than lossy.
+ *
+ * @module HubOutputReactorLive
+ */
+import { CommandId, EventId, STUDIO_OUTPUTS_ACTIVITY_KIND, ThreadId, type ProviderRuntimeEvent, type TurnId } from "@arkos/contracts";
 import { Cause, Effect, FileSystem, Layer, Option, Path, Stream } from "effect";
 import { makeDrainableWorker, startDrainableWorkerProducers } from "@arkos/shared/DrainableWorker";
 import { isGroupContainerKind } from "@arkos/shared/projectContainers";
 
-import {
-  checkpointRefForThreadMessageStart,
-  checkpointRefForThreadTurnStart,
-  resolveThreadWorkspaceCwd,
-} from "../../checkpointing/Utils.ts";
+import { checkpointRefForThreadMessageStart, checkpointRefForThreadTurnStart, resolveThreadWorkspaceCwd } from "../../checkpointing/Utils.ts";
 import { isGitRepository } from "../../git/isRepo.ts";
-import {
-  scanStudioWorkspaceFiles,
-  studioOutputsCapturedActivityPayload,
-  type StudioWorkspaceScan,
-} from "../../studioOutputs.ts";
+import { scanStudioWorkspaceFiles, studioOutputsCapturedActivityPayload, type StudioWorkspaceScan } from "../../studioOutputs.ts";
 import { diffStudioWorkspaceScans } from "../../studioOutputs.ts";
 import { ProviderService } from "../../provider/Services/ProviderService.ts";
 import { OrchestrationEngineService } from "../Services/OrchestrationEngine.ts";

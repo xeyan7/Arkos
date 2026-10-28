@@ -8,11 +8,16 @@
 //          describePullRequestState, stripHtmlComments, PullRequestTimelineEvent,
 //          buildPullRequestTimelineEvents
 
-import type {
-  PullRequestDetail,
-  PullRequestDetailInput,
-  PullRequestState,
-} from "@arkos/contracts";
+// FILE: pullRequestDetail.logic.ts
+// Purpose: Pure helpers shared by every host of the pull request detail surface (the inbox
+//          route's detail pane and the chat right-dock pane): the canonical
+//          pane identity key, the "PR #n" tab chip label, the plain-language state
+//          descriptor, and the flattened chronological timeline event list.
+// Layer: Web domain helpers (no React)
+// Exports: pullRequestDetailInputKey, pullRequestPaneTabLabel, pullRequestDetailInputFromPane,
+//          describePullRequestState, stripHtmlComments, PullRequestTimelineEvent,
+//          buildPullRequestTimelineEvents
+import type { PullRequestDetail, PullRequestDetailInput, PullRequestState } from "@arkos/contracts";
 
 import type { RightDockPane } from "~/rightDockStore.logic";
 

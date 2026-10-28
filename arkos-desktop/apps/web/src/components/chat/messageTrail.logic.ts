@@ -4,6 +4,11 @@
 // Layer: Chat transcript shell (presentation-adjacent logic, unit-tested)
 // Depends on: timeline entry shape only — no React, no DOM.
 
+// FILE: messageTrail.logic.ts
+// Purpose: Pure helpers for the left-edge message navigation trail — project the
+//   timeline into one tick per sent message and resolve which tick is active.
+// Layer: Chat transcript shell (presentation-adjacent logic, unit-tested)
+// Depends on: timeline entry shape only — no React, no DOM.
 import { type MessageId } from "@arkos/contracts";
 import { type TimelineEntry } from "../../session-logic";
 

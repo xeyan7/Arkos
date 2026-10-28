@@ -2,6 +2,9 @@
 // Purpose: Normalize, serialize, and strip assistant quote selections from user prompts.
 // Layer: Chat composer and transcript helpers
 
+// FILE: assistantSelections.ts
+// Purpose: Normalize, serialize, and strip assistant quote selections from user prompts.
+// Layer: Chat composer and transcript helpers
 import { CHAT_ASSISTANT_SELECTION_TEXT_MAX_CHARS } from "@arkos/contracts";
 
 import type { ChatAssistantSelectionAttachment } from "../types";

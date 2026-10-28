@@ -1,11 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-import {
-  MIGRATION_RUNTIME_SOURCE_RELATIVE_PATH,
-  findMigrationRuntimeIdentityMismatch,
-  type MigrationRuntimeIdentityMismatch,
-} from "@arkos/shared/migrationRecovery";
+import { MIGRATION_RUNTIME_SOURCE_RELATIVE_PATH, findMigrationRuntimeIdentityMismatch, type MigrationRuntimeIdentityMismatch } from "@arkos/shared/migrationRecovery";
 
 declare const __ARKOS_MIGRATION_RUNTIME_SOURCE_DIGEST__: string;
 

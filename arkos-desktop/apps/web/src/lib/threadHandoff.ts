@@ -3,17 +3,11 @@
 // Layer: Web handoff utilities
 // Exports: target-provider, title, transcript, and model-selection helpers.
 
-import {
-  EventId,
-  MessageId,
-  type OrchestrationThreadActivity,
-  PROVIDER_DISPLAY_NAMES,
-  type ModelSelection,
-  type ProviderInstanceId,
-  type ProviderKind,
-  type ServerProviderStatus,
-  type ThreadHandoffImportedMessage,
-} from "@arkos/contracts";
+// FILE: threadHandoff.ts
+// Purpose: Builds client-side handoff commands and imported transcript payloads.
+// Layer: Web handoff utilities
+// Exports: target-provider, title, transcript, and model-selection helpers.
+import { EventId, MessageId, type OrchestrationThreadActivity, PROVIDER_DISPLAY_NAMES, type ModelSelection, type ProviderInstanceId, type ProviderKind, type ServerProviderStatus, type ThreadHandoffImportedMessage } from "@arkos/contracts";
 import { getDefaultModel } from "@arkos/shared/model";
 import type { ProviderInstanceOption } from "../appSettings";
 import { type Thread } from "../types";

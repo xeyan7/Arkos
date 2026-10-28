@@ -10,10 +10,7 @@ import * as Path from "node:path";
 
 import type { BrowserToolName, ThreadId } from "@arkos/contracts";
 
-import {
-  DesktopBrowserAutomationHost,
-  type BrowserAutomationToolRequest,
-} from "./browserAutomation/desktopBrowserAutomationHost";
+import { DesktopBrowserAutomationHost, type BrowserAutomationToolRequest } from "./browserAutomation/desktopBrowserAutomationHost";
 import { BrowserAutomationHostError } from "./browserAutomation/hostErrors";
 import type { DesktopBrowserManager } from "./browserManager";
 

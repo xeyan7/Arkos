@@ -1,9 +1,6 @@
 import { Effect, FileSystem, Layer, Path } from "effect";
 
-import {
-  ProjectFaviconResolver,
-  type ProjectFaviconResolverShape,
-} from "../Services/ProjectFaviconResolver";
+import { ProjectFaviconResolver, type ProjectFaviconResolverShape } from "../Services/ProjectFaviconResolver";
 
 const FAVICON_CANDIDATES = [
   "favicon.svg",

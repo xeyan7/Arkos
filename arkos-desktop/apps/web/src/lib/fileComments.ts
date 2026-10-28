@@ -3,6 +3,10 @@
 //          the file viewer attaches to a thread's composer draft and prompt.
 // Layer: Chat composer and transcript helpers
 
+// FILE: fileComments.ts
+// Purpose: Normalize, serialize, and parse inline "Local comment" requests that
+//          the file viewer attaches to a thread's composer draft and prompt.
+// Layer: Chat composer and transcript helpers
 import { randomUUID } from "./utils";
 
 // Inline comments authored against a file/line range in the editor gutter. They

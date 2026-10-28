@@ -1,4 +1,11 @@
 // Same-run release outputs only: no dependencies or native compilation products.
+// Same-run release outputs only: no dependencies or native compilation products.
+// Same-run release outputs only: no dependencies or native compilation products.
+// Same-run release outputs only: no dependencies or native compilation products.
+// Same-run release outputs only: no dependencies or native compilation products.
+// Same-run release outputs only: no dependencies or native compilation products.
+// Same-run release outputs only: no dependencies or native compilation products.
+// Same-run release outputs only: no dependencies or native compilation products.
 import { createHash } from "node:crypto";
 import { lstatSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";

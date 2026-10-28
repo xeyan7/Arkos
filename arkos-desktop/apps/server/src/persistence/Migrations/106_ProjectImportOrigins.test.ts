@@ -13,7 +13,7 @@ it.layer(NodeSqliteClient.layerMemory())("project import origins", (it) => {
       const repository = yield* makeProjectImportRepository;
       const origin = {
         sourceKey: "origin",
-        provider: "codex" as const,
+        provider: "arkos" as const,
         sourceHome: "/codex",
         externalId: "native",
         projectId: ProjectId.makeUnsafe("project"),

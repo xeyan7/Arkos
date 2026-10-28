@@ -16,60 +16,40 @@
  *
  * @module device/IosSimulatorBackend
  */
+/**
+ * IosSimulatorBackend - the one DeviceBackend implementation today.
+ *
+ * Split by capability:
+ *
+ * - Discovery, boot/shutdown, install/launch/openurl, screenshots, and screen
+ *   recordings go through `xcrun simctl`, which is public, stable, and needs
+ *   no permissions.
+ * - Input injection, the accessibility tree, and the video stream need private
+ *   CoreSimulator/SimulatorKit APIs, so they go through the native helper
+ *   (see `helperClient.ts`), compiled on demand against the user's Xcode.
+ *
+ * Availability is modelled rather than inferred from errors: the pane renders a
+ * checklist (`DeviceAvailability`) instead of a stack trace, so every probe
+ * here maps onto exactly one setup step.
+ *
+ * @module device/IosSimulatorBackend
+ */
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { constants as fsConstants, existsSync } from "node:fs";
 import { access, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import * as path from "node:path";
 
-import type {
-  DeviceAvailability,
-  DeviceCapabilityId,
-  DeviceDescribeUiResult,
-  DeviceDescriptor,
-  DeviceGeometry,
-  DeviceHardwareButton,
-  DeviceInstallAppResult,
-  DeviceKeyModifier,
-  DeviceLaunchAppResult,
-  DeviceScreenshotResult,
-  DeviceSetupStep,
-  DeviceStartRecordingResult,
-  DeviceStopRecordingResult,
-  DeviceUiNode,
-  DeviceUiPoint,
-} from "@arkos/contracts";
+import type { DeviceAvailability, DeviceCapabilityId, DeviceDescribeUiResult, DeviceDescriptor, DeviceGeometry, DeviceHardwareButton, DeviceInstallAppResult, DeviceKeyModifier, DeviceLaunchAppResult, DeviceScreenshotResult, DeviceSetupStep, DeviceStartRecordingResult, DeviceStopRecordingResult, DeviceUiNode, DeviceUiPoint } from "@arkos/contracts";
 
-import {
-  DEVICE_HELPER_BINARY_NAME,
-  DEVICE_HELPER_CACHE_SEGMENTS,
-  DEVICE_HELPER_SOURCE_DIR_ENV,
-  deviceHelperCacheKey,
-  readDeviceHelperSourceRevision,
-} from "@arkos/shared/deviceHelperCache";
+import { DEVICE_HELPER_BINARY_NAME, DEVICE_HELPER_CACHE_SEGMENTS, DEVICE_HELPER_SOURCE_DIR_ENV, deviceHelperCacheKey, readDeviceHelperSourceRevision } from "@arkos/shared/deviceHelperCache";
 
 import { runProcess, type ProcessRunResult } from "../processRunner.ts";
-import {
-  DeviceBackendError,
-  type DeviceBackend,
-  type DeviceFrameListener,
-  type DeviceKeyEvent,
-  type DeviceListOptions,
-  type DeviceSwipeGesture,
-} from "./DeviceBackend.ts";
+import { DeviceBackendError, type DeviceBackend, type DeviceFrameListener, type DeviceKeyEvent, type DeviceListOptions, type DeviceSwipeGesture } from "./DeviceBackend.ts";
 import { readDeviceTypeCatalogue, type DeviceTypeCatalogue } from "./deviceTypeCatalogue.ts";
-import {
-  availabilityFromProbe,
-  capabilityUnavailableMessage,
-  parseHelperProbe,
-  type HelperProbeResult,
-} from "./helperCapabilities.ts";
+import { availabilityFromProbe, capabilityUnavailableMessage, parseHelperProbe, type HelperProbeResult } from "./helperCapabilities.ts";
 import { HELPER_METHODS, HelperClient, type DeviceHelperError } from "./helperClient.ts";
-import {
-  SANDBOX_OPT_OUT_ENV,
-  sandboxedHelperCommand,
-  type HelperSandboxCommand,
-} from "./helperSandbox.ts";
+import { SANDBOX_OPT_OUT_ENV, sandboxedHelperCommand, type HelperSandboxCommand } from "./helperSandbox.ts";
 
 const SIMCTL_TIMEOUT_MS = 30_000;
 /** How long one `simctl list devices` answer serves repeat callers; see listDevicesUnchecked. */

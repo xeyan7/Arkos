@@ -7,6 +7,14 @@
 // Exports: GitHubItemAgentActions, SendToAgentMenuItems, GitHubItemSendTarget,
 //          TOP_BAR_NARROW_LABEL_CLASS_NAME
 
+// FILE: GitHubItemAgentActions.tsx
+// Purpose: Send to agent for a GitHub item (a new draft thread with the item attached), in its
+//          two shapes: the top bar button of the detail page (asking which project when the
+//          item's repository belongs to several) and the menu entries the dock's "…" menu and
+//          the floating composer's "+" menu list, one per project.
+// Layer: Pull request presentation
+// Exports: GitHubItemAgentActions, SendToAgentMenuItems, GitHubItemSendTarget,
+//          TOP_BAR_NARROW_LABEL_CLASS_NAME
 import type { ProjectId } from "@arkos/contracts";
 
 import { ComposerPickerMenuPopup } from "~/components/chat/ComposerPickerMenuPopup";

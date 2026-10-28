@@ -2,6 +2,27 @@
 // Purpose: Owns bounded, origin-pinned, DNS-safe outbound HTTP for server integrations.
 // Layer: Shared Node/Electron network security boundary
 
+// FILE: outboundHttp.ts
+// Purpose: Owns bounded, origin-pinned, DNS-safe outbound HTTP for server integrations.
+// Layer: Shared Node/Electron network security boundary
+// FILE: outboundHttp.ts
+// Purpose: Owns bounded, origin-pinned, DNS-safe outbound HTTP for server integrations.
+// Layer: Shared Node/Electron network security boundary
+// FILE: outboundHttp.ts
+// Purpose: Owns bounded, origin-pinned, DNS-safe outbound HTTP for server integrations.
+// Layer: Shared Node/Electron network security boundary
+// FILE: outboundHttp.ts
+// Purpose: Owns bounded, origin-pinned, DNS-safe outbound HTTP for server integrations.
+// Layer: Shared Node/Electron network security boundary
+// FILE: outboundHttp.ts
+// Purpose: Owns bounded, origin-pinned, DNS-safe outbound HTTP for server integrations.
+// Layer: Shared Node/Electron network security boundary
+// FILE: outboundHttp.ts
+// Purpose: Owns bounded, origin-pinned, DNS-safe outbound HTTP for server integrations.
+// Layer: Shared Node/Electron network security boundary
+// FILE: outboundHttp.ts
+// Purpose: Owns bounded, origin-pinned, DNS-safe outbound HTTP for server integrations.
+// Layer: Shared Node/Electron network security boundary
 import { randomUUID } from "node:crypto";
 import type { LookupAddress } from "node:dns";
 import * as Dns from "node:dns/promises";
@@ -9,15 +30,7 @@ import * as Http from "node:http";
 import * as Https from "node:https";
 import * as Net from "node:net";
 
-import {
-  assertExactLoopbackIpAddress,
-  assertJsonWithinLimits,
-  assertOutboundUrlAllowed,
-  assertPublicIpAddress,
-  isBenchmarkIpAddress,
-  normalizeOutboundOrigin,
-  stripOutboundSensitiveHeaders,
-} from "./outboundHttpPolicy";
+import { assertExactLoopbackIpAddress, assertJsonWithinLimits, assertOutboundUrlAllowed, assertPublicIpAddress, isBenchmarkIpAddress, normalizeOutboundOrigin, stripOutboundSensitiveHeaders } from "./outboundHttpPolicy";
 
 export type OutboundHttpErrorCode =
   | "aborted"

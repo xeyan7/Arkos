@@ -8,11 +8,17 @@
 // own popup chrome, while these describe the panel *inside* a picker popup (search + rows), so
 // any picker panel can opt into the same density without pulling in composer chrome.
 
+// FILE: pickerPanelStyles.ts
+// Purpose: Class tokens for the dense ("plain") PickerPanelShell variant — the borderless
+//          search row, thin option rows, quiet group labels, and footer action rows.
+// Layer: Chat picker UI styling helper
+// Depends on: radius / scroll tokens from composerPickerStyles, hover token from surfaceStyles.
+//
+// Kept separate from composerPickerStyles.ts on purpose: those tokens describe the composer's
+// own popup chrome, while these describe the panel *inside* a picker popup (search + rows), so
+// any picker panel can opt into the same density without pulling in composer chrome.
 import { ELEVATED_HOVER_SURFACE_CLASS_NAME } from "~/surfaceStyles";
-import {
-  COMPOSER_PICKER_MODEL_LIST_SCROLL_CLASS_NAME,
-  COMPOSER_PICKER_OPTION_RADIUS_CLASS_NAME,
-} from "./composerPickerStyles";
+import { COMPOSER_PICKER_MODEL_LIST_SCROLL_CLASS_NAME, COMPOSER_PICKER_OPTION_RADIUS_CLASS_NAME } from "./composerPickerStyles";
 
 /**
  * Search row of a plain picker panel: no field chrome at all — a leading magnifier, the

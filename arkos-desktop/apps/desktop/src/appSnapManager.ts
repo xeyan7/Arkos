@@ -3,6 +3,10 @@
 // Layer: Desktop main-process service
 // Depends on: A signed Swift helper plus narrow filesystem/process adapters.
 
+// FILE: appSnapManager.ts
+// Purpose: Owns the macOS AppSnap helper lifecycle, permission state, and pending captures.
+// Layer: Desktop main-process service
+// Depends on: A signed Swift helper plus narrow filesystem/process adapters.
 import { stopNativeHelper } from "./stopNativeHelper";
 
 import * as ChildProcess from "node:child_process";
@@ -12,29 +16,8 @@ import * as Path from "node:path";
 import * as Readline from "node:readline";
 import type { Readable, Writable } from "node:stream";
 
-import {
-  PROVIDER_SEND_TURN_MAX_ATTACHMENTS,
-  PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
-  type DesktopAppSnapCapture,
-  type DesktopAppSnapErrorEvent,
-  type DesktopAppSnapPermission,
-  type DesktopAppSnapPermissionGuideState,
-  type DesktopAppSnapPermissionKind,
-  type DesktopAppSnapPlatform,
-  type DesktopAppSnapSettingsPane,
-  type DesktopAppSnapShortcut,
-  type DesktopAppSnapShortcutAvailability,
-  type DesktopAppSnapShortcutUpdateResult,
-  type DesktopAppSnapState,
-  type DesktopAppSnapWindowEntry,
-} from "@arkos/contracts";
-import {
-  DEFAULT_APP_SNAP_SHORTCUT,
-  appSnapShortcutAccelerator,
-  appSnapShortcutSystemConflict,
-  isAppSnapShortcut,
-  sameAppSnapShortcut,
-} from "@arkos/shared/appSnapShortcut";
+import { PROVIDER_SEND_TURN_MAX_ATTACHMENTS, PROVIDER_SEND_TURN_MAX_IMAGE_BYTES, type DesktopAppSnapCapture, type DesktopAppSnapErrorEvent, type DesktopAppSnapPermission, type DesktopAppSnapPermissionGuideState, type DesktopAppSnapPermissionKind, type DesktopAppSnapPlatform, type DesktopAppSnapSettingsPane, type DesktopAppSnapShortcut, type DesktopAppSnapShortcutAvailability, type DesktopAppSnapShortcutUpdateResult, type DesktopAppSnapState, type DesktopAppSnapWindowEntry } from "@arkos/contracts";
+import { DEFAULT_APP_SNAP_SHORTCUT, appSnapShortcutAccelerator, appSnapShortcutSystemConflict, isAppSnapShortcut, sameAppSnapShortcut } from "@arkos/shared/appSnapShortcut";
 
 const MAX_PENDING_CAPTURES = PROVIDER_SEND_TURN_MAX_ATTACHMENTS;
 const MAX_HELPER_STDERR_CHARS = 4_096;

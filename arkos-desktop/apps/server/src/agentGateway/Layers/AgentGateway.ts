@@ -14,31 +14,25 @@ import { ProjectionThreadMessageRepository } from "../../persistence/Services/Pr
  *
  * @module agentGateway/Layers/AgentGateway
  */
+/**
+ * AgentGatewayLive - Arkos app-control MCP tool surface.
+ *
+ * Implements the `arkos_*` tools served over `POST /mcp` (streamable HTTP,
+ * stateless JSON responses). Every provider session gets this endpoint plus a
+ * thread-bound bearer token injected at session start, so any agent running in
+ * a Arkos thread can list/read/create/steer threads and manage heartbeat
+ * automations - the same host-tool pattern the Codex desktop app uses.
+ *
+ * All tools delegate to existing services (OrchestrationEngine dispatch,
+ * ProjectionSnapshotQuery reads, AutomationService, GitCore); no orchestration
+ * state lives here.
+ *
+ * @module agentGateway/Layers/AgentGateway
+ */
 import { computerSpaceDesignationForMessages } from "../../computer/computerSpaceDesignation.ts";
 import { randomUUID } from "node:crypto";
 
-import {
-  COMPUTER_SETUP_REQUIRED_ACTIVITY_KIND,
-  COMPUTER_CONTROL_DENIED_ACTIVITY_KIND,
-  CommandId,
-  EventId,
-  ARKOS_GATEWAY_MAX_THREADS_PER_OPERATION,
-  MessageId,
-  ProjectId,
-  THREAD_GOAL_MAX_CHARS,
-  ThreadId,
-  TurnId,
-  type ComputerBuildSignature,
-  type ComputerPermission,
-  type ComputerSetupRequiredPayload,
-  type ModelSelection,
-  type OrchestrationCommand,
-  type ProviderApprovalDecision,
-  type ProviderKind,
-  type RuntimeMode,
-  type ServerProviderStatus,
-  type TurnDispatchMode,
-} from "@arkos/contracts";
+import { COMPUTER_SETUP_REQUIRED_ACTIVITY_KIND, COMPUTER_CONTROL_DENIED_ACTIVITY_KIND, CommandId, EventId, ARKOS_GATEWAY_MAX_THREADS_PER_OPERATION, MessageId, ProjectId, THREAD_GOAL_MAX_CHARS, ThreadId, TurnId, type ComputerBuildSignature, type ComputerPermission, type ComputerSetupRequiredPayload, type ModelSelection, type OrchestrationCommand, type ProviderApprovalDecision, type ProviderKind, type RuntimeMode, type ServerProviderStatus, type TurnDispatchMode } from "@arkos/contracts";
 import { runtimeModeEscalatesPrivilege } from "@arkos/shared/runtimeMode";
 import { isProviderKind } from "@arkos/shared/providerInstances";
 import { Effect, Layer, Option } from "effect";
@@ -62,25 +56,10 @@ import { AgentGatewayOperationRepository } from "../Services/AgentGatewayOperati
 import { ProviderDiscoveryService } from "../../provider/Services/ProviderDiscoveryService.ts";
 import { ProviderHealth } from "../../provider/Services/ProviderHealth.ts";
 import { ServerSettingsService } from "../../serverSettings.ts";
-import {
-  AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION,
-  resolveAgentGatewayTarget,
-  type AgentGatewayProviderAvailability,
-} from "../targetResolver.ts";
+import { AGENT_GATEWAY_TARGET_OPTIONS_DESCRIPTION, resolveAgentGatewayTarget, type AgentGatewayProviderAvailability } from "../targetResolver.ts";
 import { mcpToolResultError, mcpToolResultJson } from "../protocol.ts";
 import { gatewayIsoNow as isoNow, stableGatewayDigest } from "../creationUtils.ts";
-import {
-  MODEL_SELECTION_INPUT_SCHEMA,
-  PROVIDER_KINDS,
-  ToolInputError,
-  buildModelSelection,
-  decodeCreateThreadsInput,
-  errorText,
-  parseProviderKind,
-  readBooleanArg,
-  readRecordArg,
-  readStringArg,
-} from "../toolInput.ts";
+import { MODEL_SELECTION_INPUT_SCHEMA, PROVIDER_KINDS, ToolInputError, buildModelSelection, decodeCreateThreadsInput, errorText, parseProviderKind, readBooleanArg, readRecordArg, readStringArg } from "../toolInput.ts";
 import { WRITE_TOOL_ANNOTATIONS, type ToolContext, type ToolEntry } from "../toolRuntime.ts";
 import { makeAgentGatewayMcpTransport } from "../mcpTransport.ts";
 import { deliverGatewayCompletions } from "../completionDelivery.ts";
@@ -102,11 +81,7 @@ import { makeAgentGatewayComputerBrowserTools } from "../computerBrowserTools.ts
 import { computerApprovalDisplayArgs } from "../computerApprovalDisplay.ts";
 import { makeAgentGatewayDeviceTools } from "../deviceTools.ts";
 import { DeviceService } from "../../device/Services/DeviceService.ts";
-import {
-  COMPUTER_CONTROL_CAPABILITY,
-  makeAgentGatewayComputerTools,
-  type AgentGatewayComputerToolsOptions,
-} from "../computerTools.ts";
+import { COMPUTER_CONTROL_CAPABILITY, makeAgentGatewayComputerTools, type AgentGatewayComputerToolsOptions } from "../computerTools.ts";
 import { isArkosComputerToolFamilyName } from "../computerToolPermission.ts";
 import { ComputerService } from "../../computer/Services/ComputerService.ts";
 import { computerApprovalGate } from "../../computer/ComputerApprovalGate.ts";

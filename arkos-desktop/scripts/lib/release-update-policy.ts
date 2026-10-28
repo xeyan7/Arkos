@@ -3,6 +3,34 @@
 // releases publish through GitHub's Latest updater feed and retain the packaged app's
 // dedicated `arkos` channel aliases.
 
+// FILE: release-update-policy.ts
+// Purpose: Keeps the historical 0.4.x compatibility line separate while stable 0.5.x
+// releases publish through GitHub's Latest updater feed and retain the packaged app's
+// dedicated `arkos` channel aliases.
+// FILE: release-update-policy.ts
+// Purpose: Keeps the historical 0.4.x compatibility line separate while stable 0.5.x
+// releases publish through GitHub's Latest updater feed and retain the packaged app's
+// dedicated `arkos` channel aliases.
+// FILE: release-update-policy.ts
+// Purpose: Keeps the historical 0.4.x compatibility line separate while stable 0.5.x
+// releases publish through GitHub's Latest updater feed and retain the packaged app's
+// dedicated `arkos` channel aliases.
+// FILE: release-update-policy.ts
+// Purpose: Keeps the historical 0.4.x compatibility line separate while stable 0.5.x
+// releases publish through GitHub's Latest updater feed and retain the packaged app's
+// dedicated `arkos` channel aliases.
+// FILE: release-update-policy.ts
+// Purpose: Keeps the historical 0.4.x compatibility line separate while stable 0.5.x
+// releases publish through GitHub's Latest updater feed and retain the packaged app's
+// dedicated `arkos` channel aliases.
+// FILE: release-update-policy.ts
+// Purpose: Keeps the historical 0.4.x compatibility line separate while stable 0.5.x
+// releases publish through GitHub's Latest updater feed and retain the packaged app's
+// dedicated `arkos` channel aliases.
+// FILE: release-update-policy.ts
+// Purpose: Keeps the historical 0.4.x compatibility line separate while stable 0.5.x
+// releases publish through GitHub's Latest updater feed and retain the packaged app's
+// dedicated `arkos` channel aliases.
 import { constants, copyFileSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 

@@ -3,60 +3,24 @@
 // Layer: Web chat presentation component
 // Exports: TimelineWorkEntryRow, EditedFileRowContent, prefersCompactWorkEntryRow
 
+// FILE: TimelineWorkEntryRow.tsx
+// Purpose: Renders transcript work/tool rows and their inline details.
+// Layer: Web chat presentation component
+// Exports: TimelineWorkEntryRow, EditedFileRowContent, prefersCompactWorkEntryRow
 import type { ModelSelection, TurnId } from "@arkos/contracts";
 import { PROVIDER_DESCRIPTORS } from "@arkos/shared/providerMetadata";
-import {
-  createElement,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-  type ReactNode,
-} from "react";
+import { createElement, memo, useCallback, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 
 import { basenameOfPath } from "~/file-icons";
 import type { TimestampFormat } from "../../appSettings";
-import {
-  ArrowUpCircleIcon,
-  BackgroundTrayIcon,
-  BookOpenIcon,
-  BotIcon,
-  CheckIcon,
-  CircleAlertIcon,
-  CircleQuestionIcon,
-  ContextCompactionIcon,
-  ComputerUseIcon,
-  EyeIcon,
-  GitHubIcon,
-  GlobeIcon,
-  HammerIcon,
-  HandoffIcon,
-  HistoryIcon,
-  type LucideIcon,
-  McpIcon,
-  PencilIcon,
-  SearchIcon,
-  SkillCubeIcon,
-  TerminalIcon,
-  WebSearchIcon,
-  ZapIcon,
-} from "~/lib/icons";
+import { ArrowUpCircleIcon, BackgroundTrayIcon, BookOpenIcon, BotIcon, CheckIcon, CircleAlertIcon, CircleQuestionIcon, ContextCompactionIcon, ComputerUseIcon, EyeIcon, GitHubIcon, GlobeIcon, HammerIcon, HandoffIcon, HistoryIcon, type LucideIcon, McpIcon, PencilIcon, SearchIcon, SkillCubeIcon, TerminalIcon, WebSearchIcon, ZapIcon } from "~/lib/icons";
 import { describeLinkChip } from "~/lib/linkChips";
 import { computerToolName, describeComputerToolCall } from "~/lib/computerToolPresentation";
 import { cn } from "~/lib/utils";
 import { formatThreadModelSummaryLabel, resolveThreadModelSummary } from "~/lib/threadModelSummary";
 
 import { isFileChangeWorkLogEntry, type WorkLogEntry } from "../../session-logic";
-import {
-  formatAgentActivityEntryPreview,
-  isAgentActivityWorkEntry,
-  isCodexActivityStatusWorkEntry,
-  isPlainRuntimeNoticeWorkEntry,
-  isReasoningUpdateWorkEntry,
-} from "./agentActivity.logic";
+import { formatAgentActivityEntryPreview, isAgentActivityWorkEntry, isCodexActivityStatusWorkEntry, isPlainRuntimeNoticeWorkEntry, isReasoningUpdateWorkEntry } from "./agentActivity.logic";
 import { AutomationCreatedCard } from "./AutomationCreatedCard";
 import { ConnectedComputerSetupRequiredCard } from "./ComputerSetupRequiredCard";
 import { ComputerControlDeniedCard } from "./ComputerControlDeniedCard";
@@ -71,21 +35,8 @@ import { DisclosureChevron } from "../ui/DisclosureChevron";
 import { DisclosureRegion } from "../ui/DisclosureRegion";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { fileDiffStatsByPath, resolveFileDiffStatByChangedPath } from "~/lib/diffRendering";
-import {
-  extractToolArgumentField,
-  isPrefixedToolArgumentSummary,
-} from "../../lib/toolArgumentSummary";
-import {
-  deriveFriendlyCommandTarget,
-  deriveArkosMcpToolTitle,
-  extractWebFetchUrl,
-  isGenericToolTitle,
-  isArkosBrowserToolCall,
-  normalizeToolTextForComparison,
-  resolveCommandVisualKind,
-  sanitizeArkosMcpToolPreview,
-  type ArkosMcpToolStatus,
-} from "../../lib/toolCallLabel";
+import { extractToolArgumentField, isPrefixedToolArgumentSummary } from "../../lib/toolArgumentSummary";
+import { deriveFriendlyCommandTarget, deriveArkosMcpToolTitle, extractWebFetchUrl, isGenericToolTitle, isArkosBrowserToolCall, normalizeToolTextForComparison, resolveCommandVisualKind, sanitizeArkosMcpToolPreview, type ArkosMcpToolStatus } from "../../lib/toolCallLabel";
 import { formatLiveActivityMeta, useLiveActivityNow } from "../../lib/liveActivityPresentation";
 import { openWorkspaceFileReference, useWorkspaceFileOpener } from "../../lib/workspaceFileOpener";
 import { MUTED_LABEL_TEXT_CLASS_NAME, MUTED_LABEL_TEXT_COLOR } from "~/surfaceStyles";

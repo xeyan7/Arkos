@@ -31,7 +31,7 @@ function resultText(result: McpToolCallResult): string {
   return result.content.map((entry) => (entry.type === "text" ? entry.text : "")).join("\n");
 }
 
-function makeContext(provider: ProviderKind = "claudeAgent", threadId = THREAD): ToolContext {
+function makeContext(provider: ProviderKind = "arkos", threadId = THREAD): ToolContext {
   return {
     principal: {
       kind: "provider-session",

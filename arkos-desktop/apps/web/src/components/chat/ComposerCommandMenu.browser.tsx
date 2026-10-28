@@ -95,7 +95,7 @@ describe("ComposerCommandMenu provider command notices", () => {
         {
           id: "provider-command:claudeAgent:design",
           type: "provider-native-command",
-          provider: "claudeAgent",
+          provider: "arkos",
           command: "design",
           label: "/design",
           description: "Make a new Design artifact from a brief",
@@ -104,7 +104,7 @@ describe("ComposerCommandMenu provider command notices", () => {
         {
           id: "provider-command:claudeAgent:compact",
           type: "provider-native-command",
-          provider: "claudeAgent",
+          provider: "arkos",
           command: "compact",
           label: "/compact",
           description: "Compact context",

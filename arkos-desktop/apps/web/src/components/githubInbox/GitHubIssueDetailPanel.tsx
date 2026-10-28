@@ -9,43 +9,32 @@
 // Layer: GitHub inbox presentation
 // Exports: GitHubIssueDetailPanel
 
+// FILE: GitHubIssueDetailPanel.tsx
+// Purpose: The inbox detail pane for an issue, in the same page shell as a pull request: a top
+//          bar (Summary and Timeline tabs; pin, copy link, open on GitHub, Send to agent), the
+//          shared GitHubItemHeader, the description and comments (with the comment composer) on
+//          the left, and Assignees, Labels, and Comments in the info column (rows under the
+//          header in a narrow pane). The question composer floats over the bottom and feeds the
+//          issue's side chat. There is no close/reopen action: the app has no RPC for changing
+//          an issue's state.
+// Layer: GitHub inbox presentation
+// Exports: GitHubIssueDetailPanel
 import type { GitHubIssueDetailInput } from "@arkos/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { createGitHubItemContextDraft } from "~/components/chat/environment/environmentPullRequest.logic";
-import {
-  GitHubItemAgentActions,
-  type GitHubItemSendTarget,
-} from "~/components/pullRequest/GitHubItemAgentActions";
+import { GitHubItemAgentActions, type GitHubItemSendTarget } from "~/components/pullRequest/GitHubItemAgentActions";
 import { GitHubItemHeader } from "~/components/pullRequest/GitHubItemHeader";
 import { IssueInfo } from "~/components/pullRequest/GitHubItemInfo";
-import {
-  DETACHED_GITHUB_ITEM_PAGE_HOST,
-  GitHubItemAskComposer,
-  GitHubItemDetailPage,
-  GitHubItemPageBody,
-  GitHubItemPageIconActions,
-  GitHubItemTabBody,
-  GitHubItemTabs,
-  type GitHubItemPageHost,
-} from "~/components/pullRequest/GitHubItemPageLayout";
-import {
-  githubItemCardSourceFromIssue,
-  type GitHubItemAgentTarget,
-} from "~/components/pullRequest/githubItemAgentContext";
+import { DETACHED_GITHUB_ITEM_PAGE_HOST, GitHubItemAskComposer, GitHubItemDetailPage, GitHubItemPageBody, GitHubItemPageIconActions, GitHubItemTabBody, GitHubItemTabs, type GitHubItemPageHost } from "~/components/pullRequest/GitHubItemPageLayout";
+import { githubItemCardSourceFromIssue, type GitHubItemAgentTarget } from "~/components/pullRequest/githubItemAgentContext";
 import { IssueStateGlyph } from "~/components/pullRequest/PullRequestStateGlyph";
-import {
-  GitHubItemComments,
-  GitHubItemPageSummary,
-} from "~/components/pullRequest/PullRequestSummaryTab";
+import { GitHubItemComments, GitHubItemPageSummary } from "~/components/pullRequest/PullRequestSummaryTab";
 import { PullRequestTimelineTab } from "~/components/pullRequest/PullRequestTimelineTab";
 import { PullRequestWarningNote } from "~/components/pullRequest/PullRequestWarningNote";
 import { useStartGitHubItemThread } from "~/hooks/useStartGitHubItemThread";
-import {
-  githubIssueCommentMutationOptions,
-  githubIssueDetailQueryOptions,
-} from "~/lib/githubInboxQueryOptions";
+import { githubIssueCommentMutationOptions, githubIssueDetailQueryOptions } from "~/lib/githubInboxQueryOptions";
 import { pullRequestQueryErrorState } from "~/lib/pullRequestReactQuery";
 
 type IssueTab = "summary" | "timeline";

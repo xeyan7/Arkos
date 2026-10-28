@@ -3,74 +3,24 @@
 // Layer: Web chat presentation component
 // Exports: MessagesTimeline
 
-import {
-  type EditorId,
-  type HubWorkItem,
-  type MessageId,
-  type ProviderMentionReference,
-  type ResolvedKeybindingsConfig,
-  ThreadId,
-  type ThreadGoalAchievement,
-  type TurnId,
-} from "@arkos/contracts";
+// FILE: MessagesTimeline.tsx
+// Purpose: Renders the chat transcript rows and lets LegendList own scrolling/follow behavior.
+// Layer: Web chat presentation component
+// Exports: MessagesTimeline
+import { type EditorId, type HubWorkItem, type MessageId, type ProviderMentionReference, type ResolvedKeybindingsConfig, ThreadId, type ThreadGoalAchievement, type TurnId } from "@arkos/contracts";
 import { isLocalAbsolutePath } from "@arkos/shared/path";
 import { pluralize } from "@arkos/shared/text";
 import { LegendList, type LegendListRef } from "@legendapp/list/react";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ComponentProps,
-  type Dispatch,
-  type KeyboardEvent,
-  type RefObject,
-  type ReactNode,
-  type ReactElement,
-  type SetStateAction,
-} from "react";
-import {
-  deriveTimelineEntries,
-  formatClockDuration,
-  formatClockElapsed,
-  isFileChangeWorkLogEntry,
-  type WorkLogEntry,
-} from "../../session-logic";
+import { memo, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ComponentProps, type Dispatch, type KeyboardEvent, type RefObject, type ReactNode, type ReactElement, type SetStateAction } from "react";
+import { deriveTimelineEntries, formatClockDuration, formatClockElapsed, isFileChangeWorkLogEntry, type WorkLogEntry } from "../../session-logic";
 import type { WorkLogUserInputExchangeItem } from "../../workLog";
-import {
-  type TurnDiffSummary,
-  type WorktreeSetupResolutionAction,
-  type WorktreeSetupSnapshot,
-  type WorktreeSetupStep,
-} from "../../types";
+import { type TurnDiffSummary, type WorktreeSetupResolutionAction, type WorktreeSetupSnapshot, type WorktreeSetupStep } from "../../types";
 import { HubWorkItemCards } from "./group/HubWorkItemCard";
 import { AsyncUserInputCard } from "./AsyncUserInputCard";
 import ChatMarkdown from "../ChatMarkdown";
 import type { WorkingLabel } from "../ChatView.logic";
 import { InlineLinkChip } from "../InlineLinkChip";
-import {
-  ActivityLoadingIcon,
-  BotIcon,
-  ChangesIcon,
-  CircleAlertIcon,
-  CircleCheckIcon,
-  ClockIcon,
-  GitForkIcon,
-  GoalIcon,
-  MessageDeliveryCheckIcon,
-  type LucideIcon,
-  NewThreadIcon,
-  PinIcon,
-  SteerIcon,
-  ThinkingIcon,
-  Undo2Icon,
-  WorktreeIcon,
-} from "~/lib/icons";
+import { ActivityLoadingIcon, BotIcon, ChangesIcon, CircleAlertIcon, CircleCheckIcon, ClockIcon, GitForkIcon, GoalIcon, MessageDeliveryCheckIcon, type LucideIcon, NewThreadIcon, PinIcon, SteerIcon, ThinkingIcon, Undo2Icon, WorktreeIcon } from "~/lib/icons";
 import { pinActionLabel } from "~/lib/pin";
 import { syncAnimationsToTimelineOrigin } from "~/lib/animationTimelineSync";
 import { Button } from "../ui/button";
@@ -100,98 +50,32 @@ import { FileCommentsSummaryChip } from "./FileCommentsSummaryChip";
 import { BrowserAnnotationStrip } from "./BrowserAnnotationStrip";
 import { UserMessagePastedTextCard } from "./PastedTextChip";
 import { UserMessagePullRequestContextCard } from "./PullRequestContextCard";
-import {
-  EditedFileRowContent,
-  prefersCompactWorkEntryRow,
-  renderWorkEntryIcon,
-  TimelineWorkEntryRow,
-} from "./TimelineWorkEntryRow";
-import {
-  hasLeadingUserMedia,
-  resolveUserTurnMarker,
-  type UserTurnMarkerKind,
-} from "./userTurnMarker";
-import {
-  canSubmitUserMessageEdit,
-  capOpenWorkEntryRenderChunks,
-  isFoldedWorkEntryChunk,
-  resolveWorkEntryChunkFold,
-  chunkCollapsedTurnItems,
-  computeStableMessagesTimelineRows,
-  deriveMessagesTimelineRows,
-  findLastLiveWorkGroupId,
-  MAX_VISIBLE_WORK_LOG_ENTRIES,
-  planWorkEntryRenderChunks,
-  type CollapsedTurnChunk,
-  type CollapsedTurnItem,
-  type MessagesTimelineRow,
-  resolveAssistantMessageCopyState,
-  resolveAssistantMessageDisplayText,
-  resolveThreadFindJumpTarget,
-  type StableMessagesTimelineRowsState,
-} from "./MessagesTimeline.logic";
+import { EditedFileRowContent, prefersCompactWorkEntryRow, renderWorkEntryIcon, TimelineWorkEntryRow } from "./TimelineWorkEntryRow";
+import { hasLeadingUserMedia, resolveUserTurnMarker, type UserTurnMarkerKind } from "./userTurnMarker";
+import { canSubmitUserMessageEdit, capOpenWorkEntryRenderChunks, isFoldedWorkEntryChunk, resolveWorkEntryChunkFold, chunkCollapsedTurnItems, computeStableMessagesTimelineRows, deriveMessagesTimelineRows, findLastLiveWorkGroupId, MAX_VISIBLE_WORK_LOG_ENTRIES, planWorkEntryRenderChunks, type CollapsedTurnChunk, type CollapsedTurnItem, type MessagesTimelineRow, resolveAssistantMessageCopyState, resolveAssistantMessageDisplayText, resolveThreadFindJumpTarget, type StableMessagesTimelineRowsState } from "./MessagesTimeline.logic";
 import { rewriteThreadIdsAsMarkdownLinks } from "./project/projectPanel.logic";
 import { summarizeToolCallGroup } from "./toolCallGroup.logic";
 import { ToolCallGroupSummaryRow } from "./ToolCallGroupSummaryRow";
 import { useTailAnchorScroll } from "./useTailAnchorScroll";
 import { useTimelineRowOverlapGuard } from "./useTimelineRowOverlapGuard";
-import {
-  deriveDisplayedUserMessageState,
-  type ParsedTerminalContextEntry,
-} from "~/lib/terminalContext";
+import { deriveDisplayedUserMessageState, type ParsedTerminalContextEntry } from "~/lib/terminalContext";
 import { cn } from "~/lib/utils";
 import { MUTED_LABEL_TEXT_CLASS_NAME } from "~/surfaceStyles";
-import {
-  DEFAULT_CHAT_FONT_SIZE_PX,
-  normalizeChatFontSizePx,
-  type TimestampFormat,
-} from "../../appSettings";
-import {
-  CHAT_COLUMN_FRAME_CLASS_NAME,
-  CHAT_COLUMN_GUTTER_CLASS_NAME,
-  ENVIRONMENT_CONTENT_INSET_MOTION_CLASS,
-} from "./composerPickerStyles";
+import { DEFAULT_CHAT_FONT_SIZE_PX, normalizeChatFontSizePx, type TimestampFormat } from "../../appSettings";
+import { CHAT_COLUMN_FRAME_CLASS_NAME, CHAT_COLUMN_GUTTER_CLASS_NAME, ENVIRONMENT_CONTENT_INSET_MOTION_CLASS } from "./composerPickerStyles";
 import { formatDayAwareTimestamp } from "../../timestampFormat";
 import { resolveUserMessageMarkdownText } from "./userMessageTerminalContexts";
 import { splitPromptIntoDisplaySegments } from "~/composer-editor-mentions";
-import {
-  getChatMessageFooterTextStyle,
-  getChatTranscriptTextStyle,
-  getChatTranscriptUserMessageLineHeightPx,
-  getChatTranscriptUserMessageTextStyle,
-  USER_MESSAGE_BUBBLE_RADIUS_CLASS_NAME,
-  USER_MESSAGE_BUBBLE_SHELL_CHROME_CLASS_NAME,
-  USER_INPUT_EXCHANGE_BUBBLE_CLASS_NAME,
-  userMessageBubbleBorderClassName,
-} from "./chatTypography";
+import { getChatMessageFooterTextStyle, getChatTranscriptTextStyle, getChatTranscriptUserMessageLineHeightPx, getChatTranscriptUserMessageTextStyle, USER_MESSAGE_BUBBLE_RADIUS_CLASS_NAME, USER_MESSAGE_BUBBLE_SHELL_CHROME_CLASS_NAME, USER_INPUT_EXCHANGE_BUBBLE_CLASS_NAME, userMessageBubbleBorderClassName } from "./chatTypography";
 import { DisclosureChevron } from "../ui/DisclosureChevron";
 import { DisclosureRegion } from "../ui/DisclosureRegion";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "../ui/collapsible";
-import {
-  DISCLOSURE_CLEANUP_BUFFER_MS,
-  DISCLOSURE_TRANSITION_MS,
-  disclosureContentClassName,
-} from "~/lib/disclosureMotion";
+import { DISCLOSURE_CLEANUP_BUFFER_MS, DISCLOSURE_TRANSITION_MS, disclosureContentClassName } from "~/lib/disclosureMotion";
 import { getAppTypographyScale } from "../../lib/appTypography";
-import {
-  USER_MESSAGE_COLLAPSED_FADE_LINES,
-  USER_MESSAGE_COLLAPSED_MAX_LINES,
-  userMessageLikelyOverflows,
-} from "./userMessageCollapse";
+import { USER_MESSAGE_COLLAPSED_FADE_LINES, USER_MESSAGE_COLLAPSED_MAX_LINES, userMessageLikelyOverflows } from "./userMessageCollapse";
 import { observeUserMessageOverflow } from "./userMessageOverflowObserver";
-import {
-  resolveActiveTrailSnapshot,
-  type ActiveTrailSnapshot,
-  type MessageTrailAnchor,
-} from "./messageTrail.logic";
-import {
-  applyActiveChatFindMatch,
-  collectCaseInsensitiveSubstringRanges,
-  splitTextWithFindMatches,
-  threadFindMarkdownProps,
-  type ThreadFindHighlight,
-  type ThreadFindMatch,
-} from "./threadFind.logic";
+import { resolveActiveTrailSnapshot, type ActiveTrailSnapshot, type MessageTrailAnchor } from "./messageTrail.logic";
+import { applyActiveChatFindMatch, collectCaseInsensitiveSubstringRanges, splitTextWithFindMatches, threadFindMarkdownProps, type ThreadFindHighlight, type ThreadFindMatch } from "./threadFind.logic";
 
 const MAX_VISIBLE_INLINE_TOOL_ENTRIES = 4;
 const EMPTY_EDITOR_KEYBINDINGS: ResolvedKeybindingsConfig = [];

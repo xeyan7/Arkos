@@ -3,6 +3,10 @@
 //          theme-mode picker, then the theme pack. Changes apply live behind the dialog.
 // Layer: Web UI component
 
+// FILE: ThemeStep.tsx
+// Purpose: Appearance step of the welcome tour: System / Light / Dark with the shared
+//          theme-mode picker, then the theme pack. Changes apply live behind the dialog.
+// Layer: Web UI component
 import { ThemeModePicker } from "~/components/settings/ThemeModePicker";
 import { useRadioGroupKeyboardNav } from "~/hooks/useRadioGroupKeyboardNav";
 import { useTheme } from "~/hooks/useTheme";

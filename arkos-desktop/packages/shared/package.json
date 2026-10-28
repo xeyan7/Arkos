@@ -257,10 +257,6 @@
       "types": "./src/subagents.ts",
       "import": "./src/subagents.ts"
     },
-    "./agentMentions": {
-      "types": "./src/agentMentions.ts",
-      "import": "./src/agentMentions.ts"
-    },
     "./automationCompletionPolicy": {
       "types": "./src/automationCompletionPolicy.ts",
       "import": "./src/automationCompletionPolicy.ts"
@@ -304,10 +300,6 @@
     "./outboundHttp": {
       "types": "./src/outboundHttp.ts",
       "import": "./src/outboundHttp.ts"
-    },
-    "./chatGptVoiceTranscription": {
-      "types": "./src/chatGptVoiceTranscription.ts",
-      "import": "./src/chatGptVoiceTranscription.ts"
     },
     "./composerSlashCommands": {
       "types": "./src/composerSlashCommands.ts",

@@ -1,85 +1,19 @@
 import { cuaSpaceInventory } from "./cuaSpaceInventory.ts";
-import {
-  parseCuaActionDiagnostics,
-  type CuaActionDiagnostics,
-} from "@arkos/shared/cuaActionDiagnostics";
+import { parseCuaActionDiagnostics, type CuaActionDiagnostics } from "@arkos/shared/cuaActionDiagnostics";
 import { ComputerSpaceError } from "./ComputerSpaceBroker.ts";
 import { COMPUTER_WINDOW_LIST_MAX_LENGTH } from "@arkos/contracts";
-import type {
-  ComputerAccessibilityTreeApp,
-  ComputerAccessibilityTreeWindow,
-  ComputerApp,
-  ComputerAvailability,
-  ComputerBuildSignature,
-  ComputerCapabilities,
-  ComputerCursorPosition,
-  ComputerHealth,
-  ComputerPoint,
-  ComputerRect,
-  ComputerScreenshot,
-  ComputerScreenSize,
-  ComputerState,
-  ComputerUiNode,
-  ComputerVerifyStateResult,
-  ComputerWindow,
-  ComputerZoomResult,
-  ComputerInputModifier,
-  ComputerInputPause,
-  ComputerPermission,
-  ComputerLaunchAppResult,
-} from "@arkos/contracts";
-import {
-  computerPermissionSetupMessage,
-  listComputerPermissions,
-} from "@arkos/shared/computerGrants";
-import {
-  cuaRequest,
-  CUA_HOST_SOCKET_ENV,
-  CUA_SETUP_TIMEOUT_MS,
-  CuaTransportError,
-  type CuaReply,
-  type CuaToolResult,
-  type CuaEffect,
-  type CuaComputerTask,
-  cuaComputerTaskKey,
-} from "@arkos/shared/cuaDriverProtocol";
-import {
-  ComputerBackendError,
-  DEFAULT_COMPUTER_ID,
-  NO_COMPUTER_CAPABILITIES,
-  assertComputerClipboardWriteFits,
-  type ComputerBackend,
-  type ComputerBackendActionResult,
-  type ComputerBrowserBackend,
-  type ComputerBrowserCall,
-  type ComputerBrowserCallResult,
-  type ComputerCaptureRequest,
-  type ComputerFrameListener,
-  type ComputerMenuBackendTarget,
-  type ComputerShieldTarget,
-  type ComputerResolvedTarget,
-  type ComputerTextRange,
-  type ComputerBackendEventListener,
-} from "./ComputerBackend.ts";
-import {
-  desktopOperationSignal,
-  assertDesktopOperationActive,
-  desktopDeliveryMode,
-} from "./DesktopOperationQueue.ts";
+import type { ComputerAccessibilityTreeApp, ComputerAccessibilityTreeWindow, ComputerApp, ComputerAvailability, ComputerBuildSignature, ComputerCapabilities, ComputerCursorPosition, ComputerHealth, ComputerPoint, ComputerRect, ComputerScreenshot, ComputerScreenSize, ComputerState, ComputerUiNode, ComputerVerifyStateResult, ComputerWindow, ComputerZoomResult, ComputerInputModifier, ComputerInputPause, ComputerPermission, ComputerLaunchAppResult } from "@arkos/contracts";
+import { computerPermissionSetupMessage, listComputerPermissions } from "@arkos/shared/computerGrants";
+import { cuaRequest, CUA_HOST_SOCKET_ENV, CUA_SETUP_TIMEOUT_MS, CuaTransportError, type CuaReply, type CuaToolResult, type CuaEffect, type CuaComputerTask, cuaComputerTaskKey } from "@arkos/shared/cuaDriverProtocol";
+import { ComputerBackendError, DEFAULT_COMPUTER_ID, NO_COMPUTER_CAPABILITIES, assertComputerClipboardWriteFits, type ComputerBackend, type ComputerBackendActionResult, type ComputerBrowserBackend, type ComputerBrowserCall, type ComputerBrowserCallResult, type ComputerCaptureRequest, type ComputerFrameListener, type ComputerMenuBackendTarget, type ComputerShieldTarget, type ComputerResolvedTarget, type ComputerTextRange, type ComputerBackendEventListener } from "./ComputerBackend.ts";
+import { desktopOperationSignal, assertDesktopOperationActive, desktopDeliveryMode } from "./DesktopOperationQueue.ts";
 import { StillFramePublisher, resolveStillIntervalMs } from "./stillFramePublisher.ts";
 import { isModelDesktopObservationActive } from "./modelDesktopObservation.ts";
 import { currentComputerTask } from "./computerTaskContext.ts";
-import {
-  cuaPreviewStillMsOverride,
-  currentComputerCall,
-  timedComputerLeg,
-} from "./computerCallContext.ts";
+import { cuaPreviewStillMsOverride, currentComputerCall, timedComputerLeg } from "./computerCallContext.ts";
 import { jpegDimensions } from "../jpegHeader.ts";
 import { pngDimensions } from "../pngHeader.ts";
-import {
-  observedComputerTargetNode,
-  registerNativeComputerElement,
-} from "./computerElementIdentity.ts";
+import { observedComputerTargetNode, registerNativeComputerElement } from "./computerElementIdentity.ts";
 
 export class CuaActionError extends ComputerBackendError {
   constructor(

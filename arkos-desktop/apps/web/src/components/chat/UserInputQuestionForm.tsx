@@ -1,9 +1,6 @@
 import type { UserInputQuestion } from "@arkos/contracts";
 import { useEffect, useEffectEvent, useRef, type ReactNode } from "react";
-import {
-  derivePendingUserInputProgress,
-  type PendingUserInputDraftAnswer,
-} from "../../pendingUserInput";
+import { derivePendingUserInputProgress, type PendingUserInputDraftAnswer } from "../../pendingUserInput";
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { ComposerChoiceRow } from "./ComposerChoiceRow";

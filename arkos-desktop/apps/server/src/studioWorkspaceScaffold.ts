@@ -6,6 +6,13 @@
 // Layer: Server workspace helper
 // Exports: STUDIO_WORKSPACE_SUBDIRECTORIES, ensureStudioWorkspaceInstructionsFiles
 
+// FILE: studioWorkspaceScaffold.ts
+// Purpose: Owns the managed Studio workspace layout — the scaffolded subdirectory set and
+//          the agent-facing instruction files (AGENTS.md/CLAUDE.md) that teach providers
+//          where deliverables belong. Instructions are only written when missing so user
+//          edits are never clobbered.
+// Layer: Server workspace helper
+// Exports: STUDIO_WORKSPACE_SUBDIRECTORIES, ensureStudioWorkspaceInstructionsFiles
 import { Effect, FileSystem, Path } from "effect";
 
 // Relative subdirectories scaffolded under a freshly created Studio workspace root,

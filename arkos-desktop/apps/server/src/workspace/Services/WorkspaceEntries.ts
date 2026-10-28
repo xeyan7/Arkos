@@ -1,23 +1,6 @@
 import { Data, Effect, ServiceMap } from "effect";
 
-import type {
-  FilesystemBrowseInput,
-  FilesystemBrowseResult,
-  ProjectDiscoverScriptsInput,
-  ProjectDiscoverScriptsResult,
-  ProjectListDirectoriesInput,
-  ProjectListDirectoriesResult,
-  ProjectPrewarmSearchIndexInput,
-  ProjectPrewarmSearchIndexResult,
-  ProjectResolveWorkspaceFileReferencesInput,
-  ProjectResolveWorkspaceFileReferencesResult,
-  ProjectSearchContentInput,
-  ProjectSearchContentResult,
-  ProjectSearchEntriesInput,
-  ProjectSearchEntriesResult,
-  ProjectSearchLocalEntriesInput,
-  ProjectSearchLocalEntriesResult,
-} from "@arkos/contracts";
+import type { FilesystemBrowseInput, FilesystemBrowseResult, ProjectDiscoverScriptsInput, ProjectDiscoverScriptsResult, ProjectListDirectoriesInput, ProjectListDirectoriesResult, ProjectPrewarmSearchIndexInput, ProjectPrewarmSearchIndexResult, ProjectResolveWorkspaceFileReferencesInput, ProjectResolveWorkspaceFileReferencesResult, ProjectSearchContentInput, ProjectSearchContentResult, ProjectSearchEntriesInput, ProjectSearchEntriesResult, ProjectSearchLocalEntriesInput, ProjectSearchLocalEntriesResult } from "@arkos/contracts";
 
 export interface WorkspaceEntriesShape {
   readonly browse: (

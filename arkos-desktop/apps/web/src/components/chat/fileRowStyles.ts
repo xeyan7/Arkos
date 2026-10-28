@@ -4,6 +4,11 @@
 //          surface re-declaring the same Tailwind classes and indent math.
 // Layer: Chat/shared UI
 
+// FILE: fileRowStyles.ts
+// Purpose: Shared visual chrome for file/entry rows (editor explorer, diff file
+//          lists, review file tree) so every file row matches without each
+//          surface re-declaring the same Tailwind classes and indent math.
+// Layer: Chat/shared UI
 import { cn } from "~/lib/utils";
 
 // Solid "active block" = the selection background token. The selected row paints

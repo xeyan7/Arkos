@@ -4,14 +4,42 @@
 // Layer: Shared runtime utility
 // Depends on: keybinding contracts only
 
-import {
-  MAX_WHEN_EXPRESSION_DEPTH,
-  UNASSIGNED_KEYBINDING_KEY,
-  type KeybindingRule,
-  type KeybindingShortcut,
-  type KeybindingWhenNode,
-  type ResolvedKeybindingRule,
-} from "@arkos/contracts";
+// FILE: keybindingRules.ts
+// Purpose: The keybinding rule grammar both the server and the web read and write: parsing
+//   `key` and `when` strings, writing them back, rule identity, and the unassigned marker.
+// Layer: Shared runtime utility
+// Depends on: keybinding contracts only
+// FILE: keybindingRules.ts
+// Purpose: The keybinding rule grammar both the server and the web read and write: parsing
+//   `key` and `when` strings, writing them back, rule identity, and the unassigned marker.
+// Layer: Shared runtime utility
+// Depends on: keybinding contracts only
+// FILE: keybindingRules.ts
+// Purpose: The keybinding rule grammar both the server and the web read and write: parsing
+//   `key` and `when` strings, writing them back, rule identity, and the unassigned marker.
+// Layer: Shared runtime utility
+// Depends on: keybinding contracts only
+// FILE: keybindingRules.ts
+// Purpose: The keybinding rule grammar both the server and the web read and write: parsing
+//   `key` and `when` strings, writing them back, rule identity, and the unassigned marker.
+// Layer: Shared runtime utility
+// Depends on: keybinding contracts only
+// FILE: keybindingRules.ts
+// Purpose: The keybinding rule grammar both the server and the web read and write: parsing
+//   `key` and `when` strings, writing them back, rule identity, and the unassigned marker.
+// Layer: Shared runtime utility
+// Depends on: keybinding contracts only
+// FILE: keybindingRules.ts
+// Purpose: The keybinding rule grammar both the server and the web read and write: parsing
+//   `key` and `when` strings, writing them back, rule identity, and the unassigned marker.
+// Layer: Shared runtime utility
+// Depends on: keybinding contracts only
+// FILE: keybindingRules.ts
+// Purpose: The keybinding rule grammar both the server and the web read and write: parsing
+//   `key` and `when` strings, writing them back, rule identity, and the unassigned marker.
+// Layer: Shared runtime utility
+// Depends on: keybinding contracts only
+import { MAX_WHEN_EXPRESSION_DEPTH, UNASSIGNED_KEYBINDING_KEY, type KeybindingRule, type KeybindingShortcut, type KeybindingWhenNode, type ResolvedKeybindingRule } from "@arkos/contracts";
 
 type WhenToken =
   | { type: "identifier"; value: string }

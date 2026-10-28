@@ -2,10 +2,7 @@ import type { OrchestrationEvent, ProjectId, ThreadId } from "@arkos/contracts";
 import { makeDrainableWorker, startDrainableWorkerProducers } from "@arkos/shared/DrainableWorker";
 import { Cause, Duration, Effect, Layer, Schedule, Stream } from "effect";
 
-import {
-  PROJECT_AGENT_WORKER_HEALTH_INTERVAL_MS,
-  WORKER_RECOVERY_COMMAND_PREFIX,
-} from "../workerHealth.ts";
+import { PROJECT_AGENT_WORKER_HEALTH_INTERVAL_MS, WORKER_RECOVERY_COMMAND_PREFIX } from "../workerHealth.ts";
 
 import { OrchestrationEngineService } from "../../orchestration/Services/OrchestrationEngine.ts";
 import { ProjectAgentReactor } from "../Services/ProjectAgentReactor.ts";

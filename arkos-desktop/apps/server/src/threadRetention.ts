@@ -3,12 +3,11 @@
 // Layer: Server maintenance
 // Exports: retention constants, archive-root selection, and scoped job startup.
 
-import {
-  CommandId,
-  type OrchestrationReadModel,
-  type OrchestrationShellSnapshot,
-  type ThreadId,
-} from "@arkos/contracts";
+// FILE: threadRetention.ts
+// Purpose: Runs the server-side retention loop that archives inactive orchestration threads.
+// Layer: Server maintenance
+// Exports: retention constants, archive-root selection, and scoped job startup.
+import { CommandId, type OrchestrationReadModel, type OrchestrationShellSnapshot, type ThreadId } from "@arkos/contracts";
 import { automationContinuationThreadId } from "@arkos/shared/automationMode";
 import { Effect } from "effect";
 import { randomUUID } from "node:crypto";
@@ -18,10 +17,7 @@ import { GitCore } from "./git/Services/GitCore";
 import { pruneProjectedArchivedManagedWorktrees } from "./managedWorktrees";
 import type { OrchestrationEngineShape } from "./orchestration/Services/OrchestrationEngine";
 import type { ProjectionSnapshotQueryShape } from "./orchestration/Services/ProjectionSnapshotQuery";
-import {
-  AutomationRepository,
-  type AutomationRepositoryShape,
-} from "./persistence/Services/AutomationRepository";
+import { AutomationRepository, type AutomationRepositoryShape } from "./persistence/Services/AutomationRepository";
 import { ServerLifecycleEvents } from "./serverLifecycleEvents";
 
 // Stable prefix for retention commands. Older versions used it for reversible

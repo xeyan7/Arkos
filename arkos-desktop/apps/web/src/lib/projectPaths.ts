@@ -1,9 +1,4 @@
-import {
-  isExplicitRelativePath,
-  isUncPath,
-  isWindowsAbsolutePath,
-  isWindowsDrivePath,
-} from "@arkos/shared/path";
+import { isExplicitRelativePath, isUncPath, isWindowsAbsolutePath, isWindowsDrivePath } from "@arkos/shared/path";
 import { getNavigatorPlatform, isWindowsPlatform } from "./utils";
 
 function isRootPath(value: string): boolean {

@@ -3,6 +3,10 @@
 //          the exact System Settings pane and explains granting access to this installed build.
 // Layer: Settings UI component
 
+// FILE: AppSnapPermissionGuide.tsx
+// Purpose: Guided macOS permission setup shared by AppSnap and Computer control — deep-links
+//          the exact System Settings pane and explains granting access to this installed build.
+// Layer: Settings UI component
 import type { DesktopAppSnapSettingsPane } from "@arkos/contracts";
 
 import { Button } from "~/components/ui/button";

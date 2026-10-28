@@ -5,6 +5,12 @@
 // trailing whitespace, regardless of how dense the heatmap data is.
 // Layer: web profile feature.
 
+// FILE: ShareCard.tsx
+// Purpose: Fixed-size, theme-independent "virality" card rendered to PNG via html-to-image.
+// Uses explicit colors (not theme tokens) so the exported image looks identical in light
+// and dark mode. Fixed width AND height keep the exported PNG a clean wide card with no
+// trailing whitespace, regardless of how dense the heatmap data is.
+// Layer: web profile feature.
 import { forwardRef, type ReactNode } from "react";
 import type { ProfileStats, ProfileTokenStats } from "@arkos/contracts";
 import { ProviderIcon } from "~/components/ProviderIcon";

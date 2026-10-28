@@ -6,62 +6,36 @@
 // Exports: dispatchDraftThread, DraftThreadDispatchHooks, DraftThreadDispatchResult,
 //          DraftThreadOpenReason
 
-import type {
-  AssistantDeliveryMode,
-  ModelSelection,
-  ProjectId,
-  ProviderInstanceId,
-  ProviderKind,
-  ProviderStartOptions,
-  ThreadEnvironmentMode,
-  ThreadId,
-  TurnId,
-} from "@arkos/contracts";
+// FILE: draftThreadDispatch.ts
+// Purpose: Sends a local draft thread's composer prompt as the first queued turn —
+//          promotes the draft to a durable thread when needed. Shared by the Tasks view
+//          (delegating a to-do) and Kanban (dropping a Draft card on In Progress).
+// Layer: Web orchestration helper
+// Exports: dispatchDraftThread, DraftThreadDispatchHooks, DraftThreadDispatchResult,
+//          DraftThreadOpenReason
+import type { AssistantDeliveryMode, ModelSelection, ProjectId, ProviderInstanceId, ProviderKind, ProviderStartOptions, ThreadEnvironmentMode, ThreadId, TurnId } from "@arkos/contracts";
 import { PROVIDER_SEND_TURN_MAX_ATTACHMENTS } from "@arkos/contracts";
 import type { ComposerFileAttachment } from "../composerDraftDomain";
 import { revokeObjectPreviewUrl } from "../composerDraftAttachments";
 import { hasActiveComposerSend } from "./composerSendOwnership";
 import { clearPendingTurnDispatch, markPendingTurnDispatch } from "../pendingTurnDispatch";
-import {
-  appendPastedTextsToPrompt,
-  filterPastedTextsWithText,
-  pastedTextTitle,
-} from "./composerPastedText";
+import { appendPastedTextsToPrompt, filterPastedTextsWithText, pastedTextTitle } from "./composerPastedText";
 import { buildPromptThreadTitleFallback } from "@arkos/shared/chatThreads";
 import { isPendingThreadWorktree } from "@arkos/shared/threadEnvironment";
 import type { ProviderInstanceOption } from "../appSettings";
 import { composerDraftHasAttachments, composerDraftsMatchForCleanup } from "../composerDraftDomain";
-import {
-  resolvePreferredComposerModelSelection,
-  useComposerDraftStore,
-} from "../composerDraftStore";
+import { resolvePreferredComposerModelSelection, useComposerDraftStore } from "../composerDraftStore";
 import { readNativeApi } from "../nativeApi";
 import { useStore } from "../store";
 import { getThreadFromState } from "../threadDerivation";
 import type { SidebarThreadSummary } from "../types";
 import { DEFAULT_INTERACTION_MODE, DEFAULT_RUNTIME_MODE } from "../types";
 import { appendAssistantSelectionsToPrompt } from "./assistantSelections";
-import {
-  appendBrowserAnnotationsToPrompt,
-  formatBrowserAnnotationLabel,
-} from "./browserAnnotations";
-import {
-  stageUploadComposerAttachments,
-  findPendingBlobComposerAttachments,
-  hydratePendingBlobComposerAttachments,
-  formatOutgoingComposerPrompt,
-  resolvePromptEffortFromModelSelection,
-} from "./composerSend";
+import { appendBrowserAnnotationsToPrompt, formatBrowserAnnotationLabel } from "./browserAnnotations";
+import { stageUploadComposerAttachments, findPendingBlobComposerAttachments, hydratePendingBlobComposerAttachments, formatOutgoingComposerPrompt, resolvePromptEffortFromModelSelection } from "./composerSend";
 import { appendFileCommentsToPrompt, formatFileCommentTitleSeed } from "./fileComments";
-import {
-  filterPromptProviderMentionReferences,
-  filterPromptSkillReferences,
-} from "./composerMentions";
-import {
-  appendTerminalContextsToPrompt,
-  filterTerminalContextsWithText,
-  IMAGE_ONLY_BOOTSTRAP_PROMPT,
-} from "./terminalContext";
+import { filterPromptProviderMentionReferences, filterPromptSkillReferences } from "./composerMentions";
+import { appendTerminalContextsToPrompt, filterTerminalContextsWithText, IMAGE_ONLY_BOOTSTRAP_PROMPT } from "./terminalContext";
 import { resolveTerminalThreadCreationState } from "./threadBootstrap";
 import { promoteThreadCreate } from "./threadCreatePromotion";
 import { isRequestOutcomeUnknown } from "./requestOutcome";

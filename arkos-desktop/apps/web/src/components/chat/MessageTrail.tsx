@@ -12,39 +12,25 @@
 // Layer: Chat transcript shell (presentation)
 // Depends on: pure magnification math in messageTrail.logic.ts (unit-tested).
 
+// FILE: MessageTrail.tsx
+// Purpose: Left-gutter message rail with macOS-Dock-style magnification. The tick
+//   nearest the pointer grows longest (Gaussian falloff on its neighbours) and a
+//   side tooltip shows that one focused message. Built on Arkos's existing scroll
+//   engine: `activeStore` carries the current + visible viewport highlights and
+//   `onSelect` jumps (shadcn's scrollToMessage). The hot path writes tick width /
+//   opacity straight to the DOM inside one coalesced rAF — no React state per move
+//   — so it stays smooth and never re-renders the heavy timeline.
+//   With `subscribeAudioLevel`, the resting ticks also ripple with sound (the
+//   Mac's audio output and/or the microphone), outward from the middle of the
+//   visible rail; pointer/keyboard magnification always wins over the wave.
+// Layer: Chat transcript shell (presentation)
+// Depends on: pure magnification math in messageTrail.logic.ts (unit-tested).
 import { type MessageId } from "@arkos/contracts";
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type FocusEvent as ReactFocusEvent,
-  type CSSProperties,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type FocusEvent as ReactFocusEvent, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { cn } from "~/lib/utils";
 import { DISCLOSURE_CONTENT_MOTION_CLASS } from "~/lib/disclosureMotion";
 import { APP_TOOLTIP_SURFACE_CLASS_NAME } from "./composerPickerStyles";
-import {
-  clampNumber,
-  clampTooltipTop,
-  computeFocusedIndex,
-  computeGaussianWeights,
-  computeRestStyles,
-  computeSigma,
-  computeTickStyles,
-  computeTrailGeometry,
-  computeAudioTickWidths,
-  createAudioLevelShaper,
-  stepAudioEnvelope,
-  type ActiveTrailStore,
-  type MessageTrailItem,
-  type TickStyle,
-  type TrailGeometry,
-} from "./messageTrail.logic";
+import { clampNumber, clampTooltipTop, computeFocusedIndex, computeGaussianWeights, computeRestStyles, computeSigma, computeTickStyles, computeTrailGeometry, computeAudioTickWidths, createAudioLevelShaper, stepAudioEnvelope, type ActiveTrailStore, type MessageTrailItem, type TickStyle, type TrailGeometry } from "./messageTrail.logic";
 
 interface MessageTrailProps {
   items: readonly MessageTrailItem[];

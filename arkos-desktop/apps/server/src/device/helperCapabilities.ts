@@ -10,13 +10,18 @@
  * @module device/helperCapabilities
  */
 
-import {
-  DEVICE_CAPABILITY_LABELS,
-  type DeviceAvailability,
-  type DeviceCapabilityId,
-  type DeviceCapabilityStatus,
-  type DeviceToolchain,
-} from "@arkos/contracts";
+/**
+ * Parsing and interpretation of the device helper's `--probe` output.
+ *
+ * The helper reports each capability (framebuffer, hid, accessibility, encoder)
+ * separately, because the private symbols behind them move independently
+ * between Xcode releases. Keeping the parse and the availability mapping here —
+ * away from process spawning — is what lets both be unit-tested against
+ * synthetic probe payloads, including toolchains we cannot install.
+ *
+ * @module device/helperCapabilities
+ */
+import { DEVICE_CAPABILITY_LABELS, type DeviceAvailability, type DeviceCapabilityId, type DeviceCapabilityStatus, type DeviceToolchain } from "@arkos/contracts";
 
 /** Every capability, in the order the pane should list them. */
 export const DEVICE_CAPABILITY_IDS = [

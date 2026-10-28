@@ -3,20 +3,8 @@ import { Effect, Layer, Schema } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
 import { stripDiagnosticImages } from "../../provider/stripDiagnosticImages.ts";
-import {
-  PersistenceDecodeError,
-  toPersistenceDecodeError,
-  toPersistenceSqlError,
-} from "../Errors.ts";
-import {
-  CHECKPOINT_RUNTIME_CONSUMER,
-  PROVIDER_RUNTIME_INGESTION_CONSUMER,
-  PROVIDER_RUNTIME_EVENT_MAX_BYTES,
-  PROVIDER_RUNTIME_EVENT_RETAIN_ACCEPTED,
-  ProviderRuntimeEventRepository,
-  type PersistedProviderRuntimeEvent,
-  type ProviderRuntimeEventRepositoryShape,
-} from "../Services/ProviderRuntimeEvents.ts";
+import { PersistenceDecodeError, toPersistenceDecodeError, toPersistenceSqlError } from "../Errors.ts";
+import { CHECKPOINT_RUNTIME_CONSUMER, PROVIDER_RUNTIME_INGESTION_CONSUMER, PROVIDER_RUNTIME_EVENT_MAX_BYTES, PROVIDER_RUNTIME_EVENT_RETAIN_ACCEPTED, ProviderRuntimeEventRepository, type PersistedProviderRuntimeEvent, type ProviderRuntimeEventRepositoryShape } from "../Services/ProviderRuntimeEvents.ts";
 
 /**
  * How far the consumer cursor may advance between journal retention scans.

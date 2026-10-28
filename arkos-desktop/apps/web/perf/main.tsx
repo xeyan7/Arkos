@@ -2,27 +2,11 @@ import "../src/index.css";
 
 import { MessageId, TurnId } from "@arkos/contracts";
 import type { LegendListRef } from "@legendapp/list/react";
-import {
-  Profiler,
-  StrictMode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ProfilerOnRenderCallback,
-} from "react";
+import { Profiler, StrictMode, useCallback, useEffect, useMemo, useRef, useState, type ComponentProps, type ProfilerOnRenderCallback } from "react";
 import { createRoot } from "react-dom/client";
 
 import { ChatTranscriptPane } from "../src/components/chat/ChatTranscriptPane";
-import {
-  frameReport,
-  installCostToggleStyles,
-  nextFrame,
-  scrollCycleOnTranscript,
-  type FrameReport,
-} from "./metrics";
+import { frameReport, installCostToggleStyles, nextFrame, scrollCycleOnTranscript, type FrameReport } from "./metrics";
 import { assistantText, isoAt } from "./workload";
 
 type TimelineEntries = ComponentProps<typeof ChatTranscriptPane>["timelineEntries"];

@@ -6,6 +6,13 @@
 //          surface (composer, user bubble, markdown).
 // Layer: UI utilities
 
+// FILE: siteFavicon.ts
+// Purpose: Client helpers for the website-favicon feature — build authenticated
+//          favicon proxy URLs (keyed by hostname so every link on a site shares
+//          one cacheable request) and track per-src load outcomes so repeat
+//          renders skip re-probing. Shared by <SiteFavicon> and every link chip
+//          surface (composer, user bubble, markdown).
+// Layer: UI utilities
 import { resolveWsHttpUrl } from "./wsHttpUrl";
 
 /** Per-favicon-src load outcome, shared module-wide to avoid re-probing within a session. */

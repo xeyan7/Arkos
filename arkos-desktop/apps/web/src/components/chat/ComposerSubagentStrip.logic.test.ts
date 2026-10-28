@@ -256,14 +256,13 @@ describe("deriveComposerSubagentStripItems", () => {
     function settledSubagentThread(providerThreadId: string): Thread {
       return {
         id: localSubagentThreadId(parentThreadId, providerThreadId),
-        codexThreadId: null,
         projectId: "project-1" as Thread["projectId"],
         title: "Subagent task",
-        modelSelection: { provider: "claudeAgent", model: "sonnet" },
+        modelSelection: { provider: "arkos", model: "sonnet" },
         runtimeMode: "full-access",
         interactionMode: "default",
         session: {
-          provider: "claudeAgent",
+          provider: "arkos",
           status: "ready",
           createdAt: "2026-07-14T00:00:01.000Z",
           updatedAt: "2026-07-14T00:00:02.000Z",
@@ -389,14 +388,13 @@ describe("deriveComposerSubagentStripItems", () => {
 
     const subagentThread: Thread = {
       id: localSubagentThreadId(parentThreadId, "toolu_x"),
-      codexThreadId: null,
       projectId: "project-1" as Thread["projectId"],
       title: "Subagent task",
-      modelSelection: { provider: "claudeAgent", model: "sonnet" },
+      modelSelection: { provider: "arkos", model: "sonnet" },
       runtimeMode: "full-access",
       interactionMode: "default",
       session: {
-        provider: "claudeAgent",
+        provider: "arkos",
         status: "running",
         createdAt: "2026-07-14T00:00:01.000Z",
         updatedAt: "2026-07-14T00:00:01.000Z",

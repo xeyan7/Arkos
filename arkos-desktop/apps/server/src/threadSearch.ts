@@ -4,13 +4,12 @@
 // read covers every live thread regardless of what a client has hydrated.
 // Layer: server read query service (SqlClient). Available in Stable and Beta.
 
-import {
-  ORCHESTRATION_SEARCH_THREADS_MAX_EXCERPT_LENGTH,
-  ORCHESTRATION_SEARCH_THREADS_MAX_LIMIT,
-  type OrchestrationSearchThreadsInput,
-  type OrchestrationSearchThreadsResult,
-  ThreadId,
-} from "@arkos/contracts";
+// FILE: threadSearch.ts
+// Purpose: Message-content search over persisted chat history for the sidebar palette.
+// The web client only keeps message bodies for recently opened threads, so this
+// read covers every live thread regardless of what a client has hydrated.
+// Layer: server read query service (SqlClient). Available in Stable and Beta.
+import { ORCHESTRATION_SEARCH_THREADS_MAX_EXCERPT_LENGTH, ORCHESTRATION_SEARCH_THREADS_MAX_LIMIT, type OrchestrationSearchThreadsInput, type OrchestrationSearchThreadsResult, ThreadId } from "@arkos/contracts";
 import { Effect, Layer, ServiceMap } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 

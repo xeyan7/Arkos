@@ -7,6 +7,14 @@
 // Layer: Pull request presentation
 // Exports: PullRequestInfo, IssueInfo, GitHubItemInfoThread, GitHubItemInfoVariant
 
+// FILE: GitHubItemInfo.tsx
+// Purpose: The status facts of a GitHub item's detail page, in two shapes of the same data: a
+//          right-hand column of titled sections (wide panes) and compact label/value rows under
+//          the header (narrow panes, or whenever the side chat dock takes the room). Pull
+//          requests show Merge status, Comments, Reviews, Checks; issues show Assignees, Labels,
+//          Comments. Either can lead with Threads, the item's side chats.
+// Layer: Pull request presentation
+// Exports: PullRequestInfo, IssueInfo, GitHubItemInfoThread, GitHubItemInfoVariant
 import type { GitHubIssueDetail, PullRequestDetail, ThreadId } from "@arkos/contracts";
 import { useState, type ReactNode } from "react";
 
@@ -14,14 +22,7 @@ import { Button } from "~/components/ui/button";
 import { DisclosureChevron } from "~/components/ui/DisclosureChevron";
 import { DisclosureRegion } from "~/components/ui/DisclosureRegion";
 import { CentralIcon } from "~/lib/central-icons";
-import {
-  BotIcon,
-  ChatBubbleIcon,
-  ChevronRightIcon,
-  CircleCheckIcon,
-  TagIcon,
-  UsersIcon,
-} from "~/lib/icons";
+import { BotIcon, ChatBubbleIcon, ChevronRightIcon, CircleCheckIcon, TagIcon, UsersIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { ensureNativeApi } from "~/nativeApi";
 import { withStableCheckKeys } from "~/components/chat/environment/environmentPullRequest.logic";
@@ -29,10 +30,7 @@ import { GitHubLabelChips } from "./GitHubLabelChips";
 import { PullRequestActorLabel } from "./PullRequestActorLabel";
 import { PullRequestCheckStatusIcon } from "./PullRequestCheckStatusIcon";
 import { PullRequestChecksRing } from "./PullRequestChecksRing";
-import {
-  describePullRequestChecksBrief,
-  describePullRequestMergeStatus,
-} from "./pullRequestDetail.logic";
+import { describePullRequestChecksBrief, describePullRequestMergeStatus } from "./pullRequestDetail.logic";
 import { PullRequestStateGlyph } from "./PullRequestStateGlyph";
 import { PullRequestMetaRow } from "./PullRequestMetaRow";
 import { PullRequestConflictIcon } from "./pullRequestStatePresentation";

@@ -5,12 +5,7 @@ import { Effect, Layer, Schema } from "effect";
 
 import { toPersistenceSqlError } from "../Errors.ts";
 
-import {
-  ProjectionStateRepository,
-  type ProjectionStateRepositoryShape,
-  GetProjectionStateInput,
-  ProjectionState,
-} from "../Services/ProjectionState.ts";
+import { ProjectionStateRepository, type ProjectionStateRepositoryShape, GetProjectionStateInput, ProjectionState } from "../Services/ProjectionState.ts";
 
 const MinLastAppliedSequenceRowSchema = Schema.Struct({
   minLastAppliedSequence: Schema.NullOr(NonNegativeInt),

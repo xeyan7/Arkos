@@ -1,8 +1,5 @@
 import type { ProjectDigestFocusItem, ThreadId } from "@arkos/contracts";
-import {
-  sanitizeProjectDigestFocusTitle,
-  sanitizeProjectDigestSummary,
-} from "@arkos/shared/projectAgent";
+import { sanitizeProjectDigestFocusTitle, sanitizeProjectDigestSummary } from "@arkos/shared/projectAgent";
 
 export { sanitizeProjectDigestFocusTitle, sanitizeProjectDigestSummary };
 

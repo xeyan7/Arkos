@@ -1,10 +1,4 @@
-import type {
-  GitActionProgressPhase,
-  GitRunStackedActionResult,
-  GitStackedAction,
-  GitStatusResult,
-  ThreadId,
-} from "@arkos/contracts";
+import type { GitActionProgressPhase, GitRunStackedActionResult, GitStackedAction, GitStatusResult, ThreadId } from "@arkos/contracts";
 import { isTemporaryWorktreeBranch, resolveUniqueArkosBranchName } from "@arkos/shared/git";
 
 export type GitActionIconName = "commit" | "push" | "pr";

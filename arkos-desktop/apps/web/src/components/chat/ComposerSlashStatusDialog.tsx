@@ -1,22 +1,10 @@
 import type { ResolvedThreadWorkspaceState } from "@arkos/shared/threadEnvironment";
 import type { ProviderInteractionMode } from "@arkos/contracts";
 import type { DraftThreadEnvMode } from "../../composerDraftStore";
-import {
-  type ContextWindowSnapshot,
-  formatContextWindowTokens,
-  formatCostUsd,
-} from "../../lib/contextWindow";
+import { type ContextWindowSnapshot, formatContextWindowTokens, formatCostUsd } from "../../lib/contextWindow";
 import type { RateLimitStatus } from "./RateLimitBanner";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-} from "../ui/dialog";
+import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogPopup, DialogTitle } from "../ui/dialog";
 import { ContextWindowMeter } from "./ContextWindowMeter";
 
 function formatRateLimitMessage(rateLimitStatus: RateLimitStatus): string {

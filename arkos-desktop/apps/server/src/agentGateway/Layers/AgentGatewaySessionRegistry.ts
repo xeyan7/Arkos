@@ -2,13 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { Layer } from "effect";
 
-import {
-  AgentGatewaySessionRegistry,
-  type AgentGatewayCapability,
-  type AgentGatewaySessionIdentity,
-  type AgentGatewaySessionRegistryShape,
-  type AgentGatewayWriteAuthority,
-} from "../Services/AgentGatewaySessionRegistry.ts";
+import { AgentGatewaySessionRegistry, type AgentGatewayCapability, type AgentGatewaySessionIdentity, type AgentGatewaySessionRegistryShape, type AgentGatewayWriteAuthority } from "../Services/AgentGatewaySessionRegistry.ts";
 
 const PROVIDER_SESSION_CAPABILITIES = [
   "thread:read",

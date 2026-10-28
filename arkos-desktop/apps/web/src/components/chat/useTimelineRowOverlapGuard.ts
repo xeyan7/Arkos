@@ -5,6 +5,12 @@
 //          undo a resize correction and leave the transcript permanently overlapped.
 // Layer: React hooks (chat timeline)
 
+// FILE: useTimelineRowOverlapGuard.ts
+// Purpose: Correct stale virtualized row positions before paint. Row growth
+//          and late position-only commits can both place a container over its
+//          predecessor. Observe both changes so a deferred position write cannot
+//          undo a resize correction and leave the transcript permanently overlapped.
+// Layer: React hooks (chat timeline)
 import { useCallback, useEffect, useRef } from "react";
 
 // LegendList parks recycled containers at top: -10000000; anything that far up

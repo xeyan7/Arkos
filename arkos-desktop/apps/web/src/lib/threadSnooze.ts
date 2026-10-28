@@ -5,6 +5,12 @@
 // Exports: SNOOZE_PRESETS, resolveSnoozeDeadline, formatSnoozeDeadline,
 //          toDateTimeLocalValue, parseFutureDateTimeLocalValue, dispatchThreadSnoozedUntil
 
+// FILE: threadSnooze.ts
+// Purpose: Shared snooze deadlines, labels, and the metadata command used by the
+//          sidebar and the in-chat snooze notice.
+// Layer: Web UI utility
+// Exports: SNOOZE_PRESETS, resolveSnoozeDeadline, formatSnoozeDeadline,
+//          toDateTimeLocalValue, parseFutureDateTimeLocalValue, dispatchThreadSnoozedUntil
 import type { ThreadId } from "@arkos/contracts";
 
 import { toastManager } from "../components/ui/toast";

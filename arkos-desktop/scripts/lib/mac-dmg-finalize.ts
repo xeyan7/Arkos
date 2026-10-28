@@ -3,6 +3,34 @@
 // Layer: Release/build helper
 // Exports: signed DMG finalization plus pure command construction for tests.
 
+// FILE: mac-dmg-finalize.ts
+// Purpose: Notarizes, staples, and validates the final signed macOS disk image.
+// Layer: Release/build helper
+// Exports: signed DMG finalization plus pure command construction for tests.
+// FILE: mac-dmg-finalize.ts
+// Purpose: Notarizes, staples, and validates the final signed macOS disk image.
+// Layer: Release/build helper
+// Exports: signed DMG finalization plus pure command construction for tests.
+// FILE: mac-dmg-finalize.ts
+// Purpose: Notarizes, staples, and validates the final signed macOS disk image.
+// Layer: Release/build helper
+// Exports: signed DMG finalization plus pure command construction for tests.
+// FILE: mac-dmg-finalize.ts
+// Purpose: Notarizes, staples, and validates the final signed macOS disk image.
+// Layer: Release/build helper
+// Exports: signed DMG finalization plus pure command construction for tests.
+// FILE: mac-dmg-finalize.ts
+// Purpose: Notarizes, staples, and validates the final signed macOS disk image.
+// Layer: Release/build helper
+// Exports: signed DMG finalization plus pure command construction for tests.
+// FILE: mac-dmg-finalize.ts
+// Purpose: Notarizes, staples, and validates the final signed macOS disk image.
+// Layer: Release/build helper
+// Exports: signed DMG finalization plus pure command construction for tests.
+// FILE: mac-dmg-finalize.ts
+// Purpose: Notarizes, staples, and validates the final signed macOS disk image.
+// Layer: Release/build helper
+// Exports: signed DMG finalization plus pure command construction for tests.
 import { notarizeMacPayload, recordStapledPayload, runMacCommand } from "./mac-notarization.ts";
 import { existsSync, mkdtempSync, readdirSync, rmSync, statSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";

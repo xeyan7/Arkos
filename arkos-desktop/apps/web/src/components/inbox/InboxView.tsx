@@ -6,11 +6,15 @@
 // Layer: Inbox route surface
 // Exports: InboxView (default)
 
+// FILE: InboxView.tsx
+// Purpose: The Inbox page (Stable and Beta): a task column (what needs the user, what is running,
+//          what finished, and today's to-dos) beside the day told as short written cards ("Your best model
+//          was ..."). Cards and groups exist only when the user's data does, and the grid
+//          closes the gaps they leave. Colors come from the theme.
+// Layer: Inbox route surface
+// Exports: InboxView (default)
 import type { ServerProviderUsageSnapshot, StatsGetRecapResult, ThreadId } from "@arkos/contracts";
-import {
-  providerUsageDisplayName,
-  selectVisibleProviderUsageSnapshots,
-} from "@arkos/shared/providerUsage";
+import { providerUsageDisplayName, selectVisibleProviderUsageSnapshots } from "@arkos/shared/providerUsage";
 import { pluralize } from "@arkos/shared/text";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -25,15 +29,9 @@ import { useActivityThreads } from "~/hooks/useActivityThreads";
 import { useDismissedThreadStatusKeys } from "~/hooks/useDismissedThreadStatusKeys";
 import { useNowMs } from "~/hooks/useNowMs";
 import { githubInboxReviewBadgeQueryOptions } from "~/lib/pullRequestReactQuery";
-import {
-  deriveProviderUsageDisplayRows,
-  providerUsageProgressTrackProps,
-} from "~/lib/providerUsageDisplay";
+import { deriveProviderUsageDisplayRows, providerUsageProgressTrackProps } from "~/lib/providerUsageDisplay";
 import { deriveAccountRateLimits } from "~/lib/rateLimits";
-import {
-  serverAllProviderUsageQueryOptions,
-  serverRecapQueryOptions,
-} from "~/lib/serverReactQuery";
+import { serverAllProviderUsageQueryOptions, serverRecapQueryOptions } from "~/lib/serverReactQuery";
 import { cn } from "~/lib/utils";
 import { ensureNativeApi } from "~/nativeApi";
 import { automationAttentionCount, automationQueryKey } from "~/routes/-automations.shared";
@@ -48,40 +46,13 @@ import { ProviderIcon } from "../ProviderIcon";
 import { RouteInsetSurface } from "../RouteInsetSurface";
 import { RouteSurfaceHeader } from "../RouteSurface";
 import { resolvePullRequestReviewBadge } from "../Sidebar.logic";
-import {
-  collectUnreadActivityThreads,
-  resolveActivityThreadReadAt,
-} from "../SidebarActivityView.logic";
+import { collectUnreadActivityThreads, resolveActivityThreadReadAt } from "../SidebarActivityView.logic";
 import { TaskCardSurface, useTaskSelection } from "../tasks/TaskCardSurface";
 import { toLocalDueDate } from "../tasks/tasks.logic";
 import { useTaskRows, useTodoList, useTodoMutations } from "../tasks/useTodos";
 import { UsageProgressTrack } from "../UsageProgressTrack";
-import {
-  groupInboxThreads,
-  recapBucketsByStart,
-  recapInputForRange,
-  recapTokens,
-  previousDayCutoffMs,
-  resolveInboxDay,
-  selectInboxTasks,
-  sumRecapBefore,
-  summarizeInboxSlots,
-  type InboxDay,
-  type InboxSlotId,
-  type InboxSlotSummary,
-} from "./inbox.logic";
-import {
-  buildInboxDigest,
-  buildInboxTiles,
-  buildTaskDigest,
-  type DigestPart,
-  type DigestSentence,
-  type InboxIcon,
-  type InboxQuotaSummary,
-  type InboxTaskCounts,
-  type InboxTile,
-  type InboxTone,
-} from "./inboxStories";
+import { groupInboxThreads, recapBucketsByStart, recapInputForRange, recapTokens, previousDayCutoffMs, resolveInboxDay, selectInboxTasks, sumRecapBefore, summarizeInboxSlots, type InboxDay, type InboxSlotId, type InboxSlotSummary } from "./inbox.logic";
+import { buildInboxDigest, buildInboxTiles, buildTaskDigest, type DigestPart, type DigestSentence, type InboxIcon, type InboxQuotaSummary, type InboxTaskCounts, type InboxTile, type InboxTone } from "./inboxStories";
 import { InboxTaskList } from "./InboxTaskList";
 import { InboxTasks } from "./InboxTasks";
 

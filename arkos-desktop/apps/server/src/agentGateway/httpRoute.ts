@@ -9,6 +9,17 @@
  *
  * @module agentGateway/httpRoute
  */
+/**
+ * HTTP route for the Arkos agent gateway MCP endpoint.
+ *
+ * Registers `POST /mcp` (streamable-HTTP MCP, stateless JSON responses) plus
+ * spec-mandated method handling for GET/DELETE. Authentication is a
+ * per-session bearer token minted by AgentGatewayCredentials and injected into
+ * provider sessions; the global server auth stack is deliberately not used
+ * here because provider child processes have no session cookies.
+ *
+ * @module agentGateway/httpRoute
+ */
 import { Effect, Layer, Stream } from "effect";
 import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 

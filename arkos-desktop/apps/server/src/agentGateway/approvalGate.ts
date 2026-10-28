@@ -4,7 +4,4 @@ import type { ProviderKind } from "@arkos/contracts";
  * approval cards for these providers (background full-access can bypass them).
  * Device tools still refuse approval-required actions without a native gate.
  */
-export const PROVIDERS_WITHOUT_APPROVAL_GATE: ReadonlySet<ProviderKind> = new Set<ProviderKind>([
-  "antigravity",
-  "pi",
-]);
+export const PROVIDERS_WITHOUT_APPROVAL_GATE: ReadonlySet<ProviderKind> = new Set<ProviderKind>();

@@ -1,9 +1,6 @@
 import { splitPromptIntoComposerSegments } from "./composer-editor-mentions";
 import { isBuiltInComposerSlashCommand, type ComposerSlashCommand } from "./composerSlashCommands";
-import {
-  composerMentionQuotedPathHasClosingQuote,
-  decodeComposerMentionQuotedPath,
-} from "./lib/composerMentions";
+import { composerMentionQuotedPathHasClosingQuote, decodeComposerMentionQuotedPath } from "./lib/composerMentions";
 import { INLINE_TERMINAL_CONTEXT_PLACEHOLDER } from "./lib/terminalContext";
 
 export type ComposerTriggerKind = "mention" | "slash-command" | "slash-model" | "skill";

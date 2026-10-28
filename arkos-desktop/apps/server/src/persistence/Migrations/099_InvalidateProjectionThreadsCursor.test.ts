@@ -132,7 +132,7 @@ it.layer(Layer.fresh(testLayer))("099_InvalidateProjectionThreadsCursor", (it) =
             threadId,
             projectId,
             title: "Thread 099",
-            modelSelection: { provider: "codex", model: "gpt-5-codex" },
+            modelSelection: { provider: "arkos", model: "gpt-5-codex" },
             runtimeMode: "full-access",
             branch: null,
             worktreePath: null,
@@ -175,7 +175,7 @@ it.layer(Layer.fresh(testLayer))("099_InvalidateProjectionThreadsCursor", (it) =
           payload: {
             threadId,
             messageId,
-            modelSelection: { provider: "codex", model: "gpt-5-codex" },
+            modelSelection: { provider: "arkos", model: "gpt-5-codex" },
             runtimeMode: "full-access",
             interactionMode: "default",
             dispatchMode: "queue",
@@ -191,7 +191,7 @@ it.layer(Layer.fresh(testLayer))("099_InvalidateProjectionThreadsCursor", (it) =
         ) => ({
           threadId,
           status,
-          providerName: "codex",
+          providerName: "arkos",
           runtimeMode: "full-access" as const,
           activeTurnId,
           lastError: null,

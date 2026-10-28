@@ -3,6 +3,10 @@
 // Layer: Environment panel section
 // Depends on: server local-server React Query helpers and the shared Environment row skin.
 
+// FILE: EnvironmentLocalServersSection.tsx
+// Purpose: Environment panel row/menu for active local dev servers with one-click stop actions.
+// Layer: Environment panel section
+// Depends on: server local-server React Query helpers and the shared Environment row skin.
 import type { ReactNode } from "react";
 
 import type { ServerLocalServerProcess } from "@arkos/contracts";
@@ -13,18 +17,10 @@ import { LocalServerIdentity } from "../../LocalServerIdentity";
 import { ComposerPickerMenuPopup } from "../ComposerPickerMenuPopup";
 import { Menu, MenuItem, MenuTrigger } from "../../ui/menu";
 import { GlobeIcon, RefreshCwIcon, StopFilledIcon } from "~/lib/icons";
-import {
-  serverLocalServersQueryOptions,
-  serverStopLocalServerMutationOptions,
-} from "~/lib/serverReactQuery";
+import { serverLocalServersQueryOptions, serverStopLocalServerMutationOptions } from "~/lib/serverReactQuery";
 import { StatusDot } from "~/components/ui/status-chip";
 import { cn } from "~/lib/utils";
-import {
-  ENVIRONMENT_ROW_CLASS_NAME,
-  ENVIRONMENT_ROW_ICON_CLASS_NAME,
-  EnvironmentRowBody,
-  EnvironmentRowChevron,
-} from "./EnvironmentRow";
+import { ENVIRONMENT_ROW_CLASS_NAME, ENVIRONMENT_ROW_ICON_CLASS_NAME, EnvironmentRowBody, EnvironmentRowChevron } from "./EnvironmentRow";
 
 function describeServerCount(count: number): string {
   if (count === 0) return "No servers running";

@@ -1,7 +1,4 @@
-import {
-  serializeMigrationSchemaTooNewStartupBlock,
-  type MigrationSchemaTooNewStartupBlock,
-} from "@arkos/shared/migrationRecovery";
+import { serializeMigrationSchemaTooNewStartupBlock, type MigrationSchemaTooNewStartupBlock } from "@arkos/shared/migrationRecovery";
 
 import { MigrationSchemaTooNewError } from "./Errors.ts";
 import { inspectCompletedMigrationBackupForSchemaTooNew } from "./MigrationBackup.ts";

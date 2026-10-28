@@ -16,6 +16,23 @@
 // screen, so the pane reads as one object instead of a rectangle with chrome
 // stacked above and below it.
 
+// FILE: DeviceFrame.tsx
+// Purpose: SVG device chassis that frames every device-pane state, with working hardware buttons.
+// Layer: Device pane presentation primitive
+// Exports: DeviceScreen, DeviceFrame, DeviceSilhouette, deviceKindFor, screenGeometry
+// Depends on: device contracts for the button names.
+//
+// Drawn rather than composited from Apple's bezel artwork: those images are
+// licensed for marketing use, must be used unmodified, and explicitly may not
+// be turned into buttons — which is exactly what the side nubs below are — and
+// a fixed image is one device, while this pane frames anything from an iPhone
+// to a 13" iPad. The frame is an SVG of concentric squircle bands sized from
+// the device's own pixel dimensions, so one drawing fits every aspect.
+//
+// The chassis is also the pane's container rather than a decoration around the
+// video: setup checklists, boot spinners, and the live canvas all render on the
+// screen, so the pane reads as one object instead of a rectangle with chrome
+// stacked above and below it.
 import type { DeviceFamily, DeviceHardwareButton } from "@arkos/contracts";
 import { memo, useId, useMemo, type CSSProperties, type ReactNode } from "react";
 

@@ -1,51 +1,14 @@
-import {
-  type ComputerPermission,
-  type ComputerBuildSignature,
-  COMPUTER_CONTROL_DENIED_ACTIVITY_KIND,
-  COMPUTER_SETUP_REQUIRED_ACTIVITY_KIND,
-  isToolLifecycleItemType,
-  type ModelSelection,
-  STUDIO_OUTPUTS_ACTIVITY_KIND,
-  type OrchestrationLatestTurnState,
-  type OrchestrationThreadActivity,
-  type ProviderKind,
-  type ToolLifecycleItemType,
-  type TurnId,
-  type UserInputQuestion,
-} from "@arkos/contracts";
-import {
-  decodeSubagentAgentStates,
-  extractSubagentIdentityHints,
-  decodeSubagentReceiverAgents,
-  decodeSubagentReceiverThreadIds,
-} from "@arkos/shared/subagents";
-import {
-  approvalRequestKindFromRequestType,
-  pendingRequestInstanceKey,
-  type ApprovalRequestKind,
-} from "@arkos/shared/threadSummary";
-import {
-  stripTrailingToolExitCode,
-  summarizeToolRawOutput,
-} from "@arkos/shared/toolOutputSummary";
+import { type ComputerPermission, type ComputerBuildSignature, COMPUTER_CONTROL_DENIED_ACTIVITY_KIND, COMPUTER_SETUP_REQUIRED_ACTIVITY_KIND, isToolLifecycleItemType, type ModelSelection, STUDIO_OUTPUTS_ACTIVITY_KIND, type OrchestrationLatestTurnState, type OrchestrationThreadActivity, type ProviderKind, type ToolLifecycleItemType, type TurnId, type UserInputQuestion } from "@arkos/contracts";
+import { decodeSubagentAgentStates, extractSubagentIdentityHints, decodeSubagentReceiverAgents, decodeSubagentReceiverThreadIds } from "@arkos/shared/subagents";
+import { approvalRequestKindFromRequestType, pendingRequestInstanceKey, type ApprovalRequestKind } from "@arkos/shared/threadSummary";
+import { stripTrailingToolExitCode, summarizeToolRawOutput } from "@arkos/shared/toolOutputSummary";
 import { pluralize, stripTerminalControlSequences } from "@arkos/shared/text";
 import { suppressCoordinatorCheckinMessages } from "@arkos/shared/coordinatorCheckin";
 import { PROVIDER_DESCRIPTORS } from "@arkos/shared/providerMetadata";
-import {
-  deriveReadableToolTitle,
-  deriveArkosMcpToolTitle,
-  isGenericToolTitle,
-  normalizeCompactToolLabel,
-  normalizeToolTextForComparison,
-  type ArkosMcpToolStatus,
-} from "./lib/toolCallLabel";
+import { deriveReadableToolTitle, deriveArkosMcpToolTitle, isGenericToolTitle, normalizeCompactToolLabel, normalizeToolTextForComparison, type ArkosMcpToolStatus } from "./lib/toolCallLabel";
 import { toolArgumentSummaryToolName } from "./lib/toolArgumentSummary";
 import { computerToolName, describeComputerToolCall } from "./lib/computerToolPresentation";
-import {
-  deriveWorkLogToolDetails,
-  mergeWorkLogToolDetails,
-  type WorkLogToolDetails,
-} from "./lib/toolCallDetails";
+import { deriveWorkLogToolDetails, mergeWorkLogToolDetails, type WorkLogToolDetails } from "./lib/toolCallDetails";
 import { stripProposedPlanBlocksFromText } from "./proposedPlan";
 
 import type { ChatMessage, ProposedPlan } from "./types";

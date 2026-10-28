@@ -4,18 +4,18 @@
 // Exports: ToolCallDetailsContent
 // Depends on: WorkLogEntry.toolDetails
 
+// FILE: ToolCallDetailsDialog.tsx
+// Purpose: Inline details content for command and file-change transcript rows.
+// Layer: Chat presentation component
+// Exports: ToolCallDetailsContent
+// Depends on: WorkLogEntry.toolDetails
 import type { ReactNode } from "react";
 import { createMarkdownCodeFence, formatShellTranscript } from "~/lib/toolCallDetailsFormatting";
 import { cn } from "~/lib/utils";
 import type { TimestampFormat } from "../../appSettings";
 import type { WorkLogToolDetails, WorkLogToolOutputDetails } from "../../lib/toolCallDetails";
 import type { WorkLogLiveActivity } from "../../workLog";
-import {
-  formatLiveActivityElapsed,
-  formatLiveActivityProgress,
-  formatLiveActivityStateLabel,
-  useLiveActivityNow,
-} from "../../lib/liveActivityPresentation";
+import { formatLiveActivityElapsed, formatLiveActivityProgress, formatLiveActivityStateLabel, useLiveActivityNow } from "../../lib/liveActivityPresentation";
 import { formatTimestamp } from "../../timestampFormat";
 import ChatMarkdown from "../ChatMarkdown";
 

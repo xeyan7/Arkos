@@ -3,40 +3,18 @@
 // Layer: Web chat presentation component
 // Exports: ChatMarkdown
 
-import {
-  CheckIcon,
-  CopyIcon,
-  InfoIcon,
-  LightbulbIcon,
-  OctagonAlertIcon,
-  TextWrapIcon,
-  TriangleAlertIcon,
-  type LucideIcon,
-} from "~/lib/icons";
+// FILE: ChatMarkdown.tsx
+// Purpose: Renders assistant and plan markdown with syntax highlighting and local file links.
+// Layer: Web chat presentation component
+// Exports: ChatMarkdown
+import { CheckIcon, CopyIcon, InfoIcon, LightbulbIcon, OctagonAlertIcon, TextWrapIcon, TriangleAlertIcon, type LucideIcon } from "~/lib/icons";
 import { ThreadId, type ProviderMentionReference } from "@arkos/contracts";
 import { isLocalAbsolutePath } from "@arkos/shared/path";
 import "katex/dist/katex.min.css";
 import { matchWikiLinkAt, remarkWikiLinks } from "../lib/remarkWikiLinks";
 import { remarkGithubAlerts, type GithubAlertKind } from "../lib/remarkGithubAlerts";
 import { remarkHtmlBreaks } from "../lib/remarkHtmlBreaks";
-import React, {
-  Children,
-  createContext,
-  useContext,
-  type CSSProperties,
-  Suspense,
-  isValidElement,
-  memo,
-  use,
-  useDeferredValue,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-  type SyntheticEvent,
-} from "react";
+import React, { Children, createContext, useContext, type CSSProperties, Suspense, isValidElement, memo, use, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type SyntheticEvent } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import { defaultUrlTransform } from "react-markdown";
@@ -54,54 +32,30 @@ import { CentralIcon } from "~/lib/central-icons";
 import { isLocalImageMarkdownSrc } from "../lib/localImageUrls";
 import { repairMarkdownTableDelimiters } from "../lib/markdownTableRepair";
 import { showFileReferenceContextMenu } from "../lib/fileReferenceContextMenu";
-import {
-  ChatLinkActionsContext,
-  resolveGitHubItemClickOpener,
-  showLinkContextMenu,
-} from "../lib/linkContextMenu";
+import { ChatLinkActionsContext, resolveGitHubItemClickOpener, showLinkContextMenu } from "../lib/linkContextMenu";
 import { useTheme } from "../hooks/useTheme";
 import { useSmoothStreamedText } from "../hooks/useSmoothStreamedText";
 import { useThrottledStreamingValue } from "../hooks/useThrottledStreamingValue";
 import { openWorkspaceFileReference, useWorkspaceFileOpener } from "../lib/workspaceFileOpener";
 import { useQuery } from "@tanstack/react-query";
 import { projectResolveWorkspaceFileReferenceQueryOptions } from "../lib/projectReactQuery";
-import {
-  extractAbsoluteFilesystemPaths,
-  resolveChatFileChipTarget,
-  resolveMarkdownFileLinkTarget,
-  rewriteMarkdownFileUriHref,
-} from "../markdown-links";
+import { extractAbsoluteFilesystemPaths, resolveChatFileChipTarget, resolveMarkdownFileLinkTarget, rewriteMarkdownFileUriHref } from "../markdown-links";
 import type { ExpandedImagePreview } from "./chat/ExpandedImagePreview";
 import { GeneratedMarkdownImage } from "./chat/GeneratedMarkdownImage";
 import { TerminalContextInlineChip } from "./chat/TerminalContextInlineChip";
 import type { ParsedTerminalContextEntry } from "../lib/terminalContext";
 import { formatInlineTerminalContextLabel } from "./chat/userMessageTerminalContexts";
-import {
-  COMPOSER_INLINE_CHIP_ICON_LABEL_GAP_CLASS_NAME,
-  COMPOSER_INLINE_CHIP_TOKEN_ICON_CLASS_NAME,
-} from "./composerInlineChip";
+import { COMPOSER_INLINE_CHIP_ICON_LABEL_GAP_CLASS_NAME, COMPOSER_INLINE_CHIP_TOKEN_ICON_CLASS_NAME } from "./composerInlineChip";
 import { LinkChipIcon } from "./LinkChipIcon";
 import { InlineAgentChip } from "./chat/InlineAgentChip";
 import { InlineLinkChip } from "./InlineLinkChip";
 import { InlineMentionChip } from "./chat/InlineMentionChip";
 import { InlineSkillChip } from "./chat/InlineSkillChip";
 import { InlineSlashCommandChip } from "./chat/InlineSlashCommandChip";
-import {
-  COMPOSER_CHIP_SEGMENT_ATTRIBUTE,
-  COMPOSER_CHIP_TAG_NAME,
-  TERMINAL_CONTEXT_CHIP_INDEX_ATTRIBUTE,
-  TERMINAL_CONTEXT_CHIP_TAG_NAME,
-  createComposerChipsRemarkPlugin,
-  parseComposerChipSegment,
-} from "../lib/remarkComposerChips";
+import { COMPOSER_CHIP_SEGMENT_ATTRIBUTE, COMPOSER_CHIP_TAG_NAME, TERMINAL_CONTEXT_CHIP_INDEX_ATTRIBUTE, TERMINAL_CONTEXT_CHIP_TAG_NAME, createComposerChipsRemarkPlugin, parseComposerChipSegment } from "../lib/remarkComposerChips";
 import { IconButton } from "./ui/icon-button";
 import { applyActiveChatFindMatch, type ThreadFindRange } from "./chat/threadFind.logic";
-import {
-  ChatFindRenderProvider,
-  FindAwareCodeFallback,
-  FindAwareMarkdownText,
-  FindAwareShikiHtml,
-} from "./ChatMarkdownFind";
+import { ChatFindRenderProvider, FindAwareCodeFallback, FindAwareMarkdownText, FindAwareShikiHtml } from "./ChatMarkdownFind";
 
 const EXTERNAL_HTTP_HREF_PATTERN = /^https?:\/\//i;
 // Trailing `:line` / `:line:col` position suffix on a resolved file link. Kept on

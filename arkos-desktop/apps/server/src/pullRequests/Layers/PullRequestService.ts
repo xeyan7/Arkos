@@ -2,19 +2,10 @@ import type { OrchestrationProject, PullRequestDetail } from "@arkos/contracts";
 import { Effect, Layer, Scope } from "effect";
 
 import { GitHubCli, type GitHubCliShape } from "../../git/Services/GitHubCli";
-import {
-  GITHUB_ITEM_DETAIL_CACHE_TTL_MS,
-  githubItemCacheKey,
-} from "../../githubInbox/githubInbox.logic";
-import {
-  GitHubInboxService,
-  type GitHubInboxSharedReads,
-} from "../../githubInbox/Services/GitHubInboxService";
+import { GITHUB_ITEM_DETAIL_CACHE_TTL_MS, githubItemCacheKey } from "../../githubInbox/githubInbox.logic";
+import { GitHubInboxService, type GitHubInboxSharedReads } from "../../githubInbox/Services/GitHubInboxService";
 import { ProjectionSnapshotQuery } from "../../orchestration/Services/ProjectionSnapshotQuery";
-import {
-  ProjectPullRequestPins,
-  type ProjectPullRequestPinsShape,
-} from "../../persistence/Services/ProjectPullRequestPins";
+import { ProjectPullRequestPins, type ProjectPullRequestPinsShape } from "../../persistence/Services/ProjectPullRequestPins";
 import { makeKeyedSingleFlightCache } from "../KeyedSingleFlightCache";
 import { liveProjectFromShell, makeProjectRepositoryAccess } from "../projectRepositoryAccess";
 import { makePullRequestOperations } from "../pullRequestOperations";

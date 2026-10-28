@@ -2,6 +2,9 @@
 // Purpose: Shared remaining-quota progress track with an optional expected-pace marker.
 // Used by Settings and compact picker usage views so marker placement stays consistent.
 
+// FILE: UsageProgressTrack.tsx
+// Purpose: Shared remaining-quota progress track with an optional expected-pace marker.
+// Used by Settings and compact picker usage views so marker placement stays consistent.
 import { cn } from "~/lib/utils";
 
 function clampPercent(value: number): number {

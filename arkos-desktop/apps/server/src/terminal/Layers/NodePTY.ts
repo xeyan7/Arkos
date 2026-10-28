@@ -3,17 +3,14 @@
 // Layer: Terminal infrastructure
 // Depends on: node-pty native bindings, Effect layers, PTY service contract
 
+// FILE: NodePTY.ts
+// Purpose: Provides the Node.js-backed PTY adapter used by terminal sessions.
+// Layer: Terminal infrastructure
+// Depends on: node-pty native bindings, Effect layers, PTY service contract
 import { createRequire } from "node:module";
 
 import { Effect, FileSystem, Layer, Path } from "effect";
-import {
-  PtyAdapter,
-  PtyAdapterShape,
-  PtyExitEvent,
-  PtyProcess,
-  PtySpawnInput,
-  PtySpawnError,
-} from "../Services/PTY";
+import { PtyAdapter, PtyAdapterShape, PtyExitEvent, PtyProcess, PtySpawnInput, PtySpawnError } from "../Services/PTY";
 
 type NodePtyModule = typeof import("node-pty");
 type NodePtyLoader = () => Promise<NodePtyModule>;

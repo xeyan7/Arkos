@@ -5,13 +5,7 @@ import { Effect, Layer, Option, Schema, Struct } from "effect";
 
 import { toPersistenceSqlError, toPersistenceSqlOrDecodeError } from "../Errors.ts";
 
-import {
-  DeleteProjectionThreadActivitiesInput,
-  ListProjectionThreadActivitiesInput,
-  ProjectionThreadActivity,
-  ProjectionThreadActivityRepository,
-  type ProjectionThreadActivityRepositoryShape,
-} from "../Services/ProjectionThreadActivities.ts";
+import { DeleteProjectionThreadActivitiesInput, ListProjectionThreadActivitiesInput, ProjectionThreadActivity, ProjectionThreadActivityRepository, type ProjectionThreadActivityRepositoryShape } from "../Services/ProjectionThreadActivities.ts";
 
 const ProjectionThreadActivityDbRowSchema = ProjectionThreadActivity.mapFields(
   Struct.assign({

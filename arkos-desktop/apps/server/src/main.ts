@@ -7,47 +7,14 @@
  * @module CliConfig
  */
 import OS from "node:os";
-import {
-  Config,
-  Data,
-  Effect,
-  FileSystem,
-  Layer,
-  Option,
-  Path,
-  Schema,
-  ServiceMap,
-  Stream,
-} from "effect";
+import { Config, Data, Effect, FileSystem, Layer, Option, Path, Schema, ServiceMap } from "effect";
 import { Command, Flag } from "effect/unstable/cli";
-import type { ServerSettings } from "@arkos/contracts";
+
 import { NetService } from "@arkos/shared/Net";
-import {
-  MIGRATION_DIVERGENCE_CONSENT_ENV,
-  MIGRATION_RUNTIME_SOURCE_DIGEST_ENV,
-} from "@arkos/shared/migrationRecovery";
-import {
-  optionalBooleanEnvironmentConfig,
-  optionalBooleanFlag,
-  resolveBooleanConfig,
-  type BooleanFlagInput,
-} from "@arkos/shared/cli";
-import {
-  DEFAULT_PORT,
-  deriveServerPaths,
-  normalizeHttpsPublicOrigin,
-  preparePrivateServerPaths,
-  remoteAccessPolicyError,
-  resolveCanonicalWorkspaceRoots,
-  resolveStaticDir,
-  ServerConfig,
-  type RuntimeMode,
-  type ServerConfigShape,
-} from "./config";
-import {
-  ARKOS_BETA_BUNDLE_ID,
-  ARKOS_DESKTOP_BUNDLE_ID_ENV,
-} from "@arkos/shared/desktopIdentity";
+import { MIGRATION_DIVERGENCE_CONSENT_ENV, MIGRATION_RUNTIME_SOURCE_DIGEST_ENV } from "@arkos/shared/migrationRecovery";
+import { optionalBooleanEnvironmentConfig, optionalBooleanFlag, resolveBooleanConfig, type BooleanFlagInput } from "@arkos/shared/cli";
+import { DEFAULT_PORT, deriveServerPaths, normalizeHttpsPublicOrigin, preparePrivateServerPaths, remoteAccessPolicyError, resolveCanonicalWorkspaceRoots, resolveStaticDir, ServerConfig, type RuntimeMode, type ServerConfigShape } from "./config";
+import { ARKOS_BETA_BUNDLE_ID, ARKOS_DESKTOP_BUNDLE_ID_ENV } from "@arkos/shared/desktopIdentity";
 import { runBetaImportIfRequested } from "./betaImport";
 import { startBetaUsageSnapshotJob } from "./betaUsageSnapshot";
 import { LATEST_MIGRATION_ID } from "./persistence/Migrations";
@@ -58,10 +25,7 @@ import * as SqlitePersistence from "./persistence/Layers/Sqlite";
 import { ProviderRuntimeEventRepositoryLive } from "./persistence/Layers/ProviderRuntimeEvents";
 import { makeServerApplicationLayers } from "./serverLayers";
 import { startServerMemoryDiagnostics } from "./memoryDiagnostics";
-import {
-  claudeCredentialKeepaliveTargets,
-  createClaudeCredentialKeepaliveController,
-} from "./provider/claudeCredentialKeepalive";
+
 import { ProjectionSnapshotQuery } from "./orchestration/Services/ProjectionSnapshotQuery";
 import { ProviderSessionReaperLive } from "./provider/Layers/ProviderSessionReaper";
 import { ProviderRuntimeReconcilerLive } from "./provider/Layers/ProviderRuntimeReconciler";
@@ -71,19 +35,10 @@ import { ServerSettingsService } from "./serverSettings";
 import { formatHostForUrl, isLoopbackHost, isWildcardHost } from "./startupAccess";
 import { OrchestrationEngineService } from "./orchestration/Services/OrchestrationEngine";
 import { startThreadRetentionJob } from "./threadRetention";
-import {
-  discoverServerRuntime,
-  pairExternalMcpClient,
-  resolveExternalMcpBaseDir,
-  serveExternalMcpStdio,
-  verifyServerRuntime,
-} from "./externalMcp/bridge";
+import { discoverServerRuntime, pairExternalMcpClient, resolveExternalMcpBaseDir, serveExternalMcpStdio, verifyServerRuntime } from "./externalMcp/bridge";
 import { externalMcpLauncher, externalMcpShellCommand } from "./externalMcp/launcher";
 import { fetchArkosServerStatus, formatArkosServerStatus } from "./serverStatusCli";
-import {
-  embeddedMigrationRuntimeSourceDigest,
-  verifyMigrationRuntimeIdentity,
-} from "./migrationBundleIdentity";
+import { embeddedMigrationRuntimeSourceDigest, verifyMigrationRuntimeIdentity } from "./migrationBundleIdentity";
 
 export class StartupError extends Data.TaggedError("StartupError")<{
   readonly message: string;
@@ -476,35 +431,6 @@ const makeServerProgram = (input: CliInput) =>
     if (process.env[ARKOS_DESKTOP_BUNDLE_ID_ENV] === ARKOS_BETA_BUNDLE_ID) {
       yield* startBetaUsageSnapshotJob(config.baseDir);
     }
-    // Optional Claude OAuth keepalive. Disabled by default because it touches
-    // Claude Code auth data in the background; users can opt in with
-    // ARKOS_CLAUDE_KEEPALIVE=1.
-    const claudeKeepalive = createClaudeCredentialKeepaliveController({
-      homeDir: config.homeDir,
-      log: (message) => Effect.runFork(Effect.logInfo(message)),
-    });
-    const reconcileClaudeKeepalive = (settings: ServerSettings) =>
-      Effect.promise(() =>
-        claudeKeepalive.reconcile(
-          claudeCredentialKeepaliveTargets(settings, {
-            homeDir: config.homeDir,
-            stateDir: config.stateDir,
-          }),
-        ),
-      );
-    // Attach before reading the initial snapshot. The settings PubSub does not
-    // replay, so reading first could miss a disable/path update in the small
-    // window before the stream consumer subscribes.
-    const claudeKeepaliveSettingsChanges = yield* serverSettings.streamChanges.pipe(
-      Stream.toQueue({ capacity: "unbounded" }),
-    );
-    yield* reconcileClaudeKeepalive(yield* serverSettings.getSettings);
-    yield* Stream.fromQueue(claudeKeepaliveSettingsChanges).pipe(
-      Stream.runForEach(reconcileClaudeKeepalive),
-      Effect.ensuring(Effect.promise(() => claudeKeepalive.stop())),
-      Effect.forkChild,
-    );
-
     yield* Effect.logInfo("Arkos running", makeServerStartupLogData(config));
     if (startupPairingUrl) {
       if (config.allowInsecureRemote && !config.publicUrl) {
@@ -650,7 +576,7 @@ const mcpServeCommand = Command.make(
     }),
 ).pipe(
   Command.withDescription(
-    "Serve the paired Arkos external MCP integration over stdio for Codex, Claude, and other MCP clients.",
+    "Serve the paired Arkos external MCP integration over stdio for external MCP clients.",
   ),
 );
 

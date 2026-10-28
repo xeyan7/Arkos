@@ -10,13 +10,13 @@ import { baseStats, tokenStats } from "./profileTestFixtures";
 it("keeps the full missing-token disclosure inside the exported card", async () => {
   await page.viewport(960, 520);
   const unavailableProviders: ProviderKind[] = [
-    "antigravity",
-    "cursor",
-    "devin",
-    "droid",
-    "grok",
-    "opencode",
-    "pi",
+    "arkos",
+    "arkos",
+    "arkos",
+    "arkos",
+    "arkos",
+    "arkos",
+    "arkos",
   ];
   const heatmap = Array.from({ length: 183 }, (_, index) => {
     const date = new Date(Date.UTC(2026, 0, index + 1));

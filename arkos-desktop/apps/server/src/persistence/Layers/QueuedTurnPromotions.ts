@@ -2,11 +2,7 @@ import { Effect, Layer, Option } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
 import { toPersistenceSqlError } from "../Errors.ts";
-import {
-  QueuedTurnPromotionRepository,
-  type QueuedTurnPromotion,
-  type QueuedTurnPromotionRepositoryShape,
-} from "../Services/QueuedTurnPromotions.ts";
+import { QueuedTurnPromotionRepository, type QueuedTurnPromotion, type QueuedTurnPromotionRepositoryShape } from "../Services/QueuedTurnPromotions.ts";
 
 const columns = (sql: SqlClient.SqlClient) => sql`
   queued_event_sequence AS "queuedEventSequence",

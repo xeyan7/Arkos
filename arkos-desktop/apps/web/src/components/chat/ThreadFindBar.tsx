@@ -4,6 +4,11 @@
 // Layer: Chat transcript presentation
 // Depends on: projected-message matching in threadFind.logic (not the DOM list).
 
+// FILE: ThreadFindBar.tsx
+// Purpose: Compact in-thread find panel floating at the top-right of the chat
+//   column — field + close on top, prev/next + match count below.
+// Layer: Chat transcript presentation
+// Depends on: projected-message matching in threadFind.logic (not the DOM list).
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
 import { IconButton } from "~/components/ui/icon-button";
@@ -12,16 +17,7 @@ import { ArrowDownIcon, ArrowUpIcon, SearchIcon, XIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { MUTED_LABEL_TEXT_CLASS_NAME } from "~/surfaceStyles";
 import { type TimelineEntry } from "../../session-logic";
-import {
-  collectThreadFindDocuments,
-  createThreadFindDocumentTextCache,
-  findThreadMatches,
-  normalizeFindQuery,
-  resolveThreadFindJump,
-  stepThreadFindIndex,
-  type ThreadFindHighlight,
-  type ThreadFindMatch,
-} from "./threadFind.logic";
+import { collectThreadFindDocuments, createThreadFindDocumentTextCache, findThreadMatches, normalizeFindQuery, resolveThreadFindJump, stepThreadFindIndex, type ThreadFindHighlight, type ThreadFindMatch } from "./threadFind.logic";
 
 interface ThreadFindBarProps {
   open: boolean;

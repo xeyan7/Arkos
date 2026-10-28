@@ -5,6 +5,12 @@
 // Layer: Web UI dialog
 // Exports: CreateProjectDialog, CreateProjectSubmitValue
 
+// FILE: CreateProjectDialog.tsx
+// Purpose: Single entry point for adding a project — typed path, source folders
+//          (drag/drop or native browse; extra folders make a multi-folder project),
+//          and destination Space.
+// Layer: Web UI dialog
+// Exports: CreateProjectDialog, CreateProjectSubmitValue
 import { type GitHubProjectProvisionProgressEvent, type SpaceId } from "@arkos/contracts";
 import { parseGitHubRepositoryInput } from "@arkos/shared/githubRepository";
 import { findProjectFolderProblem } from "@arkos/shared/projectFolders";
@@ -23,25 +29,14 @@ import { useVoidSpace } from "../voidSpaceStore";
 import { cn } from "~/lib/utils";
 
 import { FolderAddIcon, FolderIcon } from "~/lib/icons";
-import {
-  CreateGitHubProjectFields,
-  PROJECT_DIALOG_FIELD_CONTROL_CLASS_NAME,
-} from "./CreateGitHubProjectFields";
+import { CreateGitHubProjectFields, PROJECT_DIALOG_FIELD_CONTROL_CLASS_NAME } from "./CreateGitHubProjectFields";
 import { ProjectFolderList } from "./ProjectFolderList";
 import { ProjectSourceSegmentedPicker } from "./ProjectSourceSegmentedPicker";
 import { describeAddProjectError } from "./Sidebar.logic";
 import { SpaceEditorDialog, type SpaceEditorValue } from "./SpaceEditorDialog";
 import { SpaceIcon } from "./SpaceIcon";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-  dialogFieldLabelClassName,
-} from "./ui/dialog";
+import { Dialog, DialogFooter, DialogHeader, DialogPanel, DialogPopup, DialogTitle, dialogFieldLabelClassName } from "./ui/dialog";
 import { ComposerPickerSelectPopup } from "./chat/ComposerPickerMenuPopup";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { Select, SelectItem, SelectTrigger, SelectValue } from "./ui/select";

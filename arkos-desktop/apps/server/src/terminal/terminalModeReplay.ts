@@ -2,6 +2,9 @@
 // Purpose: Tracks live terminal modes so a fresh renderer can reattach with matching input state.
 // Layer: Terminal infrastructure
 
+// FILE: terminalModeReplay.ts
+// Purpose: Tracks live terminal modes so a fresh renderer can reattach with matching input state.
+// Layer: Terminal infrastructure
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);

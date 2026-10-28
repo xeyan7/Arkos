@@ -2,6 +2,9 @@
 // Purpose: Coordinates diff-panel data sources, toolbar state, and patch body rendering.
 // Layer: Diff panel container
 
+// FILE: DiffPanel.tsx
+// Purpose: Coordinates diff-panel data sources, toolbar state, and patch body rendering.
+// Layer: Diff panel container
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ThreadId, type ResolvedKeybindingsConfig, type TurnId } from "@arkos/contracts";
@@ -9,18 +12,8 @@ import type { FileDiffMetadata } from "@pierre/diffs/react";
 import * as Schema from "effect/Schema";
 import { Columns2Icon, CopyIcon, EllipsisIcon, FolderIcon, Rows3Icon } from "~/lib/icons";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import {
-  gitBranchesQueryOptions,
-  gitQueryKeys,
-  refreshGitAfterFileWrite,
-  gitStatusQueryOptions,
-  gitWorkingTreeDiffQueryOptions,
-  gitWorkingTreeDiffStatsQueryOptions,
-} from "~/lib/gitReactQuery";
-import {
-  checkpointDiffQueryOptions,
-  resolveCheckpointDiffQueryDisplayState,
-} from "~/lib/providerReactQuery";
+import { gitBranchesQueryOptions, refreshGitAfterFileWrite, gitStatusQueryOptions, gitWorkingTreeDiffQueryOptions, gitWorkingTreeDiffStatsQueryOptions } from "~/lib/gitReactQuery";
+import { checkpointDiffQueryOptions, resolveCheckpointDiffQueryDisplayState } from "~/lib/providerReactQuery";
 import { stripDiffSearchParams } from "../diffRouteSearch";
 import { useTheme } from "../hooks/useTheme";
 import { useDiffRouteSearch } from "../hooks/useDiffRouteSearch";
@@ -29,27 +22,10 @@ import { useVisibleDiffFilePath } from "../hooks/useVisibleDiffFilePath";
 import { serverConfigQueryOptions } from "../lib/serverReactQuery";
 import { shortcutLabelForCommand } from "../keybindings";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import {
-  buildFileDiffRenderKey,
-  getRenderablePatch,
-  resolveDiffCopyText,
-  resolveFileDiffPath,
-  sortFileDiffsByPath,
-  summarizeRenderablePatchStats,
-} from "../lib/diffRendering";
+import { buildFileDiffRenderKey, getRenderablePatch, resolveDiffCopyText, resolveFileDiffPath, sortFileDiffsByPath, summarizeRenderablePatchStats } from "../lib/diffRendering";
 import { scrollDiffFileIntoView } from "../lib/diffScrollSurface";
-import {
-  appendChatFileReference,
-  appendComposerPromptText,
-  buildDiffSelectionReference,
-  buildWhyChangedPrompt,
-  normalizeSelectionSnippet,
-} from "../lib/chatReferences";
-import {
-  resolveDiffEditBaseRev,
-  resolveDiffFileEditMode,
-  type DiffFileEditRequest,
-} from "../lib/diffEditBaseRev";
+import { appendChatFileReference, appendComposerPromptText, buildDiffSelectionReference, buildWhyChangedPrompt, normalizeSelectionSnippet } from "../lib/chatReferences";
+import { resolveDiffEditBaseRev, resolveDiffFileEditMode, type DiffFileEditRequest } from "../lib/diffEditBaseRev";
 import { resolveDiffEnvironmentState } from "../lib/threadEnvironment";
 import { disclosureWidthClassName } from "../lib/disclosureMotion";
 import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
@@ -60,37 +36,10 @@ import { inferCheckpointTurnCountByTurnId } from "../session-logic";
 import { type TimestampFormat, useAppSettings } from "../appSettings";
 import { useComposerDraftStore } from "../composerDraftStore";
 import type { DiffRenderMode } from "./chat/chatHeaderControls";
-import {
-  areAllRenderableFilesCollapsed,
-  DIFF_PANEL_PICKER_SCOPE_OPTIONS,
-  isDiffPanelRepoScopeOption,
-  isStaleDiffTurnSelection,
-  resolveConversationCacheScope,
-  resolveDiffPanelGitStatusQueriesEnabled,
-  resolveDiffPanelQueriesEnabled,
-  resolveDiffPanelScopeCountQueriesEnabled,
-  resolveDiffPanelRepoLiveRefetchIntervalMs,
-  resolveDiffPanelScopeFileCounts,
-  resolveDiffPanelScopePickerValue,
-  resolveDiffPanelThread,
-  resolveDiffPanelViewSource,
-  resolveAdjacentDiffFilePath,
-  resolveDiffSelectAllArmed,
-  resolveDiffSelectAllWithinViewport,
-  resolveInitialDiffViewKind,
-  resolveSelectedTurnSummary,
-  resolveWatchedDiffFilePath,
-  type DiffChangeNavigationDirection,
-  type DiffPanelRepoScopeOption,
-  type DiffPanelTurnScopeIntent,
-  type DiffViewKind,
-} from "./DiffPanel.logic";
+import { areAllRenderableFilesCollapsed, DIFF_PANEL_PICKER_SCOPE_OPTIONS, isDiffPanelRepoScopeOption, isStaleDiffTurnSelection, resolveConversationCacheScope, resolveDiffPanelGitStatusQueriesEnabled, resolveDiffPanelQueriesEnabled, resolveDiffPanelScopeCountQueriesEnabled, resolveDiffPanelRepoLiveRefetchIntervalMs, resolveDiffPanelScopeFileCounts, resolveDiffPanelScopePickerValue, resolveDiffPanelThread, resolveDiffPanelViewSource, resolveAdjacentDiffFilePath, resolveDiffSelectAllArmed, resolveDiffSelectAllWithinViewport, resolveInitialDiffViewKind, resolveSelectedTurnSummary, resolveWatchedDiffFilePath, type DiffChangeNavigationDirection, type DiffPanelRepoScopeOption, type DiffPanelTurnScopeIntent, type DiffViewKind } from "./DiffPanel.logic";
 import { resolveDraftFallbackModelSelection } from "./ChatView.logic";
 import { DiffPanelChangeMarkers } from "./DiffPanelChangeMarkers";
-import {
-  DiffPanelChangeNavigationButtons,
-  type DiffPanelChangeNavigation,
-} from "./DiffPanelChangeNavigation";
+import { DiffPanelChangeNavigationButtons, type DiffPanelChangeNavigation } from "./DiffPanelChangeNavigation";
 import { DiffLineBlamePopover, type DiffLineBlameTarget } from "./DiffLineBlamePopover";
 import { DiffPanelCompareRefMenuSection } from "./DiffPanelCompareRefMenuSection";
 import { DiffPanelPatchViewport } from "./DiffPanelPatchViewport";
@@ -102,25 +51,11 @@ import { closestThroughShadow } from "./chat/chatSelectionActions";
 import { TranscriptSelectionAction } from "./chat/TranscriptSelectionAction";
 import { useCodeSelectionAction } from "./chat/useCodeSelectionAction";
 import { useProjectFileChangeSubscription } from "../hooks/useProjectFileChangeSubscription";
-import {
-  createDiffPanelRepoLiveRefreshSelector,
-  createDiffPanelThreadCatalogSelector,
-  toDiffPanelThreadCatalog,
-  type DiffPanelThreadCatalog,
-} from "./diffPanelSelectors";
+import { createDiffPanelRepoLiveRefreshSelector, createDiffPanelThreadCatalogSelector, toDiffPanelThreadCatalog, type DiffPanelThreadCatalog } from "./diffPanelSelectors";
 import { DiffPanelLoadingState, DiffPanelShell, type DiffPanelMode } from "./DiffPanelShell";
 import { TOOLBAR_ICON_BUTTON_TONE_CLASS_NAME } from "./ui/button-group";
 import { IconButton } from "./ui/icon-button";
-import {
-  Menu,
-  MenuCheckboxItem,
-  MenuGroup,
-  MenuGroupLabel,
-  MenuItem,
-  MenuRadioGroup,
-  MenuRadioItem,
-  MenuTrigger,
-} from "./ui/menu";
+import { Menu, MenuCheckboxItem, MenuGroup, MenuGroupLabel, MenuItem, MenuRadioGroup, MenuRadioItem, MenuTrigger } from "./ui/menu";
 import { REPO_DIFF_SCOPE_LABELS, resolveRepoDiffScopeLabel } from "../repoDiffScopeStore";
 import { PanelStateMessage } from "./chat/PanelStateMessage";
 import { type SplitViewPanePanelState } from "../splitViewStore";

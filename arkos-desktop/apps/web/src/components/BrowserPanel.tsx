@@ -6,40 +6,21 @@
 // Note: raw <button>s for autocomplete-suggestion rows and tab-title activate
 // regions are intentional — list-row and tab semantics, not shadcn Buttons.
 
+// FILE: BrowserPanel.tsx
+// Purpose: Renders the in-app browser chrome and mirrors the native Electron view.
+// Layer: Desktop-only React component
+// Depends on: browserStateStore, nativeApi browser bridge, DiffPanelShell
+//
+// Note: raw <button>s for autocomplete-suggestion rows and tab-title activate
+// regions are intentional — list-row and tab semantics, not shadcn Buttons.
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  PROVIDER_SEND_TURN_MAX_ATTACHMENTS,
-  type ServerLocalServerProcess,
-  type ThreadBrowserState,
-  type ThreadId,
-} from "@arkos/contracts";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  Camera01Icon,
-  CircleAlertIcon,
-  ExternalLinkIcon,
-  GlobeIcon,
-  LinkIcon,
-  LoaderCircleIcon,
-  MoreHorizontalIcon,
-  type LucideIcon,
-  PlusIcon,
-  RefreshCwIcon,
-  XIcon,
-} from "~/lib/icons";
+import { PROVIDER_SEND_TURN_MAX_ATTACHMENTS, type ServerLocalServerProcess, type ThreadBrowserState, type ThreadId } from "@arkos/contracts";
+import { ArrowLeftIcon, ArrowRightIcon, Camera01Icon, CircleAlertIcon, ExternalLinkIcon, GlobeIcon, LinkIcon, LoaderCircleIcon, MoreHorizontalIcon, type LucideIcon, PlusIcon, RefreshCwIcon, XIcon } from "~/lib/icons";
 
 import { localServerPrimaryLabel } from "@arkos/shared/localServers";
-import {
-  BROWSER_BLANK_URL,
-  isBlankBrowserTabUrl,
-  resolveCopyableBrowserTabUrl,
-} from "@arkos/shared/browserSession";
-import {
-  BROWSER_COPY_LINK_TOAST_TITLE,
-  isBrowserCopyLinkChord,
-} from "@arkos/shared/browserShortcuts";
+import { BROWSER_BLANK_URL, isBlankBrowserTabUrl, resolveCopyableBrowserTabUrl } from "@arkos/shared/browserSession";
+import { BROWSER_COPY_LINK_TOAST_TITLE, isBrowserCopyLinkChord } from "@arkos/shared/browserShortcuts";
 
 import { isElectron } from "~/env";
 import { CentralIcon } from "~/lib/central-icons";
@@ -48,46 +29,18 @@ import { BrowserVaultButton } from "./BrowserVault";
 import type { DockPaneRuntimeMode } from "~/lib/dockPaneActivation";
 import { readDesktopZoomFactor, subscribeDesktopZoomFactor } from "~/lib/desktopZoom";
 import { BROWSER_PANEL_BOUNDS_SYNC_EVENT } from "~/lib/browserPanelBoundsSync";
-import {
-  NATIVE_SURFACE_MENU_OVERLAY_SELECTOR,
-  NATIVE_SURFACE_OCCLUSION_SYNC_EVENT,
-} from "~/lib/nativeSurfaceOcclusion";
+import { NATIVE_SURFACE_MENU_OVERLAY_SELECTOR, NATIVE_SURFACE_OCCLUSION_SYNC_EVENT } from "~/lib/nativeSurfaceOcclusion";
 import { serverLocalServersQueryOptions } from "~/lib/serverReactQuery";
 import { cn, isMacNavigatorPlatform } from "~/lib/utils";
 
-import {
-  useBrowserStateStore,
-  selectThreadBrowserHistory,
-  selectThreadBrowserState,
-} from "../browserStateStore";
+import { useBrowserStateStore, selectThreadBrowserHistory, selectThreadBrowserState } from "../browserStateStore";
 import { useComposerDraftStore, type BrowserAnnotationDraft } from "../composerDraftStore";
 import { anchoredToastManager } from "./ui/toast";
 import { prepareComposerImageFromBrowserScreenshot } from "../lib/browserPromptContext";
-import {
-  BROWSER_CHROME_CONTROL_CLASS_NAME,
-  BROWSER_CHROME_CONTROL_FILLED_CLASS_NAME,
-  browserAddressDisplayValue,
-  browserWebviewInitialUrl,
-  buildBrowserAddressSuggestions,
-  createBrowserPanelHideScheduler,
-  createBrowserPanelRendererHandoff,
-  createBrowserRendererLossHandler,
-  hasObscuringHitStackElementAboveSurface,
-  normalizeBrowserAddressInput,
-  resolveBrowserChromeStatus,
-  resolveBrowserAddressSync,
-  shouldOccludeBrowserWebview,
-  applyBrowserWebviewPresentation,
-  isBrowserPanelBoundsHiddenKey,
-  resolveBrowserRuntimePresentation,
-  type BrowserAddressSuggestion,
-} from "./BrowserPanel.logic";
+import { BROWSER_CHROME_CONTROL_CLASS_NAME, BROWSER_CHROME_CONTROL_FILLED_CLASS_NAME, browserAddressDisplayValue, browserWebviewInitialUrl, buildBrowserAddressSuggestions, createBrowserPanelHideScheduler, createBrowserPanelRendererHandoff, createBrowserRendererLossHandler, hasObscuringHitStackElementAboveSurface, normalizeBrowserAddressInput, resolveBrowserChromeStatus, resolveBrowserAddressSync, shouldOccludeBrowserWebview, applyBrowserWebviewPresentation, isBrowserPanelBoundsHiddenKey, resolveBrowserRuntimePresentation, type BrowserAddressSuggestion } from "./BrowserPanel.logic";
 import { BrowserTabStrip } from "./BrowserTabStrip";
 import { DiffPanelLoadingState, DiffPanelShell, type DiffPanelMode } from "./DiffPanelShell";
-import {
-  useBrowserAnnotations,
-  type BrowserAnnotationsController,
-} from "./browser/useBrowserAnnotations";
+import { useBrowserAnnotations, type BrowserAnnotationsController } from "./browser/useBrowserAnnotations";
 import { LocalServerIdentity } from "./LocalServerIdentity";
 import { Button } from "./ui/button";
 import { ButtonGroup, ButtonGroupSeparator } from "./ui/button-group";

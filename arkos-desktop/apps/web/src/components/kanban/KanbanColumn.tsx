@@ -3,6 +3,10 @@
 // Layer: UI component (project-board building block)
 // Exports: KanbanColumn, kanbanColumnDropId, parseKanbanColumnDropId
 
+// FILE: KanbanColumn.tsx
+// Purpose: One kanban column — droppable body, sortable draft cards.
+// Layer: UI component (project-board building block)
+// Exports: KanbanColumn, kanbanColumnDropId, parseKanbanColumnDropId
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";

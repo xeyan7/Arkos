@@ -1,120 +1,102 @@
 import "../index.css";
-
 import { page } from "vitest/browser";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
-
 // Windows/Linux desktop use the opaque projection, without macOS vibrancy.
 vi.mock("~/env", () => ({ isElectron: true }));
 vi.mock("~/lib/utils", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("~/lib/utils")>()),
-  isMacNavigatorPlatform: () => false,
+    ...(await importOriginal<typeof import("~/lib/utils")>()),
+    isMacNavigatorPlatform: () => false,
 }));
-
 import { ThemePackEditor } from "./ThemePackEditor";
 import { DEFAULT_THEME_STATE, getCodeThemeSeed, parseStoredThemeState } from "~/theme/theme.logic";
-
 const root = document.documentElement;
 let previousTheme: string | null;
-
 beforeEach(() => {
-  previousTheme = localStorage.getItem("arkos:theme");
+    previousTheme = localStorage.getItem("arkos:theme");
 });
-
 afterEach(() => {
-  if (previousTheme === null) localStorage.removeItem("arkos:theme");
-  else localStorage.setItem("arkos:theme", previousTheme);
-  window.dispatchEvent(new StorageEvent("storage", { key: "arkos:theme" }));
+    if (previousTheme === null)
+        localStorage.removeItem("arkos:theme");
+    else
+        localStorage.setItem("arkos:theme", previousTheme);
+    window.dispatchEvent(new StorageEvent("storage", { key: "arkos:theme" }));
 });
-
 async function selectLightPreset(label: string) {
-  await page.getByRole("combobox", { name: "Light theme code theme" }).click();
-  await page.getByRole("option", { name: label, exact: true }).click();
+    await page.getByRole("combobox", { name: "Light theme code theme" }).click();
+    await page.getByRole("option", { name: label, exact: true }).click();
 }
-
 it("preserves saved Codex on mount, applies and persists Vercel, then restores Codex", async () => {
-  const stored = JSON.stringify({
-    ...DEFAULT_THEME_STATE,
-    codeThemeIds: { dark: "codex", light: "codex" },
-    chromeThemes: {
-      dark: getCodeThemeSeed("codex", "dark"),
-      light: getCodeThemeSeed("codex", "light"),
-    },
-    mode: "light",
-  });
-  localStorage.setItem("arkos:theme", stored);
-  await render(<ThemePackEditor variant="light" />);
-  await expect.poll(() => root.getAttribute("data-code-theme-id")).toBe("codex");
-  expect(root.getAttribute("data-window-material")).toBe("opaque");
-  expect(localStorage.getItem("arkos:theme")).toBe(stored);
-
-  await selectLightPreset("Vercel");
-  await expect.poll(() => root.style.getPropertyValue("--codex-base-accent")).toBe("#006aff");
-  expect(getComputedStyle(root).getPropertyValue("--color-text-foreground").trim()).toBe("#171717");
-  expect(root.style.getPropertyValue("--codex-base-surface")).toBe("#ffffff");
-  expect(parseStoredThemeState(localStorage.getItem("arkos:theme")).codeThemeIds.light).toBe(
-    "vercel",
-  );
-  await expect
-    .element(page.getByRole("img", { name: "Light theme preview: Vercel" }))
-    .toBeVisible();
-
-  await selectLightPreset("Codex");
-  await expect.poll(() => root.style.getPropertyValue("--codex-base-accent")).toBe("#0169cc");
-  expect(root.style.getPropertyValue("--color-text-foreground")).toBe("#0d0d0d");
+    const stored = JSON.stringify({
+        ...DEFAULT_THEME_STATE,
+        codeThemeIds: { dark: "arkos", light: "arkos" },
+        chromeThemes: {
+            dark: getCodeThemeSeed("arkos", "dark"),
+            light: getCodeThemeSeed("arkos", "light"),
+        },
+        mode: "light",
+    });
+    localStorage.setItem("arkos:theme", stored);
+    await render(<ThemePackEditor variant="light"/>);
+    await expect.poll(() => root.getAttribute("data-code-theme-id")).toBe("arkos");
+    expect(root.getAttribute("data-window-material")).toBe("opaque");
+    expect(localStorage.getItem("arkos:theme")).toBe(stored);
+    await selectLightPreset("Vercel");
+    await expect.poll(() => root.style.getPropertyValue("--codex-base-accent")).toBe("#006aff");
+    expect(getComputedStyle(root).getPropertyValue("--color-text-foreground").trim()).toBe("#171717");
+    expect(root.style.getPropertyValue("--codex-base-surface")).toBe("#ffffff");
+    expect(parseStoredThemeState(localStorage.getItem("arkos:theme")).codeThemeIds.light).toBe("vercel");
+    await expect
+        .element(page.getByRole("img", { name: "Light theme preview: Vercel" }))
+        .toBeVisible();
+    await selectLightPreset("Codex");
+    await expect.poll(() => root.style.getPropertyValue("--codex-base-accent")).toBe("#0169cc");
+    expect(root.style.getPropertyValue("--color-text-foreground")).toBe("#0d0d0d");
 });
-
 it("previews an inactive light preset and applies it only when the user chooses Use light theme", async () => {
-  localStorage.setItem("arkos:theme", JSON.stringify({ ...DEFAULT_THEME_STATE, mode: "dark" }));
-  await render(<ThemePackEditor variant="light" />);
-  await selectLightPreset("Vercel");
-
-  expect(root.getAttribute("data-theme-variant")).toBe("dark");
-  expect(root.getAttribute("data-code-theme-id")).toBe("arkos");
-  const preview = page.getByRole("img", { name: "Light theme preview: Vercel" });
-  expect(getComputedStyle(preview.element()).backgroundColor).toBe("rgb(255, 255, 255)");
-  expect(getComputedStyle(preview.element()).color).toBe("rgb(23, 23, 23)");
-
-  await page.getByRole("button", { name: "Use light theme" }).click();
-  await expect.poll(() => root.getAttribute("data-theme-variant")).toBe("light");
-  expect(root.getAttribute("data-code-theme-id")).toBe("vercel");
-  const saved = parseStoredThemeState(localStorage.getItem("arkos:theme"));
-  expect(saved.mode).toBe("light");
-  expect(saved.codeThemeIds.dark).toBe("arkos");
-  expect(saved.systemUiFont).toBe(true);
+    localStorage.setItem("arkos:theme", JSON.stringify({ ...DEFAULT_THEME_STATE, mode: "dark" }));
+    await render(<ThemePackEditor variant="light"/>);
+    await selectLightPreset("Vercel");
+    expect(root.getAttribute("data-theme-variant")).toBe("dark");
+    expect(root.getAttribute("data-code-theme-id")).toBe("arkos");
+    const preview = page.getByRole("img", { name: "Light theme preview: Vercel" });
+    expect(getComputedStyle(preview.element()).backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(getComputedStyle(preview.element()).color).toBe("rgb(23, 23, 23)");
+    await page.getByRole("button", { name: "Use light theme" }).click();
+    await expect.poll(() => root.getAttribute("data-theme-variant")).toBe("light");
+    expect(root.getAttribute("data-code-theme-id")).toBe("vercel");
+    const saved = parseStoredThemeState(localStorage.getItem("arkos:theme"));
+    expect(saved.mode).toBe("light");
+    expect(saved.codeThemeIds.dark).toBe("arkos");
+    expect(saved.systemUiFont).toBe(true);
 });
-
-it.each(["dark", "light"] as const)(
-  "replaces Linear completely with Codex and an orange accent when selecting Arkos (%s)",
-  async (variant) => {
+it.each(["dark", "light"] as const)("replaces Linear completely with Codex and an orange accent when selecting Arkos (%s)", async (variant) => {
     const title = variant === "dark" ? "Dark" : "Light";
     const accent = variant === "dark" ? "#f2612d" : "#c74614";
     const otherVariant = variant === "dark" ? "light" : "dark";
     const stored = {
-      ...DEFAULT_THEME_STATE,
-      mode: variant,
-      systemUiFont: false,
-      codeThemeIds: { ...DEFAULT_THEME_STATE.codeThemeIds, [variant]: "linear" },
-      chromeThemes: {
-        ...DEFAULT_THEME_STATE.chromeThemes,
-        [variant]: {
-          ...getCodeThemeSeed("linear", variant),
-          contrast: 22,
-          fonts: { ui: "Inter", code: "Menlo" },
+        ...DEFAULT_THEME_STATE,
+        mode: variant,
+        systemUiFont: false,
+        codeThemeIds: { ...DEFAULT_THEME_STATE.codeThemeIds, [variant]: "linear" },
+        chromeThemes: {
+            ...DEFAULT_THEME_STATE.chromeThemes,
+            [variant]: {
+                ...getCodeThemeSeed("linear", variant),
+                contrast: 22,
+                fonts: { ui: "Inter", code: "Menlo" },
+            },
         },
-      },
     };
     localStorage.setItem("arkos:theme", JSON.stringify(stored));
-    await render(<ThemePackEditor variant={variant} />);
+    await render(<ThemePackEditor variant={variant}/>);
     window.dispatchEvent(new StorageEvent("storage", { key: "arkos:theme" }));
     await expect.poll(() => root.getAttribute("data-code-theme-id")).toBe("linear");
-
     await page.getByRole("combobox", { name: `${title} theme code theme` }).click();
     await page.getByRole("option", { name: "Arkos", exact: true }).click();
     await expect.poll(() => root.getAttribute("data-code-theme-id")).toBe("arkos");
-
     const saved = parseStoredThemeState(localStorage.getItem("arkos:theme"));
-    const codex = getCodeThemeSeed("codex", variant);
+    const codex = getCodeThemeSeed("arkos", variant);
     expect(saved.chromeThemes[variant]).toEqual({ ...codex, accent });
     expect(saved.chromeThemes[otherVariant]).toEqual(stored.chromeThemes[otherVariant]);
     expect(root.style.getPropertyValue("--codex-base-accent")).toBe(accent);
@@ -126,5 +108,4 @@ it.each(["dark", "light"] as const)(
     const fontFamily = getComputedStyle(preview.element()).fontFamily;
     expect(fontFamily).toContain("system-ui");
     expect(fontFamily).not.toContain("Inter");
-  },
-);
+});

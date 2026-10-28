@@ -1,48 +1,32 @@
 /** Bounded, explicitly comparable browser tasks in an already running
  * isolated package. Observation never navigates or performs the model's task. */
+/** Bounded, explicitly comparable browser tasks in an already running
+ * isolated package. Observation never navigates or performs the model's task. */
+/** Bounded, explicitly comparable browser tasks in an already running
+ * isolated package. Observation never navigates or performs the model's task. */
+/** Bounded, explicitly comparable browser tasks in an already running
+ * isolated package. Observation never navigates or performs the model's task. */
+/** Bounded, explicitly comparable browser tasks in an already running
+ * isolated package. Observation never navigates or performs the model's task. */
+/** Bounded, explicitly comparable browser tasks in an already running
+ * isolated package. Observation never navigates or performs the model's task. */
+/** Bounded, explicitly comparable browser tasks in an already running
+ * isolated package. Observation never navigates or performs the model's task. */
+/** Bounded, explicitly comparable browser tasks in an already running
+ * isolated package. Observation never navigates or performs the model's task. */
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, realpath, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import {
-  ClientOrchestrationCommand,
-  COMPUTER_WS_METHODS,
-  ModelSelection,
-  ORCHESTRATION_WS_METHODS,
-  ProjectId,
-  ThreadId,
-  WS_METHODS,
-  type ComputerAuditHistoryEntry,
-  type OrchestrationLatestTurn,
-  type ServerConfig,
-} from "@arkos/contracts";
+import { ClientOrchestrationCommand, COMPUTER_WS_METHODS, ModelSelection, ORCHESTRATION_WS_METHODS, ProjectId, ThreadId, WS_METHODS, type ComputerAuditHistoryEntry, type OrchestrationLatestTurn, type ServerConfig } from "@arkos/contracts";
 import { Schema, type Effect } from "effect";
-import {
-  startFocusProbe,
-  type FocusProbeExpect,
-} from "../../apps/desktop/src/cuaFixtures/focusProbe.ts";
+import { startFocusProbe, type FocusProbeExpect } from "../../apps/desktop/src/cuaFixtures/focusProbe.ts";
 import { artifactIdentity, PackagedAppInstallationError } from "./packaged-artifact.ts";
-import {
-  connectPackagedOwner,
-  waitForSelectedProvider,
-  type PackagedOwnerClient,
-} from "./packaged-client.ts";
+import { connectPackagedOwner, waitForSelectedProvider, type PackagedOwnerClient } from "./packaged-client.ts";
 import { assessContinuousFocus, assertPassiveComputerReady } from "./packaged-evidence.ts";
 import { delay, waitUntil } from "./packaged-fixture.ts";
-import {
-  collectComputerRun,
-  prepareComputerRunDiagnostics,
-  type DiagnosticToolCaller,
-} from "./measurement.ts";
-import {
-  assessGitHubCompletion,
-  assessNeweggCompletion,
-  assessBrowserBenchmarkRuns,
-  BROWSER_BENCHMARK_BUDGET_MS,
-  browserBenchmarkPrompt,
-  parseBrowserBenchmarkRunCount,
-  type BrowserBenchmarkTask,
-} from "./browser-benchmark-evidence.ts";
+import { collectComputerRun, prepareComputerRunDiagnostics, type DiagnosticToolCaller } from "./measurement.ts";
+import { assessGitHubCompletion, assessNeweggCompletion, assessBrowserBenchmarkRuns, BROWSER_BENCHMARK_BUDGET_MS, browserBenchmarkPrompt, parseBrowserBenchmarkRunCount, type BrowserBenchmarkTask } from "./browser-benchmark-evidence.ts";
 import { createBrowserObserver, readGitHubReference } from "./browser-benchmark-observer.ts";
 
 const { values } = parseArgs({

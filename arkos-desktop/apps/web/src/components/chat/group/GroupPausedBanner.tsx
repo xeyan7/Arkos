@@ -4,6 +4,11 @@
 // Layer: Web component
 // Exports: GroupPausedBanner
 
+// FILE: GroupPausedBanner.tsx
+// Purpose: Slim notice shown above the coordinator composer while its group is
+//          paused; offers a one-click Resume that replays queued wakes server-side.
+// Layer: Web component
+// Exports: GroupPausedBanner
 import type { ProjectId } from "@arkos/contracts";
 import { useState } from "react";
 

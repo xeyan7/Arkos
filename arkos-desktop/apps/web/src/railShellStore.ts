@@ -3,16 +3,14 @@
 //          panel column shows (Home or Spaces), and the Spaces drill-in project.
 // Layer: Web UI store (sessionStorage, modeled on spacesUiStore)
 
+// FILE: railShellStore.ts
+// Purpose: Per-window state for the rail layout: the active rail item, which panel the
+//          panel column shows (Home or Spaces), and the Spaces drill-in project.
+// Layer: Web UI store (sessionStorage, modeled on spacesUiStore)
 import type { ProjectId } from "@arkos/contracts";
 import { create } from "zustand";
 
-import {
-  RAIL_PANEL_ITEM_IDS,
-  reconcileActiveRailItem,
-  type RailItemId,
-  type RailPanelItemId,
-  type RailRouteItemId,
-} from "./appRail.logic";
+import { RAIL_PANEL_ITEM_IDS, reconcileActiveRailItem, type RailItemId, type RailPanelItemId, type RailRouteItemId } from "./appRail.logic";
 
 const STORAGE_KEY = "arkos:rail-shell:v1";
 

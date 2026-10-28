@@ -4,13 +4,7 @@ import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 import { Effect, Layer, Option, Schema, Struct } from "effect";
 
 import { toPersistenceSqlOrDecodeError } from "../Errors.ts";
-import {
-  GetByThreadAndTurnCountInput,
-  ListByThreadIdInput,
-  ProjectionCheckpoint,
-  ProjectionCheckpointRepository,
-  type ProjectionCheckpointRepositoryShape,
-} from "../Services/ProjectionCheckpoints.ts";
+import { GetByThreadAndTurnCountInput, ListByThreadIdInput, ProjectionCheckpoint, ProjectionCheckpointRepository, type ProjectionCheckpointRepositoryShape } from "../Services/ProjectionCheckpoints.ts";
 
 const ProjectionCheckpointDbRowSchema = ProjectionCheckpoint.mapFields(
   Struct.assign({

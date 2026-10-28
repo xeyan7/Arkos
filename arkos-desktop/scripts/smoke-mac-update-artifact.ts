@@ -4,17 +4,37 @@
 // Layer: Release/build script
 // Depends on: build-desktop-artifact.ts and mac-update-zip helpers.
 
+// FILE: smoke-mac-update-artifact.ts
+// Purpose: HEAD-only smoke test for macOS update artifacts without downloading the zip.
+// Layer: Release/build script
+// Depends on: build-desktop-artifact.ts and mac-update-zip helpers.
+// FILE: smoke-mac-update-artifact.ts
+// Purpose: HEAD-only smoke test for macOS update artifacts without downloading the zip.
+// Layer: Release/build script
+// Depends on: build-desktop-artifact.ts and mac-update-zip helpers.
+// FILE: smoke-mac-update-artifact.ts
+// Purpose: HEAD-only smoke test for macOS update artifacts without downloading the zip.
+// Layer: Release/build script
+// Depends on: build-desktop-artifact.ts and mac-update-zip helpers.
+// FILE: smoke-mac-update-artifact.ts
+// Purpose: HEAD-only smoke test for macOS update artifacts without downloading the zip.
+// Layer: Release/build script
+// Depends on: build-desktop-artifact.ts and mac-update-zip helpers.
+// FILE: smoke-mac-update-artifact.ts
+// Purpose: HEAD-only smoke test for macOS update artifacts without downloading the zip.
+// Layer: Release/build script
+// Depends on: build-desktop-artifact.ts and mac-update-zip helpers.
+// FILE: smoke-mac-update-artifact.ts
+// Purpose: HEAD-only smoke test for macOS update artifacts without downloading the zip.
+// Layer: Release/build script
+// Depends on: build-desktop-artifact.ts and mac-update-zip helpers.
+// FILE: smoke-mac-update-artifact.ts
+// Purpose: HEAD-only smoke test for macOS update artifacts without downloading the zip.
+// Layer: Release/build script
+// Depends on: build-desktop-artifact.ts and mac-update-zip helpers.
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import {
-  createReadStream,
-  existsSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-} from "node:fs";
+import { createReadStream, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import type { Server } from "node:http";
 import { tmpdir } from "node:os";
@@ -23,10 +43,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 import desktopPackageJson from "../apps/desktop/package.json" with { type: "json" };
-import {
-  assertMacUpdateManifestZipMetadata,
-  resolveSingleMacUpdateZipFileName,
-} from "./lib/mac-update-zip.ts";
+import { assertMacUpdateManifestZipMetadata, resolveSingleMacUpdateZipFileName } from "./lib/mac-update-zip.ts";
 
 interface SmokeResult {
   readonly artifactDir: string;

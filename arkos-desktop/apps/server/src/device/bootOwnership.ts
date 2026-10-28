@@ -18,6 +18,26 @@
  *
  * @module device/bootOwnership
  */
+/**
+ * Which simulators Arkos booted, remembered across process death.
+ *
+ * `DeviceManager` tracks this in memory, which is enough for a clean quit: the
+ * finalizer walks the set and shuts each one down. A crash or a SIGKILL runs no
+ * finalizer, so the set dies with the process and the simulators outlive it.
+ * That was not merely untidy — the orphan reappeared as `bootSource: "user"`,
+ * which meant nothing would ever reclaim it: it fell outside the boot cap, the
+ * idle sweep, and the next quit's shutdown, all of which are gated on Arkos
+ * having booted the device. Each crash leaked one simulator, permanently.
+ *
+ * The record is a plain JSON file rather than a row in the database because it
+ * has to be readable and writable before most of the server exists, and because
+ * a corrupt or missing file must degrade to "own nothing" rather than fail a
+ * boot. Recovery is deliberately conservative: a device is only reclaimed when
+ * it is still booted AND still listed as ours, so a udid the user has since
+ * booted themselves is never shut down out from under them.
+ *
+ * @module device/bootOwnership
+ */
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 

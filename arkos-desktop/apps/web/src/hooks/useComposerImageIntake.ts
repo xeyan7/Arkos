@@ -2,14 +2,14 @@
 // Purpose: Serializes image preparation, exposes pending UI state, and cancels stale draft work.
 // Layer: Web composer hook
 
+// FILE: useComposerImageIntake.ts
+// Purpose: Serializes image preparation, exposes pending UI state, and cancels stale draft work.
+// Layer: Web composer hook
 import { PROVIDER_SEND_TURN_MAX_ATTACHMENTS, type ThreadId } from "@arkos/contracts";
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 
 import type { ComposerImageAttachment } from "../composerDraftStore";
-import {
-  prepareComposerImageAttachmentsFromFiles,
-  type ComposerImageBuildResult,
-} from "../lib/composerSend";
+import { prepareComposerImageAttachmentsFromFiles, type ComposerImageBuildResult } from "../lib/composerSend";
 
 const ATTACHMENT_LIMIT_ERROR = `You can attach up to ${PROVIDER_SEND_TURN_MAX_ATTACHMENTS} references per message.`;
 

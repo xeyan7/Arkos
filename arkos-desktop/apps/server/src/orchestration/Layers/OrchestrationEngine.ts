@@ -1,95 +1,33 @@
-import type {
-  ChatAttachment,
-  OrchestrationEvent,
-  OrchestrationReadModel,
-  ProjectId,
-  SpaceId,
-  ThreadId,
-} from "@arkos/contracts";
+import type { ChatAttachment, OrchestrationEvent, OrchestrationReadModel, ProjectId, SpaceId, ThreadId } from "@arkos/contracts";
 import { OrchestrationCommand, ORCHESTRATION_WS_METHODS } from "@arkos/contracts";
 import { makeKeyedDrainableWorker } from "@arkos/shared/KeyedDrainableWorker";
 import { SIDECHAT_INACTIVITY_EXPIRY_MS, sidechatExpiryMs } from "@arkos/shared/sidechatExpiry";
-import {
-  Cause,
-  Deferred,
-  Effect,
-  Exit,
-  Layer,
-  Option,
-  PubSub,
-  Ref,
-  Schema,
-  Semaphore,
-  Scope,
-  Stream,
-} from "effect";
+import { Cause, Deferred, Effect, Exit, Layer, Option, PubSub, Ref, Schema, Semaphore, Scope, Stream } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
 import { ServerConfig } from "../../config.ts";
 import { ServerSettingsService } from "../../serverSettings.ts";
-import {
-  toPersistenceSqlError,
-  type OrchestrationEventStoreError,
-  type PersistenceSqlError,
-} from "../../persistence/Errors.ts";
+import { toPersistenceSqlError, type OrchestrationEventStoreError, type PersistenceSqlError } from "../../persistence/Errors.ts";
 import { OrchestrationEventStore } from "../../persistence/Services/OrchestrationEventStore.ts";
-import {
-  OrchestrationCommandReceiptRepository,
-  type OrchestrationCommandReceipt,
-} from "../../persistence/Services/OrchestrationCommandReceipts.ts";
+import { OrchestrationCommandReceiptRepository, type OrchestrationCommandReceipt } from "../../persistence/Services/OrchestrationCommandReceipts.ts";
 import { ManagedAttachmentRepository } from "../../persistence/Services/ManagedAttachments.ts";
 import { ManagedAttachmentRepositoryLive } from "../../persistence/Layers/ManagedAttachments.ts";
 import { ProjectionThreadMessageRepository } from "../../persistence/Services/ProjectionThreadMessages.ts";
 import { ProjectionThreadMessageRepositoryLive } from "../../persistence/Layers/ProjectionThreadMessages.ts";
 import { orchestrationMessageFromStoredMessage } from "../../persistence/projectionThreadMessageRow.ts";
-import {
-  LOCAL_LOOPBACK_ATTACHMENT_PRINCIPAL,
-  type ManagedAttachmentPrincipal,
-} from "../../managedAttachmentPrincipal.ts";
-import {
-  OrchestrationCommandAdmissionError,
-  OrchestrationCommandIdentityCollisionError,
-  OrchestrationCommandInvariantError,
-  OrchestrationCommandInternalError,
-  OrchestrationCommandPreviouslyRejectedError,
-  OrchestrationCommandTimeoutError,
-  type OrchestrationDispatchError,
-} from "../Errors.ts";
-import {
-  fingerprintOrchestrationCommand,
-  type OrchestrationCommandFingerprint,
-} from "../commandFingerprint.ts";
-import {
-  ORCHESTRATION_COMMAND_CONTROL_RESERVE,
-  ORCHESTRATION_COMMAND_QUEUE_CAPACITY,
-  ORCHESTRATION_EVENT_PUBSUB_CAPACITY,
-  type OrchestrationCommandAdmissionDecision,
-  orchestrationCommandLane,
-  isQuiescingCommandAdmissible,
-} from "../orchestrationAdmission.ts";
+import { LOCAL_LOOPBACK_ATTACHMENT_PRINCIPAL, type ManagedAttachmentPrincipal } from "../../managedAttachmentPrincipal.ts";
+import { OrchestrationCommandAdmissionError, OrchestrationCommandIdentityCollisionError, OrchestrationCommandInvariantError, OrchestrationCommandInternalError, OrchestrationCommandPreviouslyRejectedError, OrchestrationCommandTimeoutError, type OrchestrationDispatchError } from "../Errors.ts";
+import { fingerprintOrchestrationCommand, type OrchestrationCommandFingerprint } from "../commandFingerprint.ts";
+import { ORCHESTRATION_COMMAND_CONTROL_RESERVE, ORCHESTRATION_COMMAND_QUEUE_CAPACITY, ORCHESTRATION_EVENT_PUBSUB_CAPACITY, type OrchestrationCommandAdmissionDecision, orchestrationCommandLane, isQuiescingCommandAdmissible } from "../orchestrationAdmission.ts";
 import { decideOrchestrationCommand } from "../decider.ts";
-import {
-  discardMaterializedThreadGoalFile,
-  isOversizedThreadGoal,
-  materializeThreadGoalFile,
-  pruneThreadGoalFiles,
-  readMaterializedThreadGoalText,
-  threadGoalFileNameFromReference,
-  threadGoalFileReference,
-} from "../threadGoalMaterialization.ts";
+import { discardMaterializedThreadGoalFile, isOversizedThreadGoal, materializeThreadGoalFile, pruneThreadGoalFiles, readMaterializedThreadGoalText, threadGoalFileNameFromReference, threadGoalFileReference } from "../threadGoalMaterialization.ts";
 import { PROJECT_METADATA_SNAPSHOT_PROJECTORS } from "../projectMetadataProjection.ts";
 import { createEmptyReadModel, projectEvent } from "../projector.ts";
-import {
-  OrchestrationProjectionPipeline,
-  type ShellMetadataOrchestrationEvent,
-} from "../Services/ProjectionPipeline.ts";
+import { OrchestrationProjectionPipeline, type ShellMetadataOrchestrationEvent } from "../Services/ProjectionPipeline.ts";
 import { ORCHESTRATION_PROJECTOR_NAMES } from "./ProjectionPipeline.ts";
 import { ProjectionSnapshotQuery } from "../Services/ProjectionSnapshotQuery.ts";
 import { REQUIRED_SNAPSHOT_PROJECTORS } from "./ProjectionSnapshotQuery.ts";
-import {
-  OrchestrationEngineService,
-  type OrchestrationEngineShape,
-} from "../Services/OrchestrationEngine.ts";
+import { OrchestrationEngineService, type OrchestrationEngineShape } from "../Services/OrchestrationEngine.ts";
 
 const ORCHESTRATION_DISPATCH_TIMEOUT_MS = 45_000;
 const ORCHESTRATION_COMMAND_CONCURRENCY = 4;
@@ -1717,6 +1655,9 @@ const makeOrchestrationEngine = Effect.gen(function* () {
 
   const dispatch: OrchestrationEngineShape["dispatch"] = (command, context) =>
     Effect.gen(function* () {
+      if (new Set<string>(["thread.turn.start","thread.turn.dispatch-queued","thread.message.edit-and-resend","thread.goal.continue","thread.approval.respond","thread.user-input.respond","thread.task.background","thread.claude-cache.respond"]).has(command.type)) {
+       return yield* new OrchestrationCommandInvariantError({commandType:command.type,detail:"No agent runtime is connected."});
+      }
       const result = yield* Deferred.make<{ sequence: number }, OrchestrationDispatchError>();
       const executionState = yield* Ref.make<CommandExecutionState>("queued");
       const envelope: CommandEnvelope = {

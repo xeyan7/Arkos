@@ -2,12 +2,7 @@ import { Effect, Layer } from "effect";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 
 import { toPersistenceSqlError } from "../../persistence/Errors.ts";
-import {
-  ThreadDiagnosticsQuery,
-  type DiagnosticThreadActivity,
-  type OperationalDiagnostic,
-  type ThreadDiagnosticsQueryShape,
-} from "../Services/ThreadDiagnosticsQuery.ts";
+import { ThreadDiagnosticsQuery, type DiagnosticThreadActivity, type OperationalDiagnostic, type ThreadDiagnosticsQueryShape } from "../Services/ThreadDiagnosticsQuery.ts";
 
 const OPERATIONAL_DIAGNOSTIC_CAP = 10_000;
 const OPERATIONAL_DIAGNOSTIC_RETENTION_PRUNE_INTERVAL = 50;

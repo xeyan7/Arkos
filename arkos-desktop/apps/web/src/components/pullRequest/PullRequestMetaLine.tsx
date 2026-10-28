@@ -8,6 +8,15 @@
 // Layer: Pull request presentation
 // Exports: PullRequestMetaLine
 
+// FILE: PullRequestMetaLine.tsx
+// Purpose: The dot-separated metadata line every pull request surface writes — author · time ·
+//          state under the detail title, repository · branch under a list row's title, files ·
+//          counts above a diff. It owns the separator so the glyph, the spacing, and the fact
+//          that it is punctuation rather than content (hence aria-hidden) cannot drift per
+//          surface, and it draws separators between the segments that survive, so a
+//          conditional segment can be `null` without leaving a stray dot behind.
+// Layer: Pull request presentation
+// Exports: PullRequestMetaLine
 import { Children, isValidElement, type ReactNode } from "react";
 
 import { cn } from "~/lib/utils";

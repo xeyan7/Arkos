@@ -83,7 +83,7 @@ describe("buildHandoffBootstrapText", () => {
       ...thread([boundaryMessage, ...recentMessages]),
       handoff: {
         sourceThreadId: ThreadId.makeUnsafe("source-thread"),
-        sourceProvider: "claudeAgent",
+        sourceProvider: "arkos",
         importedAt: "2026-07-08T00:00:00.000Z",
         bootstrapStatus: "pending",
       },

@@ -2,14 +2,7 @@ import type { ProjectId } from "@arkos/contracts";
 import type { AgentGatewayOperationRepositoryShape } from "./Services/AgentGatewayOperationRepository";
 import type { ProjectionThreadMessageRepositoryShape } from "../persistence/Services/ProjectionThreadMessages";
 import type { ProjectionTurnRepositoryShape } from "../persistence/Services/ProjectionTurns";
-import {
-  HubWorkProgress,
-  ThreadId,
-  TurnId,
-  hubWorkItem,
-  type HubWorkRecord,
-  type ArkosCreateThreadsInput,
-} from "@arkos/contracts";
+import { HubWorkProgress, ThreadId, TurnId, hubWorkItem, type HubWorkRecord, type ArkosCreateThreadsInput } from "@arkos/contracts";
 import { Effect, Option, Schema } from "effect";
 
 import type { OrchestrationCommandReceiptRepositoryShape } from "../persistence/Services/OrchestrationCommandReceipts";
@@ -30,13 +23,7 @@ import { cloneDelegatedAttachments } from "./delegatedAttachments";
 import { renderHubWorkPrompt, resolveHubWorkSource } from "./hubWorkSource";
 import { mcpToolResultError, mcpToolResultJson } from "./protocol";
 import { errorText, readStringArg, ToolInputError } from "./toolInput";
-import {
-  GatewayToolError,
-  READ_ONLY_TOOL_ANNOTATIONS,
-  WRITE_TOOL_ANNOTATIONS,
-  type ToolContext,
-  type ToolEntry,
-} from "./toolRuntime";
+import { GatewayToolError, READ_ONLY_TOOL_ANNOTATIONS, WRITE_TOOL_ANNOTATIONS, type ToolContext, type ToolEntry } from "./toolRuntime";
 
 type CreateThreads = Effect.Success<ReturnType<typeof makeCreateThreadsHandler>>;
 

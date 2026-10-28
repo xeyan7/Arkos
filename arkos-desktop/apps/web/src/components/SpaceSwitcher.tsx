@@ -1,47 +1,24 @@
 // FILE: SpaceSwitcher.tsx
 // Purpose: Arc-style horizontal Space tabs with reordering and tab management.
 
+// FILE: SpaceSwitcher.tsx
+// Purpose: Arc-style horizontal Space tabs with reordering and tab management.
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  horizontalListSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
+import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { SPACE_NAME_MAX_LENGTH, type ProjectId, type SpaceId } from "@arkos/contracts";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type DragEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent, type KeyboardEvent, type MouseEvent } from "react";
 
 import type { Space } from "~/types";
 import { createClientPointMenuAnchor } from "~/lib/clientPointMenuAnchor";
-import {
-  DEFAULT_VOID_SPACE,
-  resolveActiveSpaceId,
-  spaceDisplayName,
-  spaceKey,
-  type VoidSpacePresentation,
-} from "~/lib/spaceGrouping";
+import { DEFAULT_VOID_SPACE, resolveActiveSpaceId, spaceDisplayName, spaceKey, type VoidSpacePresentation } from "~/lib/spaceGrouping";
 import { cn } from "~/lib/utils";
 import { PencilIcon, PlusIcon, ResetIcon, Trash2 } from "~/lib/icons";
 import { SIDEBAR_SECTION_LABEL_CLASS_NAME } from "~/sidebarRowStyles";
 import { SpaceIcon, type SpaceIconValue } from "./SpaceIcon";
 import { ComposerPickerMenuPopup } from "./chat/ComposerPickerMenuPopup";
-import {
-  SIDEBAR_CONTEXT_MENU_ITEM_CLASS_NAME,
-  SIDEBAR_CONTEXT_MENU_PANEL_CLASS_NAME,
-  SidebarContextMenuIcon,
-} from "./sidebarContextMenuStyles";
+import { SIDEBAR_CONTEXT_MENU_ITEM_CLASS_NAME, SIDEBAR_CONTEXT_MENU_PANEL_CLASS_NAME, SidebarContextMenuIcon } from "./sidebarContextMenuStyles";
 import { Menu, MenuGroup, MenuItem } from "./ui/menu";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 

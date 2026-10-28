@@ -8,6 +8,16 @@
  *
  * @module device/Layers/DeviceService
  */
+/**
+ * DeviceServiceLive - one DeviceManager for the server process.
+ *
+ * The manager exists on every platform so no caller has to branch on `null`;
+ * off darwin its backend reports `unsupported-platform` and every device call
+ * fails cleanly through the same path a missing Xcode would take. `supported`
+ * is what callers use to decide whether to expose the surface at all.
+ *
+ * @module device/Layers/DeviceService
+ */
 import { Effect, Layer } from "effect";
 import { homedir } from "node:os";
 import * as path from "node:path";

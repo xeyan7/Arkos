@@ -5,16 +5,16 @@
 // Layer: Chat composer logic
 // Exports: deriveComposerSubagentStripItems and the strip row types
 
+// FILE: ComposerSubagentStrip.logic.ts
+// Purpose: Derives the subagent rows shown in the composer strip from enriched work
+// log entries, mirroring the active-task-list scoping (live turn wins; a prior set
+// stays visible only while some subagent is still working).
+// Layer: Chat composer logic
+// Exports: deriveComposerSubagentStripItems and the strip row types
 import { ThreadId, type TurnId } from "@arkos/contracts";
 
 import type { WorkLogEntry, WorkLogSubagent } from "../../session-logic";
-import {
-  formatSubagentModelLabel,
-  humanizeSubagentStatus,
-  normalizeSubagentStatusKind,
-  resolveSubagentPresentation,
-  type SubagentStatusKind,
-} from "../../lib/subagentPresentation";
+import { formatSubagentModelLabel, humanizeSubagentStatus, normalizeSubagentStatusKind, resolveSubagentPresentation, type SubagentStatusKind } from "../../lib/subagentPresentation";
 
 export interface ComposerSubagentStripItem {
   kind: "subagent";

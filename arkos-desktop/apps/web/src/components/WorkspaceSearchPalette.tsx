@@ -12,6 +12,19 @@
 // Result rows are memoized and receive only stable props, so a keystroke
 // re-render bails out at the row boundary.
 
+// FILE: WorkspaceSearchPalette.tsx
+// Purpose: Minimal command-style palette for searching the current project's
+//          files/directories by name and its contents (grep-style snippets).
+//          Deliberately compact: a bare 44px input row, 28px result rows, scalable
+//          UI type, and a single 14px column inset shared by input, label, icons.
+// Layer: Web UI components
+//
+// Structure: the exported component is a thin dialog shell; all query state
+// lives in the inner content component mounted INSIDE the popup, so Base UI
+// unmounting it after the 200ms exit transition resets state for free (no
+// reset-on-close effect, no row teardown while the popup is fading out).
+// Result rows are memoized and receive only stable props, so a keystroke
+// re-render bails out at the row boundary.
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebouncedValue } from "@tanstack/react-pacer";
@@ -20,28 +33,12 @@ import type { ProjectContentMatch, ProjectEntry } from "@arkos/contracts";
 import { PROJECT_SEARCH_CONTENT_MIN_QUERY_LENGTH } from "@arkos/contracts";
 import { normalizeWorkspaceEntrySearchQuery } from "@arkos/shared/searchQuery";
 
-import {
-  prewarmProjectSearchIndex,
-  projectSearchContentQueryOptions,
-  projectSearchEntriesQueryOptions,
-} from "~/lib/projectReactQuery";
+import { prewarmProjectSearchIndex, projectSearchContentQueryOptions, projectSearchEntriesQueryOptions } from "~/lib/projectReactQuery";
 import { buildMatchSegments } from "~/lib/matchHighlight";
 import { cn } from "~/lib/utils";
-import {
-  Command,
-  CommandDialog,
-  CommandDialogPopup,
-  CommandGroup,
-  CommandGroupLabel,
-  CommandItem,
-  CommandList,
-  CommandStatus,
-} from "./ui/command";
+import { Command, CommandDialog, CommandDialogPopup, CommandGroup, CommandGroupLabel, CommandItem, CommandList, CommandStatus } from "./ui/command";
 import { FileEntryIcon } from "./chat/FileEntryIcon";
-import {
-  isWorkspaceSearchFilesystemPathQuery,
-  resolveWorkspaceSearchFilesystemTarget,
-} from "./WorkspaceSearchPalette.logic";
+import { isWorkspaceSearchFilesystemPathQuery, resolveWorkspaceSearchFilesystemTarget } from "./WorkspaceSearchPalette.logic";
 
 export type WorkspaceSearchPaletteMode = "files" | "snippets";
 

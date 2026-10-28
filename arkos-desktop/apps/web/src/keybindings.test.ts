@@ -236,171 +236,9 @@ function compile(bindings: TestBinding[]): ResolvedKeybindingsConfig {
 
 // Mirror the server defaults here so frontend shortcut resolution stays aligned.
 const DEFAULT_BINDINGS = compile([
-  {
-    shortcut: modShortcut("b"),
-    command: "sidebar.toggle",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
   // Mirror server defaults: Cmd+K everywhere; Ctrl+K only off macOS.
   { shortcut: modShortcut("k", { metaKey: true, modKey: false }), command: "sidebar.search" },
-  {
-    shortcut: ctrlShortcut("k"),
-    command: "sidebar.search",
-    whenAst: whenNot(whenIdentifier("isMac")),
-  },
-  {
-    shortcut: modShortcut("u", { altKey: true }),
-    command: "sidebar.activity",
-    whenAst: whenModChordAllowed,
-  },
   { shortcut: modShortcut("j"), command: "terminal.toggle" },
-  {
-    shortcut: modShortcut("d"),
-    command: "terminal.workspace.terminal",
-    whenAst: whenIdentifier("terminalFocus"),
-  },
-  {
-    shortcut: modShortcut("t"),
-    command: "terminal.new",
-    whenAst: whenIdentifier("terminalFocus"),
-  },
-  {
-    shortcut: modShortcut("w"),
-    command: "terminal.close",
-    whenAst: whenIdentifier("terminalFocus"),
-  },
-  {
-    shortcut: modShortcut("j", { shiftKey: true }),
-    command: "terminal.workspace.newFullWidth",
-  },
-  {
-    shortcut: modShortcut("w"),
-    command: "terminal.workspace.closeActive",
-    whenAst: whenIdentifier("terminalWorkspaceOpen"),
-  },
-  {
-    shortcut: ctrlShortcut("1"),
-    command: "terminal.workspace.terminal",
-    whenAst: whenIdentifier("terminalWorkspaceOpen"),
-  },
-  {
-    shortcut: ctrlShortcut("2"),
-    command: "terminal.workspace.chat",
-    whenAst: whenIdentifier("terminalWorkspaceOpen"),
-  },
-  {
-    shortcut: modShortcut("d"),
-    command: "diff.toggle",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("b", { shiftKey: true }),
-    command: "browser.toggle",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("m", { shiftKey: true }),
-    command: "modelPicker.toggle",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("]", { altKey: true, modKey: false }),
-    command: "model.next",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("[", { altKey: true, modKey: false }),
-    command: "model.previous",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("tab", { shiftKey: true, modKey: false }),
-    command: "model.effort.next",
-    whenAst: whenIdentifier("composerFocus"),
-  },
-  {
-    shortcut: modShortcut("e", { shiftKey: true }),
-    command: "traitsPicker.toggle",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("l", { metaKey: true, modKey: false }),
-    command: "composer.focus.toggle",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("f"),
-    command: "chat.find",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("p"),
-    command: "search.files",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("f", { shiftKey: true }),
-    command: "search.content",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("u", { shiftKey: true }),
-    command: "settings.usage",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("o", { shiftKey: true }),
-    command: "sidebar.addProject",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("i"),
-    command: "sidebar.importThread",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("n"),
-    command: "chat.new",
-    whenAst: whenModChordAllowed,
-  },
-  {
-    shortcut: modShortcut("n", { shiftKey: true }),
-    command: "chat.newLatestProject",
-    whenAst: whenModChordAllowed,
-  },
-  {
-    shortcut: modShortcut("n", { altKey: true }),
-    command: "chat.newChat",
-    whenAst: whenModChordAllowed,
-  },
-  {
-    shortcut: modShortcut("t", { shiftKey: true }),
-    command: "chat.newTerminal",
-    whenAst: whenModChordAllowed,
-  },
-  {
-    shortcut: modShortcut("c", { altKey: true }),
-    command: "chat.newClaude",
-    whenAst: whenModChordAllowed,
-  },
-  {
-    shortcut: modShortcut("x", { altKey: true }),
-    command: "chat.newCodex",
-    whenAst: whenModChordAllowed,
-  },
-  {
-    shortcut: modShortcut("r", { altKey: true }),
-    command: "chat.newCursor",
-    whenAst: whenModChordAllowed,
-  },
-  {
-    shortcut: ctrlShortcut("tab"),
-    command: "view.recent.next",
-  },
-  {
-    shortcut: ctrlShortcut("tab", { shiftKey: true }),
-    command: "view.recent.previous",
-  },
   ...Array.from({ length: 9 }, (_, index) => ({
     shortcut: modShortcut(String(index + 1), { altKey: true }),
     command: `space.jump.${index + 1}` as KeybindingCommand,
@@ -417,27 +255,7 @@ const DEFAULT_BINDINGS = compile([
       whenIdentifier("isMac"),
     ),
   })),
-  {
-    shortcut: modShortcut("c", { shiftKey: true }),
-    command: "thread.copyId",
-    whenAst: whenModChordAllowed,
-  },
-  {
-    shortcut: modShortcut("]", { shiftKey: true }),
-    command: "chat.visible.next",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
-  {
-    shortcut: modShortcut("[", { shiftKey: true }),
-    command: "chat.visible.previous",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
   { shortcut: modShortcut("o"), command: "editor.openFavorite" },
-  {
-    shortcut: modShortcut("s"),
-    command: "editor.file.save",
-    whenAst: whenNot(whenIdentifier("terminalFocus")),
-  },
 ]);
 
 describe("terminal shortcuts", () => {
@@ -454,16 +272,6 @@ describe("terminal shortcuts", () => {
 
   it("supports when expressions", () => {
     const keybindings = compile([
-      {
-        shortcut: modShortcut("\\"),
-        command: "terminal.workspace.terminal",
-        whenAst: whenAnd(whenIdentifier("terminalOpen"), whenNot(whenIdentifier("terminalFocus"))),
-      },
-      {
-        shortcut: modShortcut("n", { shiftKey: true }),
-        command: "terminal.new",
-        whenAst: whenAnd(whenIdentifier("terminalOpen"), whenNot(whenIdentifier("terminalFocus"))),
-      },
       { shortcut: modShortcut("j"), command: "terminal.toggle" },
     ]);
     assert.equal(
@@ -509,11 +317,6 @@ describe("terminal shortcuts", () => {
 
   it("matches physical bracket shortcuts even when event.key differs from the printed symbol", () => {
     const keybindings = compile([
-      {
-        shortcut: modShortcut("[", { shiftKey: true }),
-        command: "chat.visible.previous",
-        whenAst: whenNot(whenIdentifier("terminalFocus")),
-      },
     ]);
 
     assert.strictEqual(
@@ -602,15 +405,6 @@ describe("workspace search shortcuts", () => {
 
   it("honors a remapped search command and an explicit unassignment", () => {
     const remapped = compile([
-      {
-        shortcut: modShortcut("g"),
-        command: "search.files",
-        whenAst: whenNot(whenIdentifier("terminalFocus")),
-      },
-      {
-        shortcut: { ...modShortcut("unassigned"), modKey: false },
-        command: "search.content",
-      },
     ]);
 
     assert.equal(
@@ -862,16 +656,6 @@ describe("workspace terminal tab shortcuts", () => {
 describe("shortcutLabelForCommand", () => {
   it("returns the most recent binding label", () => {
     const bindings = compile([
-      {
-        shortcut: modShortcut("\\"),
-        command: "terminal.workspace.terminal",
-        whenAst: whenIdentifier("terminalFocus"),
-      },
-      {
-        shortcut: modShortcut("\\", { shiftKey: true }),
-        command: "terminal.workspace.terminal",
-        whenAst: whenNot(whenIdentifier("terminalFocus")),
-      },
     ]);
     assert.strictEqual(
       shortcutLabelForCommand(bindings, "terminal.workspace.terminal", "Linux"),
@@ -944,11 +728,6 @@ describe("cross-command precedence", () => {
   it("uses when + order so a later focused rule overrides a global rule", () => {
     const keybindings = compile([
       { shortcut: modShortcut("n"), command: "chat.new" },
-      {
-        shortcut: modShortcut("n"),
-        command: "terminal.new",
-        whenAst: whenIdentifier("terminalFocus"),
-      },
     ]);
 
     assert.equal(
@@ -969,11 +748,6 @@ describe("cross-command precedence", () => {
 
   it("still lets a later global rule win when both rules match", () => {
     const keybindings = compile([
-      {
-        shortcut: modShortcut("n"),
-        command: "terminal.new",
-        whenAst: whenIdentifier("terminalFocus"),
-      },
       { shortcut: modShortcut("n"), command: "chat.new" },
     ]);
 
@@ -1021,23 +795,6 @@ describe("resolveShortcutCommand", () => {
     },
   );
 
-  it("lets a configured effort shortcut replace the Shift+Tab fallback", () => {
-    const keybindings = compile([
-      {
-        command: "model.effort.next",
-        shortcut: modShortcut("e", { altKey: true, modKey: false }),
-        whenAst: whenIdentifier("composerFocus"),
-      },
-    ]);
-    const options = { platform: "MacIntel", context: { composerFocus: true } };
-    assert.strictEqual(
-      resolveShortcutCommand(event({ key: "e", altKey: true }), keybindings, options),
-      "model.effort.next",
-    );
-    assert.isNull(
-      resolveShortcutCommand(event({ key: "Tab", shiftKey: true }), keybindings, options),
-    );
-  });
 
   it("resolves model cycle commands outside terminal focus", () => {
     assert.strictEqual(

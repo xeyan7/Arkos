@@ -3,16 +3,7 @@ import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 
 import { toPersistenceSqlOrDecodeError } from "../Errors";
-import {
-  AuthPairingLinkRecord,
-  AuthPairingLinkRepository,
-  type AuthPairingLinkRepositoryShape,
-  ConsumeAuthPairingLinkInput,
-  CreateAuthPairingLinkInput,
-  GetAuthPairingLinkByCredentialInput,
-  ListActiveAuthPairingLinksInput,
-  RevokeAuthPairingLinkInput,
-} from "../Services/AuthPairingLinks";
+import { AuthPairingLinkRecord, AuthPairingLinkRepository, type AuthPairingLinkRepositoryShape, ConsumeAuthPairingLinkInput, CreateAuthPairingLinkInput, GetAuthPairingLinkByCredentialInput, ListActiveAuthPairingLinksInput, RevokeAuthPairingLinkInput } from "../Services/AuthPairingLinks";
 
 function toIsoDateTime(value: unknown): string {
   if (typeof value === "string") return value;

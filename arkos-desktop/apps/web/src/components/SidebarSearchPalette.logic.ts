@@ -2,6 +2,10 @@
 // Scoring stays local and deterministic so the palette can rank title hits above
 // message-content hits while still surfacing a useful snippet for chat matches.
 // Server message hits cover threads whose messages this client has not loaded.
+// Purpose: Scores sidebar palette results for actions, themes, projects, and chat threads.
+// Scoring stays local and deterministic so the palette can rank title hits above
+// message-content hits while still surfacing a useful snippet for chat matches.
+// Server message hits cover threads whose messages this client has not loaded.
 import type { ComponentType } from "react";
 
 import type { ProviderKind } from "@arkos/contracts";

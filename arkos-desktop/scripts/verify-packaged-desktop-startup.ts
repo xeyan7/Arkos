@@ -3,19 +3,29 @@
 // Purpose: Launches a packaged desktop payload from an isolated temporary tree before upload.
 // Layer: Release verification script
 
+// FILE: verify-packaged-desktop-startup.ts
+// Purpose: Launches a packaged desktop payload from an isolated temporary tree before upload.
+// Layer: Release verification script
+// FILE: verify-packaged-desktop-startup.ts
+// Purpose: Launches a packaged desktop payload from an isolated temporary tree before upload.
+// Layer: Release verification script
+// FILE: verify-packaged-desktop-startup.ts
+// Purpose: Launches a packaged desktop payload from an isolated temporary tree before upload.
+// Layer: Release verification script
+// FILE: verify-packaged-desktop-startup.ts
+// Purpose: Launches a packaged desktop payload from an isolated temporary tree before upload.
+// Layer: Release verification script
+// FILE: verify-packaged-desktop-startup.ts
+// Purpose: Launches a packaged desktop payload from an isolated temporary tree before upload.
+// Layer: Release verification script
+// FILE: verify-packaged-desktop-startup.ts
+// Purpose: Launches a packaged desktop payload from an isolated temporary tree before upload.
+// Layer: Release verification script
+// FILE: verify-packaged-desktop-startup.ts
+// Purpose: Launches a packaged desktop payload from an isolated temporary tree before upload.
+// Layer: Release verification script
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import {
-  chmodSync,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

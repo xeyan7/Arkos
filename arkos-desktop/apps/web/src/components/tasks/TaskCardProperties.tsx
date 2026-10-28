@@ -5,6 +5,12 @@
 // Layer: Tasks UI component
 // Exports: TaskCardProperties
 
+// FILE: TaskCardProperties.tsx
+// Purpose: The task card's row of property pills — due day, project, priority — each one
+//          opening the same picker the rest of Tasks uses. A property that is set shows its
+//          value; an unset one is just its icon, so an empty to-do stays quiet.
+// Layer: Tasks UI component
+// Exports: TaskCardProperties
 import type { ProjectId, Todo, TodoUpdateInput } from "@arkos/contracts";
 
 import { CalendarIcon, FolderIcon } from "~/lib/icons";

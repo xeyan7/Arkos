@@ -3,20 +3,15 @@
 // Layer: Web settings UI
 // Exports: ThemePackEditor
 
+// FILE: ThemePackEditor.tsx
+// Purpose: Per-variant theme card matching the Codex appearance settings layout.
+// Layer: Web settings UI
+// Exports: ThemePackEditor
 import { DESKTOP_WINDOW_BLUR_RADIUS_MAX, DESKTOP_WINDOW_BLUR_RADIUS_MIN } from "@arkos/contracts";
 import { type CSSProperties, useEffect, useId, useMemo, useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
+import { Dialog, DialogClose, DialogFooter, DialogHeader, DialogPanel, DialogPopup, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Popover, PopoverPopup, PopoverTrigger } from "./ui/popover";
 import { Select, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -29,22 +24,9 @@ import { SettingsCard, SettingsSelectPopup } from "./settings/SettingsPanelPrimi
 import { copyTextToClipboard } from "../hooks/useCopyToClipboard";
 import { type ChromeTheme, type ThemeMode, type ThemeVariant, useTheme } from "../hooks/useTheme";
 import { cn } from "../lib/utils";
-import {
-  SETTINGS_CARD_ROW_CLASS_NAME,
-  SETTINGS_CONTROL_RADIUS_CLASS_NAME,
-  SETTINGS_STACKED_ROWS_DIVIDER_CLASS_NAME,
-} from "../settingsPanelStyles";
+import { SETTINGS_CARD_ROW_CLASS_NAME, SETTINGS_CONTROL_RADIUS_CLASS_NAME, SETTINGS_STACKED_ROWS_DIVIDER_CLASS_NAME } from "../settingsPanelStyles";
 import { ELEVATED_HOVER_SURFACE_RAISED_TEXT_CLASS_NAME } from "../surfaceStyles";
-import {
-  CODE_THEME_OPTIONS,
-  DEFAULT_THEME_STATE,
-  VIBRANCY_EQUIVALENT_BLUR_RADIUS,
-  WINDOW_TRANSLUCENCY_OPACITY_MIN,
-  buildThemeCssVariables,
-  getAvailableCodeThemes,
-  getCodeThemeSeed,
-  resolveThemePack,
-} from "../theme/theme.logic";
+import { CODE_THEME_OPTIONS, DEFAULT_THEME_STATE, VIBRANCY_EQUIVALENT_BLUR_RADIUS, WINDOW_TRANSLUCENCY_OPACITY_MIN, buildThemeCssVariables, getAvailableCodeThemes, getCodeThemeSeed, resolveThemePack } from "../theme/theme.logic";
 
 type ThemePackEditorProps = {
   isActive?: boolean;

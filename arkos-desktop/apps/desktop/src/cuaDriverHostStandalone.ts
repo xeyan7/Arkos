@@ -21,6 +21,27 @@
  * setup path; `check_permissions` uses the driver's own platform report.
  */
 
+/**
+ * Standalone Cua driver host — runs the same {@link CuaDriverHost} the macOS
+ * desktop embeds, outside Electron, against a provisioned
+ * `cua-driver`. This is the Windows/Linux deployment path: the Arkos server
+ * reaches the socket this host listens on through `ARKOS_CUA_HOST_SOCKET`
+ * and authenticates every request with the shared capability
+ * (`ARKOS_BROWSER_HOST_CAPABILITY`).
+ *
+ *   bun apps/desktop/src/cuaDriverHostStandalone.ts \
+ *     --driver /opt/arkos/cua-driver [--socket /run/arkos-cua/host.sock]
+ *
+ * This is not a port of the macOS safety layer. `nativeRevision: null` permits
+ * upstream artifacts; their transport cancellation cannot acknowledge native
+ * input drain. A patched Linux artifact may advertise the separately verified
+ * browser-only cancellation capability, but native desktop input stays closed.
+ * This host has no global Escape adapter, so Linux browser mutations also stay
+ * closed: native cleanup support alone is insufficient for input admission.
+ * Browser observation and passive endpoint detection remain available.
+ * There is no AppSnap helper, masked-activation shield, frame tap, or permission
+ * setup path; `check_permissions` uses the driver's own platform report.
+ */
 import { randomBytes } from "node:crypto";
 import { access, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";

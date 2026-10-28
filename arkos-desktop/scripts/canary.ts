@@ -2,6 +2,27 @@
 // Purpose: Maintains and launches an isolated, frozen Arkos Canary checkout.
 // Layer: Local developer tooling
 
+// FILE: canary.ts
+// Purpose: Maintains and launches an isolated, frozen Arkos Canary checkout.
+// Layer: Local developer tooling
+// FILE: canary.ts
+// Purpose: Maintains and launches an isolated, frozen Arkos Canary checkout.
+// Layer: Local developer tooling
+// FILE: canary.ts
+// Purpose: Maintains and launches an isolated, frozen Arkos Canary checkout.
+// Layer: Local developer tooling
+// FILE: canary.ts
+// Purpose: Maintains and launches an isolated, frozen Arkos Canary checkout.
+// Layer: Local developer tooling
+// FILE: canary.ts
+// Purpose: Maintains and launches an isolated, frozen Arkos Canary checkout.
+// Layer: Local developer tooling
+// FILE: canary.ts
+// Purpose: Maintains and launches an isolated, frozen Arkos Canary checkout.
+// Layer: Local developer tooling
+// FILE: canary.ts
+// Purpose: Maintains and launches an isolated, frozen Arkos Canary checkout.
+// Layer: Local developer tooling
 import { spawn, spawnSync } from "node:child_process";
 import * as Crypto from "node:crypto";
 import * as FS from "node:fs";

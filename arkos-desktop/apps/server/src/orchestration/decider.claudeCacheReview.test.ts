@@ -55,7 +55,7 @@ function makeReadModel(
         id: THREAD_ID,
         projectId: ProjectId.makeUnsafe("project-claude-cache"),
         title: "Claude cache review",
-        modelSelection: { provider: "claudeAgent", model: "claude-opus-4-6" },
+        modelSelection: { provider: "arkos", model: "claude-opus-4-6" },
         interactionMode: DEFAULT_PROVIDER_INTERACTION_MODE,
         runtimeMode: "full-access",
         branch: null,
@@ -330,7 +330,7 @@ describe("decider Claude cache review", () => {
         review: { ...REVIEW, status: "responding" },
         session: {
           threadId: THREAD_ID,
-          providerName: "claudeAgent",
+          providerName: "arkos",
           status: "running",
           runtimeMode: "full-access",
           activeTurnId: TurnId.makeUnsafe("turn-current"),

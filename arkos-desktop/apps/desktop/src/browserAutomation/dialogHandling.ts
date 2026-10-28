@@ -1,13 +1,7 @@
 import type { WebContents } from "electron";
 
 import type { BrowserAutomationVisibleRuntime } from "../browserManager";
-import {
-  drainOnAbort,
-  ensureCdpAttached,
-  evaluateInContext,
-  sendCdpCommand,
-  throwIfAborted,
-} from "./cdpRuntime";
+import { drainOnAbort, ensureCdpAttached, evaluateInContext, sendCdpCommand, throwIfAborted } from "./cdpRuntime";
 
 export const MAX_DIALOGS_PER_COMMAND = 20;
 const MAX_DIALOG_TEXT_BYTES = 4_096;

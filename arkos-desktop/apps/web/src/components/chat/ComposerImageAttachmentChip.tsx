@@ -3,15 +3,16 @@
 // Layer: Chat composer presentation
 // Depends on: composer draft image metadata, shared chip styles, and expanded image preview helpers.
 
+// FILE: ComposerImageAttachmentChip.tsx
+// Purpose: Renders image attachments, including source-aware AppSnap cards.
+// Layer: Chat composer presentation
+// Depends on: composer draft image metadata, shared chip styles, and expanded image preview helpers.
 import { WindowIcon } from "~/lib/icons";
 import { type ComposerImageAttachment } from "../../composerDraftStore";
 import { normalizeComposerImageSource } from "../../lib/composerImageSource";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { AttachmentRemoveButton } from "./AttachmentRemoveButton";
-import {
-  DRAFT_ATTACHMENT_WARNING_DESCRIPTION,
-  DraftAttachmentWarningIcon,
-} from "./DraftAttachmentWarning";
+import { DRAFT_ATTACHMENT_WARNING_DESCRIPTION, DraftAttachmentWarningIcon } from "./DraftAttachmentWarning";
 import { buildExpandedImagePreview, type ExpandedImagePreview } from "./ExpandedImagePreview";
 
 interface ComposerImageAttachmentChipProps {

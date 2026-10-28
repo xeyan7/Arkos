@@ -4,6 +4,11 @@
 // intensity. Sizing uses inline px so html-to-image reproduces it exactly.
 // Layer: web profile feature.
 
+// FILE: ActivityHeatmap.tsx
+// Purpose: GitHub-style contribution heatmap shared by the Profile page and the
+// shareable card. Renders columns of week × weekday cells with pre-bucketed
+// intensity. Sizing uses inline px so html-to-image reproduces it exactly.
+// Layer: web profile feature.
 import { type CSSProperties } from "react";
 import type { ProfileHeatmapCell } from "@arkos/contracts";
 import { cn } from "~/lib/utils";

@@ -1,36 +1,11 @@
 import { ipcRenderer } from "electron";
-import type {
-  BrowserAnnotation,
-  BrowserAnnotationMarker,
-  BrowserAnnotationSource,
-  BrowserAnnotationTheme,
-} from "@arkos/contracts";
-import {
-  browserAnnotationDocumentIdentityUrl,
-  sanitizeBrowserAnnotationUrl,
-} from "@arkos/shared/browserAnnotations";
+import type { BrowserAnnotation, BrowserAnnotationMarker, BrowserAnnotationSource, BrowserAnnotationTheme } from "@arkos/contracts";
+import { browserAnnotationDocumentIdentityUrl, sanitizeBrowserAnnotationUrl } from "@arkos/shared/browserAnnotations";
 
 import { BROWSER_ANNOTATION_GUEST_COMMAND_CHANNEL, BROWSER_IPC_CHANNELS } from "../ipcChannels";
-import {
-  formatCssBorderRadius,
-  formatElementSize,
-  inspectorCardFor,
-  type ElementStyleSnapshot,
-  type InspectorCard,
-} from "./elementInspection";
+import { formatCssBorderRadius, formatElementSize, inspectorCardFor, type ElementStyleSnapshot, type InspectorCard } from "./elementInspection";
 import { createGuestIdentifier } from "./guestIdentity";
-import {
-  GUEST_ANNOTATION_MAX_COMMENT_LENGTH,
-  GUEST_ANNOTATION_MAX_NAME_LENGTH,
-  GUEST_ANNOTATION_MAX_PAGE_TITLE_LENGTH,
-  GUEST_ANNOTATION_MAX_ROLE_LENGTH,
-  GUEST_ANNOTATION_MAX_SELECTOR_LENGTH,
-  GUEST_ANNOTATION_MAX_TAG_NAME_LENGTH,
-  GUEST_ANNOTATION_MAX_TEXT_LENGTH,
-  GUEST_ANNOTATION_MAX_URL_LENGTH,
-  GUEST_ANNOTATION_PROTOCOL_VERSION,
-  isGuestAnnotationCommand,
-} from "./guestProtocol";
+import { GUEST_ANNOTATION_MAX_COMMENT_LENGTH, GUEST_ANNOTATION_MAX_NAME_LENGTH, GUEST_ANNOTATION_MAX_PAGE_TITLE_LENGTH, GUEST_ANNOTATION_MAX_ROLE_LENGTH, GUEST_ANNOTATION_MAX_SELECTOR_LENGTH, GUEST_ANNOTATION_MAX_TAG_NAME_LENGTH, GUEST_ANNOTATION_MAX_TEXT_LENGTH, GUEST_ANNOTATION_MAX_URL_LENGTH, GUEST_ANNOTATION_PROTOCOL_VERSION, isGuestAnnotationCommand } from "./guestProtocol";
 import "../browserWebMcp/guestBridge";
 
 const HOST_ATTRIBUTE = "data-arkos-browser-annotations";

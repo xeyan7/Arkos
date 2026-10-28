@@ -2,6 +2,9 @@
 // Purpose: Own the long-lived xterm runtime lifecycle behind the terminal runtime registry.
 // Layer: Terminal runtime infrastructure
 
+// FILE: terminalRuntime.ts
+// Purpose: Own the long-lived xterm runtime lifecycle behind the terminal runtime registry.
+// Layer: Terminal runtime infrastructure
 import { ClipboardAddon } from "@xterm/addon-clipboard";
 import { FitAddon } from "@xterm/addon-fit";
 import { ImageAddon } from "@xterm/addon-image";
@@ -9,17 +12,9 @@ import { LigaturesAddon } from "@xterm/addon-ligatures";
 import { SearchAddon } from "@xterm/addon-search";
 import { Unicode11Addon } from "@xterm/addon-unicode11";
 import { WebglAddon } from "@xterm/addon-webgl";
-import {
-  defaultTerminalTitleForCliKind,
-  consumeTerminalIdentityInput,
-} from "@arkos/shared/terminalThreads";
+import { defaultTerminalTitleForCliKind, consumeTerminalIdentityInput } from "@arkos/shared/terminalThreads";
 import { describeErrorMessage } from "@arkos/shared/errorMessages";
-import {
-  TERMINAL_MAX_COLS,
-  TERMINAL_MAX_ROWS,
-  TERMINAL_MIN_COLS,
-  TERMINAL_MIN_ROWS,
-} from "@arkos/contracts";
+import { TERMINAL_MAX_COLS, TERMINAL_MAX_ROWS, TERMINAL_MIN_COLS, TERMINAL_MIN_ROWS } from "@arkos/contracts";
 import type { TerminalSessionSnapshot } from "@arkos/contracts";
 import { Terminal } from "@xterm/xterm";
 
@@ -28,30 +23,11 @@ import { suppressQueryResponses } from "~/lib/suppressQueryResponses";
 
 import { openInPreferredEditor } from "../../editorPreferences";
 import { isTerminalClearShortcut, terminalNavigationShortcutData } from "../../keybindings";
-import {
-  collectWrappedTerminalLinkLine,
-  extractTerminalLinks,
-  isTerminalLinkActivation,
-  resolvePathLinkTarget,
-  resolveWrappedTerminalLinkRange,
-  wrappedTerminalLinkRangeIntersectsBufferLine,
-} from "../../terminal-links";
+import { collectWrappedTerminalLinkLine, extractTerminalLinks, isTerminalLinkActivation, resolvePathLinkTarget, resolveWrappedTerminalLinkRange, wrappedTerminalLinkRangeIntersectsBufferLine } from "../../terminal-links";
 import { addWsTransportStateListener } from "../../wsTransportEvents";
-import {
-  getTerminalBoldFontWeight,
-  getTerminalFontFamily,
-  getTerminalFontSizePx,
-  getTerminalFontWeight,
-  isTerminalBackgroundTranslucent,
-  terminalThemeFromApp,
-  writeSystemMessage,
-} from "./terminalRuntimeAppearance";
+import { getTerminalBoldFontWeight, getTerminalFontFamily, getTerminalFontSizePx, getTerminalFontWeight, isTerminalBackgroundTranslucent, terminalThemeFromApp, writeSystemMessage } from "./terminalRuntimeAppearance";
 import { terminalEventDispatcher } from "./terminalEventDispatcher";
-import type {
-  TerminalRuntimeConfig,
-  TerminalRuntimeEntry,
-  TerminalRuntimeViewState,
-} from "./terminalRuntimeTypes";
+import type { TerminalRuntimeConfig, TerminalRuntimeEntry, TerminalRuntimeViewState } from "./terminalRuntimeTypes";
 import { waitForTerminalFontReady } from "./terminalFontSettle";
 import { observeTerminalWriteParsed } from "./terminalPerformance";
 

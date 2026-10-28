@@ -3,12 +3,7 @@ import { useEffect, useState, type RefObject } from "react";
 
 import { resolveFileDiffPath } from "~/lib/diffRendering";
 import { readDiffFileAnchors, resolveDiffRenderSurface } from "~/lib/diffScrollSurface";
-import {
-  DIFF_CHANGE_MARKER_HEIGHT_PX,
-  resolveDiffChangeMarkers,
-  type DiffChangeMarker,
-  type DiffChangeMarkerKind,
-} from "./DiffPanel.logic";
+import { DIFF_CHANGE_MARKER_HEIGHT_PX, resolveDiffChangeMarkers, type DiffChangeMarker, type DiffChangeMarkerKind } from "./DiffPanel.logic";
 
 const CHANGE_MARKER_COLOR_BY_KIND: Record<DiffChangeMarkerKind, string> = {
   added: "var(--success)",

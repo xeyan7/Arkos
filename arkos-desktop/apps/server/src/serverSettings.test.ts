@@ -142,7 +142,7 @@ describe("ServerSettingsService", () => {
           enableAssistantStreaming: true,
           enableProviderUpdateChecks: false,
           providers: {
-            codex: {
+            arkos: {
               enabled: false,
               binaryPath: "/usr/local/bin/codex",
               customModels: ["gpt-custom"],
@@ -156,8 +156,8 @@ describe("ServerSettingsService", () => {
 
     expect(result.updated.enableAssistantStreaming).toBe(true);
     expect(result.updated.enableProviderUpdateChecks).toBe(false);
-    expect(result.updated.providers.codex.enabled).toBe(false);
-    expect(result.updated.providers.codex.binaryPath).toBe("/usr/local/bin/codex");
+    expect(result.updated.providers.arkos.enabled).toBe(false);
+    expect(result.updated.providers.arkos.binaryPath).toBe("/usr/local/bin/codex");
     expect(result.parsed).toMatchObject({
       revision: 1,
       migrationVersion: 3,
@@ -165,7 +165,7 @@ describe("ServerSettingsService", () => {
         enableAssistantStreaming: true,
         enableProviderUpdateChecks: false,
         providers: {
-          codex: {
+          arkos: {
             enabled: false,
             binaryPath: "/usr/local/bin/codex",
             customModels: ["gpt-custom"],
@@ -193,7 +193,7 @@ describe("ServerSettingsService", () => {
             migrationVersion,
             settings: {
               textGenerationModelSelection: {
-                provider: "codex",
+                provider: "arkos",
                 model,
               },
             },
@@ -230,17 +230,17 @@ describe("ServerSettingsService", () => {
             settings: {
               enableProviderUpdateChecks: false,
               textGenerationModelSelection: {
-                provider: "kilo",
+                provider: "arkos",
                 model: "kilo/kilo-auto/free",
               },
               providers: {
-                kilo: {
+                arkos: {
                   enabled: true,
                   binaryPath: "/opt/kilo",
                   serverUrl: "http://127.0.0.1:4096",
                   customModels: ["provider/shared-model"],
                 },
-                opencode: {
+                arkos: {
                   enabled: false,
                   binaryPath: "/opt/opencode",
                   customModels: ["provider/opencode-model"],
@@ -261,15 +261,15 @@ describe("ServerSettingsService", () => {
     expect(result.settingsFileExists).toBe(true);
     expect(result.settings.enableProviderUpdateChecks).toBe(false);
     expect(result.settings.textGenerationModelSelection).toMatchObject({
-      provider: "opencode",
+      provider: "arkos",
       model: "kilo/kilo-auto/free",
     });
-    expect(result.settings.providers.opencode).toMatchObject({
+    expect(result.settings.providers.arkos).toMatchObject({
       enabled: true,
       binaryPath: "/opt/opencode",
       customModels: ["provider/opencode-model", "provider/shared-model"],
     });
-    expect(result.settings.providers.opencode.serverUrl).toBe("");
+    expect(result.settings.providers.arkos.serverUrl).toBe("");
   });
 
   it("keeps provider passwords server-only and returns configured flags to clients", async () => {
@@ -281,7 +281,7 @@ describe("ServerSettingsService", () => {
         yield* service.start;
         const view = yield* service.updateSettingsView({
           providers: {
-            opencode: { serverPassword: "opencode-secret" },
+            arkos: { serverPassword: "opencode-secret" },
           },
         });
         const internal = yield* service.getSettings;
@@ -290,8 +290,8 @@ describe("ServerSettingsService", () => {
       }),
     );
 
-    expect(result.internal.providers.opencode.serverPasswordConfigured).toBe(true);
-    expect(result.view.providers.opencode).toMatchObject({ serverPasswordConfigured: true });
+    expect(result.internal.providers.arkos.serverPasswordConfigured).toBe(true);
+    expect(result.view.providers.arkos).toMatchObject({ serverPasswordConfigured: true });
     expect(JSON.stringify(result.internal)).not.toContain("opencode-secret");
     expect(JSON.stringify(result.view)).not.toContain("opencode-secret");
     expect(JSON.stringify(result.view)).not.toContain('"serverPassword"');
@@ -303,55 +303,55 @@ describe("ServerSettingsService", () => {
       name: "resolves text generation selection away from disabled providers",
       overrides: {
         textGenerationModelSelection: {
-          provider: "antigravity" as const,
-          model: DEFAULT_MODEL_BY_PROVIDER.antigravity,
+          provider: "arkos" as const,
+          model: DEFAULT_MODEL_BY_PROVIDER.arkos,
         },
-        providers: { antigravity: { enabled: false } },
+        providers: { arkos: { enabled: false } },
       },
-      expectedProvider: "codex" as const,
+      expectedProvider: "arkos" as const,
     },
     {
       name: "falls back only to providers with dedicated Git text generation",
       overrides: {
         textGenerationModelSelection: {
-          provider: "codex" as const,
-          model: DEFAULT_MODEL_BY_PROVIDER.codex,
+          provider: "arkos" as const,
+          model: DEFAULT_MODEL_BY_PROVIDER.arkos,
         },
         providers: {
-          codex: { enabled: false },
-          claudeAgent: { enabled: true },
-          cursor: { enabled: false },
-          opencode: { enabled: true },
+          arkos: { enabled: false },
+          arkos: { enabled: true },
+          arkos: { enabled: false },
+          arkos: { enabled: true },
         },
       },
-      expectedProvider: "claudeAgent" as const,
+      expectedProvider: "arkos" as const,
     },
     {
       name: "normalizes enabled but unsupported Git text generation selections",
       overrides: {
         textGenerationModelSelection: {
-          provider: "antigravity" as const,
-          model: DEFAULT_MODEL_BY_PROVIDER.antigravity,
+          provider: "arkos" as const,
+          model: DEFAULT_MODEL_BY_PROVIDER.arkos,
         },
       },
-      expectedProvider: "codex" as const,
+      expectedProvider: "arkos" as const,
     },
     {
       name: "falls back to droid when all ordered providers are disabled",
       overrides: {
         textGenerationModelSelection: {
-          provider: "opencode" as const,
-          model: DEFAULT_MODEL_BY_PROVIDER.opencode,
+          provider: "arkos" as const,
+          model: DEFAULT_MODEL_BY_PROVIDER.arkos,
         },
         providers: {
-          codex: { enabled: false },
-          claudeAgent: { enabled: false },
-          cursor: { enabled: false },
-          opencode: { enabled: false },
-          droid: { enabled: true },
+          arkos: { enabled: false },
+          arkos: { enabled: false },
+          arkos: { enabled: false },
+          arkos: { enabled: false },
+          arkos: { enabled: true },
         },
       },
-      expectedProvider: "droid" as const,
+      expectedProvider: "arkos" as const,
     },
   ])("$name", async ({ overrides, expectedProvider }) => {
     const settings = await Effect.runPromise(
@@ -363,7 +363,7 @@ describe("ServerSettingsService", () => {
 
     expect(settings.textGenerationModelSelection.provider).toBe(expectedProvider);
     expect(settings.textGenerationModelSelection.model).toBe(
-      expectedProvider === "droid"
+      expectedProvider === "arkos"
         ? DEFAULT_DROID_GIT_TEXT_GENERATION_MODEL
         : DEFAULT_MODEL_BY_PROVIDER[expectedProvider],
     );
@@ -378,16 +378,16 @@ describe("ServerSettingsService", () => {
         Effect.provide(
           ServerSettingsService.layerTest({
             textGenerationModelSelection: {
-              provider: "claudeAgent",
+              provider: "arkos",
               instanceId: "claude_work",
-              model: DEFAULT_MODEL_BY_PROVIDER.claudeAgent,
+              model: DEFAULT_MODEL_BY_PROVIDER.arkos,
             },
             providers: {
-              claudeAgent: { enabled: false },
+              arkos: { enabled: false },
             },
             providerInstances: {
               claude_work: {
-                driver: "claudeAgent",
+                driver: "arkos",
                 enabled: true,
                 config: { homePath: "/tmp/claude-work" },
               },
@@ -398,9 +398,9 @@ describe("ServerSettingsService", () => {
     );
 
     expect(settings.textGenerationModelSelection).toMatchObject({
-      provider: "claudeAgent",
+      provider: "arkos",
       instanceId: "claude_work",
-      model: DEFAULT_MODEL_BY_PROVIDER.claudeAgent,
+      model: DEFAULT_MODEL_BY_PROVIDER.arkos,
     });
   });
 
@@ -411,13 +411,13 @@ describe("ServerSettingsService", () => {
         return yield* service.updateSettings({
           providerInstances: {
             work: {
-              driver: "claudeAgent",
+              driver: "arkos",
               enabled: true,
               config: { homePath: "/tmp/claude-work" },
             },
           },
           textGenerationModelSelection: {
-            provider: "codex",
+            provider: "arkos",
             instanceId: "work",
             model: "custom-model",
           },
@@ -426,7 +426,7 @@ describe("ServerSettingsService", () => {
     );
 
     expect(settings.textGenerationModelSelection).toMatchObject({
-      provider: "claudeAgent",
+      provider: "arkos",
       instanceId: "work",
       model: "custom-model",
     });
@@ -439,7 +439,7 @@ describe("ServerSettingsService", () => {
         yield* service.updateSettings({
           providerInstances: {
             codex_work: {
-              driver: "codex",
+              driver: "arkos",
               enabled: true,
               config: { homePath: "/tmp/codex-work" },
             },
@@ -451,7 +451,7 @@ describe("ServerSettingsService", () => {
         });
         return yield* service.updateSettings({
           textGenerationModelSelection: {
-            provider: "codex",
+            provider: "arkos",
             model: "gpt-5.4",
           },
         });
@@ -459,7 +459,7 @@ describe("ServerSettingsService", () => {
     );
 
     expect(settings.textGenerationModelSelection).toMatchObject({
-      instanceId: "codex",
+      instanceId: "arkos",
       model: "gpt-5.4",
     });
   });
@@ -473,18 +473,18 @@ describe("ServerSettingsService", () => {
         Effect.provide(
           ServerSettingsService.layerTest({
             textGenerationModelSelection: {
-              provider: "claudeAgent",
+              provider: "arkos",
               instanceId: "claude_work",
-              model: DEFAULT_MODEL_BY_PROVIDER.claudeAgent,
+              model: DEFAULT_MODEL_BY_PROVIDER.arkos,
             },
             providers: {
-              codex: { enabled: false },
-              claudeAgent: { enabled: false },
-              cursor: { enabled: false },
+              arkos: { enabled: false },
+              arkos: { enabled: false },
+              arkos: { enabled: false },
             },
             providerInstances: {
               claude_work: {
-                driver: "claudeAgent",
+                driver: "arkos",
                 enabled: false,
                 config: { homePath: "/tmp/claude-work" },
               },
@@ -496,7 +496,7 @@ describe("ServerSettingsService", () => {
                 config: { binaryPath: "gemini" },
               },
               cursor_work: {
-                driver: "cursor",
+                driver: "arkos",
                 enabled: true,
                 config: { binaryPath: "cursor-agent" },
               },
@@ -507,9 +507,9 @@ describe("ServerSettingsService", () => {
     );
 
     expect(settings.textGenerationModelSelection).toMatchObject({
-      provider: "cursor",
+      provider: "arkos",
       instanceId: "cursor_work",
-      model: DEFAULT_MODEL_BY_PROVIDER.cursor,
+      model: DEFAULT_MODEL_BY_PROVIDER.arkos,
     });
   });
 
@@ -520,12 +520,12 @@ describe("ServerSettingsService", () => {
         yield* service.updateSettings({
           providerInstances: {
             claude_work: {
-              driver: "claudeAgent",
+              driver: "arkos",
               enabled: true,
               config: { homePath: "/tmp/claude-work" },
             },
             codex_work: {
-              driver: "codex",
+              driver: "arkos",
               enabled: true,
               config: { homePath: "/tmp/codex-work" },
             },
@@ -534,7 +534,7 @@ describe("ServerSettingsService", () => {
         return yield* service.updateSettings({
           providerInstances: {
             claude_work: {
-              driver: "claudeAgent",
+              driver: "arkos",
               enabled: true,
               config: { homePath: "/tmp/claude-work-2" },
             },
@@ -554,13 +554,13 @@ describe("ServerSettingsService", () => {
       ...DEFAULT_SERVER_SETTINGS,
       providerInstances: {
         grok_work: {
-          driver: "grok",
+          driver: "arkos",
           enabled: true,
           environment: [{ name: "XAI_API_KEY", value: "secret-token", sensitive: true }],
           config: { binaryPath: "/opt/grok" },
         },
         opencode_work: {
-          driver: "opencode",
+          driver: "arkos",
           enabled: true,
           config: {
             serverUrl: "http://127.0.0.1:4096",
@@ -587,7 +587,7 @@ describe("ServerSettingsService", () => {
         yield* service.updateSettings({
           providerInstances: {
             grok_work: {
-              driver: "grok",
+              driver: "arkos",
               enabled: true,
               environment: [{ name: "XAI_API_KEY", value: "secret-token", sensitive: true }],
               config: { binaryPath: "/opt/grok" },
@@ -597,7 +597,7 @@ describe("ServerSettingsService", () => {
         return yield* service.updateSettings({
           providerInstances: {
             grok_work: {
-              driver: "grok",
+              driver: "arkos",
               displayName: "Grok Work",
               enabled: true,
               environment: [
@@ -618,7 +618,7 @@ describe("ServerSettingsService", () => {
     );
     expect(grokWork).toBeDefined();
     expect(grokWork ? providerStartOptionsFromInstance(grokWork) : undefined).toMatchObject({
-      grok: { environment: { XAI_API_KEY: "secret-token" } },
+      arkos: { environment: { XAI_API_KEY: "secret-token" } },
     });
     expect(
       redactServerSettingsForClient(settings).providerInstances.grok_work?.environment,
@@ -635,7 +635,7 @@ describe("ServerSettingsService", () => {
         const updated = yield* service.updateSettings({
           providerInstances: {
             grok_work: {
-              driver: "grok",
+              driver: "arkos",
               enabled: true,
               environment: [{ name: "XAI_API_KEY", value: "secret-token", sensitive: true }],
             },
@@ -671,7 +671,7 @@ describe("ServerSettingsService", () => {
         const updated = yield* service.updateSettings({
           providerInstances: {
             grok_work: {
-              driver: "grok",
+              driver: "arkos",
               enabled: true,
               environment: [{ name: "XAI_API_KEY", value: "secret-token", sensitive: false }],
             },
@@ -695,7 +695,7 @@ describe("ServerSettingsService", () => {
         yield* service.updateSettings({
           providerInstances: {
             opencode_work: {
-              driver: "opencode",
+              driver: "arkos",
               enabled: true,
               config: {
                 serverUrl: "http://127.0.0.1:4096",
@@ -707,7 +707,7 @@ describe("ServerSettingsService", () => {
         return yield* service.updateSettings({
           providerInstances: {
             opencode_work: {
-              driver: "opencode",
+              driver: "arkos",
               displayName: "OpenCode Work",
               enabled: true,
               config: {
@@ -745,7 +745,7 @@ describe("ServerSettingsService", () => {
         const updated = yield* service.updateSettings({
           providerInstances: {
             opencode_work: {
-              driver: "opencode",
+              driver: "arkos",
               enabled: true,
               config: {
                 serverUrl: "http://127.0.0.1:4096",
@@ -786,12 +786,12 @@ describe("ServerSettingsService", () => {
             ...DEFAULT_SERVER_SETTINGS,
             providerInstances: {
               grok_work: {
-                driver: "grok",
+                driver: "arkos",
                 enabled: true,
                 environment: [{ name: "XAI_API_KEY", value: "secret-token", sensitive: true }],
               },
               opencode_work: {
-                driver: "opencode",
+                driver: "arkos",
                 enabled: true,
                 config: {
                   serverUrl: "http://127.0.0.1:4096",
@@ -829,7 +829,7 @@ describe("ServerSettingsService", () => {
   });
 });
 
-const ompGatedOff = (feature: string) => feature !== "omp";
+const ompGatedOff = (feature: string) => feature !== "arkos";
 const stableFeatureEnabled = (feature: string) => isBetaFeatureEnabled(feature, "production");
 
 describe("gateBetaOnlyProviders", () => {
@@ -837,30 +837,30 @@ describe("gateBetaOnlyProviders", () => {
     ...DEFAULT_SERVER_SETTINGS,
     providers: {
       ...DEFAULT_SERVER_SETTINGS.providers,
-      omp: { ...DEFAULT_SERVER_SETTINGS.providers.omp, enabled: true },
+      arkos: { ...DEFAULT_SERVER_SETTINGS.providers.arkos, enabled: true },
     },
   };
 
   it("reads a gated-off provider as disabled without touching the others", () => {
     const gated = gateBetaOnlyProviders(withOmpEnabled, ompGatedOff);
-    expect(gated.providers.omp.enabled).toBe(false);
-    expect(gated.providers.codex.enabled).toBe(true);
-    // The input object is untouched — the persisted value survives.
-    expect(withOmpEnabled.providers.omp.enabled).toBe(true);
+    expect(gated.providers.arkos.enabled).toBe(false);
+    expect(gated.providers.arkos.enabled).toBe(true);
+    // The input object is untouched ��� the persisted value survives.
+    expect(withOmpEnabled.providers.arkos.enabled).toBe(true);
   });
 
   it("preserves enabled Oh My Pi accounts in Stable", () => {
     const settings: ServerSettings = {
       ...withOmpEnabled,
       providerInstances: {
-        omp_work: { driver: "omp", enabled: true, config: {} },
+        omp_work: { driver: "arkos", enabled: true, config: {} },
       },
     };
     const gated = gateBetaOnlyProviders(settings, stableFeatureEnabled);
     expect(gated).toBe(settings);
-    expect(gated.providers.omp.enabled).toBe(true);
+    expect(gated.providers.arkos.enabled).toBe(true);
     expect(gated.providerInstances.omp_work?.enabled).toBe(true);
-    expect(providerDisabledSettingsMessage("omp", stableFeatureEnabled)).toBe(
+    expect(providerDisabledSettingsMessage("arkos", stableFeatureEnabled)).toBe(
       "Oh My Pi is disabled in Settings > Providers.",
     );
   });
@@ -869,8 +869,8 @@ describe("gateBetaOnlyProviders", () => {
     const settings: ServerSettings = {
       ...withOmpEnabled,
       providerInstances: {
-        omp_work: { driver: "omp", enabled: true, config: {} },
-        codex_work: { driver: "codex", enabled: true, config: {} },
+        omp_work: { driver: "arkos", enabled: true, config: {} },
+        codex_work: { driver: "arkos", enabled: true, config: {} },
       },
     };
     const gated = gateBetaOnlyProviders(settings, ompGatedOff);
@@ -884,7 +884,7 @@ describe("gateBetaOnlyProviders", () => {
       ...DEFAULT_SERVER_SETTINGS,
       providers: {
         ...DEFAULT_SERVER_SETTINGS.providers,
-        omp: { ...DEFAULT_SERVER_SETTINGS.providers.omp, enabled: false },
+        arkos: { ...DEFAULT_SERVER_SETTINGS.providers.arkos, enabled: false },
       },
     };
     expect(gateBetaOnlyProviders(settings, ompGatedOff)).toBe(settings);
@@ -893,23 +893,23 @@ describe("gateBetaOnlyProviders", () => {
   it("falls back to a non-gated provider for text generation", () => {
     const settings: ServerSettings = {
       ...DEFAULT_SERVER_SETTINGS,
-      textGenerationModelSelection: { provider: "omp", model: "omp-auto" },
+      textGenerationModelSelection: { provider: "arkos", model: "omp-auto" },
       providers: {
         ...DEFAULT_SERVER_SETTINGS.providers,
-        omp: { ...DEFAULT_SERVER_SETTINGS.providers.omp, enabled: true },
+        arkos: { ...DEFAULT_SERVER_SETTINGS.providers.arkos, enabled: true },
       },
     };
     const projected = resolveTextGenerationProvider(gateBetaOnlyProviders(settings, ompGatedOff));
-    expect(projected.textGenerationModelSelection.provider).not.toBe("omp");
+    expect(projected.textGenerationModelSelection.provider).not.toBe("arkos");
   });
 });
 
 describe("providerDisabledSettingsMessage", () => {
   it("points Beta-only providers at Arkos Beta instead of Settings", () => {
-    expect(providerDisabledSettingsMessage("omp", () => false)).toBe(
+    expect(providerDisabledSettingsMessage("arkos", () => false)).toBe(
       "Oh My Pi is available in Arkos Beta.",
     );
-    expect(providerDisabledSettingsMessage("codex", (f) => f !== "omp")).toBe(
+    expect(providerDisabledSettingsMessage("arkos", (f) => f !== "arkos")).toBe(
       "Codex is disabled in Settings > Providers.",
     );
   });

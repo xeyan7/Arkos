@@ -3,67 +3,29 @@
 // Depends on: git React Query helpers, native API mutations, and toolbar selection rules.
 // Note: the "Create branch" footer row uses raw <button> because it is a
 // menu-item-style affordance inside a ComboboxPopup, not a generic action.
+// Purpose: Branch/worktree picker for the chat toolbar.
+// Coordinates branch checkout/create actions and decorates rows with git metadata.
+// Depends on: git React Query helpers, native API mutations, and toolbar selection rules.
+// Note: the "Create branch" footer row uses raw <button> because it is a
+// menu-item-style affordance inside a ComboboxPopup, not a generic action.
 import type { GitBranch, GitStashInfoResult, GitStatusResult, NativeApi } from "@arkos/contracts";
 import { pluralize } from "@arkos/shared/text";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronDownIcon, GitBranchIcon, PlusIcon } from "~/lib/icons";
-import {
-  type CSSProperties,
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useOptimistic,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { type CSSProperties, useCallback, useDeferredValue, useEffect, useMemo, useOptimistic, useRef, useState, useTransition } from "react";
 
-import {
-  gitBranchesQueryOptions,
-  gitQueryKeys,
-  gitStatusQueryOptions,
-  refreshGitQueriesScoped,
-} from "../lib/gitReactQuery";
+import { gitBranchesQueryOptions, gitQueryKeys, gitStatusQueryOptions, refreshGitQueriesScoped } from "../lib/gitReactQuery";
 import { readNativeApi } from "../nativeApi";
 import { parsePullRequestReference } from "../pullRequestReference";
-import {
-  dedupeRemoteBranchesWithLocalMatches,
-  deriveLocalBranchNameFromRemoteRef,
-  EnvMode,
-  resolveBranchSelectionTarget,
-  resolveBranchToolbarValue,
-  shouldSyncLocalThreadBranch,
-} from "./BranchToolbar.logic";
+import { dedupeRemoteBranchesWithLocalMatches, deriveLocalBranchNameFromRemoteRef, EnvMode, resolveBranchSelectionTarget, resolveBranchToolbarValue, shouldSyncLocalThreadBranch } from "./BranchToolbar.logic";
 import { Button } from "./ui/button";
 import { DiffStat } from "./ui/diff-stat";
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-} from "./ui/dialog";
-import {
-  Combobox,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxPopup,
-  ComboboxTrigger,
-} from "./ui/combobox";
+import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogPopup, DialogTitle } from "./ui/dialog";
+import { Combobox, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList, ComboboxPopup, ComboboxTrigger } from "./ui/combobox";
 import { Input } from "./ui/input";
 import { toastManager } from "./ui/toast";
-import {
-  ENVIRONMENT_ROW_CLASS_NAME,
-  ENVIRONMENT_ROW_ICON_CLASS_NAME,
-  EnvironmentRowBody,
-  EnvironmentRowChevron,
-} from "./chat/environment/EnvironmentRow";
+import { ENVIRONMENT_ROW_CLASS_NAME, ENVIRONMENT_ROW_ICON_CLASS_NAME, EnvironmentRowBody, EnvironmentRowChevron } from "./chat/environment/EnvironmentRow";
 import { COMPOSER_TOOLBAR_PICKER_TRIGGER_CLASS_NAME } from "./chat/composerPickerStyles";
 import { ELEVATED_HOVER_SURFACE_CLASS_NAME } from "../surfaceStyles";
 import type { ThreadWorkspacePatch } from "../types";

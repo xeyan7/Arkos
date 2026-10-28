@@ -7,36 +7,26 @@
  *
  * @module ProviderRuntimeReconcilerLive
  */
-import {
-  CommandId,
-  EventId,
-  type OrchestrationSession,
-  type OrchestrationThreadShell,
-} from "@arkos/contracts";
+/**
+ * ProviderRuntimeReconcilerLive - Repairs live runtime/projection divergence.
+ *
+ * This is the same-process counterpart to startupTurnReconciliation. It uses
+ * Adapter sessions as live evidence and always settles ambiguous missing-event
+ * cases as interrupted rather than inventing successful completion.
+ *
+ * @module ProviderRuntimeReconcilerLive
+ */
+import { CommandId, EventId, type OrchestrationSession, type OrchestrationThreadShell } from "@arkos/contracts";
 import { Cause, Duration, Effect, Layer, Schedule } from "effect";
 
 import { OrchestrationEngineService } from "../../orchestration/Services/OrchestrationEngine.ts";
 import { OrchestrationReactor } from "../../orchestration/Services/OrchestrationReactor.ts";
 import { ProjectionSnapshotQuery } from "../../orchestration/Services/ProjectionSnapshotQuery.ts";
-import {
-  PROVIDER_RUNTIME_INGESTION_CONSUMER,
-  ProviderRuntimeEventRepository,
-} from "../../persistence/Services/ProviderRuntimeEvents.ts";
-import {
-  bindingActiveTurnId,
-  DEFAULT_RUNTIME_RECONCILIATION_STALE_AFTER_MS,
-  planProviderRuntimeReconciliation,
-  type ProviderRuntimeReconciliationPlan,
-} from "../providerRuntimeReconciliation.ts";
-import {
-  ProviderRuntimeReconciler,
-  type ProviderRuntimeReconcilerShape,
-} from "../Services/ProviderRuntimeReconciler.ts";
+import { PROVIDER_RUNTIME_INGESTION_CONSUMER, ProviderRuntimeEventRepository } from "../../persistence/Services/ProviderRuntimeEvents.ts";
+import { bindingActiveTurnId, DEFAULT_RUNTIME_RECONCILIATION_STALE_AFTER_MS, planProviderRuntimeReconciliation, type ProviderRuntimeReconciliationPlan } from "../providerRuntimeReconciliation.ts";
+import { ProviderRuntimeReconciler, type ProviderRuntimeReconcilerShape } from "../Services/ProviderRuntimeReconciler.ts";
 import { ProviderService } from "../Services/ProviderService.ts";
-import {
-  ProviderSessionDirectory,
-  type ProviderRuntimeBinding,
-} from "../Services/ProviderSessionDirectory.ts";
+import { ProviderSessionDirectory, type ProviderRuntimeBinding } from "../Services/ProviderSessionDirectory.ts";
 
 const DEFAULT_RECONCILIATION_INTERVAL_MS = 5_000;
 const DEFAULT_RECONCILIATION_CANDIDATE_LIMIT = 256;

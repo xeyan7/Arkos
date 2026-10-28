@@ -1,25 +1,11 @@
-import {
-  OrchestrationGetTurnDiffResult,
-  type OrchestrationGetFullThreadDiffInput,
-  type OrchestrationGetFullThreadDiffResult,
-  type OrchestrationGetTurnDiffResult as OrchestrationGetTurnDiffResultType,
-} from "@arkos/contracts";
+import { OrchestrationGetTurnDiffResult, type OrchestrationGetFullThreadDiffInput, type OrchestrationGetFullThreadDiffResult, type OrchestrationGetTurnDiffResult as OrchestrationGetTurnDiffResultType } from "@arkos/contracts";
 import { Effect, Layer, Option, Schema } from "effect";
 
 import { ProjectionSnapshotQuery } from "../../orchestration/Services/ProjectionSnapshotQuery.ts";
 import { CheckpointInvariantError, CheckpointUnavailableError } from "../Errors.ts";
-import {
-  checkpointRefForThreadTurn,
-  checkpointRefForThreadTurnInManagedFamily,
-  checkpointRefForThreadTurnStart,
-  checkpointRefForThreadTurnStartInManagedFamily,
-  resolveThreadWorkspaceCwd,
-} from "../Utils.ts";
+import { checkpointRefForThreadTurn, checkpointRefForThreadTurnInManagedFamily, checkpointRefForThreadTurnStart, checkpointRefForThreadTurnStartInManagedFamily, resolveThreadWorkspaceCwd } from "../Utils.ts";
 import { CheckpointStore } from "../Services/CheckpointStore.ts";
-import {
-  CheckpointDiffQuery,
-  type CheckpointDiffQueryShape,
-} from "../Services/CheckpointDiffQuery.ts";
+import { CheckpointDiffQuery, type CheckpointDiffQueryShape } from "../Services/CheckpointDiffQuery.ts";
 
 const isTurnDiffResult = Schema.is(OrchestrationGetTurnDiffResult);
 

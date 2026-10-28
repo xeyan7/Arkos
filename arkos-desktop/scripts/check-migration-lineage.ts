@@ -2,6 +2,27 @@
 // Purpose: Fail closed when a released migration's (id, name) tracker identity changes.
 // Layer: CI preflight
 
+// FILE: check-migration-lineage.ts
+// Purpose: Fail closed when a released migration's (id, name) tracker identity changes.
+// Layer: CI preflight
+// FILE: check-migration-lineage.ts
+// Purpose: Fail closed when a released migration's (id, name) tracker identity changes.
+// Layer: CI preflight
+// FILE: check-migration-lineage.ts
+// Purpose: Fail closed when a released migration's (id, name) tracker identity changes.
+// Layer: CI preflight
+// FILE: check-migration-lineage.ts
+// Purpose: Fail closed when a released migration's (id, name) tracker identity changes.
+// Layer: CI preflight
+// FILE: check-migration-lineage.ts
+// Purpose: Fail closed when a released migration's (id, name) tracker identity changes.
+// Layer: CI preflight
+// FILE: check-migration-lineage.ts
+// Purpose: Fail closed when a released migration's (id, name) tracker identity changes.
+// Layer: CI preflight
+// FILE: check-migration-lineage.ts
+// Purpose: Fail closed when a released migration's (id, name) tracker identity changes.
+// Layer: CI preflight
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";

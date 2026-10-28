@@ -6,12 +6,14 @@
 //          never surface another group's library.
 // Layer: Chat UI hooks
 
-import {
-  type LibraryCommit,
-  type LibraryEntry,
-  type ProjectAgentLibraryStatusResult,
-  type ProjectId,
-} from "@arkos/contracts";
+// FILE: useGroupLibrary.ts
+// Purpose: Client state for the group Library panel — per-directory listings,
+//          mutations (mkdir/rename/delete/restore), binary upload, and the
+//          remote-push status pill. Mirrors useProjectAgent's load/mutation
+//          discipline (project-id + generation guards) so a project switch can
+//          never surface another group's library.
+// Layer: Chat UI hooks
+import { type LibraryCommit, type LibraryEntry, type ProjectAgentLibraryStatusResult, type ProjectId } from "@arkos/contracts";
 import { LIBRARY_UPLOAD_ROUTE_PATH } from "@arkos/shared/binaryTransfer";
 import { useEffect, useRef, useState } from "react";
 

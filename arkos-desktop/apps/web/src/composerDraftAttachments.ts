@@ -2,28 +2,22 @@
 // Purpose: Owns composer attachment identity, blob lifetime, persistence verification, and hydration.
 // Exports: Attachment transitions used by persistence and action construction.
 
+// FILE: composerDraftAttachments.ts
+// Purpose: Owns composer attachment identity, blob lifetime, persistence verification, and hydration.
+// Exports: Attachment transitions used by persistence and action construction.
+// FILE: composerDraftAttachments.ts
+// Purpose: Owns composer attachment identity, blob lifetime, persistence verification, and hydration.
+// Exports: Attachment transitions used by persistence and action construction.
+// FILE: composerDraftAttachments.ts
+// Purpose: Owns composer attachment identity, blob lifetime, persistence verification, and hydration.
+// Exports: Attachment transitions used by persistence and action construction.
 import { type ThreadId } from "@arkos/contracts";
 import * as Schema from "effect/Schema";
 
-import {
-  COMPOSER_DRAFT_STORAGE_KEY,
-  COMPOSER_DRAFT_STORAGE_VERSION,
-  PersistedComposerImageAttachment,
-  shouldRemoveDraft,
-  type ComposerAttachmentPersistenceResult,
-  type ComposerDraftStoreState,
-  type ComposerFileAttachment,
-  type ComposerImageAttachment,
-  type ComposerPromptHistorySavedDraft,
-  type ComposerThreadDraftState,
-  type QueuedComposerTurn,
-} from "./composerDraftDomain";
+import { COMPOSER_DRAFT_STORAGE_KEY, COMPOSER_DRAFT_STORAGE_VERSION, PersistedComposerImageAttachment, shouldRemoveDraft, type ComposerAttachmentPersistenceResult, type ComposerDraftStoreState, type ComposerFileAttachment, type ComposerImageAttachment, type ComposerPromptHistorySavedDraft, type ComposerThreadDraftState, type QueuedComposerTurn } from "./composerDraftDomain";
 import { getLocalStorageItem } from "./hooks/useLocalStorage";
 import { deleteComposerImageBlob } from "./lib/composerImageBlobStore";
-import {
-  normalizeComposerImageSource,
-  toPersistedComposerImageSource,
-} from "./lib/composerImageSource";
+import { normalizeComposerImageSource, toPersistedComposerImageSource } from "./lib/composerImageSource";
 
 const composerAttachmentPersistenceQueueByThreadId = new Map<string, Promise<void>>();
 // Tracks the newest in-flight sync per (slot, thread) so a superseded verification knows not to

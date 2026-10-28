@@ -10,20 +10,20 @@
  *
  * @module computer/uiTreeTargeting
  */
-import type {
-  ComputerPoint,
-  ComputerRect,
-  ComputerScreenSize,
-  ComputerSpaceErrorCode,
-  ComputerTarget,
-  ComputerUiNode,
-} from "@arkos/contracts";
-import {
-  flattenUiTree,
-  resolveUiTreeTarget,
-  uiTreeActivationPoint,
-  type UiTreeTargetSpec,
-} from "@arkos/shared/uiTreeTargeting";
+/**
+ * Resolving a desktop target — a coordinate or a label — to the point that acts
+ * on it.
+ *
+ * The matching itself is `@arkos/shared/uiTreeTargeting`, shared with the iOS
+ * family: exact label before substring, ambiguity refused rather than guessed.
+ * What lives here is what the desktop specifically needs — a window scope, a
+ * role compared verbatim, and an `onScreen` flag the perception source already
+ * computed — plus the coordinate path, which has no accessibility tree at all.
+ *
+ * @module computer/uiTreeTargeting
+ */
+import type { ComputerPoint, ComputerRect, ComputerScreenSize, ComputerSpaceErrorCode, ComputerTarget, ComputerUiNode } from "@arkos/contracts";
+import { flattenUiTree, resolveUiTreeTarget, uiTreeActivationPoint, type UiTreeTargetSpec } from "@arkos/shared/uiTreeTargeting";
 import { clampTextToLength } from "./utf8Truncation.ts";
 import { retainComputerElementRef } from "./computerElementIdentity.ts";
 

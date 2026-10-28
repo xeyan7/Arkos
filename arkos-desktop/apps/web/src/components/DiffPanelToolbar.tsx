@@ -4,27 +4,18 @@
 //          Environment panel (EnvironmentRow triggers + ComposerPickerMenuPopup menus).
 // Layer: Diff panel UI
 
+// FILE: DiffPanelToolbar.tsx
+// Purpose: Unified review toolbar for the diff panel — scope picker, stats, file jump,
+//          view options, git actions, and turn selection. Picker chrome matches the
+//          Environment panel (EnvironmentRow triggers + ComposerPickerMenuPopup menus).
+// Layer: Diff panel UI
 import type { FileDiffMetadata } from "@pierre/diffs/react";
 import type { ThreadId, TurnId } from "@arkos/contracts";
 import { FaPlusMinus } from "react-icons/fa6";
 import { useState, type ReactNode } from "react";
 
 import GitActionsControl from "~/components/GitActionsControl";
-import {
-  ChangesIcon,
-  Columns2Icon,
-  CopyIcon,
-  DiffIcon,
-  EllipsisIcon,
-  FolderIcon,
-  FoldersIcon,
-  GitBranchIcon,
-  GitCommitIcon,
-  ListChecksIcon,
-  RefreshCwIcon,
-  Rows3Icon,
-  XIcon,
-} from "~/lib/icons";
+import { ChangesIcon, Columns2Icon, CopyIcon, DiffIcon, EllipsisIcon, FolderIcon, FoldersIcon, GitBranchIcon, GitCommitIcon, ListChecksIcon, RefreshCwIcon, Rows3Icon, XIcon } from "~/lib/icons";
 import { cn } from "~/lib/utils";
 import { ELEVATED_HOVER_SURFACE_RAISED_TEXT_CLASS_NAME } from "~/surfaceStyles";
 import type { TimestampFormat } from "~/appSettings";
@@ -32,42 +23,17 @@ import type { TurnDiffSummary } from "~/types";
 import type { RepoDiffScope } from "~/repoDiffScopeStore";
 import { REPO_DIFF_SCOPE_LABELS } from "~/repoDiffScopeStore";
 import { formatShortTimestamp } from "~/timestampFormat";
-import {
-  DIFF_PANEL_PICKER_SCOPE_OPTIONS,
-  isDiffPanelRepoScopeOption,
-  resolveDiffPanelPickerLabel,
-  resolveDiffPanelScopePickerValue,
-  type DiffPanelRepoScopeOption,
-  type DiffPanelTurnScopeIntent,
-  type DiffPanelViewSource,
-} from "./DiffPanel.logic";
-import {
-  DiffPanelChangeNavigationButtons,
-  type DiffPanelChangeNavigation,
-} from "./DiffPanelChangeNavigation";
+import { DIFF_PANEL_PICKER_SCOPE_OPTIONS, isDiffPanelRepoScopeOption, resolveDiffPanelPickerLabel, resolveDiffPanelScopePickerValue, type DiffPanelRepoScopeOption, type DiffPanelTurnScopeIntent, type DiffPanelViewSource } from "./DiffPanel.logic";
+import { DiffPanelChangeNavigationButtons, type DiffPanelChangeNavigation } from "./DiffPanelChangeNavigation";
 import { DiffPanelCompareRefMenuSection } from "./DiffPanelCompareRefMenuSection";
 import { DiffPanelFileJumpMenu } from "./DiffPanelFileJumpMenu";
 import { ComposerPickerMenuPopup } from "./chat/ComposerPickerMenuPopup";
 import { EnvironmentRowBody, EnvironmentRowChevron } from "./chat/environment/EnvironmentRow";
 import type { DiffRenderMode } from "./chat/chatHeaderControls";
 import { DiffStat } from "./chat/DiffStatLabel";
-import {
-  BUTTON_GROUP_ACTIVE_CLASS_NAME,
-  BUTTON_GROUP_SURFACE_CLASS_NAME,
-  ButtonGroup,
-  TOOLBAR_ICON_BUTTON_TONE_CLASS_NAME,
-} from "./ui/button-group";
+import { BUTTON_GROUP_ACTIVE_CLASS_NAME, BUTTON_GROUP_SURFACE_CLASS_NAME, ButtonGroup, TOOLBAR_ICON_BUTTON_TONE_CLASS_NAME } from "./ui/button-group";
 import { IconButton } from "./ui/icon-button";
-import {
-  Menu,
-  MenuCheckboxItem,
-  MenuGroup,
-  MenuGroupLabel,
-  MenuItem,
-  MenuRadioGroup,
-  MenuRadioItem,
-  MenuTrigger,
-} from "./ui/menu";
+import { Menu, MenuCheckboxItem, MenuGroup, MenuGroupLabel, MenuItem, MenuRadioGroup, MenuRadioItem, MenuTrigger } from "./ui/menu";
 const DIFF_PANEL_PICKER_ICON_CLASS_NAME = "size-3.5 shrink-0 text-[var(--color-text-foreground)]";
 
 /** Tighter than EnvironmentRow — dock header has no 16px icon gutter column. */

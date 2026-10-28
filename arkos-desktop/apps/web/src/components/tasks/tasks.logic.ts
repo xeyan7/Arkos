@@ -6,15 +6,14 @@
 // Exports: deriveTaskStatus, buildTaskSections, applyTodoEvent, due-date helpers,
 //          priority metadata.
 
-import {
-  TodoId,
-  type Todo,
-  type TodoDueDate,
-  type TodoListResult,
-  type TodoPriority,
-  type TodoStreamEvent,
-  type TodoUpdateInput,
-} from "@arkos/contracts";
+// FILE: tasks.logic.ts
+// Purpose: Pure derivation for the Tasks view — a to-do's status from its linked agent
+//          chat, grouping and ordering, due-date labels, and the React Query cache
+//          reducer for the live to-do event stream, and the text a delegation sends.
+// Layer: UI logic (no React, no stores) so the task math stays unit-testable.
+// Exports: deriveTaskStatus, buildTaskSections, applyTodoEvent, due-date helpers,
+//          priority metadata.
+import { TodoId, type Todo, type TodoDueDate, type TodoListResult, type TodoPriority, type TodoStreamEvent, type TodoUpdateInput } from "@arkos/contracts";
 
 import { formatRelativeTime } from "~/lib/relativeTime";
 import { canSessionAnswerPendingRequests, deriveActiveWorkStartedAt } from "../../session-logic";
